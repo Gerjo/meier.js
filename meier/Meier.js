@@ -5,7 +5,7 @@
 /// perfectly.
 ///
 
-(function(prefix) {
+var LoadEngine = function(prefix) {
 
     // All files to load:
     var files = [
@@ -37,4 +37,4 @@
     //console.log(document.href, window.location.host, window.location);
 
 // Self calling function:
-}("../meier/"));
+};

@@ -2,14 +2,17 @@
 <html>
 <head>
 
-<!-- Load the "engine" -->
+<!-- Load the "engine" loader -->
 <script src="../meier/Meier.js"></script>
-
-<!-- Load game code: -->
-<script src="HelloWorld.js"></script>
 
 <!-- Instantiate the lot: -->
 <script>
+
+// Load engine from this path:
+LoadEngine("../meier/");
+
+// At this point it's safe to load game code.
+
 
 function init() {
     // The world inherits the size of the container element. If you want
@@ -19,6 +22,10 @@ function init() {
 }
 
 </script>
+
+<!-- Load game code: -->
+<script src="HelloWorld.js"></script>
+
 
 <!-- Per default, an empty document has no height, and weird paddings. -->
 <style>
