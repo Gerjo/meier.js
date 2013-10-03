@@ -14,6 +14,16 @@ function Renderer(container, width, height) {
     container.appendChild(canvas);
 }
 
+/// Save the correct rotation/translation state.
+Renderer.prototype.save = function() {
+    this.context.save();
+};
+
+/// Restore the previously saved state:
+Renderer.prototype.restore = function() {
+    this.context.restore();
+};
+
 /// Transparently clear the canvas:
 Renderer.prototype.clear = function() {
     this.context.clearRect(0, 0, this.width, this.height);
@@ -48,6 +58,23 @@ Renderer.prototype.rotate = function(radians) {
 /// Translate all subsequent draw calls:
 Renderer.prototype.translate = function(x, y) {
     this.context.translate(x, y);
+};
+
+/// Draw a rectangle:
+/// Accepts:
+/// [Rectangle]
+/// [Number, Number, Number, Number]
+/// [Vector, Number, Number]
+Renderer.prototype.rectangle = function(a, b, c, d) {
+    if(a instanceof Rectangle) {
+        this.context.rect(a.min.x, a.min.y, a.width(), a.height());
+    
+    } else if(a instanceof Vector) {
+        this.context.rect(a.x, a.y, b, c);
+    
+    } else {
+        this.context.rect(a, b, c, d);
+    }
 };
 
 /// Draw a texture:
@@ -113,24 +140,28 @@ Renderer.prototype.line = function(a, b, c, d) {
     }
 };
 
-Renderer.prototype.text = function(string, x, y, color, align, font) {
+Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
     
-    if(!color) {
+    if( ! color) {
         color = "black";
     }
     
-    if(!align) {
+    if( ! align) {
         align = "center";
     }
     
-    if(!font) {
+    if( ! valign) {
+        valign = "top";
+    }
+    
+    if( ! font) {
         font = "bold 14px monospace";
     }
     
-    this.context.font      = font;
-    this.context.fillStyle = color;
-    this.context.textAlign = align;
-    
+    this.context.font         = font;
+    this.context.fillStyle    = color;
+    this.context.textAlign    = align;
+    this.context.textBaseline = valign;
     this.context.fillText(string, x, y);
 };
 

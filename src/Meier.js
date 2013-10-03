@@ -17,6 +17,8 @@ var LoadEngine = function(prefix) {
         "geometry/Vector.js",
         "geometry/Line.js",
         "geometry/Size.js",
+        "geometry/Rectangle.js",
+        
         
         "Matrix.js",
         "MersenneTwister.js",

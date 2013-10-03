@@ -25,7 +25,7 @@ function Game(container) {
     this.timer            = new Stopwatch(); // Delta time counter.
     this.width            = container.offsetWidth;
     this.height           = container.offsetHeight;
-    
+        
     this.renderer         = new Renderer(container, this.width, this.height);
     
     // Debug information:

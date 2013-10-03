@@ -101,6 +101,8 @@ Actor.prototype.draw = function(renderer) {
         texture = this.fries;
     }
     
+    // Store the current translation and rotation state:
+    renderer.save();
     
     // Rotate about center, this is a bit involved:
     renderer.translate(this.position.x + hw, this.position.y + hh);
@@ -109,7 +111,6 @@ Actor.prototype.draw = function(renderer) {
     renderer.texture(texture, this.width * -0.5, this.height * -0.5, this.width, this.height);
     renderer.text(this.sometext, 0, 0);
     
-    // Restore the canvas:
-    renderer.rotate(-this.rotation);
-    renderer.translate(-(this.position.x + hh), -(this.position.y + hw));
+    // Restore the translation/rotation of the canvas:
+    renderer.restore();
 };
