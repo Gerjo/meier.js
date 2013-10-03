@@ -117,7 +117,7 @@ Renderer.prototype.text = function(string, x, y, color, align, font) {
     }
     
     if(!font) {
-        color = "bold 14px monospace";
+        font = "bold 14px monospace";
     }
     
     this.context.font      = font;
