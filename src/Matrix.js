@@ -22,11 +22,23 @@ Matrix.CreateIdentity = function() {
     return new Matrix();
 };
 
+/// Acccepts:
+/// [number, number]
+/// [Vector]
 Matrix.CreateTranslation = function(x, y) {
-    var m = new Matrix();
-    m.translate(x, y);
+    if(x instanceof Vector) {
+        return new Matrix([
+            1, 0, x.x,
+            0, 1, x.y,
+            0, 0, 1
+        ]);
+    }
     
-    return m;
+    return new Matrix([
+        1, 0, x,
+        0, 1, y,
+        0, 0, 1
+    ]);
 };
 
 Matrix.CreateRotation = function(radians) {
