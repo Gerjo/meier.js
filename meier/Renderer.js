@@ -106,20 +106,6 @@ Renderer.prototype.linesegment = function(a, b) {
     }
 };
 
-/// Accepts:
-/// [LineSegment]
-/// [Vector, Vector]
-Renderer.prototype.linesegment = function(a, b) {
-    if(a instanceof LineSegment) {
-        this.context.moveTo(a.a.x, a.a.y);
-        this.context.lineTo(a.b.x, a.b.y);
-        
-    } else if(a instanceof Vector) {
-        this.context.moveTo(a.x, a.y);
-        this.context.lineTo(b.x, b.y);
-    }
-};
-
 Renderer.prototype.text = function(string, x, y, color, align, font) {
     
     if(!color) {
