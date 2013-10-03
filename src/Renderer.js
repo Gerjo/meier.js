@@ -206,3 +206,44 @@ Renderer.prototype.stroke = function(color) {
     this.context.strokeStyle = color;
     this.context.stroke();
 };
+
+/// Accepts:
+/// [LineSegment]
+/// [Vector, Vector]
+/// [Number, Number, Number, Number]
+Renderer.prototype.arrow = function(a, b, c, d) {
+    var fromX, fromY, toX, toY;
+    
+    if(a instanceof LineSegment) {
+        fromX = a.a.x;
+        fromY = a.a.y;
+        toX   = a.b.x;
+        toY   = a.b.y;
+    
+    } else if(a instanceof Vector && b instanceof Vector) {
+        fromX = a.x;
+        fromY = a.y;
+        toX   = b.x;
+        toY   = b.y;
+        
+    } else {
+        fromX = a;
+        fromY = b;
+        toX   = c;
+        toY   = d;
+    }
+    
+    var headlen = 10;   // length of head in pixels
+    var angle = Math.atan2(toY - fromY, toX - fromX);
+    this.context.moveTo(fromX, fromY);
+    this.context.lineTo(toX, toY);
+    this.context.lineTo(
+        toX - headlen * Math.cos(angle - Math.PI / 6),
+        toY - headlen * Math.sin(angle - Math.PI / 6)
+    );
+    this.context.moveTo(toX, toY);
+    this.context.lineTo(
+        toX - headlen * Math.cos(angle + Math.PI / 6),
+        toY - headlen * Math.sin(angle + Math.PI / 6)
+    );
+};
