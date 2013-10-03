@@ -189,23 +189,6 @@ Matrix.prototype.determinant = function() {
            (this[0][0] * this[1][2] * this[2][1]);
 };
 
-/// Translate this matrix:
-Matrix.prototype.translate = function(x, y) {
-    
-    // If it has an x property, it's probably a vector of sorts:
-    if(x.x) {
-        this[0][2] = x.x;
-        this[1][2] = x.y;
-        
-    // Assume it's a number:
-    } else {
-        this[0][2] = x;
-        this[1][2] = y;
-    }
-    
-    return this;
-};
-
 Matrix.prototype.toString = function() {
     return this[0].join(", ") + "\n" + this[1].join(", ") + "\n" + this[2].join(", ");
 };
