@@ -294,7 +294,7 @@ Random = (function() {
             mt.setSeed(seed);
         },
         
-        // [0..1]
+        /// [0..1]
         Float: function() {
             return mt.nextFloat();
         },
@@ -310,5 +310,12 @@ Random = (function() {
         Range: function(min, max) {
             return mt.nextFloat() * (max - min) + min;
         },
+        
+        /// Returns a random vector distributed on a unit circle.
+        Vector: function() {
+            var tan = mt.nextFloat() * Math.PI * 2;
+            
+            return new Vector(Math.cos(tan), Math.sin(tan));
+        }
     };
 }());
