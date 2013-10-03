@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- Load the "engine" -->
+<script src="../meier/Meier.js"></script>
+
+<!-- Load game code: -->
+<script src="HelloWorld.js"></script>
+
+<!-- Instantiate the lot: -->
+<script>
+
+function init() {
+    // The world inherits the size of the container element. If you want
+    // a fixed size, just create a div and use CSS to give it a fixed
+    // size - and use said div as container.
+    var game = new HelloWorld(document.getElementsByTagName("body")[0]);
+}
+
+</script>
+
+<!-- Per default, an empty document has no height, and weird paddings. -->
+<style>
+body, html {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+</style>
+
+</head>
+<body onload="init();">
+</body>
+</html>
