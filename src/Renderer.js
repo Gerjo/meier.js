@@ -51,6 +51,9 @@ Renderer.prototype.translate = function(x, y) {
 };
 
 /// Draw a texture:
+/// Accepts:
+/// [Texture, Number, Number]
+/// [Texture, Number, Number, Number, Number]
 Renderer.prototype.texture = function(texture, x, y, width, height) {
     
     // No width given, draw as-is:
@@ -76,6 +79,7 @@ Renderer.prototype.texture = function(texture, x, y, width, height) {
     );    
 };
 
+/// Start a new set of drawing calls.
 Renderer.prototype.begin = function() {
     this.context.beginPath();
 };
@@ -95,14 +99,17 @@ Renderer.prototype.circle = function(x, y, r) {
 /// Accepts:
 /// [LineSegment]
 /// [Vector, Vector]
-Renderer.prototype.linesegment = function(a, b) {
+/// [Number, Number, Number, Number]
+Renderer.prototype.line = function(a, b, c, d) {
     if(a instanceof LineSegment) {
         this.context.moveTo(a.a.x, a.a.y);
         this.context.lineTo(a.b.x, a.b.y);
-        
-    } else if(a instanceof Vector) {
+    } else if(a instanceof Vector && b instanceof Vector) {
         this.context.moveTo(a.x, a.y);
         this.context.lineTo(b.x, b.y);
+    } else {
+        this.context.moveTo(a, b);
+        this.context.lineTo(c, d);
     }
 };
 
@@ -127,11 +134,22 @@ Renderer.prototype.text = function(string, x, y, color, align, font) {
     this.context.fillText(string, x, y);
 };
 
-Renderer.prototype.vector = function(vector) {
+/// Accepts: 
+/// [Vector]
+/// [Number, Number]
+Renderer.prototype.vector = function(a, b) {
     this.context.moveTo(0, 0);
-    this.context.lineTo(vector.x, vector.y);
+    
+    if(a instanceof Vector) {
+        this.context.lineTo(a.x, a.y);
+    } else {
+        this.context.lineTo(a, b);
+    }
 };
 
+/// Accepts:
+/// [Array of Vector]
+/// NB: automatically closes the loop, if not closed.
 Renderer.prototype.polygon = function(vertices) {
     
     this.context.moveTo(vertices[0].x, vertices[0].y);
@@ -143,15 +161,16 @@ Renderer.prototype.polygon = function(vertices) {
     // Close the polygon loop:
     if( ! vertices.first().equals(vertices.last())) {
         this.context.lineTo(vertices[0].x, vertices[0].y);
-    }
-    
+    }  
 };
 
+/// Fill all draw calls since begin() with a given color.
 Renderer.prototype.fill = function(color) {
     this.context.fillStyle = color;
     this.context.fill();
 };
 
+/// Stroke the outline of all draw calls since begin() with a given color.
 Renderer.prototype.stroke = function(color) {
     this.context.strokeStyle = color;
     this.context.stroke();
