@@ -14,7 +14,7 @@ function Renderer(container, width, height) {
     container.appendChild(canvas);
 }
 
-/// Save the correct rotation/translation state.
+/// Save the current rotation/translation state.
 Renderer.prototype.save = function() {
     this.context.save();
 };
