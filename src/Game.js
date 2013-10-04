@@ -73,6 +73,9 @@ Game.prototype._update = function() {
     // Update statistics (TODO: rework some things)
     this.stats.update();
     
+    // Reset the transform to an identity matrix:
+    this.renderer.context.setTransform(1, 0, 0, 1, 0, 0);
+    
     this.stats.draw(this.renderer.context);
 };
 
