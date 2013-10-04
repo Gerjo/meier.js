@@ -35,3 +35,122 @@ function Normalized(min, max, current) {
     var per =  1 / (max - min)
     return per * current;
 }
+
+
+/// Apply newton rapson iteration to approximate roots of a 
+/// polynomal.
+///
+/// let g be f'
+///
+/// Example: find the root of f(x) = x^4 + x
+/// Then we derrive f, which gives g(x) = 4 * x^3 + 1
+///
+/// Note: this requires less iterations than Picard, but
+/// it may not be possible to find a derivative.
+///
+function NewtonRaphsonIteration(f, g, initial, steps) {
+    
+    var r = initial - f(initial) / g(initial);
+    
+    if(steps > 0) {
+        return NewtonRaphsonIteration(f, g, r, steps - 1);
+    }
+    
+    return r;
+}
+
+/// Apply picard iteration to approximate roots of a polynomal.
+/// let f be f(x) = y
+/// then change that into:
+/// let g be g(x) = x
+///
+/// Example: find the root of f(x) = x^3 - 3x + 1
+/// then we use g(x) = (x^3 + 1) / 3 
+///
+/// Note: we simply isolated x.
+///
+function PicardIteration(g, initial, steps) {
+    
+    var r = g(initial);
+        
+    if(steps > 0) {
+        return PicardIteration(g, r, steps - 1);
+    }
+    
+    return r;
+}
+
+/// Compute the factorial of a given number. Uses a switch case for
+/// 0 < n < 7, then resorts to a while loop. Granted javascript
+/// may be slow, if you must - inline your own factorial.
+function Factorial(n) {
+    // Precomputed :)
+    switch(n) {
+        case 0: return 1;
+        case 1: return 1;
+        case 2: return 2;
+        case 3: return 6;
+        case 4: return 24;
+        case 5: return 120;
+        case 6: return 720;
+    }
+    
+    var r = 1;
+    
+    while( n-- > 1) {
+        r *= n;
+    }
+    
+    return r;
+}
+
+/// Calculate Bernstein basis polynomials.
+///
+/// @param d Number of control points minus one.
+/// @param n Current control point. Works when n <= d
+/// @param x Time interval
+/// @return float indicating the bernstein basis value
+function BernsteinBasis(d, n, x) {
+    
+    // Binomial coefficient:
+    var b = Factorial(d) / (Factorial(d - n) * Factorial(n));
+
+    // Bernstein polynomial:
+    return b * Math.pow(x, n) * Math.pow(1 - x, d - n);
+}
+
+/// Calculate a point on a bézier curve. Works for any number of control
+/// points. Internaly uses Bernstein basis polynomals. If this is
+/// performance sensitive, (internally,) the bernstein basis polynomal
+/// computation may be cached.
+///
+/// NB: a bézier curve is is simply a basis spline of the highest 
+/// possible degree. (where degree equals the number of control points)
+///
+/// @param points A collection indicating the control points.
+/// @param delta Interval at which to calculate the point, ranges from 0 to 1.
+/// @return a point on a bézier curve.
+function BezierInterpolation(points, delta) {
+    if(points.length === 0) {
+        throw new Error("Cannot calculate a bezier curve point without any control points.");
+    }
+    
+    var result = new Vector(0, 0);
+    
+    var n = points.length - 1;
+    for(var i = 0, b; i <= n; ++i) {
+        // TODO: We can cache the BernsteinBasis result.
+        b = BernsteinBasis(n, i, delta);
+        
+        result.x += points[i].x * b;
+        result.y += points[i].y * b;
+    }
+    
+    return result;
+}
+
+/// My polynomial wish-list
+function LagrangeInterpolation() {}
+function HornersMethod() {}
+function RegulaFalsi() { }
+function BasisSpline() {}

@@ -52,6 +52,11 @@ Game.prototype._update = function() {
     var dt = this.timer.peek() * 0.001;
     this.timer.start();
     
+    // Clamp dt:
+    if(dt > 0.2) {
+        dt = 0.2;
+    }
+    
     this.stats.log("FPS", Math.ceil(1 / dt) + "/" + this.fps);
     this.stats.log("Clock", Math.floor(this.clock.peek() * 0.001));
     

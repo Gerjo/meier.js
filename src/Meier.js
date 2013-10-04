@@ -19,7 +19,6 @@ var LoadEngine = function(prefix) {
         "geometry/Size.js",
         "geometry/Rectangle.js",
         
-        
         "Matrix.js",
         "MersenneTwister.js",
         "Renderer.js",
@@ -27,7 +26,8 @@ var LoadEngine = function(prefix) {
         "Stats.js",
         "Stopwatch.js",
         "Tree.js",
-        "Input.js"
+        "Input.js",
+        "Math.js",
     ];
     
     // Add all files as a script:

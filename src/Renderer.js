@@ -116,10 +116,26 @@ Renderer.prototype.begin = function() {
 /// [Vector, number]
 Renderer.prototype.circle = function(x, y, r) {
     if(x instanceof Vector) {
-        this.context.arc(x.x, x.y, y, 0, 2 * Math.PI);
+        this.context.arc(x.x, x.y, r, 0, 2 * Math.PI);
         
     } else {
         this.context.arc(x, y, r, 0, 2 * Math.PI);
+    }
+};
+
+/// Draw an arc at [x,y] with radius R from radians to radians.
+/// Example: arc(0, 0, 40, 0, Math.PI)  - A semi circle
+/// Example: arc(0, 0, 40, 0, Math.PI * 2) - A circle
+/// Example: arc(0, 0, 40, 0, Math.PI * 0.5) - 90 degree arc
+///
+/// Accepts:
+/// [Number, Number, Number, Number, Number]
+/// [Vector, Number, Number, Number]
+Renderer.prototype.arc = function(a, b, c, d, e) {
+    if(a instanceof Vector) {
+        this.context.arc(a.x, a.y, b, c, d);
+    } else {
+        this.context.arc(a, b, c, d, e);
     }
 };
 
