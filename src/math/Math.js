@@ -149,8 +149,52 @@ function BezierInterpolation(points, delta) {
     return result;
 }
 
+
+/// Find the lagrange polynomial that runs through all the given control points.
+/// http://mathworld.wolfram.com/LagrangeInterpolatingPolynomial.html
+///
+/// Note: the control points do not indicate a local minimal or maxima of the
+/// created polynomial.
+///
+function LagrangePolynomial(points) {
+    var p = [];
+
+    // Create a polynomial for each point, when summed together
+    // this forms the Lagrange polynomial:
+    for(var i = 0; i < points.length; ++i) {
+        (function(i) {
+            p[i] = function(x) {
+                
+                var r =  points[i].y;
+                
+                for(var j = 0; j < points.length; ++j) {
+                    if(j === i) {
+                        continue;
+                    }
+                    
+                    r *= (x - points[j].x) / (points[i].x - points[j].x);
+                }
+                
+                return r;
+            }
+        }(i));
+    }
+    
+    // Return function of x:
+    return function(x) {
+        var y = 0;
+        
+        // Sum all polynomials:
+        for(var k = 0; k < p.length; ++k) {            
+            y += p[k](x);
+        }
+        
+        return y;
+    }
+}
+
+
 /// My polynomial wish-list
-function LagrangeInterpolation() {}
 function HornersMethod() {}
 function RegulaFalsi() { }
 function BasisSpline() {}
