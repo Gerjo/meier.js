@@ -7,27 +7,35 @@
 
 var LoadEngine = function(prefix) {
 
-    // All files to load:
+    // All files to load, the order here is important.
     var files = [
+        // Inject functionality into existing javascript constructs:
         "Functions.js",
-        "Game.js",
-        "Heap.js",
-        "Intersection.js",
         
-        "geometry/Vector.js",
-        "geometry/Line.js",
-        "geometry/Size.js",
-        "geometry/Rectangle.js",
+        // Math heavy files:
+        "math/Intersection.js",
+        "math/Vector.js",
+        "math/Line.js",
+        "math/Size.js",
+        "math/Rectangle.js",
+        "math/Matrix.js",
+        "math/Math.js",
         
-        "Matrix.js",
-        "MersenneTwister.js",
-        "Renderer.js",
-        "Resources.js",
-        "Stats.js",
-        "Stopwatch.js",
-        "Tree.js",
-        "Input.js",
-        "Math.js",
+        // Core code:
+        "engine/Game.js",
+        "engine/Renderer.js",
+        "engine/Resources.js",
+        "engine/Input.js",
+        
+        // Not written by me.
+        "contrib/Heap.js",
+        "contrib/MersenneTwister.js",
+        
+        // Doesn't belong to any category.
+        "aux/Random.js",
+        "aux/Stats.js",
+        "aux/Stopwatch.js",
+        "aux/Tree.js",
     ];
     
     // Add all files as a script:
