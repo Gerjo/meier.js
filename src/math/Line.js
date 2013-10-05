@@ -1,5 +1,5 @@
 // An infinite line, running through point A and B:
-var line = LineSegment;
+var Line = LineSegment;
 
 // A finite line, running from point A through B, shorthand for LineSegment:
 var Segment = LineSegment;
