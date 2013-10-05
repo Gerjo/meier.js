@@ -117,15 +117,15 @@ Renderer.prototype.begin = function() {
 /// [Disk]
 Renderer.prototype.circle = function(a, b, c) {
     if(a instanceof Vector) {
-        this.context.moveTo(a.x, a.y);
+        this.context.moveTo(a.x + b, a.y);
         this.context.arc(a.x, a.y, b, 0, 2 * Math.PI);
         
     } else if(a instanceof Disk) {
-        this.context.moveTo(a.position.x, a.position.y);
+        this.context.moveTo(a.position.x + a.radius, a.position.y);
         this.context.arc(a.position.x, a.position.y, a.radius, 0, 2 * Math.PI);
         
     } else {
-        this.context.moveTo(a, b);
+        this.context.moveTo(a + c, b);
         this.context.arc(a, b, c, 0, 2 * Math.PI);
     }
 };
