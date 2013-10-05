@@ -12,7 +12,20 @@ Intersection = (function() {
                 return rectangleRay(rectangle, ray, true); 
             },
             
-            Rectangles: rectanglesTest
+            Rectangles: rectanglesTest,
+            
+            Segments: function(segmentA, segmentB) {
+                return false === lineSegmentsInteresection(segmentA, segmentB);
+            },
+            
+            DiskLineSegment: function(disk, line) { 
+                return diskLine(disk, line, true, true); 
+            },
+            
+            DiskLine: function(disk, line) { 
+                return diskLine(disk, line, true, false); 
+            }
+            
         },
         
         // Getters, returns data if available, else false.
@@ -28,7 +41,15 @@ Intersection = (function() {
             
             Rectangles: rectanglesIntersection,
             
-            Segments: lineSegmentsInteresection
+            Segments: lineSegmentsInteresection,
+            
+            DiskLineSegment: function(disk, line) { 
+                return diskLine(disk, line, false, true); 
+            },
+            
+            DiskLine: function(disk, line) { 
+                return diskLine(disk, line, false, false); 
+            }
         },
         
         // Nearest location between object and object.
@@ -41,6 +62,70 @@ Intersection = (function() {
         }
     };
     
+    /// Mostly taken from:
+    /// http://stackoverflow.com/questions/1073336/circle-line-collision-detection
+    /// solves the (x - a)^2 + (y - b)^2 = r^2 equation along with the 
+    /// parametric representation of the given line.
+    function diskLine(disk, line, testOnly, finite) {
+        var dir = line.direction();
+        var f   = line.a.clone().subtract(disk.position);
+        
+        var a = dir.dot(dir);
+        var b = 2 * f.dot(dir);
+        var c = f.dot(f) - Math.pow(disk.radius, 2);
+        
+        // Early out of infinite lines, test only. We don't need
+        // to find roots, we just care if they exist.
+        if(testOnly && ! finite) {
+            // > 0, two real solutions
+            // = 0, one real solution
+            // < 0, complex numbers.
+            return (Math.pow(b, 2) - 4 * a * c) >= 0;
+        }
+        
+        var roots = SolveQuadraticPolynomial(a, b, c);
+        
+        if(roots.length > 0) {
+            // Tangent to count as secant. I doubt floating point
+            // math is accureate enough for this anyway. Additionally
+            // always returning two points should make code more 
+            // predictable for the end-user.
+            if(roots.length === 1) {
+                roots[1] = roots[0];
+            }
+            
+            if(testOnly) {
+                if(finite) {
+                    return (
+                        (roots[0] >= 0 && roots[0] <= 1) || 
+                        (roots[1] >= 0 && roots[1] <= 1)
+                    );
+                } else {
+                    // Should never be reached due to early out.
+                    // but just in case...
+                    return true;
+                }
+            }
+                        
+            var r = [];
+            
+            for(var i = 0; i < 2; ++i) {
+                if(!finite || roots[i] >= 0 && roots[i] <= 1) {
+                    r.push(
+                        new Vector(
+                            dir.x * roots[i] + line.a.x,
+                            dir.y * roots[i] + line.a.y
+                        )
+                    );
+                }
+            }
+            
+            return r.length > 0 ? r : false;
+        }
+        
+        return false;
+    }
+    
     // Original by Bojan at Game Oven
     function lineSegmentsInteresection(p, q) {
         ////p, pr, q, qs)
@@ -52,7 +137,7 @@ Intersection = (function() {
         // Get the fake 2D cross product
         var rs = r.cross(s);
         
-        if(rs == 0) {
+        if(rs === 0) {
             return false;   // TODO: Introduce some tolerance
         }
         

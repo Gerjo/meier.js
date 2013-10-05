@@ -17,6 +17,7 @@ var LoadEngine = function(prefix) {
         "math/Vector.js",
         "math/Line.js",
         "math/Size.js",
+        "math/Disk.js",
         "math/Rectangle.js",
         "math/Matrix.js",
         "math/Math.js",
