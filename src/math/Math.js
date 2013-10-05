@@ -193,6 +193,35 @@ function LagrangePolynomial(points) {
     }
 }
 
+/// Find the root of a quadratic polynomial. Returns an
+/// array containing the available solutions. Interally
+/// uses the Quadratic formula.
+///
+/// Solves 'x' in: ax^2 + bx + c = 0
+function SolveQuadraticPolynomial(a, b, c) {
+    var discriminant = Math.pow(b, 2) - 4 * a * c;
+    
+    // One real solution:
+    if(discriminant === 0) {
+        
+        return [
+            -b / (2 * a)
+        ];
+        
+    // Two real solution:
+    } else if(discriminant > 0) {
+        var root = Math.sqrt(discriminant);
+        
+        return [
+            (-b + root) / (2 * a),
+            (-b - root) / (2 * a) 
+        ];
+    }
+    
+    // Polynomial discriminant < 0, solutions are found 
+    // in complex plane - I don't care.
+    return [];
+}
 
 /// My polynomial wish-list
 function HornersMethod() {}
