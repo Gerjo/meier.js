@@ -114,12 +114,12 @@ Renderer.prototype.begin = function() {
 /// Accepts:
 /// [number, number, number]
 /// [Vector, number]
-Renderer.prototype.circle = function(x, y, r) {
-    if(x instanceof Vector) {
-        this.context.arc(x.x, x.y, r, 0, 2 * Math.PI);
+Renderer.prototype.circle = function(a, b, c) {
+    if(a instanceof Vector) {
+        this.context.arc(a.x, a.y, b, 0, 2 * Math.PI);
         
     } else {
-        this.context.arc(x, y, r, 0, 2 * Math.PI);
+        this.context.arc(a, b, c, 0, 2 * Math.PI);
     }
 };
 
