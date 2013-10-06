@@ -11,3 +11,7 @@ function Disk(x, y, r) {
         this.radius   = r;
     }
 }
+
+Disk.prototype.clone = function() {
+    return new Disk(this.position.x, this.position.y, this.radius);
+};
