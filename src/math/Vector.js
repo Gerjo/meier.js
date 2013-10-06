@@ -7,6 +7,20 @@ function Vector(x, y) {
     this.y = y;
 }
 
+Vector.prototype.angleBetween = function(other) {
+    
+    var angle = Math.acos(
+        this.dot(other) / Math.sqrt(this.lengthSQ() * other.lengthSQ())
+    );
+    
+    if(-this.y * other.x + this.x * other.y < 0) {
+        //Math.PI + Math.PI - angle;
+        return -angle; // Nagative sigh.
+    }
+    
+    return angle;
+};
+
 Vector.prototype.equals = function(other) {
     return this.x == other.x && this.y == other.y;
 };
