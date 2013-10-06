@@ -36,6 +36,51 @@ function Normalized(min, max, current) {
     return per * current;
 }
 
+/// From degrees to radians.
+function ToRadians(degrees) {
+    return degrees * Math.PI / 180;
+}
+
+/// From radians to degrees.
+function ToDegrees(radians) {
+    return 180 / Math.PI * radians;
+}
+
+/// Map a [0..PI, -PI..0] range to [0...2PI]
+function ToAbsoluteRadians(a) {
+    if(a < 0) {
+        return Math.PI + (Math.PI + a);
+    }
+    
+    return a;
+}
+
+/// Map [-nPI...nPI] to [0..PI, -PI..0] range
+function ToRelativeRadians(a) {
+    
+    // Normalize to something positive:
+    while(a < 0) {
+        a += Math.TwoPI;
+    }
+    
+    // Normalize to [0...2PI]:
+    while(a >= Math.TwoPI) {
+        a -= Math.TwoPI;
+    }
+    
+    // Normalize [PI...2PI] to [-PI..0]
+    if(a > Math.PI) {
+        return (a - Math.PI) - Math.PI;
+    }
+    
+    // Range good as-is.
+    return a;
+}
+
+/// Radians to degrees and Math.round.
+function ToDegreesRounded(radians) {
+    return Math.round(180 / Math.PI * radians);
+}
 
 /// Apply newton rapson iteration to approximate roots of a 
 /// polynomal.
