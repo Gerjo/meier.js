@@ -23,6 +23,12 @@ function LineSegment(a, b, c, d) {
     }
 }
 
+/// Compute the angle between two lines:
+LineSegment.prototype.angleBetween = function(other) {
+    // TODO: can we optimize this?
+    return this.direction().angleBetween(other.direction);
+};
+
 LineSegment.prototype.clone = function() {
     return new LineSegment(this.a.x, this.a.y, this.b.x, this.b.y);
 };
