@@ -2,6 +2,8 @@
 /// 
 /// 
 
+Math.TwoPI = Math.PI * 2;
+
 /// Retrieve last item of an array:
 if(!Array.prototype.last) {
     Array.prototype.last = function() {
