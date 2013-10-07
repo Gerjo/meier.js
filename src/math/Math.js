@@ -1,4 +1,11 @@
 
+/// My polynomial wish-list
+function HornersMethod() {}
+function RegulaFalsi() { }
+function BasisSpline() {}
+
+
+
 /// Great for comparing floating point numbers:
 function EpsilonEquals(value, test, epsilon) {
     return value > test - epsilon && value < test + epsilon;
@@ -268,7 +275,89 @@ function SolveQuadraticPolynomial(a, b, c) {
     return [];
 }
 
-/// My polynomial wish-list
-function HornersMethod() {}
-function RegulaFalsi() { }
-function BasisSpline() {}
+
+/// A half-baked implementation of Gauss-Jordan elemination.
+/// Untested with zero values, don't expect this to work. It
+/// serves as food for the brain to come up with something
+/// better.
+///
+/// Input format: an array with the following significant indices:
+/// 0 1 2 |  9
+/// 3 4 5 | 10
+/// 6 7 8 | 11
+///
+/// Output: an array containing the x, y and z values.
+function GaussJordanElimination(a) {
+    var r;
+    
+    // TODO: Account for zero values by swapping rows.
+    // TODO: Some operations are redundant.
+    // TODO: Arguments to accept matrices and such.
+    // TODO: Use this to calculate the inverse of matrices
+    // TODO: Use reduced row echelon to solve, rather than
+    // full blown Gauss-Jordan.
+    
+    // first row 1 x x
+    a[1] /= a[0];
+    a[2] /= a[0];
+    a[9] /= a[0];
+    a[0] /= a[0];
+    
+    // second row 0 x x
+    r = a[3] / a[0];
+    a[3]  -= (r * a[0]);
+    a[4]  -= (r * a[1]);
+    a[5]  -= (r * a[2]);
+    a[10] -= (r * a[9]);
+    
+    // third row 0 x x
+    r =  a[6] / a[0];
+    a[6]  -= (r * a[0]);
+    a[7]  -= (r * a[1]);
+    a[8]  -= (r * a[2]);
+    a[11] -= (r * a[9]);
+
+    // third row: 0 0 x
+    r = -(a[7] / a[4]);
+    a[6]  += (r * a[3]);
+    a[7]  += (r * a[4]);
+    a[8]  += (r * a[5]);
+    a[11] += (r * a[10]);
+    
+    // Second row: 0 1 x
+    a[3]  /= a[4];
+    a[5]  /= a[4];
+    a[10] /= a[4];
+    a[4]  /= a[4];
+    
+    // Third row: 0 0 1
+    a[6]  /= a[8];
+    a[7]  /= a[8];
+    a[11] /= a[8];
+    a[8]  /= a[8];
+    
+    // First row 1 0 x
+    r = -(a[1] / a[4]);
+    a[0] += (r * a[3])
+    a[1] += (r * a[4])
+    a[2] += (r * a[5])
+    a[9] += (r * a[10])
+    
+    // First row 1 0 0
+    r = -(a[2] / a[8]);
+    a[0] += (r * a[6])
+    a[1] += (r * a[7])
+    a[2] += (r * a[8])
+    a[9] += (r * a[11])
+    
+    // Second row 0 1 0
+    r = -(a[5] / a[8]);
+    a[3]  += (r * a[6])
+    a[4]  += (r * a[7])
+    a[5]  += (r * a[8])
+    a[10] += (r * a[11])
+    
+    return [
+        a[9], a[10], a[11]
+    ];
+}
