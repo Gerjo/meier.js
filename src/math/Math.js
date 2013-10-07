@@ -62,6 +62,13 @@ function ToAbsoluteRadians(a) {
     return a;
 }
 
+
+
+function DeltaRelativeRadians(a, b) {
+    var delta = b - a;
+    return delta + ((delta > Math.PI) ? -Math.TwoPI : (delta < -Math.PI) ? Math.TwoPI : 0)
+}
+
 /// Map [-nPI...nPI] to [0..PI, -PI..0] range
 function ToRelativeRadians(a) {
     
@@ -83,6 +90,7 @@ function ToRelativeRadians(a) {
     // Range good as-is.
     return a;
 }
+
 
 /// Radians to degrees and Math.round.
 function ToDegreesRounded(radians) {
