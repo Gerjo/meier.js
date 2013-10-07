@@ -66,9 +66,9 @@ Stats.prototype.draw = function(context) {
         if(this.stats.hasOwnProperty(k)) {
             context.fillText(k, x, y);
             context.fillText(this.stats[k], x + this.columnWidth, y);
+            
+            y += this.fontSize;
         }
-        
-        y += this.fontSize;
     }
     
     context.fill();
