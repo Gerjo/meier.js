@@ -4,6 +4,10 @@
 
 Math.TwoPI = Math.PI * 2;
 
+Math.sgn = function(n) {
+    return n >= 0 ? 1 : -1;
+}
+
 /// Retrieve last item of an array:
 if(!Array.prototype.last) {
     Array.prototype.last = function() {
