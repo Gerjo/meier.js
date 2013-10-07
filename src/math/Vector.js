@@ -2,10 +2,25 @@
 // Alias:
 var Point = Vector;
 
+Vector.CreateAngular = function(rotation, radius) {
+    radius = radius || 1;
+    
+    return new Vector(Math.cos(rotation) * radius,  Math.sin(rotation) * radius);
+}
+
 function Vector(x, y) {
     this.x = x;
     this.y = y;
 }
+
+// Unsure how much use this has. Use Vector.CreateAngular instead.
+/*Vector.prototype.setAngle = function(radians) {
+    var l = this.length();
+    this.x = Math.cos(radians) * l;
+    this.y = Math.sin(radians) * l;
+    
+    return this;
+};*/
 
 Vector.prototype.angleBetween = function(other) {
     

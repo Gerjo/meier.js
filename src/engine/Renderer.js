@@ -8,6 +8,9 @@ function Renderer(container, width, height) {
     var context           = this.context  = this.canvas.getContext("2d");
     this.width            = canvas.width  = width;
     this.height           = canvas.height = height;
+    this.hw               = this.width * 0.5
+    this.hh               = this.height * 0.5;
+    
     canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
     canvas.style.position = "absolute";
     
