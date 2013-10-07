@@ -15,7 +15,7 @@ Vector.prototype.angleBetween = function(other) {
     
     if(-this.y * other.x + this.x * other.y < 0) {
         //Math.PI + Math.PI - angle;
-        return -angle; // Nagative sigh.
+        return -angle; // Negative sigh.
     }
     
     return angle;
@@ -97,7 +97,7 @@ Vector.prototype.lengthSQ = function(o) {
 Vector.prototype.trim = function(length) {
     // TODO: do this without sqrt?
     
-    // Divide by zero is OK. You should've checked
+    // Division by zero is OK. You should've checked
     // before trimming.
     var l = length / (Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2)));
     
