@@ -84,6 +84,9 @@ Game.prototype.update = function(dt) {
 };
 
 Game.prototype.draw = function(renderer) {
+    // Clear the canvas:
+    renderer.clear();
+    
     // TODO: Override...
 };
 
