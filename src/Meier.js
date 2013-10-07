@@ -44,8 +44,4 @@ var LoadEngine = function(prefix) {
         document.writeln('<scri' + 'pt src="' + prefix + src + '" type="text/javascript"></scri' + 'pt>');
         
     });
-
-    //console.log(document.href, window.location.host, window.location);
-
-// Self calling function:
 };
