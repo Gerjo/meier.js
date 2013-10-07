@@ -63,13 +63,13 @@ Grid.prototype.draw = function(renderer) {
     renderer.begin();
     renderer.vector(v);
     renderer.stroke("hotpink");
-    renderer.text("π/-4", v.x, v.y);
+    renderer.text("PI/-4", v.x, v.y);
     
     var v = Vector.CreateAngular(Math.QuarterPI).trim(220);
     renderer.begin();
     renderer.vector(v);
     renderer.stroke("hotpink");
-    renderer.text("π/4", v.x, v.y);
+    renderer.text("PI/4", v.x, v.y);
 };
 
 
