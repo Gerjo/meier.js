@@ -3,7 +3,7 @@
 function Stats(width, height) {
     // Tweakable:
     this.size       = new Size(width, height);
-    this.offset     = new Size(10, 25);
+    this.offset     = new Size(10, (height * 0.5) - 10);
     this.stats      = {};
     this.fontSize   = 12;
     this.charWidth  = this.fontSize - 4;
@@ -54,23 +54,19 @@ Stats.prototype.draw = function(context) {
     }
     
     
-    var x = this.size.w - this.estimatedWidth - this.offset.w;
+    var x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
     var y = this.offset.h;
         
-    context.beginPath();
-    context.textAlign = "left";
-    context.textBaseline = "bottom";
-    context.fillStyle = this.color;
-    context.font = "bold " + this.fontSize + "px Monospace";
-    
+    var font = "bold " + this.fontSize + "px Monospace";
+
     for(var k in this.stats) {
         if(this.stats.hasOwnProperty(k)) {
-            context.fillText(k, x, y);
-            context.fillText(this.stats[k], x + this.columnWidth, y);
             
-            y += this.fontSize;
+            context.text(k, x, y, this.color, "left", "top", font)
+            context.text(this.stats[k], x + this.columnWidth, y, this.color, "left", "top", font)
+            
+            y -= this.fontSize;
         }
     }
     
-    context.fill();
 };

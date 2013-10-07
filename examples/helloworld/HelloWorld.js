@@ -53,7 +53,7 @@ function Actor(game) {
     this.rotation = 0;
     this.width    = 100;
     this.height   = 100;
-    this.position = new Point(100, 100);
+    this.position = new Point(0, 0);
     this.burger   = new Texture("burger.png");
     this.fries    = new Texture("fries.png"); 
     
@@ -101,15 +101,18 @@ Actor.prototype.draw = function(renderer) {
         texture = this.fries;
     }
     
-    // Store the current translation and rotation state:
+    // Rotate about center, this is a bit involved:
+    // First: store the current translation and rotation state:
     renderer.save();
     
-    // Rotate about center, this is a bit involved:
+    // Transformation calls:
     renderer.translate(this.position.x + hw, this.position.y + hh);
     renderer.rotate(this.rotation);
     
-    renderer.texture(texture, this.width * -0.5, this.height * -0.5, this.width, this.height);
+    // Draw calls:
+    renderer.texture(texture, this.width * -0.5, this.height * 0.5, this.width, this.height);
     renderer.text(this.sometext, 0, 0);
+
     
     // Restore the translation/rotation of the canvas:
     renderer.restore();
