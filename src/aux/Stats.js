@@ -59,6 +59,7 @@ Stats.prototype.draw = function(context) {
         
     context.beginPath();
     context.textAlign = "left";
+    context.textBaseline = "bottom";
     context.fillStyle = this.color;
     context.font = "bold " + this.fontSize + "px Monospace";
     
