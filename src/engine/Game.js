@@ -25,6 +25,8 @@ function Game(container) {
     this.timer            = new Stopwatch(); // Delta time counter.
     this.width            = container.offsetWidth;
     this.height           = container.offsetHeight;
+    this.hw               = this.width  * 0.5;
+    this.hh               = this.height * 0.5;    
         
     this.renderer         = new Renderer(container, this.width, this.height);
     
@@ -63,9 +65,19 @@ Game.prototype._update = function() {
     // User defined update.
     this.update(dt);
     
-    // Clean the screen:
-    // Actually, leave that up to the user.
-    //this.renderer.clear();
+    /// Reset the transform to an identity matrix:
+    /// We can tweak the letters in:
+    /// a b 0
+    /// c d 0
+    /// e f 1
+    this.renderer.context.setTransform(
+        1,  0, 
+        0,  1, 
+        
+        // Draw from center. A half pixel offset 
+        // gives sharper lines.
+        this.renderer.hw + 0.5,
+        this.renderer.hh + 0.5);
     
     // User defined draw loop:
     this.draw(this.renderer);
@@ -73,10 +85,7 @@ Game.prototype._update = function() {
     // Update statistics (TODO: rework some things)
     this.stats.update();
     
-    // Reset the transform to an identity matrix:
-    this.renderer.context.setTransform(1, 0, 0, 1, 0, 0);
-    
-    this.stats.draw(this.renderer.context);
+    this.stats.draw(this.renderer);
 };
 
 Game.prototype.update = function(dt) {

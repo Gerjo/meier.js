@@ -168,8 +168,10 @@ Input.prototype.updatePosition = function(event) {
     
     // Only count inside world bounds:
     if(x >= 0 && y >= 0 && x <= this.size.w && y <= this.size.h) {
-        this.x = x;
-        this.y = y;
+        
+        // Transform to screen coordinates:
+        this.x = x - this.size.w * 0.5;
+        this.y = (this.size.h * 0.5) - y;
     
         // Trigger MOUSE_MOVE event:
         return true;

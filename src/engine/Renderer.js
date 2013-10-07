@@ -10,6 +10,8 @@ function Renderer(container, width, height) {
     this.height           = canvas.height = height;
     this.hw               = this.width * 0.5
     this.hh               = this.height * 0.5;
+    this._rotation        = 0;
+    this._translate       = new Vector(0, 0);
     
     canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
     canvas.style.position = "absolute";
@@ -29,13 +31,13 @@ Renderer.prototype.restore = function() {
 
 /// Transparently clear the canvas:
 Renderer.prototype.clear = function() {
-    this.context.clearRect(0, 0, this.width, this.height);
+    this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
 };
 
 /// Clear the canvas with a solid fill color:
 Renderer.prototype.clearSolid = function(color) {
     this.context.fillStyle = color;
-    this.context.fillRect(0, 0, this.width, this.height);    
+    this.context.fillRect(-this.hw, -this.hh, this.width, this.height);    
 };
 
 /// Clear the canvas with a solid fill color:
@@ -46,8 +48,8 @@ Renderer.prototype.clearTexture = function(texture) {
             0,              // Source Y
             texture.width,  // Source width
             texture.height, // Source height
-            0,              // Target X
-            0,              // Target Y
+            -this.hw,       // Target X
+            -this.hh,       // Target Y
             this.width,     // Target width
             this.height     // Target height
     );    
@@ -56,11 +58,14 @@ Renderer.prototype.clearTexture = function(texture) {
 /// Rotate any subsequent draw calls:
 Renderer.prototype.rotate = function(radians) {
     this.context.rotate(radians);
+    this._rotation = radians;
 };
 
 /// Translate all subsequent draw calls:
 Renderer.prototype.translate = function(x, y) {
-    this.context.translate(x, y);
+    this.context.translate(x, -y);
+    this._translate.x = x;
+    this._translate.y = -y;
 };
 
 /// Draw a rectangle:
@@ -70,13 +75,13 @@ Renderer.prototype.translate = function(x, y) {
 /// [Vector, Number, Number]
 Renderer.prototype.rectangle = function(a, b, c, d) {
     if(a instanceof Rectangle) {
-        this.context.rect(a.min.x, a.min.y, a.width(), a.height());
+        this.context.rect(a.min.x, -a.min.y, a.width(), a.height());
     
     } else if(a instanceof Vector) {
-        this.context.rect(a.x, a.y, b, c);
+        this.context.rect(a.x, -a.y, b, c);
     
     } else {
-        this.context.rect(a, b, c, d);
+        this.context.rect(a, -b, c, d);
     }
 };
 
@@ -95,6 +100,7 @@ Renderer.prototype.texture = function(texture, x, y, width, height) {
     if(isNaN(height)) {
         height = texture.height;
     }
+ 
     
     this.context.drawImage(
             texture.image,  // The image
@@ -103,10 +109,10 @@ Renderer.prototype.texture = function(texture, x, y, width, height) {
             texture.width,  // Source width
             texture.height, // Source height
             x,              // Target X
-            y,              // Target Y
+            -y,              // Target Y
             width,          // Target width
             height          // Target height
-    );    
+    );
 };
 
 /// Start a new set of drawing calls.
@@ -120,16 +126,16 @@ Renderer.prototype.begin = function() {
 /// [Disk]
 Renderer.prototype.circle = function(a, b, c) {
     if(a instanceof Vector) {
-        this.context.moveTo(a.x + b, a.y);
-        this.context.arc(a.x, a.y, b, 0, 2 * Math.PI);
+        this.context.moveTo(a.x + b, -a.y);
+        this.context.arc(a.x, -a.y, b, 0, 2 * Math.PI);
         
     } else if(a instanceof Disk) {
-        this.context.moveTo(a.position.x + a.radius, a.position.y);
-        this.context.arc(a.position.x, a.position.y, a.radius, 0, 2 * Math.PI);
+        this.context.moveTo(a.position.x + a.radius, -a.position.y);
+        this.context.arc(a.position.x, -a.position.y, a.radius, 0, 2 * Math.PI);
         
     } else {
-        this.context.moveTo(a + c, b);
-        this.context.arc(a, b, c, 0, 2 * Math.PI);
+        this.context.moveTo(a + c, -b);
+        this.context.arc(a, -b, c, 0, 2 * Math.PI);
     }
 };
 
@@ -143,9 +149,9 @@ Renderer.prototype.circle = function(a, b, c) {
 /// [Vector, Number, Number, Number]
 Renderer.prototype.arc = function(a, b, c, d, e) {
     if(a instanceof Vector) {
-        this.context.arc(a.x, a.y, b, c, d);
+        this.context.arc(a.x, -a.y, b, c, d);
     } else {
-        this.context.arc(a, b, c, d, e);
+        this.context.arc(a, -b, c, d, e);
     }
 };
 
@@ -155,14 +161,14 @@ Renderer.prototype.arc = function(a, b, c, d, e) {
 /// [Number, Number, Number, Number]
 Renderer.prototype.line = function(a, b, c, d) {
     if(a instanceof LineSegment) {
-        this.context.moveTo(a.a.x, a.a.y);
-        this.context.lineTo(a.b.x, a.b.y);
+        this.context.moveTo(a.a.x, -a.a.y);
+        this.context.lineTo(a.b.x, -a.b.y);
     } else if(a instanceof Vector && b instanceof Vector) {
-        this.context.moveTo(a.x, a.y);
-        this.context.lineTo(b.x, b.y);
+        this.context.moveTo(a.x, -a.y);
+        this.context.lineTo(b.x, -b.y);
     } else {
-        this.context.moveTo(a, b);
-        this.context.lineTo(c, d);
+        this.context.moveTo(a, -b);
+        this.context.lineTo(c, -d);
     }
 };
 
@@ -188,7 +194,7 @@ Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
     this.context.fillStyle    = color;
     this.context.textAlign    = align;
     this.context.textBaseline = valign;
-    this.context.fillText(string, x, y);
+    this.context.fillText(string, x, -y);
 };
 
 /// Accepts: 
@@ -198,9 +204,9 @@ Renderer.prototype.vector = function(a, b) {
     this.context.moveTo(0, 0);
     
     if(a instanceof Vector) {
-        this.context.lineTo(a.x, a.y);
+        this.context.lineTo(a.x, -a.y);
     } else {
-        this.context.lineTo(a, b);
+        this.context.lineTo(a, -b);
     }
 };
 
@@ -209,15 +215,15 @@ Renderer.prototype.vector = function(a, b) {
 /// NB: automatically closes the loop, if not closed.
 Renderer.prototype.polygon = function(vertices) {
     
-    this.context.moveTo(vertices[0].x, vertices[0].y);
+    this.context.moveTo(vertices[0].x, -vertices[0].y);
     
     for(var i = 1; i < vertices.length; ++i) {
-        this.context.lineTo(vertices[i].x, vertices[i].y);
+        this.context.lineTo(vertices[i].x, -vertices[i].y);
     }
     
     // Close the polygon loop:
     if( ! vertices.first().equals(vertices.last())) {
-        this.context.lineTo(vertices[0].x, vertices[0].y);
+        this.context.lineTo(vertices[0].x, -vertices[0].y);
     }  
 };
 
@@ -242,21 +248,21 @@ Renderer.prototype.arrow = function(a, b, c, d) {
     
     if(a instanceof LineSegment) {
         fromX = a.a.x;
-        fromY = a.a.y;
+        fromY = -a.a.y;
         toX   = a.b.x;
-        toY   = a.b.y;
+        toY   = -a.b.y;
     
     } else if(a instanceof Vector && b instanceof Vector) {
         fromX = a.x;
-        fromY = a.y;
+        fromY = -a.y;
         toX   = b.x;
-        toY   = b.y;
+        toY   = -b.y;
         
     } else {
         fromX = a;
-        fromY = b;
+        fromY = -b;
         toX   = c;
-        toY   = d;
+        toY   = -d;
     }
     
     var headlen = 10;   // length of head in pixels
@@ -265,11 +271,11 @@ Renderer.prototype.arrow = function(a, b, c, d) {
     this.context.lineTo(toX, toY);
     this.context.lineTo(
         toX - headlen * Math.cos(angle - Math.PI / 6),
-        toY - headlen * Math.sin(angle - Math.PI / 6)
+        (toY - headlen * Math.sin(angle - Math.PI / 6))
     );
     this.context.moveTo(toX, toY);
     this.context.lineTo(
         toX - headlen * Math.cos(angle + Math.PI / 6),
-        toY - headlen * Math.sin(angle + Math.PI / 6)
+        (toY - headlen * Math.sin(angle + Math.PI / 6))
     );
 };
