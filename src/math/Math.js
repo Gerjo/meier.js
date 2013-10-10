@@ -4,7 +4,15 @@ function HornersMethod() {}
 function RegulaFalsi() { }
 function BasisSpline() {}
 
+function ToLetter(num) {
+    // TODO: larger range.
+    return String.fromCharCode(97 + num);
+}
 
+function ToUpperLetter(num) {
+    // TODO: larger range.
+    return String.fromCharCode(65 + num);
+}
 
 /// Great for comparing floating point numbers:
 function EpsilonEquals(value, test, epsilon) {

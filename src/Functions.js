@@ -2,9 +2,10 @@
 /// 
 /// 
 
-Math.QuarterPI = Math.PI / 4;
-Math.HalfPI    = Math.PI / 2;
-Math.TwoPI     = Math.PI * 2;
+Math.QuarterPI     = Math.PI / 4;
+Math.TreeQuarterPI = Math.PI / 4 * 3;
+Math.HalfPI        = Math.PI / 2;
+Math.TwoPI         = Math.PI * 2;
 
 Math.sgn = function(n) {
     return n >= 0 ? 1 : -1;

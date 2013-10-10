@@ -29,6 +29,13 @@ LineSegment.prototype.angleBetween = function(other) {
     return this.direction().angleBetween(other.direction);
 };
 
+LineSegment.prototype.middle = function() {
+    return new Vector(
+        LerpFloat(this.a.x, this.b.x, 0.5),
+        LerpFloat(this.a.y, this.b.y, 0.5)
+    );
+};
+
 LineSegment.prototype.clone = function() {
     return new LineSegment(this.a.x, this.a.y, this.b.x, this.b.y);
 };
