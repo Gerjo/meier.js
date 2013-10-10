@@ -13,9 +13,13 @@ Input.Events.MOUSE_MOVE  = Input.Events.COUNT++;
 Input.Events.RIGHT_DOWN  = Input.Events.COUNT++;
 Input.Events.RIGHT_UP    = Input.Events.COUNT++;
 Input.Events.RIGHT_CLICK = Input.Events.COUNT++;
+//
+Input.Events.KEY_DOWN    = Input.Events.COUNT++;
+Input.Events.KEY_UP      = Input.Events.COUNT++;
 
 // Tablets only.
 Input.Events.DOUBLE_TAP = Input.Events.COUNT++;
+
 
 
 function PriorityCallback(priority, callback) {
@@ -144,6 +148,15 @@ function Input(container, width, height, isTablet) {
         } else if(event.which === 1) {
             this.trigger(Input.Events.LEFT_UP, event);
         }
+    }.bind(this);
+    
+    //browser only?
+    document.body.onkeydown = function(event) {
+        this.triggerKeyboard(Input.Events.KEY_DOWN, event);
+    }.bind(this);
+    
+    document.body.onkeyup = function(event) {
+        this.triggerKeyboard(Input.Events.KEY_UP, event);
     }.bind(this);
 }
 
