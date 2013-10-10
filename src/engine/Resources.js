@@ -40,8 +40,8 @@ function Texture(src) {
     this.isLoaded   = false;
     this.width      = 0;
     this.height     = 0;
-    this.hWidth     = 0; // Half
-    this.hHeight    = 0; // Half
+    this.hw         = 0; // Half
+    this.hh         = 0; // Half
     
     // Once loaded, update internal state of this texture:
     this.image.onload = function() {
@@ -49,8 +49,8 @@ function Texture(src) {
         // render them with any size as desired.
         this.width    = this.image.width;
         this.height   = this.image.height;
-        this.hWidth   = this.image.width * 0.5;
-        this.hHeight  = this.image.height * 0.5;
+        this.hw       = this.image.width * 0.5;
+        this.hh       = this.image.height * 0.5;
         
         this.isLoaded = true;
         
