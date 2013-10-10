@@ -91,6 +91,13 @@ Renderer.prototype.rectangle = function(a, b, c, d) {
 /// [Texture, Number, Number, Number, Number]
 Renderer.prototype.texture = function(texture, x, y, width, height) {
     
+	if(x instanceof Vector) {
+		height = width;
+		width = y;
+		y = x.y;
+		x = x.x;
+	}
+	
     // No width given, draw as-is:
     if(isNaN(width)) {
         width = texture.width;
