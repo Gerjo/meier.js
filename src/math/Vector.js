@@ -36,6 +36,10 @@ Vector.prototype.angleBetween = function(other) {
     return angle;
 };
 
+Vector.prototype.angle = function() {
+    return Math.atan2(this.y, this.x);
+}
+
 Vector.prototype.equals = function(other) {
     return this.x == other.x && this.y == other.y;
 };
