@@ -183,18 +183,15 @@ Input.prototype.updatePosition = function(event) {
 
 Input.prototype.trigger = function(eventtype, event, location) {
     
-    // Produces a fair amount of spam in the console:
-    /*if(eventtype != Input.Events.MOUSE_MOVE) {
-        for(var k in Input.Events) {
-            if(Input.Events[k] == eventtype) {
-                console.log("Triggering: " + this.listeners[eventtype].length  + " x [" + k + "]");
-                break;
-            }
-        }
-    }*/
-    
     this.listeners[eventtype].every(function (priorityCallback) {
         return priorityCallback.callback(location || this);
+    }.bind(this));
+};
+
+Input.prototype.triggerKeyboard = function(eventtype, event) {
+    
+    this.listeners[eventtype].every(function (priorityCallback) {
+        return priorityCallback.callback(event.keyCode, String.fromCharCode(event.keyCode));
     }.bind(this));
 };
 
