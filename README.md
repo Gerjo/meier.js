@@ -28,10 +28,10 @@ Structure
 
 Work in progress
 ==========
-** Texture transformations **
+**Texture transformations**
 <br> Textures are commonly manipulated by the following operations: _resize_, _translate_, _skew_, _clip_, _rotate_. The current implementation doesn't support everything yet, nor is it very structured. Mostlikely an optional 3 by 3 matrix will be introduced to allow for most transformations. A matrix also works tightly with the scheduled Web GL renderer.
 
-** Abstract game object **
+**Abstract game object**
 <br>Useful for any engine is a game object that contains some commonly used logic. Probably introduce a collision shape, mass, drag, rotation and a position, to allow for rigid body physics.
 
 **Audio**
