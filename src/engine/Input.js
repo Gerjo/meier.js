@@ -35,6 +35,8 @@ function Input(container, width, height, isTablet) {
     this.container = container;
     this.size      = new Size(width, height);
     
+    this.keystates = {};
+    
     // Intialize empty listeners:
     this.listeners = [];
     for(var i = 0; i < Input.Events.COUNT; ++i) {
@@ -151,11 +153,20 @@ function Input(container, width, height, isTablet) {
     }.bind(this);
     
     //browser only?
-    document.body.onkeydown = function(event) {
+    document.onkeydown = function(event) {
+        
+        if(event.shiftKey) {
+            // TODO: upper case / lower case.,
+            // TODO: capslock detection.
+        }
+        
+        //console.log(String.fromCharCode(event.keyCode), event.keyCode, event);
+        this.keystates[event.keyCode] = true;
         this.triggerKeyboard(Input.Events.KEY_DOWN, event);
     }.bind(this);
     
-    document.body.onkeyup = function(event) {
+    document.onkeyup = function(event) {
+        this.keystates[event.keyCode] = false;
         this.triggerKeyboard(Input.Events.KEY_UP, event);
     }.bind(this);
 }
