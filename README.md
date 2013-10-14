@@ -23,3 +23,20 @@ Structure
 
 **/src/contrib/**
 <br>*Code sourced from open source projects. Each file contains more details about its origin.*
+
+
+
+Work in progress
+==========
+** Texture transformations **
+<br> Textures are commonly manipulated by the following operations: _resize_, _translate_, _skew_, _clip_, _rotate_. The current implementation doesn't support everything yet, nor is it very structured. Mostlikely an optional 3 by 3 matrix will be introduced to allow for most transformations. A matrix also works tightly with the scheduled Web GL renderer.
+
+** Abstract game object **
+<br>Useful for any engine is a game object that contains some commonly used logic. Probably introduce a collision shape, mass, drag, rotation and a position, to allow for rigid body physics.
+
+**Audio**
+<br>An efficient means to play short samples and background music.
+
+
+**Web Sockets**
+<br>The client side is easy, but further study needs to be done for a generic server implementation, e.g., a server that simply forwards all messages to all clients is open for abuse - some form of authentication needs to be performed.
