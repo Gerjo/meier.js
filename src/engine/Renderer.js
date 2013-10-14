@@ -110,15 +110,15 @@ Renderer.prototype.texture = function(texture, x, y, width, height) {
  
     
     this.context.drawImage(
-            texture.image,   // The image
-            0,               // Source X
-            0,               // Source Y
-            texture.width,   // Source width
-            texture.height,  // Source height
-            x - texture.hw,  // Target X
-            -y - texture.hh, // Target Y
-            width,           // Target width
-            height           // Target height
+            texture.image,     // The image
+            0,                 // Source X
+            0,                 // Source Y
+            texture.width,     // Source width
+            texture.height,    // Source height
+            x - width * 0.5,   // Target X
+            -y - height * 0.5, // Target Y
+            width,             // Target width
+            height             // Target height
     );
 };
 
