@@ -10,6 +10,7 @@ Structure
 *<br>Contains typical usage examples:*
 <br> online demo: [Animation and textures](http://gerjo.github.io/meier.js/examples/helloworld/helloworld.html)
 <br> online demo: [The coordinate system](http://gerjo.github.io/meier.js/examples/grid/grid.html)
+<br> online demo: [Adriaan's peculiar game](http://gerjo.github.io/meier.js/examples/countermoon/game.html) [a <s>kidney</s> gunner that shoots pink bullets, wip]
 
 **/src/engine/** 
 <br>*An actual engine, of sorts. Ties a few components together.*
