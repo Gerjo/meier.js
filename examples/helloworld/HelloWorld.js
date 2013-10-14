@@ -106,11 +106,11 @@ Actor.prototype.draw = function(renderer) {
     renderer.save();
     
     // Transformation calls:
-    renderer.translate(this.position.x + hw, this.position.y + hh);
+    renderer.translate(this.position.x, this.position.y);
     renderer.rotate(this.rotation);
     
     // Draw calls:
-    renderer.texture(texture, this.width * -0.5, this.height * 0.5, this.width, this.height);
+    renderer.texture(texture, 0, 0, this.width, this.height);
     renderer.text(this.sometext, 0, 0);
 
     
