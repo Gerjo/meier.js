@@ -29,6 +29,11 @@ LineSegment.prototype.angleBetween = function(other) {
     return this.direction().angleBetween(other.direction);
 };
 
+/// Compute the angle of direction:
+LineSegment.prototype.angle = function() {
+    return this.direction().angle();
+};
+
 LineSegment.prototype.middle = function() {
     return new Vector(
         LerpFloat(this.a.x, this.b.x, 0.5),
