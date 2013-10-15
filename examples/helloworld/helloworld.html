@@ -11,8 +11,8 @@
 // Load engine from this path:
 LoadEngine("../../src/");
 
-// At this point it's safe to load game code.
-
+// Include some game code:
+Meier.Include("HelloWorld.js");
 
 function init() {
     // The world inherits the size of the container element. If you want
@@ -22,10 +22,6 @@ function init() {
 }
 
 </script>
-
-<!-- Load game code: -->
-<script src="HelloWorld.js"></script>
-
 
 <!-- Per default, an empty document has no height, and weird paddings. -->
 <style>

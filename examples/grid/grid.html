@@ -11,7 +11,8 @@
 // Load engine from this path:
 LoadEngine("../../src/");
 
-// At this point it's safe to load game code.
+// Include some game code:
+Meier.Include("Grid.js");
 
 
 function init() {
@@ -22,9 +23,6 @@ function init() {
 }
 
 </script>
-
-<!-- Load game code: -->
-<script src="Grid.js"></script>
 
 
 <!-- Per default, an empty document has no height, and weird paddings. -->
