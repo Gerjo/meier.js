@@ -55,14 +55,20 @@ var LoadEngine = function(prefix) {
 /// fast loading. Though this require versioning. 
 ///
 var Meier = (function() {
-    var enginePrefix = "";
-    var ident        = "meier/";
-    var extension    = ".js";
-    var loaded       = {};
+    var enginePrefix = "";          // New prefix.
+    var ident        = "meier/";    // To replace prefix.
+    var extension    = ".js";       // Default javascript extension.
+    var loaded       = {};          // Files already loaded.
+    var verbose      = false;       // Per default, no logging.
     
     // Actors like a C++ functor, sets up the engine file prefix.
     var exposed = function(prefix) {
         enginePrefix = prefix || "";
+    }
+    
+    // Enable or disable logging.
+    exposed.SetVerbose = function(beVerbose) {
+        verbose = beVerbose;
     }
     
     // Load files directly:
@@ -86,7 +92,10 @@ var Meier = (function() {
         
         // Make sure this file isn't loaded already:
         if( ! loaded[normalized.toLowerCase()] ) {
-            console.log("Loading: " + normalized);
+            
+            if(verbose) {
+                console.log("Loading: " + normalized);
+            }
             
             loaded[normalized.toLowerCase()] = true;
             
@@ -94,7 +103,9 @@ var Meier = (function() {
             document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript"></scri' + 'pt>'); 
             
         } else {
-            console.log("Already loaded: " + normalized);
+            if(verbose) {
+                console.log("Already loaded: " + normalized);
+            }
         }
     }
     
