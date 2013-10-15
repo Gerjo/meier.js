@@ -7,41 +7,74 @@
 
 var LoadEngine = function(prefix) {
 
-    // All files to load, the order here is important.
-    var files = [
-        // Inject functionality into existing javascript constructs:
-        "Functions.js",
-        
-        // Math heavy files:
-        "math/Intersection.js",
-        "math/Vector.js",
-        "math/Line.js",
-        "math/Size.js",
-        "math/Disk.js",
-        "math/Rectangle.js",
-        "math/Matrix.js",
-        "math/Math.js",
-        
-        // Core code:
-        "engine/Game.js",
-        "engine/Renderer.js",
-        "engine/Resources.js",
-        "engine/Input.js",
-        
-        // Not written by me.
-        "contrib/Heap.js",
-        "contrib/MersenneTwister.js",
-        
-        // Doesn't belong to any category.
-        "aux/Random.js",
-        "aux/Stats.js",
-        "aux/Stopwatch.js",
-        "aux/Tree.js",
-    ];
+    // Support for the old load system by calling the new system.
+    Meier(prefix);
     
-    // Add all files as a script:
-    files.forEach(function(src) {
-        document.writeln('<scri' + 'pt src="' + prefix + src + '" type="text/javascript"></scri' + 'pt>');
-        
-    });
+    Meier.Include("meier/aux/Functions.js");
+    
+    Meier.Include("meier/math/Intersection.js");
+    Meier.Include("meier/math/Vector.js");
+    Meier.Include("meier/math/Line.js");
+    Meier.Include("meier/math/Size.js");
+    Meier.Include("meier/math/Disk.js");
+    Meier.Include("meier/math/Rectangle.js");
+    Meier.Include("meier/math/Matrix.js");
+    Meier.Include("meier/math/Math.js");
+    
+    Meier.Include("meier/engine/Game.js");
+    Meier.Include("meier/engine/Renderer.js");
+    Meier.Include("meier/engine/Resources.js");
+    Meier.Include("meier/engine/Input.js");
+    
+    Meier.Include("meier/contrib/Heap.js");
+    Meier.Include("meier/contrib/MersenneTwister.js");
+    
+    Meier.Include("meier/aux/Random.js");
+    Meier.Include("meier/aux/Stats.js");
+    Meier.Include("meier/aux/Stopwatch.js");
+    Meier.Include("meier/aux/Tree.js");
 };
+
+
+
+var Meier = (function() {
+    var enginePrefix = "";
+    var ident        = "meier/";
+    var extension    = ".js";
+    var loaded       = {};
+    
+    var exposed = function(prefix) {
+        enginePrefix = prefix;
+    }
+    
+    exposed.Include = function(file) {
+        var normalized = file;
+        
+        if(normalized.substr(-extension.length) != extension) {
+            normalized += extension;
+        }
+        
+        // Prefix the engine code (e.g., load from a different URL)
+        if(normalized.substr(0, ident.length) == ident) {
+            normalized = enginePrefix + normalized.substring(ident.length);
+        } else {
+            //normalized = normalized;
+        }
+        
+        if( ! loaded[normalized] ) {
+            console.log("Loading: " + normalized);
+            
+            loaded[normalized] = true;
+            
+            // Load the file, directly, blocking. 
+            document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript"></scri' + 'pt>'); 
+            
+        } else {
+            console.log("Already loaded: " + normalized);
+        }
+    }
+    
+    return exposed;
+}());
+
+
