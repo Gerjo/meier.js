@@ -2,15 +2,10 @@ Meier.Include("meier/math/Math.js");
 
 
 /// Calculate the mean (average) of a collection.
-/// Optionally specify whether biased or not.
-function Mean(data, biased) {
-    
-    // Biased option incase of a sample (x bar)
-    var n = (biased === true) ? data.length - 1 : data.length;
-    
+function Mean(data) {
     return data.reduce(function (a, b) {
         return a + b;
-    }) / n;
+    }) / data.length;;
 }
 
 function Sum(data) {
