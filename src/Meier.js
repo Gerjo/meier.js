@@ -102,6 +102,18 @@ var Meier = (function() {
             // Load the file, directly, blocking.
             document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript"></scri' + 'pt>'); 
             
+            /*var s = document.createElement("script");
+            s.src = normalized;
+            
+            s.onload = function() {
+                console.log("Loaded.", normalized);
+            }
+            
+            var head = document.getElementsByTagName("head")[0];
+            
+            head.insertBefore(s, head.firstChild);*/
+            
+            
         } else {
             if(verbose) {
                 console.log("Already loaded: " + normalized);
