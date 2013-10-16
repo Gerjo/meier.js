@@ -20,6 +20,7 @@ var LoadEngine = function(prefix) {
     Meier.Include("meier/math/Rectangle.js");
     Meier.Include("meier/math/Matrix.js");
     Meier.Include("meier/math/Math.js");
+    Meier.Include("meier/math/Statistics.js");
     
     Meier.Include("meier/engine/Game.js");
     Meier.Include("meier/engine/Renderer.js");
