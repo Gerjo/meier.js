@@ -4,6 +4,37 @@ function HornersMethod() {}
 function RegulaFalsi() { }
 function BasisSpline() {}
 
+/// Round numbers to the specified precision. Halves 
+/// are rounded up. 
+///
+/// @param {num} the to be rounded number.
+/// @param {precision} rounding precision. Accepts negative numbers.
+/// @return the rounded number.
+function Round(num, precision) {
+    
+    if(precision > 0) {
+        var exp = Math.pow(10, precision)
+        return parseInt(num * exp + 0.5, 10) / exp;
+    
+    } else if(precision < 0) {
+        var exp = Math.pow(10, -precision)
+        return parseInt(num / exp + 0.5, 10) * exp;
+    }
+    
+    return parseInt(num + 0.5);
+}
+
+/// Determine if a number is inside a given range.
+///
+/// @param The number to compare.
+/// @param The upper(or lower) bound.
+/// @param The upper(or lower) bound.
+///
+/// @return boolean indicating if the number is in the given range.
+function Between(num, a, b) {
+    return (num > Math.min(a, b) && num < Math.max(a, b));
+};
+
 function ToLetter(num) {
     // TODO: larger range.
     return String.fromCharCode(97 + num);
