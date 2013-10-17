@@ -75,6 +75,14 @@ function LerpColor(a, b, t) {
                      LerpFloat(a[3], b[3], t) + ")";
 }
 
+/// Lerp for vectors:
+function LerpVector(a, b, t) {
+    return new Vector(
+        a.x * (1 - t) + b.x * t,
+        a.y * (1 - t) + b.y * t
+    );
+}
+
 /// Normalize a range into [0..1].
 /// Example: Normalized(0, 255, 128) yields 0.5
 function Normalized(min, max, current) {
