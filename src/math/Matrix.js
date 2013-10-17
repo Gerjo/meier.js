@@ -14,7 +14,7 @@ function Matrix(array) {
     }
     
     // Adding a length property makes this object
-    // behave as in array in loops.
+    // behave as an array in loops.
     this.length = 3;
 }
 
