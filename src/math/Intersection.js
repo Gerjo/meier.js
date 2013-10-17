@@ -28,7 +28,11 @@ Intersection = (function() {
                 
                 // Bit of a hack. If the infinite lines would intersect, let's test if the
                 // point of intersection lies on the segment, too.
-                return Between(t.y, segment.a.y, segment.b.y) && Between(t.x, segment.a.x, segment.b.x);
+                return (
+                    (t.y >= Math.min(segment.a.y, segment.b.y) && t.y <= Math.max(segment.a.y, segment.b.y))
+                    &&
+                    (t.x >= Math.min(segment.a.x, segment.b.x) && t.x <= Math.max(segment.a.x, segment.b.x))
+                );
             },
             
             DiskLineSegment: function(disk, line) { 
@@ -63,15 +67,16 @@ Intersection = (function() {
             
             SegmentLine: function(segment, line) {
                 var t = lines(segment.a, segment.b, line.a, line.b);
-                
-                
-                if(t === false) {
-                    return false;
+               
+                if( t !== false &&
+                    (t.y >= Math.min(segment.a.y, segment.b.y) && t.y <= Math.max(segment.a.y, segment.b.y))
+                    &&
+                    (t.x >= Math.min(segment.a.x, segment.b.x) && t.x <= Math.max(segment.a.x, segment.b.x))
+                ) {
+                    return t;
                 }
                 
-                if(Between(t.y, segment.a.y, segment.b.y) && Between(t.x, segment.a.x, segment.b.x)) {
-                    return r;
-                }
+                return false;
             },
             
             Lines: function (lineA, lineB) {
