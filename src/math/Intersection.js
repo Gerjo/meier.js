@@ -58,7 +58,7 @@ Intersection = (function() {
             Rectangles: rectanglesIntersection,
             
             Segments: function(segmentA, segmentB) {
-                return lineSegmentsInteresection(segmentA, segmentB, false);
+                return lineSegmentsInteresection(segmentA, segmentB);
             },
             
             SegmentLine: function(segment, line) {
