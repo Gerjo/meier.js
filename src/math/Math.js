@@ -61,6 +61,11 @@ function ToDegrees(radians) {
     return 180 / Math.PI * radians;
 }
 
+/// Radians to multiples of pi.
+function ToPiMultiples(radians) {
+    return radians / Math.PI;
+}
+
 /// Map a [0..PI, -PI..0] range to [0...2PI]
 function ToAbsoluteRadians(a) {
     if(a < 0) {
