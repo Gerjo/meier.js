@@ -149,6 +149,29 @@ function ToDegreesRounded(radians) {
     return Math.round(180 / Math.PI * radians);
 }
 
+
+/// Determine if an angle lies between two other angles. This
+/// assumes the angles are given in atan2 format.
+///
+/// @todo better efficency on the inner workings.
+///
+/// @param {angle} The angle to test for.
+/// @param {a} The lower (or upper) bound
+/// @param {b} The upper (or lower) bound
+/// @return boolean indicating whether angle lies between angles.
+function IsAngleInBetween(angle, a, b) {
+    
+    a     = Vector.CreateAngular(a);
+    b     = Vector.CreateAngular(b);
+    angle = Vector.CreateAngular(angle);
+    
+    return (
+        Math.sgn(a.cross(angle)) != Math.sgn(b.cross(angle))
+    );
+}
+
+
+
 /// Apply newton rapson iteration to approximate roots of a 
 /// polynomal.
 ///
