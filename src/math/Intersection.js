@@ -15,7 +15,20 @@ Intersection = (function() {
             Rectangles: rectanglesTest,
             
             Segments: function(segmentA, segmentB) {
-                return false === lineSegmentsInteresection(segmentA, segmentB);
+                return false !== lineSegmentsInteresection(segmentA, segmentB);
+            },
+            
+            SegmentLine: function(segment, line) {
+                var t = lines(segment.a, segment.b, line.a, line.b);
+                
+                
+                if(t === false) {
+                    return false;
+                }
+                
+                // Bit of a hack. If the infinite lines would intersect, let's test if the
+                // point of intersection lies on the segment, too.
+                return Between(t.y, segment.a.y, segment.b.y) && Between(t.x, segment.a.x, segment.b.x);
             },
             
             DiskLineSegment: function(disk, line) { 
@@ -24,8 +37,11 @@ Intersection = (function() {
             
             DiskLine: function(disk, line) { 
                 return diskLine(disk, line, true, false); 
-            }
+            },
             
+            Lines: function (lineA, lineB) {
+                return false !== lines(lineA.a, lineA.b, lineB.a, lineB.b);
+            }
         },
         
         // Getters, returns data if available, else false.
@@ -41,7 +57,26 @@ Intersection = (function() {
             
             Rectangles: rectanglesIntersection,
             
-            Segments: lineSegmentsInteresection,
+            Segments: function(segmentA, segmentB) {
+                return lineSegmentsInteresection(segmentA, segmentB, false);
+            },
+            
+            SegmentLine: function(segment, line) {
+                var t = lines(segment.a, segment.b, line.a, line.b);
+                
+                
+                if(t === false) {
+                    return false;
+                }
+                
+                if(Between(t.y, segment.a.y, segment.b.y) && Between(t.x, segment.a.x, segment.b.x)) {
+                    return r;
+                }
+            },
+            
+            Lines: function (lineA, lineB) {
+                return lines(lineA.a, lineA.b, lineB.a, lineB.b);
+            },
             
             DiskLineSegment: function(disk, line) { 
                 return diskLine(disk, line, false, true); 
@@ -61,6 +96,47 @@ Intersection = (function() {
             LineSegmentBetweenRectangles: NearestLineSegmentBetweenRectangles
         }
     };
+    
+    function lines(p1, d1, p2, d2) {
+        // Calculate slope "a" in "y = a * x + b":
+        var a_a = (d1.y - p1.y) / (d1.x - p1.x);
+        var b_a = (d2.y - p2.y) / (d2.x - p2.x);
+
+        // Using slope "a", calculate "b". This is eventually
+        // the constant in "c = mx + ny":
+        var a_c = a_a * p1.x - p1.y;
+        var b_c = b_a * p2.x - p2.y;
+
+        // Straight line early out:
+        if(d1.x == p1.x) {
+            // Perpendicular OR not
+            var y = (b_a == 0) ? d2.y : b_a * d1.x - b_c;
+    
+            return new Vector(d1.x, y);
+        }
+
+        // Straight line early out:
+        if(d2.x == p2.x) {
+            // Perpendicular OR not
+            var y = (a_a == 0) ? d1.y : a_a * d2.x - a_c;
+
+            return new Vector(d2.x, y);
+        }
+
+        // They never meet :(
+        if(a_a - b_a == 0) {
+            return false;
+        }
+
+        // Elimination method applied:
+        var x = (a_c - b_c) / (a_a - b_a);
+    
+        // Feed "x" back into "c = mx + ny" to find "y":
+        var y = a_a * x - a_c;
+    
+        // Et voila.
+        return new Vector(x, y);
+    }
     
     /// Mostly taken from:
     /// http://stackoverflow.com/questions/1073336/circle-line-collision-detection
