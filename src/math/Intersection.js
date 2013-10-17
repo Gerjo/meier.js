@@ -241,7 +241,6 @@ Intersection = (function() {
         var max  = new Vector(0, 0);
         var pen  = new Vector(0, 0);
         var aRect, bRect;
-        var distanceSQ = 0;
     
         ['x', 'y'].forEach(function(axis) {
             aRect = b.min[axis] < a.min[axis] ? b : a;
@@ -255,8 +254,6 @@ Intersection = (function() {
             if(pen[axis] <= 0) {
                 min[axis] = max[axis] = Math.max(b.min[axis], a.min[axis]);
                 pen[axis] = 0;
-            } else {
-                distanceSQ += Math.pow(pen[axis], 2);
             }
         
         }.bind(this));
@@ -266,7 +263,7 @@ Intersection = (function() {
             return new LineSegment(0, 0, 0, 0);
         }
     
-        // Set the currect line, toggle to "rectA to rectB" not "min to max":
+        // Set the correct line, toggle to "rectA to rectB" not "min to max":
         if(b.min.y > a.min.y && b.min.x < a.min.x ||
            b.min.y < a.min.y && b.min.x > a.min.x) {
             var tmp = min.y;
