@@ -92,6 +92,9 @@ Array.prototype.unique = function(compare) {
 /// In other words, it reduces a multidimensional array
 /// into one dimension, recursively.
 Array.prototype.flatten = function() {
+ 
+    // Do it all inline, one does not care about the
+    // order of elements.
     var n = [];
     for(var i = 0; i < this.length; ++i) {
         if(this[i] instanceof Array) {
@@ -101,6 +104,7 @@ Array.prototype.flatten = function() {
     }
     
     return this;
+
 };
 
 /// Merge an array into this array without creating a
