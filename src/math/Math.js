@@ -147,6 +147,56 @@ function EpsilonEquals(value, test, epsilon) {
     return value > test - epsilon && value < test + epsilon;
 }
 
+/// Short-hand function for sorting numbers in ascending magnitude. 
+/// This is more expressive than inlining a function. The default
+/// sorting algorithm may no work as expected.
+///
+/// [9, -9, 3, 2].sort(SortAscending) === [-9, 2, 3, 9]
+///
+/// @param {a} The first number.
+/// @param {b} The second number.
+/// @return A number indicating the difference.
+/// @see SortDescending
+/// @see SortNatural
+function SortAscending(a, b) {
+    return a - b;
+}
+
+/// Short-hand function for sorting numbers in descending magnitude.
+///
+/// @param {a} The first number.
+/// @param {b} The second number.
+/// @return A number indicating the difference.
+/// @see SortAscending
+/// @see SortNatural
+function SortDescending(a, b) {
+    return b - a;
+}
+
+/// Short-hand function to sort an array like a typical human would.
+/// There are varying implementations, use this - or build your own.
+///
+/// Example results:
+///     With natural sort:
+///        img1.png 
+///        img2.png
+///        img10.png 
+///        img12.png 
+///     With default build-in sort:
+///        img1.png 
+///        img10.png 
+///        img12.png 
+///        img2.png
+///
+/// @param {a} The first item.
+/// @param {b} The second item.
+/// @return A number indicating the difference.
+/// @see SortAscending
+/// @see SortDescending
+function SortNatural(a, b) {
+    return +/\d+/.exec(a)[0] > +/\d+/.exec(b)[0];
+}
+
 
 /// Map range A onto B at interval cu in [b1..b2]
 function Map(a1, a2, b1, b2, cu) {
