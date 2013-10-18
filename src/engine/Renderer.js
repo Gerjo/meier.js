@@ -261,7 +261,8 @@ Renderer.prototype.fill = function(color) {
 };
 
 /// Stroke the outline of all draw calls since begin() with a given color.
-Renderer.prototype.stroke = function(color) {
+Renderer.prototype.stroke = function(color, thickness) {
+    this.context.lineWidth = thickness || 1;
     this.context.strokeStyle = color;
     this.context.stroke();
     return this;
