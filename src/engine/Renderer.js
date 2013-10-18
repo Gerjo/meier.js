@@ -173,6 +173,9 @@ Renderer.prototype.line = function(a, b, c, d) {
     } else if(a instanceof Vector && b instanceof Vector) {
         this.context.moveTo(a.x, -a.y);
         this.context.lineTo(b.x, -b.y);
+    } else if(a instanceof Vector) {
+        this.context.moveTo(0, 0);
+        this.context.lineTo(a.x, -a.y); 
     } else {
         this.context.moveTo(a, -b);
         this.context.lineTo(c, -d);
@@ -247,6 +250,7 @@ Renderer.prototype.stroke = function(color) {
 };
 
 /// Accepts:
+/// [Vector]
 /// [LineSegment]
 /// [Vector, Vector]
 /// [Number, Number, Number, Number]
@@ -264,7 +268,11 @@ Renderer.prototype.arrow = function(a, b, c, d) {
         fromY = -a.y;
         toX   = b.x;
         toY   = -b.y;
-        
+    } else if(a instanceof Vector) {
+        toX = a.x;
+        toY = -a.y;
+        fromX = 0;
+        fromY = 0;
     } else {
         fromX = a;
         fromY = -b;
