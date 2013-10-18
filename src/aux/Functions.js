@@ -32,6 +32,62 @@ if(!Array.prototype.random) {
     };
 }
 
+/// Retrieve unique values from this array. Non javascript
+/// primitives (number, string) should use a custom compare
+/// function, else "references" are compared. Without the
+/// custom compare, this runs in O(2n), else O(n^n).
+///
+/// @todo optimize internal workings.
+Array.prototype.unique = function(compare) {
+    
+    var r = [];
+    
+    // User defined compare function:
+    if(compare) {
+        if(compare instanceof Function) {
+            
+            outer:
+            for(var i = 0; i < this.length; ++i) {
+                for(var j = 0; j < this.length; ++j) {
+                    if(j != i && compare(this[i], this[j]) === true) {
+                        continue outer;
+                    }
+                }
+                
+                r.push(this[i]);
+            }
+            
+            
+        } else {
+            throw new Error("The given 'compare' is not a function.");
+        }
+        
+    // Default compare, this shall only work for javascript primitives
+    // or objects that tackfully overload the toString parameter. 
+    } else {
+        var dict = [];
+        
+        for(var i = 0; i < this.length; ++i) {
+            if( ! dict[this[i]]) {
+                dict[this[i]] = { c: 1, i: i };
+            } else {
+                dict[this[i]].c++;
+            }
+        }
+        
+        for(var k in dict) {
+            if(dict.hasOwnProperty(k)) {
+                if(dict[k].c === 1) {
+                    r.push(this[dict[k].i]);
+                }
+            }
+        }
+    }
+    
+    
+    return r;
+};
+
 /// Merge all internal array entries in the outer array.
 /// In other words, it reduces a multidimensional array
 /// into one dimension, recursively.
