@@ -22,22 +22,26 @@ function Renderer(container, width, height) {
 /// Save the current rotation/translation state.
 Renderer.prototype.save = function() {
     this.context.save();
+    return this;
 };
 
 /// Restore the previously saved state:
 Renderer.prototype.restore = function() {
     this.context.restore();
+    return this;
 };
 
 /// Transparently clear the canvas:
 Renderer.prototype.clear = function() {
     this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
+    return this;
 };
 
 /// Clear the canvas with a solid fill color:
 Renderer.prototype.clearSolid = function(color) {
     this.context.fillStyle = color;
-    this.context.fillRect(-this.hw, -this.hh, this.width, this.height);    
+    this.context.fillRect(-this.hw, -this.hh, this.width, this.height);  
+    return this;  
 };
 
 /// Clear the canvas with a solid fill color:
@@ -53,12 +57,14 @@ Renderer.prototype.clearTexture = function(texture) {
             this.width,     // Target width
             this.height     // Target height
     );    
+    return this;
 };
 
 /// Rotate any subsequent draw calls:
 Renderer.prototype.rotate = function(radians) {
     this.context.rotate(radians);
     this._rotation = radians;
+    return this;
 };
 
 /// Translate all subsequent draw calls:
@@ -66,6 +72,7 @@ Renderer.prototype.translate = function(x, y) {
     this.context.translate(x, -y);
     this._translate.x = x;
     this._translate.y = -y;
+    return this;
 };
 
 /// Draw a rectangle:
@@ -83,6 +90,7 @@ Renderer.prototype.rectangle = function(a, b, c, d) {
     } else {
         this.context.rect(a, -b, c, d);
     }
+    return this;
 };
 
 /// Draw a texture:
@@ -120,11 +128,13 @@ Renderer.prototype.texture = function(texture, x, y, width, height) {
             width,             // Target width
             height             // Target height
     );
+    return this;
 };
 
 /// Start a new set of drawing calls.
 Renderer.prototype.begin = function() {
     this.context.beginPath();
+    return this;
 };
 
 /// Accepts:
@@ -144,6 +154,7 @@ Renderer.prototype.circle = function(a, b, c) {
         this.context.moveTo(a + c, -b);
         this.context.arc(a, -b, c, 0, 2 * Math.PI);
     }
+    return this;
 };
 
 /// Draw an arc at [x,y] with radius R from radians to radians.
@@ -160,6 +171,7 @@ Renderer.prototype.arc = function(a, b, c, d, e) {
     } else {
         this.context.arc(a, -b, c, d, e);
     }
+    return this;
 };
 
 /// Accepts:
@@ -180,6 +192,7 @@ Renderer.prototype.line = function(a, b, c, d) {
         this.context.moveTo(a, -b);
         this.context.lineTo(c, -d);
     }
+    return this;
 };
 
 Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
@@ -205,6 +218,7 @@ Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
     this.context.textAlign    = align;
     this.context.textBaseline = valign;
     this.context.fillText(string, x, -y);
+    return this;
 };
 
 /// Accepts: 
@@ -218,6 +232,7 @@ Renderer.prototype.vector = function(a, b) {
     } else {
         this.context.lineTo(a, -b);
     }
+    return this;
 };
 
 /// Accepts:
@@ -235,18 +250,21 @@ Renderer.prototype.polygon = function(vertices) {
     if( ! vertices.first().equals(vertices.last())) {
         this.context.lineTo(vertices[0].x, -vertices[0].y);
     }  
+    return this;
 };
 
 /// Fill all draw calls since begin() with a given color.
 Renderer.prototype.fill = function(color) {
     this.context.fillStyle = color;
     this.context.fill();
+    return this;
 };
 
 /// Stroke the outline of all draw calls since begin() with a given color.
 Renderer.prototype.stroke = function(color) {
     this.context.strokeStyle = color;
     this.context.stroke();
+    return this;
 };
 
 /// Accepts:
@@ -293,4 +311,5 @@ Renderer.prototype.arrow = function(a, b, c, d) {
         toX - headlen * Math.cos(angle + Math.PI / 6),
         (toY - headlen * Math.sin(angle + Math.PI / 6))
     );
+    return this;
 };
