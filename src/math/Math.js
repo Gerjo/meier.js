@@ -40,7 +40,7 @@ function IsInteger(n) {
 }
 
 /// Find the greatest common divisor of two numbers.
-/// Also known as: GCD, GCF or HCF. Return values are 
+/// Also known as: GCD, GCF, HCD or HCF. Return values are 
 /// always positive, this is coherent with wolfram alpha.
 /// 
 /// Examples:
@@ -51,7 +51,7 @@ function IsInteger(n) {
 /// @param {m} The first number.
 /// @param {n} The second number.
 /// @return The highest common non-negative divisor.
-GCD = GCF = HCF = function EuclideanAlgorithm(m, n) {
+GCD = GCF = HCF = HCD = function EuclideanAlgorithm(m, n) {
     
     if(m === 0) {
         return Math.abs(n);
@@ -99,6 +99,26 @@ GCD = GCF = HCF = function EuclideanAlgorithm(m, n) {
     
     // Input was not an integer number.
     return NaN;
+}
+
+/// Find the lowest common denominator, also known as
+/// least common denominator. (e.g., used for solving
+/// fraction addition or subtraction)
+///
+/// Simple example:
+///     LCD(135, 5) === 135
+///
+/// Solving multiple:
+///     LCD(3, LCD(25, 5)) === 75
+///
+/// Functional approach solving multiple:
+///    [3,25,5].reduce(LCD) === 75
+///
+/// @param {a} The first number.
+/// @param {b} The second number.
+/// @return The lowest common non-negative denominator.
+function LCD(a, b) {
+    return Math.abs(a * b / GCD(a, b));
 }
 
 /// Determine if a number is inside a given range.
