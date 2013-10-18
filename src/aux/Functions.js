@@ -32,6 +32,20 @@ if(!Array.prototype.random) {
     };
 }
 
+/// Merge all internal array entries in the outer array.
+/// In other words, it reduces a multidimensional array
+/// into one dimension, recursively.
+Array.prototype.flatten = function() {
+    var n = [];
+    for(var i = 0; i < this.length; ++i) {
+        if(this[i] instanceof Array) {
+            this.merge(this[i]);
+            this[i--] = this.pop();
+        }
+    }
+    
+    return this;
+};
 /// Filter combined with a map.
 if(!Array.prototype.filterMap) {
     Array.prototype.filterMap = function(callback) {
