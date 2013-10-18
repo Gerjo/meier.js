@@ -88,6 +88,11 @@ Array.prototype.unique = function(compare) {
     return r;
 };
 
+/// Empty an array.
+Array.prototype.clear = function() {
+    this.length = 0;
+};
+
 /// Merge all internal array entries in the outer array.
 /// In other words, it reduces a multidimensional array
 /// into one dimension, recursively.
