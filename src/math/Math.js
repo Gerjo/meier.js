@@ -24,6 +24,83 @@ function Round(num, precision) {
     return parseInt(num + 0.5);
 }
 
+/// Test if the argument is an integer. NaN and infinity
+/// are not considered integers.
+///
+/// Examples:
+///    IsInteger("456") === true
+///    IsInteger(123) === true
+///    IsInteger("foo") === false
+///    IsInteger(infinity) === false
+///
+/// @param {n} the value to test.
+/// @return boolean indicating whether the argument is integer.
+function IsInteger(n) {
+    return parseInt(n, 10) == n;
+}
+
+/// Find the greatest common divisor of two numbers.
+/// Also known as: GCD, GCF or HCF. Return values are 
+/// always positive, this is coherent with wolfram alpha.
+/// 
+/// Examples:
+///    GCD(3, 6) === 3
+///    GCD(-54, 549) === 9
+///    GCD(-12, -6) === 6
+///
+/// @param {m} The first number.
+/// @param {n} The second number.
+/// @return The highest common non-negative divisor.
+GCD = GCF = HCF = function EuclideanAlgorithm(m, n) {
+    
+    if(m === 0) {
+        return Math.abs(n);
+    }
+    
+    if(n === 0) {
+        return Math.abs(m);
+    }
+    
+    if(IsInteger(m) &&  IsInteger(n)) {
+        
+        // For positive numbers only:
+        if(m > 0 && n > 0) {
+            
+            while(m != n) {
+                if(m > n) {
+                    m = m - n;
+                } else {
+                    n = n - m;
+                }
+            }
+            
+            return m;
+            
+        // One of the numbers is negative, resort to modulo.
+        } else {
+        
+            // m shall be the lowest number.
+            if(n > m) {
+                var t = n;
+                n = m;
+                m = t;
+            }
+
+            for(var r = m % n; true; r = m % n) {    
+                if(r == 0) {
+                    return Math.abs(n);
+                }
+    
+                m = n;
+                n = r;
+            }
+        }
+    }
+    
+    // Input was not an integer number.
+    return NaN;
+}
+
 /// Determine if a number is inside a given range.
 ///
 /// @param The number to compare.
