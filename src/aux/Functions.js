@@ -46,6 +46,21 @@ Array.prototype.flatten = function() {
     
     return this;
 };
+
+/// Merge an array into this array without creating a
+/// copy. Similar to .concat() but without the copy.
+Array.prototype.merge = function(array) {
+    if(array instanceof Array) {
+        for(var i = 0; i < array.length; ++i) {
+            this.push(array[i]);
+        }
+    } else {
+        throw new Error("Argument is not an array.");
+    }
+    
+    return this;
+};
+
 /// Filter combined with a map.
 if(!Array.prototype.filterMap) {
     Array.prototype.filterMap = function(callback) {
