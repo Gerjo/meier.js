@@ -198,7 +198,7 @@ Renderer.prototype.line = function(a, b, c, d) {
 /// Draw a dashed line.
 ///
 /// @todo optimize internal workings.
-Renderer.prototype.dashed = function(fromX, fromY, toY, toX, length) {
+Renderer.prototype.dashed = function(fromX, fromY, toX, toY, length) {
     length = length || 10;
     
     var dir = new Vector(
