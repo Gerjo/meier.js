@@ -213,10 +213,10 @@ Renderer.prototype.dashed = function(fromX, fromY, toX, toY, length) {
     
     for(var i = 0; i < l; i += length * 2) {
         this.line(
-            dir.x * i,
-            dir.y * i,
-            dir.x * (i + length),
-            dir.x * (i + length)
+            fromX + dir.x * i,
+            fromY + dir.y * i,
+            fromX + dir.x * (i + length),
+            fromY + dir.y * (i + length)
         );
     }
     
