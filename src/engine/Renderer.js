@@ -195,6 +195,34 @@ Renderer.prototype.line = function(a, b, c, d) {
     return this;
 };
 
+/// Draw a dashed line.
+///
+/// @todo optimize internal workings.
+Renderer.prototype.dashed = function(fromX, fromY, toY, toX, length) {
+    length = length || 10;
+    
+    var dir = new Vector(
+        toX - fromX,
+        toY - fromY
+    );
+    
+    // Total length to cover:
+    var l = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2));
+    
+    dir.normalize();
+    
+    for(var i = 0; i < l; i += length * 2) {
+        this.line(
+            dir.x * i,
+            dir.y * i,
+            dir.x * (i + length),
+            dir.x * (i + length)
+        );
+    }
+    
+    return this;
+};
+
 Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
     
     if( ! color) {
