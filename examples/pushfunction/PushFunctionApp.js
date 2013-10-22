@@ -13,7 +13,7 @@ function PushFunctionApp(container) {
     
 
     // Center-of-mass:
-    this.center = new Point(150, 0);
+    this.center = new Point(0, 0);
     
     // Some initial coordinates:
     this.coordinates.push(
@@ -22,7 +22,19 @@ function PushFunctionApp(container) {
         new Point(40, 40).add(this.center),
         new Point(-40, 40).add(this.center)
     );
+    
 
+    this.coordinates = [
+        new Vector(-65.0, -130.0),
+        new Vector(130.0, -130.0),
+        new Vector(60.0, 195.0),
+        new Vector(2.5, 195.0),
+        new Vector(-65.0, 132.5)
+    ];
+    
+    // Let's move the polygon to the side:
+    this.coordinates.forEach(function(v) { v.x += 100; });
+    this.center.x += 100;
 
     // The generated confex full:
     this.hull = [];
