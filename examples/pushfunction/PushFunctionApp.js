@@ -11,7 +11,7 @@ function PushFunctionApp(container) {
     // To contain all polygon coordinates:
     this.coordinates = [];
     
-    this.useLocalStorage = true;
+    this.useLocalStorage = false;
     this.storageKey      = "pfn-coordinates";
 
     // Center-of-mass:
@@ -30,7 +30,7 @@ function PushFunctionApp(container) {
     this.coordinates.forEach(function(v) { v.x += 100; });
     this.center.x += 100;
     
-    if(this.useLocalStorage === false) {
+    if(this.useLocalStorage === true) {
         var t = localStorage.getItem(this.storageKey);
     
         if(t && (t = JSON.TryParse(t)) && t && t instanceof Array) {
