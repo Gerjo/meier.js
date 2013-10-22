@@ -11,6 +11,20 @@ Math.sgn = function(n) {
     return n >= 0 ? 1 : -1;
 }
 
+/// Parse JSON strings without silly exceptions that suggest
+/// your code is broken due to the incorrect line-numbers.
+///
+/// @param {data} The JSON encoded string.
+/// @param {reviver} If a function, prescribes how the value originally produced by parsing is transformed, before being returned.
+/// @return An object or undefined if parsing failed.
+JSON.tryParse = JSON.TryParse = function(data, reviver) {
+    try {
+        return JSON.parse(data, reviver);
+    } catch(idontcareaboutexceptionshere) {
+        return undefined;
+    }
+};
+
 /// Retrieve last item of an array:
 Array.prototype.last = function() {
     return this[this.length - 1];
