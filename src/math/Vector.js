@@ -23,8 +23,8 @@ function Vector(x, y) {
 };*/
 
 /// Mostly used for serialisation, such as used by localStorage.
-Vector.prototype.toString = function(other) {
-    return "{x:" + this.x + ",y:" + this.y + "}";
+Vector.prototype.toString = function() {
+    return '{"x":' + this.x + ',"y":' + this.y + "}";
 };
 
 Vector.prototype.angleBetween = function(other) {
