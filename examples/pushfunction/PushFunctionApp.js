@@ -247,6 +247,12 @@ PushFunctionApp.prototype.drawPushFunction = function(renderer) {
                 line.b.x,
                 line.b.y
             ).stroke("green", thickness);*/
+                
+            if(n > 0) {
+                renderer.begin().dashed(n * s, 0, n * s, y, 1).stroke("rgba(0,0,0,0.4)");
+            } else {
+                renderer.begin().dashed((Math.TwoPI+n) * s, 0, (Math.TwoPI+n) * s, y, 1).stroke("rgba(0,0,0,0.4)");
+            }
     
             renderer.begin().line(
                 Math.max(0, line.a.x),
