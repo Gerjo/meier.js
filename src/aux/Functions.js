@@ -12,25 +12,22 @@ Math.sgn = function(n) {
 }
 
 /// Retrieve last item of an array:
-if(!Array.prototype.last) {
-    Array.prototype.last = function() {
-        return this[this.length - 1];
-    };
-}
+Array.prototype.last = function() {
+    return this[this.length - 1];
+};
+
 
 /// Retrieve first item an an array:
-if(!Array.prototype.first) {
-    Array.prototype.first = function() {
-        return this[0];
-    };
-}
+Array.prototype.first = function() {
+    return this[0];
+};
+
 
 /// Return random item from array:
-if(!Array.prototype.random) {
-    Array.prototype.random = function() {
-        return this[Math.floor(Math.random() * this.length)];
-    };
-}
+Array.prototype.random = function() {
+    return this[Math.floor(Math.random() * this.length)];
+};
+
 
 /// Retrieve unique values from this array. Non javascript
 /// primitives (number, string) should use a custom compare
@@ -127,37 +124,34 @@ Array.prototype.merge = function(array) {
 };
 
 /// Filter combined with a map.
-if(!Array.prototype.filterMap) {
-    Array.prototype.filterMap = function(callback) {
+Array.prototype.filterMap = function(callback) {
+
+    for(var i = 0, r; i < this.length; ++i) {
+        r = callback(this[i]);
     
-        for(var i = 0, r; i < this.length; ++i) {
-            r = callback(this[i]);
-        
-            if(r === undefined) {
-                this.splice(i--, 1);
-            } else {
-                this[i] = r;
-            }
+        if(r === undefined) {
+            this.splice(i--, 1);
+        } else {
+            this[i] = r;
         }
-    
-        return this;
-    };
-}
+    }
+
+    return this;
+};
+
 
 /// Duplicate an array:
-if(!Array.prototype.clone) {
-    Array.prototype.clone = function() { 
-        return this.slice(0); 
-    }
+Array.prototype.clone = function() { 
+    return this.slice(0); 
 }
+
 
 
 /// Determine if a string ends with the given suffix:
-if(!String.prototype.endsWith) {
-    String.prototype.endsWith = function(suffix) {
-        return this.indexOf(suffix, this.length - suffix.length) !== -1;
-    };
-}
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+
 
 /// Add support for context binding on older platforms e.g.: the ipad 1 or older ipods.
 ///
