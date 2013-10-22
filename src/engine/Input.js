@@ -34,7 +34,6 @@ function Input(container, width, height, isTablet) {
     this.isTablet  = isTablet;
     this.container = container;
     this.size      = new Size(width, height);
-    
     this.keystates = {};
     
     // Intialize empty listeners:
@@ -75,28 +74,36 @@ function Input(container, width, height, isTablet) {
         container.ontouchend = function(event) {
             event.preventDefault();
             
-            this.trigger(Input.Events.LEFT_UP, event);
+            // Double -ap requires a small sleep. Only sleep when there are
+            // actual double tab listeners.
+            if(this.listeners[Input.Events.DOUBLE_TAP].length > 0) {
+                this.trigger(Input.Events.LEFT_UP, event);
             
-            if(clickTimeoutID != 0) {
-                this.updatePosition(event);
-                this.trigger(Input.Events.DOUBLE_TAP, event, lastTap);
+                if(clickTimeoutID != 0) {
+                    this.updatePosition(event);
+                    this.trigger(Input.Events.DOUBLE_TAP, event, lastTap);
                 
-                clearTimeout(timeoutID);
-                clickTimeoutID = 0;
-            } else {
-                
-                // Schedule timer:
-                clickTimeoutID = setTimeout(function() {
-                    this.trigger(Input.Events.LEFT_CLICK, event);
-                
-                    // Event played, clear ID:
+                    clearTimeout(timeoutID);
                     clickTimeoutID = 0;
-                }.bind(this), doubleTapDelay);
-            }
+                } else {
+                
+                    // Schedule timer:
+                    clickTimeoutID = setTimeout(function() {
+                        this.trigger(Input.Events.LEFT_CLICK, event);
+                
+                        // Event played, clear ID:
+                        clickTimeoutID = 0;
+                    }.bind(this), doubleTapDelay);
+                }
             
-            // Update last location:
-            lastTap.x = this.x;
-            lastTap.y = this.y;
+                // Update last location:
+                lastTap.x = this.x;
+                lastTap.y = this.y;
+                
+            } else {
+                // No double-tap listeres, trigger event right away.
+                this.trigger(Input.Events.LEFT_CLICK, event);
+            }
             
             return false;
         }.bind(this);
