@@ -268,16 +268,21 @@ Renderer.prototype.vector = function(a, b) {
 /// NB: automatically closes the loop, if not closed.
 Renderer.prototype.polygon = function(vertices) {
     
-    this.context.moveTo(vertices[0].x, -vertices[0].y);
+    // The minimal required minimum for the code not to crash.
+    if(vertices.length > 0) {
     
-    for(var i = 1; i < vertices.length; ++i) {
-        this.context.lineTo(vertices[i].x, -vertices[i].y);
-    }
+        this.context.moveTo(vertices[0].x, -vertices[0].y);
     
-    // Close the polygon loop:
-    if( ! vertices.first().equals(vertices.last())) {
-        this.context.lineTo(vertices[0].x, -vertices[0].y);
-    }  
+        for(var i = 1; i < vertices.length; ++i) {
+            this.context.lineTo(vertices[i].x, -vertices[i].y);
+        }
+    
+        // Close the polygon loop:
+        if( ! vertices.first().equals(vertices.last())) {
+            this.context.lineTo(vertices[0].x, -vertices[0].y);
+        }
+    } 
+    
     return this;
 };
 
