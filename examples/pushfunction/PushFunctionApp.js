@@ -30,8 +30,8 @@ function PushFunctionApp(container) {
     // Radius of a coordinate:
     this.radius = 3;
     
-    // Edit radius could be larger/smaller.
-    this.editRadius = this.radius * 1;
+    // Grown the effective radius for tablets.
+    this.editRadius = this.radius * ((this.isTablet) ? 4 : 1);
     
     // Radius of center-of-mass:
     this.massRadius = 5;
