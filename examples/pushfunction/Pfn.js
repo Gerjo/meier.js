@@ -7,6 +7,12 @@ function CreatePushFunction(hull) {
     var bounds   = f.bounds   = [];
     var edges    = f.edges    = [];
     
+    // Flag to toggle that the function isn't happy.
+    // Commenly occurs when center-of-mass is outside
+    // the object. Such things never happen in real-life
+    // anyway, so we don't account for it.
+    f.isDegenerate = false;
+    
     // The hull is expected to be mapped around
     // the center-of-mass.
     var center   = new Vector(0, 0);
@@ -42,19 +48,22 @@ function CreatePushFunction(hull) {
             
             // End:
             "b": b,
-                        
+                
+            // Size of the actual edge.
             "e": vertices[i].distance(vertices[j]),
             
+            // Unique ID to identify.
             "i": i,
             
+            // Range (grows when merged)
             "r": [[a, b]],
             
-            // Normal:
+            // Edge normal i.e., possible equilibrium:
             "n": n
         };
     }
     
-    function A(angle, a, b) {
+    function InRange(angle, a, b) {
         var base = Vector.CreateAngular(angle);
         return base.cross(Vector.CreateAngular(a)) >= 0 
                 && base.cross(Vector.CreateAngular(b)) <= 0
@@ -65,17 +74,19 @@ function CreatePushFunction(hull) {
         bound = bounds[i];
         
         // Out-of-bounds:
-        if( ! A(bound.n, bound.a, bound.b)) {
+        if( ! InRange(bound.n, bound.a, bound.b)) {
                     
             // See if "bound" fits in any other bound.
             var r = bounds.every(function(whom) {
+                
+                // It's pointless to merge with thyself.
                 if(bound.i == whom.i) {
                     return true;
                 }
                 
                 // Test all subspaces
                 return whom.r.every(function(pair) {
-                    if(A(bound.n, pair[0], pair[1])) {
+                    if(InRange(bound.n, pair[0], pair[1])) {
                         // Other bound inherits all.
                         whom.r.merge(bound.r); 
                         
@@ -89,24 +100,30 @@ function CreatePushFunction(hull) {
                 });
             });
             
+            // The normal does not fall within the bounds, but
+            // the bounds weren't merged either. Usually this
+            // means something is NaN or a floatpoint error.
             if(r) {
-                console.log("murphy");
+                //console.log("Murphy's law.");
+                f.isDegenerate = true;
             }
         }
     }
     
-    bounds.forEach(function(bouwnd) {
-        if(bouwnd.r.length > 1) {
+    // Build the new upper and lower bounds from the
+    // merged ranges.
+    bounds.forEach(function(bound) {
+        if(bound.r.length > 1) {
             
-            var pair = bouwnd.r.flatten().unique();
-            
-            // The order might be... broken.            
-            bouwnd.a = pair[0];
-            bouwnd.b = pair[1];
-            
+            var pair = bound.r.flatten().unique();
+                  
+            bound.a = pair[0];
+            bound.b = pair[1];
         }
     });
-        
+       
+    // Ironically, the push function as a function is only
+    // usefull for simulations - not calculations. 
     function f(angle) {
         var base = Vector.CreateAngular(angle);
         
@@ -117,9 +134,10 @@ function CreatePushFunction(hull) {
             }
         }
         
-        console.log("unknown angle...");
+        console.log("Unable to find an equilibrium for the given angle.");
         return 999;
     }
 
+    // NB: f is a function with some public properties.
     return f;
 }

@@ -114,6 +114,11 @@ PushFunctionApp.prototype.draw = function(renderer) {
     renderer.text(" - Click anywhere to place or delete vertices;", -this.hw, this.hh - 10, "black", "left", "top", smallfont);
     renderer.text(" - Drop-and-drop the center-of-mass.", -this.hw, this.hh - 30, "black", "left", "top", smallfont);
     
+    if(this.f.isDegenerate === true) {
+        renderer.text("Something broke internally.", this.hw - 10, -this.hh + 40, "red", "right", "bottom", smallfont);
+        renderer.text("Floating point math fail or a weird center-of-mass.", this.hw - 10, -this.hh + 25, "red", "right", "bottom", smallfont);
+        renderer.text("Sorry.", this.hw - 10, -this.hh + 10, "red", "right", "bottom", smallfont);
+    }
     
     // Each coordinate:
     this.coordinates.forEach(function(coordinate) {
