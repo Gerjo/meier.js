@@ -70,7 +70,9 @@ function PushFunctionApp(container) {
     }.bind(this));
     
     this.input.subscribe(Input.Events.LEFT_DOWN, function(mouse) {
-        this.trackMouse = true;
+        if(this.input.distance(this.center) < this.massRadius * 2) {
+            this.trackMouse = true;
+        }
     }.bind(this));
     
     this.input.subscribe(Input.Events.LEFT_UP, function(mouse) {
