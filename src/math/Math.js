@@ -539,9 +539,8 @@ function PolyonGiftWrap(coordinates) {
         do {
             
             r.push(pointOnHull);
+            endpoint = coordinates.first();
             
-            // (S[j] is on left of line from P[i] to endpoint
-            endpoint = coordinates[0];
             for(var j = 0; j < coordinates.length; ++j) {
                 
                 // This does the same as the inlined version. Basically uses the
