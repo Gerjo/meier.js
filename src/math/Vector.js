@@ -22,6 +22,11 @@ function Vector(x, y) {
     return this;
 };*/
 
+/// Mostly used for serialisation, such as used by localStorage.
+Vector.prototype.toString = function(other) {
+    return "{x:" + this.x + ",y:" + this.y + "}";
+};
+
 Vector.prototype.angleBetween = function(other) {
     
     var angle = Math.acos(
