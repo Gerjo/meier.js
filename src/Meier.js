@@ -102,7 +102,7 @@ var Meier = (function() {
             loaded[normalized.toLowerCase()] = true;
             
             // Load the file, directly, blocking.
-            document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript"></scri' + 'pt>'); 
+            document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript" charset="utf-8"></scri' + 'pt>'); 
             
             /*var s = document.createElement("script");
             s.src = normalized;
