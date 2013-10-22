@@ -109,10 +109,10 @@ PushFunctionApp.prototype.draw = function(renderer) {
     
     var smallfont = "10px monospace";
     
-    // Usage text:
-    renderer.text("Realtime push function calculator.", -this.hw, this.hh, "black", "left", "top");
-    renderer.text(" - Click anywhere to place or delete vertices;", -this.hw, this.hh - 20, "black", "left", "top", smallfont);
-    renderer.text(" - Drop and drop the center-of-mass.", -this.hw, this.hh - 40, "black", "left", "top", smallfont);
+    // Let's use HTML for this.
+    //renderer.text("Realtime push function calculator.", -this.hw, this.hh, "black", "left", "top");
+    renderer.text(" - Click anywhere to place or delete vertices;", -this.hw, this.hh - 10, "black", "left", "top", smallfont);
+    renderer.text(" - Drop-and-drop the center-of-mass.", -this.hw, this.hh - 30, "black", "left", "top", smallfont);
     
     
     // Each coordinate:
@@ -129,6 +129,12 @@ PushFunctionApp.prototype.draw = function(renderer) {
         renderer.fill(color);
         
     }.bind(this));
+    
+    // A tooltip, of sorts:
+    if(this.input.distance(this.center) < this.massRadius * 2 && !this.trackMouse) {
+        renderer.text("Drag me!", this.center.x, this.center.y);
+    }
+    
     
     // Convex hull:
     renderer.begin();
