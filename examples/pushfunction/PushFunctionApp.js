@@ -11,19 +11,13 @@ function PushFunctionApp(container) {
     // To contain all polygon coordinates:
     this.coordinates = [];
     
+    this.useLocalStorage = true;
+    this.storageKey      = "pfn-coordinates";
 
     // Center-of-mass:
     this.center = new Point(0, 0);
     
     // Some initial coordinates:
-    this.coordinates.push(
-        new Point(-50, -30).add(this.center),
-        new Point(50, -35).add(this.center),
-        new Point(40, 40).add(this.center),
-        new Point(-40, 40).add(this.center)
-    );
-    
-
     this.coordinates = [
         new Vector(-65.0, -130.0),
         new Vector(130.0, -130.0),
@@ -35,6 +29,28 @@ function PushFunctionApp(container) {
     // Let's move the polygon to the side:
     this.coordinates.forEach(function(v) { v.x += 100; });
     this.center.x += 100;
+    
+    if(this.useLocalStorage === false) {
+        var t = localStorage.getItem(this.storageKey);
+    
+        if(t && (t = JSON.TryParse(t)) && t && t instanceof Array) {
+            this.coordinates = t.filterMap(function(obj) { 
+                if(obj.x && obj.y) {                    
+                    return new Vector(obj.x, obj.y);
+                }
+                
+                // Dispose entry.
+                return undefined;
+            });
+        }
+        
+        t = localStorage.getItem(this.storageKey + "-com");
+
+        if(t && (t = JSON.TryParse(t)) && t && t.x && t.y) {
+            this.center.x = t.x;
+            this.center.y = t.y;
+        }
+    }
 
     // The generated confex full:
     this.hull = [];
@@ -104,6 +120,13 @@ function PushFunctionApp(container) {
 }
 
 PushFunctionApp.prototype.updateInternals = function() {
+    
+    // Cache an entry, used when testing a specific polygon design.
+    if(this.useLocalStorage) {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.coordinates));
+        localStorage.setItem(this.storageKey + "-com", this.center);
+    }
+    
     // Find a new convex hull:
     this.hull = PolyonGiftWrap(this.coordinates);
     
@@ -216,7 +239,14 @@ PushFunctionApp.prototype.drawPushFunction = function(renderer) {
             Math.max(0, line.b.x),
             line.b.y
         ).stroke("black", thickness);
-    
+        
+        /*renderer.begin().line(
+            line.a.x,
+            line.a.y,
+            line.b.x,
+            line.b.y
+        ).stroke("black", thickness);
+        */
         if(line.a.x > 0) {
             renderer.begin();
             renderer.dashed(line.a.x, 0, line.a.x, Math.TwoPI * s, 10);
