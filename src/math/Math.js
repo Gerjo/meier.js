@@ -533,10 +533,7 @@ function PolyonGiftWrap(coordinates) {
         
             return previous;
         }, coordinates.first());
-    
-    
-        r.push(left);
-    
+        
         var pointOnHull = left, endpoint, timeout = 100; 
         
         do {
