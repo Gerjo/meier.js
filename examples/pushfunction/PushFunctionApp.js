@@ -215,84 +215,79 @@ PushFunctionApp.prototype.drawPushFunction = function(renderer) {
     renderer.begin();
     renderer.dashed(0, 0, Math.TwoPI * s, Math.TwoPI * s, 4);
     renderer.stroke("grey", 2);
-
-    for(var i = 0; i < this.f.bounds.length; ++i) {
-        var a = this.f.bounds[i].a;
-        var b = this.f.bounds[i].b;
-        var n = this.f.bounds[i].n;
-        var la = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].a);
-        var lb = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].b);
-
-        var x = n * s;
-        var y = i * 10;
     
-        var y = ToAbsoluteRadians(n) * s;
-    
-        
-        var line = new Line(
-            Math.min(x, x + s * la, x + s * lb), y, Math.max(x, x + s * la, x + s * lb), y
-        );
-    
+    // Special case for 1 stable edge, the normal drawing logic
+    // fails in such case.
+    if(this.f.bounds.length == 1) {
         renderer.begin().line(
-            Math.max(0, line.a.x),
-            line.a.y,
-            Math.max(0, line.b.x),
-            line.b.y
+            0,
+            ToAbsoluteRadians(this.f.bounds.first().n) * s,
+            Math.TwoPI * s,
+            ToAbsoluteRadians(this.f.bounds.first().n) * s
         ).stroke("black", thickness);
         
-        /*renderer.begin().line(
-            line.a.x,
-            line.a.y,
-            line.b.x,
-            line.b.y
-        ).stroke("black", thickness);
-        */
-        if(line.a.x > 0) {
-            renderer.begin();
-            renderer.dashed(line.a.x, 0, line.a.x, Math.TwoPI * s, 10);
-            renderer.stroke("rgba(0,0,0,0.4)");
-        } else {
-            renderer.begin();
-            renderer.dashed(Math.TwoPI * s + line.a.x, 0, Math.TwoPI * s + line.a.x, Math.TwoPI * s, 10);
-            renderer.stroke("rgba(0,0,0,0.4)");
+    } else {
+        for(var i = 0; i < this.f.bounds.length; ++i) {
+            var a = this.f.bounds[i].a;
+            var b = this.f.bounds[i].b;
+            var n = this.f.bounds[i].n;
+            var la = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].a);
+            var lb = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].b);
+
+            var x = n * s;
+            var y = i * 10;
+    
+            var y = ToAbsoluteRadians(n) * s;
+    
         
-            // vert line
-            /*renderer.begin();
-            renderer.dashed(  0, 
-                            Math.TwoPI * s + line.a.x, 
-                            Math.TwoPI * s + line.a.x,
-                            Math.TwoPI * s + line.a.x
-                            );
-            renderer.stroke("grey");*/
+            var line = new Line(
+                Math.min(x, x + s * la, x + s * lb), y, Math.max(x, x + s * la, x + s * lb), y
+            );
+        
+            renderer.begin().line(
+                line.a.x,
+                line.a.y,
+                line.b.x,
+                line.b.y
+            ).stroke("green", thickness);
+    
+            renderer.begin().line(
+                Math.max(0, line.a.x),
+                line.a.y,
+                Math.max(0, line.b.x),
+                line.b.y
+            ).stroke("black", thickness);
+        
+        
+            if(line.a.x > 0) {
+                renderer.begin();
+                renderer.dashed(line.a.x, 0, line.a.x, Math.TwoPI * s, 10);
+                renderer.stroke("rgba(0,0,0,0.4)");
+            } else {
+                renderer.begin();
+                renderer.dashed(Math.TwoPI * s + line.a.x, 0, Math.TwoPI * s + line.a.x, Math.TwoPI * s, 10);
+                renderer.stroke("rgba(0,0,0,0.4)");
+            }
+
+            // Both bounds off-screen:    
+            if(line.a.x < 0 && line.b.x < 0) {    
+                renderer.begin().line(
+                    Math.TwoPI * s + line.b.x,
+                    line.a.y,
+                    Math.TwoPI * s + line.a.x,
+                    line.b.y
+                ).stroke("black", thickness);
+        
+            // One end off-screen:
+            } else if(line.a.x < 0) {
+                renderer.begin().line(
+                    Math.TwoPI * s,
+                    line.a.y,
+                    Math.TwoPI * s + line.a.x,
+                    line.b.y
+                ).stroke("black", thickness);
+            } 
         }
-    
-        // vert line
-        /*renderer.begin();
-        renderer.dashed(  0, 
-                        Math.max(0, line.b.x), 
-                        Math.max(0, line.b.x),
-                        Math.max(0, line.b.x)
-                        );
-        renderer.stroke("grey)");*/
-    
-        // Both bounds off-screen:    
-        if(line.a.x < 0 && line.b.x < 0) {    
-            renderer.begin().line(
-                Math.TwoPI * s + line.b.x,
-                line.a.y,
-                Math.TwoPI * s + line.a.x,
-                line.b.y
-            ).stroke("black", thickness);
-        
-        // One end off-screen:
-        } else if(line.a.x < 0) {
-            renderer.begin().line(
-                Math.TwoPI * s,
-                line.a.y,
-                Math.TwoPI * s + line.a.x,
-                line.b.y
-            ).stroke("black", thickness);
-        } 
     }
 
     // Axis
