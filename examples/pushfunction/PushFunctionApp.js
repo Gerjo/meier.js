@@ -234,22 +234,19 @@ PushFunctionApp.prototype.drawPushFunction = function(renderer) {
             var la = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].a);
             var lb = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].b);
 
-            var x = n * s;
-            var y = i * 10;
-    
+            var x = n * s;    
             var y = ToAbsoluteRadians(n) * s;
     
-        
             var line = new Line(
                 Math.min(x, x + s * la, x + s * lb), y, Math.max(x, x + s * la, x + s * lb), y
             );
         
-            renderer.begin().line(
+            /*renderer.begin().line(
                 line.a.x,
                 line.a.y,
                 line.b.x,
                 line.b.y
-            ).stroke("green", thickness);
+            ).stroke("green", thickness);*/
     
             renderer.begin().line(
                 Math.max(0, line.a.x),
