@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- Load the "engine" loader -->
+<script src="../../src/Meier.js"></script>
+
+<!-- Instantiate the lot: -->
+<script>
+
+// Load engine from this path:
+LoadEngine("../../src/");
+
+
+// Include some game code:
+Meier.Include("PushFunctionApp.js");
+
+
+function init() {
+    // The world inherits the size of the container element. If you want
+    // a fixed size, just create a div and use CSS to give it a fixed
+    // size - and use said div as container.
+    var game = new PushFunctionApp(document.getElementById("pushfnworld"));
+}
+
+</script>
+
+<!-- Per default, an empty document has no height, and weird paddings. -->
+<style>
+div#pushfnworld {
+    height: 600px;
+    width: 800px;
+    margin: 0px auto;
+    padding: 0px;
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px #000;
+}
+
+</style>
+
+</head>
+<body onload="init();">
+    <div id="pushfnworld">
+        
+    </div>
+</body>
+</html>
