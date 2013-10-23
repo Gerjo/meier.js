@@ -4,6 +4,22 @@ function HornersMethod() {}
 function RegulaFalsi() { }
 function BasisSpline() {}
 
+/// Approximation of sine function of an angle.
+/// @param {rads} some angle expressed in  [0, 2PI] radians.
+/// @return an approximation of sine.
+function FastSin(rads) {
+    return -0.41498e-8 + (1.000000515 + (-0.105463955e-4 + (-0.1665856017 + (-0.297181298e-3 +
+         (0.8894256955e-2 - 0.5282205803e-3 * rads) * rads) * rads) * rads) * rads) * rads;
+}
+
+/// Approximation of cosine function of an angle.
+/// @param {rads} some angle expressed in  [0, 2PI] radians.
+/// @return an approximation of cosine.
+function FastCos(rads) {
+    return 1.000000002 + (-0.2053e-6 + (-0.4999959817 + (-0.2922839e-4 + (0.4176577023e-1 + 
+         (-0.163891331e-3 - 0.1275240287e-2 * rads) * rads) * rads) * rads) * rads) * rads;
+}
+
 /// Round numbers to the specified precision. Halves 
 /// are rounded up. 
 ///
