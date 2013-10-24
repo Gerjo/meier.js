@@ -13,15 +13,6 @@ function Vector(x, y) {
     this.y = y;
 }
 
-// Unsure how much use this has. Use Vector.CreateAngular instead.
-/*Vector.prototype.setAngle = function(radians) {
-    var l = this.length();
-    this.x = Math.cos(radians) * l;
-    this.y = Math.sin(radians) * l;
-    
-    return this;
-};*/
-
 /// Mostly used for serialisation, such as used by localStorage.
 Vector.prototype.toString = function() {
     return '{"x":' + this.x + ',"y":' + this.y + "}";
