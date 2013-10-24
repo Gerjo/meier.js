@@ -6,7 +6,7 @@ define(function(require){
         // Tweakable:
         this.size       = new Size(width, height);
         this.offset     = new Size(10, (height * 0.5) - 10);
-        this.Logger      = {};
+        this.logger     = {};
         this.fontSize   = 12;
         this.charWidth  = this.fontSize - 4;
         this.color      = "black";
@@ -32,7 +32,7 @@ define(function(require){
     };
 
     Logger.prototype.set = function(key, value) {
-        this.Logger[key + ":"] = value;
+        this.logger[key + ":"] = value;
     
         // Estimate the column with. Works due to monospaced font.
         this.columnWidth = Math.max(this.columnWidth, (key.length + 1) * this.charWidth);
@@ -43,7 +43,7 @@ define(function(require){
     };
 
     Logger.prototype.delete = function(key) {
-        delete this.Logger[key + ":"];
+        delete this.logger[key + ":"];
     };
 
     Logger.prototype.update = function(dt) {
@@ -61,11 +61,11 @@ define(function(require){
         
         var font = "bold " + this.fontSize + "px Monospace";
 
-        for(var k in this.Logger) {
-            if(this.Logger.hasOwnProperty(k)) {
+        for(var k in this.logger) {
+            if(this.logger.hasOwnProperty(k)) {
             
                 context.text(k, x, y, this.color, "left", "top", font)
-                context.text(this.Logger[k], x + this.columnWidth, y, this.color, "left", "top", font)
+                context.text(this.logger[k], x + this.columnWidth, y, this.color, "left", "top", font)
             
                 y -= this.fontSize;
             }
