@@ -3,6 +3,10 @@ meier.js
 
 After copy-pasting my own code around so many times, it seemed prudent to  derive a library *of sorts*.
 
+
+[![browser support](https://ci.testling.com/Gerjo/meier.js.png)](https://ci.testling.com/Gerjo/Meier.js)
+
+
 Structure
 =========
 
