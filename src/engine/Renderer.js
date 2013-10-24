@@ -90,15 +90,30 @@ define(function(require) {
     /// [Number, Number, Number, Number]
     /// [Vector, Number, Number]
     Renderer.prototype.rectangle = function(a, b, c, d) {
+        
+        var x, y, h, w;
+        
         if(a instanceof Rectangle) {
-            this.context.rect(a.min.x, -a.min.y, a.width(), a.height());
+            x = a.min.x;
+            y = -a.min.y;
+            w = a.width();
+            h = a.height();
     
         } else if(a instanceof Vector) {
-            this.context.rect(a.x, -a.y, b, c);
-    
+            x = a.x;
+            y = -a.y;
+            w = b;
+            h = c;
+                
         } else {
-            this.context.rect(a, -b, c, d);
+            x = a
+            y = -b;
+            w = c;
+            h = d;
         }
+        
+        this.context.rect(x - h * 0.5, y - h * 0.5, h, w);
+
         return this;
     };
 
