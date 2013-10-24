@@ -6,28 +6,19 @@
 <!-- Load the "engine" loader -->
 <script src="../../src/Meier.js"></script>
 
-<!-- Instantiate the lot: -->
 <script>
 
 // Load engine from this path:
-LoadEngine("../../src/");
+Meier("../../src/");
 
-
-// Include some game code:
-Meier.Include("PushFunctionApp.js");
-Meier.Include("Pfn.js");
-
-
-function init() {
-    // The world inherits the size of the container element. If you want
-    // a fixed size, just create a div and use CSS to give it a fixed
-    // size - and use said div as container.
-    var game = new PushFunctionApp(document.getElementById("pushfnworld"));
-}
+Meier(function() {
+    require(["PushFunctionApp"], function(PushFunctionApp) {
+        var app = new PushFunctionApp(document.getElementById("pushfnworld"));
+    });
+});
 
 </script>
 
-<!-- Per default, an empty document has no height, and weird paddings. -->
 <style>
 
 h1 {
@@ -54,7 +45,7 @@ div {
 </style>
 
 </head>
-<body onload="init();">
+<body>
     <h1>Interactive realtime push function calculator.</h1>
     <hr>
     <div id="pushfnworld">

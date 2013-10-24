@@ -1,5 +1,9 @@
-/// Exposing my own interface to contrib/MersenneTwister.
-Random = (function() {
+define(function(require) {
+    
+    require("meier/contrib/MersenneTwister.js");
+    var Vector = require("meier/math/Vector");
+    
+    
     var mt = new MersenneTwister();
     
     return {
@@ -75,4 +79,4 @@ Random = (function() {
             return new Vector(Math.cos(tan), Math.sin(tan));
         }
     };
-}());
+});

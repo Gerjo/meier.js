@@ -5,21 +5,20 @@
 <!-- Load the "engine" loader -->
 <script src="../../src/Meier.js"></script>
 
-<!-- Instantiate the lot: -->
 <script>
 
 // Load engine from this path:
-LoadEngine("../../src/");
+Meier("../../src/");
 
-// Include some game code:
-Meier.Include("HelloWorld.js");
-
-function init() {
-    // The world inherits the size of the container element. If you want
-    // a fixed size, just create a div and use CSS to give it a fixed
-    // size - and use said div as container.
-    var game = new HelloWorld(document.getElementsByTagName("body")[0]);
-}
+// Called when everything is ready to go:
+Meier(function() {
+    require(["./HelloWorld"], function(HelloWorld) {
+        // The world inherits the size of the container element. If you want
+        // a fixed size, just create a div and use CSS to give it a fixed
+        // size - and use said div as container.
+        var game = new HelloWorld(document.getElementsByTagName("body")[0]);
+    });
+});
 
 </script>
 
@@ -34,6 +33,6 @@ body, html {
 </style>
 
 </head>
-<body onload="init();">
+<body>
 </body>
 </html>

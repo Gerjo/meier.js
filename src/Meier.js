@@ -1,173 +1,67 @@
-///
-/// A file to load all required files in the correct order. At 
-/// some point I'll bundle a proper dependancy loader, such as
-/// RequireJS or LABjs or whatever. For now this does the job
-/// perfectly.
-///
 
-var LoadEngine = function(prefix) {
-
-    // Support for the old load system by calling the new system.
-    Meier(prefix);
-    
-    Meier.Include("meier/aux/Functions.js");
-    
-    Meier.Include("meier/math/Intersection.js");
-    Meier.Include("meier/math/Vector.js");
-    Meier.Include("meier/math/Line.js");
-    Meier.Include("meier/math/Size.js");
-    Meier.Include("meier/math/Disk.js");
-    Meier.Include("meier/math/Rectangle.js");
-    Meier.Include("meier/math/Matrix.js");
-    Meier.Include("meier/math/Math.js");
-    Meier.Include("meier/math/Angles.js");
-    Meier.Include("meier/math/Statistics.js");
-    
-    Meier.Include("meier/engine/Game.js");
-    Meier.Include("meier/engine/Renderer.js");
-    Meier.Include("meier/engine/Resources.js");
-    Meier.Include("meier/engine/Input.js");
-    
-    Meier.Include("meier/contrib/Heap.js");
-    Meier.Include("meier/contrib/MersenneTwister.js");
-    
-    Meier.Include("meier/aux/Random.js");
-    Meier.Include("meier/aux/Stats.js");
-    Meier.Include("meier/aux/Stopwatch.js");
-    Meier.Include("meier/aux/Tree.js");
-};
-
-
-/// Simple file loading facility. This is designed to eliminate
-/// the need for maintaining a bunch "script" tags.
-///
-/// Engine code can be configured to be loaded from a specific
-/// folder or URL. E.g., calling:
-///    Meier("www.example.com");
-///    Meier.Include("meier/engine/Game");
-/// Will attempt to load 'www.example.com/engine/Game.js'. 
-///
-/// Non-engine code will be loaded as-is. E.g.,
-///   Meier("www.example.com");
-///   Meier.Include("./MyGame.js");
-///
-/// Will attempt to load './MyGame.js' literally.
-///
-/// TODO: expand code to store files in LocalStorage for extremely
-/// fast loading. Though this require versioning. 
-///
 var Meier = (function() {
-    var enginePrefix = "";          // New prefix.
-    var ident        = "meier/";    // To replace prefix.
-    var extension    = ".js";       // Default javascript extension.
-    var loaded       = {};          // Files already loaded.
-    var verbose      = false;       // Per default, no logging.
     
-    var stream = GetRequestStream();
+    var requireTagAdded = false;
+    var requireJsLoaded = false;
+    var loadfn          = null;
     
-    // Actors like a C++ functor, sets up the engine file prefix.
-    var exposed = function(prefix) {
-        enginePrefix = prefix || "";
-    }
-    
-    var fetch = function(url) {
-        console.log("Fetching: ", url);
+    // Path where meier.js files are located:
+    var path            = "";
+
+    var Meier = function(arg) {
         
-		stream.open("GET", url, false);
-        
-		stream.onreadystatechange = function() {
-            console.log(stream.readyState);
-            if(stream.readyState == 4) {
-		        console.log("Response length:", stream.responseText.length, "bytes");
-                
-                eval(stream.responseText);
+        if(typeof arg == "function") {
+            loadfn = arg;
+            
+            // RequireJS was already loaded:
+            if(requireJsLoaded === true) {
+                loadfn();
             }
-        };
-		
-        stream.send(null);
+            
+        } else if(typeof arg === "string") {
+            if(requireTagAdded === false) {
+                path = arg;
+                
+                // Load my hacks the old fashioned way:
+                document.write('<script src="' + path + '/aux/JsExtensions.js"></sc' + 'ript>');
+                
+                // Load requireJS slightly more modern:
+                var script = document.createElement("script");
+                script.src = path + '/contrib/require.js';
+            
+                script.onload = function() {
+                    requireJsLoaded = true;
+                    
+                    requirejs.config({
+                        paths: {
+                            "meier" : path
+                        }
+                    });
+                                        
+                    // Call initializer, if available:
+                    if(loadfn) {
+                        loadfn();
+                    }
+                };
+            
+                script.onerror = function() {
+                    console.log("Failed to load requirejs. Did you specify a correct path to meier.js?");
+                };
+            
+                var head = document.getElementsByTagName("head")[0];
+                head.insertBefore(script, head.firstChild)
+                
+                // Make sure we only add one tag.
+                requireTagAdded = true;
+            } else {
+                console.error("Warning: you're setting a path to meier.js twice.");
+            }
+        } else {
+            console.error("You called me... but I'm not sure what to do. Argument received:", arg);
+        }
+        
     };
     
-    // Enable or disable logging.
-    exposed.SetVerbose = function(beVerbose) {
-        verbose = beVerbose;
-    }
-    
-    // Load files directly:
-    exposed.Include = function(file) {
-        
-        var normalized = file;
-        
-        // The ".js" file extension is optional. Append it here
-        // if not found.
-        if(normalized.substr(-extension.length) != extension) {
-            normalized += extension;
-        }
-        
-        // Prefix the engine code (e.g., load from a different URL)
-        if(normalized.substr(0, ident.length) == ident) {
-            normalized = enginePrefix + normalized.substring(ident.length);
-        
-        } else {
-            // TODO: possibly prefix game code, too?
-            //normalized = someprefix + normalized;
-        }
-        
-        // Make sure this file isn't loaded already:
-        if( ! loaded[normalized.toLowerCase()] ) {
-            
-            if(verbose) {
-                console.log("Loading: " + normalized);
-            }
-            
-        
-            //fetch(normalized);
-            
-            loaded[normalized.toLowerCase()] = true;
-            
-            // Load the file, directly, blocking.
-            document.writeln('<scri' + 'pt src="' + normalized + '" type="text/javascript" charset="utf-8"></scri' + 'pt>'); 
-            
-            /*var s = document.createElement("script");
-            s.src = normalized;
-            
-            s.onload = function() {
-                console.log("Loaded.", normalized);
-            }
-            
-            var head = document.getElementsByTagName("head")[0];
-            
-            head.insertBefore(s, head.firstChild);*/
-            
-            
-        } else {
-            if(verbose) {
-                console.log("Already loaded: " + normalized);
-            }
-        }
-    }
-    
-    // Return the publically available logic:
-    return exposed;
-}());
+    return Meier;
 
-
-
-function GetRequestStream() {
-	var temp_xmlHttp = false;
-    
-	if(window.XMLHttpRequest) {
-    	temp_xmlHttp = new XMLHttpRequest();
-	} else if(window.ActiveXObject) {
-	    try {
-			temp_xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
-	    } catch (e) {
-			try {
-				temp_xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
-			} catch (e) {
-                throw new Error(e);
-				// Stone age browser.
-			}
-	    }
-	}
-	return temp_xmlHttp;
-}
+})();

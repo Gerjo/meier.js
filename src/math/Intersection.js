@@ -1,4 +1,10 @@
-Intersection = (function() {
+
+define(function(require) {
+    var Vector      = require("meier/math/Vector");
+    var Line        = require("meier/math/Line");
+    var Rectangle   = require("meier/math/Rectangle");
+    var Disk        = require("meier/math/Disk");
+
     // Publically exposed interface:
     var exposed = {
         // Test-only, returns booleans. Internal math may
@@ -7,25 +13,25 @@ Intersection = (function() {
             RectangleLineSegment: function (rectangle, segment) {
                 return CohenSutherlandClipping(segment.a.x, segment.a.y, segment.b.x, segment.b.y, rectangle, true);
             },
-            
+        
             RectangleRay: function (rectangle, ray) { 
                 return rectangleRay(rectangle, ray, true); 
             },
-            
+        
             Rectangles: rectanglesTest,
-            
+        
             Segments: function(segmentA, segmentB) {
                 return false !== lineSegmentsInteresection(segmentA, segmentB);
             },
-            
+        
             SegmentLine: function(segment, line) {
                 var t = lines(segment.a, segment.b, line.a, line.b);
-                
-                
+            
+            
                 if(t === false) {
                     return false;
                 }
-                
+            
                 // Bit of a hack. If the infinite lines would intersect, let's test if the
                 // point of intersection lies on the segment, too.
                 return (
@@ -34,40 +40,40 @@ Intersection = (function() {
                     (t.x >= Math.min(segment.a.x, segment.b.x) && t.x <= Math.max(segment.a.x, segment.b.x))
                 );
             },
-            
+        
             DiskLineSegment: function(disk, line) { 
                 return diskLine(disk, line, true, true); 
             },
-            
+        
             DiskLine: function(disk, line) { 
                 return diskLine(disk, line, true, false); 
             },
-            
+        
             Lines: function (lineA, lineB) {
                 return false !== lines(lineA.a, lineA.b, lineB.a, lineB.b);
             }
         },
-        
+    
         // Getters, returns data if available, else false.
         // Will be slower than or equal to a Test.
         Get: {
             RectangleRay: function (rectangle, ray) { 
                 return rectangleRay(rectangle, ray, false); 
             },
-            
+        
             RectangleLineSegment: function (rectangle, lineSegment) { 
                 return CohenSutherlandClipping(segment.a.x, segment.a.y, segment.b.x, segment.b.y, rectangle, false);
             },
-            
+        
             Rectangles: rectanglesIntersection,
-            
+        
             Segments: function(segmentA, segmentB) {
                 return lineSegmentsInteresection(segmentA, segmentB);
             },
-            
+        
             SegmentLine: function(segment, line) {
                 var t = lines(segment.a, segment.b, line.a, line.b);
-               
+           
                 if( t !== false &&
                     (t.y >= Math.min(segment.a.y, segment.b.y) && t.y <= Math.max(segment.a.y, segment.b.y))
                     &&
@@ -75,33 +81,33 @@ Intersection = (function() {
                 ) {
                     return t;
                 }
-                
+            
                 return false;
             },
-            
+        
             Lines: function (lineA, lineB) {
                 return lines(lineA.a, lineA.b, lineB.a, lineB.b);
             },
-            
+        
             DiskLineSegment: function(disk, line) { 
                 return diskLine(disk, line, false, true); 
             },
-            
+        
             DiskLine: function(disk, line) { 
                 return diskLine(disk, line, false, false); 
             }
         },
-        
+    
         // Nearest location between object and object.
         Nearest: {
             PointOnLineSegment: function(point, segment) {
                 return SegmentNearestPoint(point, segment);
             },
-            
+        
             LineSegmentBetweenRectangles: NearestLineSegmentBetweenRectangles
         }
     };
-    
+
     function lines(p1, d1, p2, d2) {
         // Calculate slope "a" in "y = a * x + b":
         var a_a = (d1.y - p1.y) / (d1.x - p1.x);
@@ -116,7 +122,7 @@ Intersection = (function() {
         if(d1.x == p1.x) {
             // Perpendicular OR not
             var y = (b_a == 0) ? d2.y : b_a * d1.x - b_c;
-    
+
             return new Vector(d1.x, y);
         }
 
@@ -135,14 +141,14 @@ Intersection = (function() {
 
         // Elimination method applied:
         var x = (a_c - b_c) / (a_a - b_a);
-    
+
         // Feed "x" back into "c = mx + ny" to find "y":
         var y = a_a * x - a_c;
-    
+
         // Et voila.
         return new Vector(x, y);
     }
-    
+
     /// Mostly taken from:
     /// http://stackoverflow.com/questions/1073336/circle-line-collision-detection
     /// solves the (x - a)^2 + (y - b)^2 = r^2 equation along with the 
@@ -150,11 +156,11 @@ Intersection = (function() {
     function diskLine(disk, line, testOnly, finite) {
         var dir = line.direction();
         var f   = line.a.clone().subtract(disk.position);
-        
+    
         var a = dir.dot(dir);
         var b = 2 * f.dot(dir);
         var c = f.dot(f) - Math.pow(disk.radius, 2);
-        
+    
         // Early out of infinite lines, test only. We don't need
         // to find roots, we just care if they exist.
         if(testOnly && ! finite) {
@@ -163,9 +169,9 @@ Intersection = (function() {
             // < 0, complex numbers.
             return (Math.pow(b, 2) - 4 * a * c) >= 0;
         }
-        
+    
         var roots = SolveQuadraticPolynomial(a, b, c);
-        
+    
         if(roots.length > 0) {
             // Tangent to count as secant. I doubt floating point
             // math is accureate enough for this anyway. Additionally
@@ -174,7 +180,7 @@ Intersection = (function() {
             if(roots.length === 1) {
                 roots[1] = roots[0];
             }
-            
+        
             if(testOnly) {
                 if(finite) {
                     return (
@@ -187,9 +193,9 @@ Intersection = (function() {
                     return true;
                 }
             }
-                        
+                    
             var r = [];
-            
+        
             for(var i = 0; i < 2; ++i) {
                 if(!finite || roots[i] >= 0 && roots[i] <= 1) {
                     r.push(
@@ -200,69 +206,69 @@ Intersection = (function() {
                     );
                 }
             }
-            
+        
             return r.length > 0 ? r : false;
         }
-        
+    
         return false;
     }
-    
+
     // Original by Bojan at Game Oven
     function lineSegmentsInteresection(p, q) {
         ////p, pr, q, qs)
-        
+    
         // Get R and S
         var r = p.direction(); // pr - p;
         var s = q.direction(); // qs - q;
-    
+
         // Get the fake 2D cross product
         var rs = r.cross(s);
-        
+    
         if(rs === 0) {
             return false;   // TODO: Introduce some tolerance
         }
-        
+    
         // Get the params
         var qp = new Vector(q.a.x - p.a.x, q.a.y - p.a.y);
         var t = qp.cross(s) / rs;
         var u = qp.cross(r) / rs;
-    
+
         // Check if the params are in the range
         if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
             //console.log(rs, p.a.x + r.x * t);
             return r.scaleScalar(t).add(p.a);  //p + r * t;
         }
-        
+    
         return false;
     }
-    
+
     function NearestLineSegmentBetweenRectangles(a, b) {    
         var min  = new Vector(0, 0);
         var max  = new Vector(0, 0);
         var pen  = new Vector(0, 0);
         var aRect, bRect;
-    
+
         ['x', 'y'].forEach(function(axis) {
             aRect = b.min[axis] < a.min[axis] ? b : a;
             bRect = aRect == a ? b : a;
-    
+
             min[axis] = aRect.max[axis];
             max[axis] = bRect.min[axis];
-        
+    
             pen[axis] = max[axis] - min[axis];
-        
+    
             if(pen[axis] <= 0) {
                 min[axis] = max[axis] = Math.max(b.min[axis], a.min[axis]);
                 pen[axis] = 0;
             }
-        
-        }.bind(this));
     
+        }.bind(this));
+
         // Special case: both axis overlap:
         if(pen.y === 0 && pen.x === 0) {
             return new LineSegment(0, 0, 0, 0);
         }
-    
+
         // Set the correct line, toggle to "rectA to rectB" not "min to max":
         if(b.min.y > a.min.y && b.min.x < a.min.x ||
            b.min.y < a.min.y && b.min.x > a.min.x) {
@@ -270,10 +276,10 @@ Intersection = (function() {
             min.y   = max.y; 
             max.y   = tmp;
         }
-    
+
         return new LineSegment(min.x, min.y, max.x, max.y);
     }
-    
+
     function SegmentNearestPoint(point, segment) {
         return (function (x, y, x1, y1, x2, y2) {
             var A = x - x1;
@@ -299,12 +305,12 @@ Intersection = (function() {
                 xx = x1 + param * C;
                 yy = y1 + param * D;
             }
-            
+        
             return new Point(xx, yy);
-            
+        
         } (point.x, point.y, segment.a.x, segment.a.y, segment.b.x, segment.b.y));
     }
-    
+
     function rectanglesIntersection(a, b) {
         // TODO: look up that way to test an intersect at the same time.
         if(rectanglesTest(a, b)) {
@@ -313,27 +319,27 @@ Intersection = (function() {
                 Math.max(a.max.x, b.max.x), Math.max(a.max.y, b.max.y)
             );
         }
-        
+    
         return false;
     }
-    
+
     function rectanglesTest(a, b) {
         return a.min.x <= b.max.x &&
                b.min.x <= a.max.x &&
                a.min.y <= b.max.y &&
                b.min.y <= a.max.y ;
     }
-    
+
     // https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm 
     function CohenSutherlandClipping(x0, y0, x1, y1, rectangle, testOnly) {
-    
+
         var Sutherland     = {};
         Sutherland.INSIDE  = 0;
         Sutherland.LEFT    = 1 << 0;
         Sutherland.TOP     = 1 << 1;
         Sutherland.RIGHT   = 1 << 2;
         Sutherland.BOTTOM  = 1 << 3;
-     
+ 
 
         var ComputeOutCode = function(x, y, rectangle) {
             var code = Sutherland.INSIDE;
@@ -344,17 +350,17 @@ Intersection = (function() {
             } else if (x > rectangle.max.x) {    // to the right of clip window
                 code |= Sutherland.RIGHT;
             }
-            
+        
             if (y < rectangle.min.y) {           // below the clip window
                 code |= Sutherland.BOTTOM;
             } else if (y > rectangle.max.y) {    // above the clip window
                 code |= Sutherland.TOP;
             }
-            
+        
             return code;
         }
-    
-       
+
+   
         // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
         var outcode0 = ComputeOutCode(x0, y0, rectangle);
         var outcode1 = ComputeOutCode(x1, y1, rectangle);
@@ -364,10 +370,10 @@ Intersection = (function() {
             if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
                 accept = true;
                 break;
-                
+            
             } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
                 break;
-                
+            
             } else {
                 // failed both tests, so calculate the line segment to clip
                 // from an outside point to an intersection with clip edge
@@ -405,90 +411,90 @@ Intersection = (function() {
                 }
             }
         }
-        
+    
         if (!accept) {
             return false;
         }
-        
+    
         if(testOnly) {
             return true;
         }
-        
+    
         return {
             "entry": new Point(x0, y0),
             "exit": new Point(x1, y1)
         };
     }
 
-    
+
     // Implementation kindly taken from: 
     // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
     function rectangleRay(rectangle, ray, testOnly) {
 
         var dir = ray.direction();//.normalize();
-        
+    
         //console.clear();
-        
-        
+    
+    
         // Horizontal parallel early out:
         if(dir.x === 0 && ! rectangle.containsX(ray.a.x)) {
             //console.log("Horizontal early out.");
             return false;
-            
+        
         // Vertical parallel early out:
         } else if(dir.y === 0 && ! rectangle.containsY(ray.a.y)) {
             //console.log("Vertical early out.");
             return false;
         }
-        
+    
         var Tnear = -Infinity;
         var Tfar  = Infinity;
         var T1, T2, oneOverDir, tmp;
-        
+    
         var r = ['x','y'].every(function(axis){
             oneOverDir = 1 / dir[axis];
             T1 = (rectangle.min[axis] - ray.a[axis]) * oneOverDir;
             T2 = (rectangle.max[axis] - ray.a[axis]) * oneOverDir;
-        
+    
             // origin is on the left side of the rectangle, flip!
             if(T1 > T2) {
                 tmp = T1;
                 T1 = T2;
                 T2 = tmp;
             }
-        
+    
             if(T1 > Tnear ) { Tnear = T1; }
             if(T2 < Tfar ) {  Tfar  = T2; }
-        
+    
             if(Tnear > Tfar) {
                 //console.log(axis + " box is missed, ",Tnear,">",Tfar);
                 return false;
             }
-        
+    
             if(Tfar < 0) {
                 //console.log(axis + " box is behind ray",Tfar,"< 0");
                 return false;
-                
-            }
-        
-            //console.log(axis + " axis fits. Near: ", Tnear, "far:", Tfar);
             
+            }
+    
+            //console.log(axis + " axis fits. Near: ", Tnear, "far:", Tfar);
+        
             return true;
         });
-        
+    
         if(testOnly === true) {
             return r;
         }
-        
+    
         return {
             // Point of rectangle entry:
             "entry": new Point(ray.a.x + dir.x * Tnear, ray.a.y + dir.y * Tnear),
-            
+        
             // Point of rectangle exit:
             "exit": new Point(ray.a.x + dir.x * Tfar, ray.a.y + dir.y * Tfar)
         };
     }
-    
-    
+
+
     return exposed;
-}());
+});

@@ -1,16 +1,21 @@
 <html>
 <head>
 
-<script src="../../src/contrib/require.js"></script>
+<script src="../../src/Meier.js"></script>
 
 <script>
 
-require(["Foo"], function (foo) {
-    
-    foo();
-});
 
-console.log("hi");
+Meier("../../src");
+Meier(function() {
+    require(["entry"], function(Entry) {
+        try {
+            new Entry(document.body);
+        } catch(e) {
+            alert(e);
+        }
+    });
+});
 
 </script>
 </head>
