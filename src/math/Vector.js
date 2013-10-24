@@ -1,22 +1,22 @@
 define(function(require) {
 
-    Vector.CreateAngular = function(rotation, radius) {
+    MeierVector.CreateAngular = function(rotation, radius) {
         radius = radius || 1;
     
-        return new Vector(Math.cos(rotation) * radius,  Math.sin(rotation) * radius);
+        return new MeierVector(Math.cos(rotation) * radius,  Math.sin(rotation) * radius);
     }
 
-    function Vector(x, y) {
+    function MeierVector(x, y) {
         this.x = x;
         this.y = y;
     }
 
     /// Mostly used for serialisation, such as used by localStorage.
-    Vector.prototype.toString = function() {
+    MeierVector.prototype.toString = function() {
         return '{"x":' + this.x + ',"y":' + this.y + "}";
     };
 
-    Vector.prototype.angleBetween = function(other) {
+    MeierVector.prototype.angleBetween = function(other) {
     
         var angle = Math.acos(
             this.dot(other) / Math.sqrt(this.lengthSQ() * other.lengthSQ())
@@ -30,57 +30,57 @@ define(function(require) {
         return angle;
     };
 
-    Vector.prototype.angle = function() {
+    MeierVector.prototype.angle = function() {
         return Math.atan2(this.y, this.x);
     }
 
-    Vector.prototype.equals = function(other) {
+    MeierVector.prototype.equals = function(other) {
         return this.x == other.x && this.y == other.y;
     };
 
-    Vector.prototype.clone = function() {
-        return new Vector(this.x, this.y);
+    MeierVector.prototype.clone = function() {
+        return new MeierVector(this.x, this.y);
     };
 
-    Vector.prototype.addScalar = function(scalar) {
+    MeierVector.prototype.addScalar = function(scalar) {
         this.x += scalar; 
         this.y += scalar;
         return this;
     };
 
-    Vector.prototype.dot = function(o) {
+    MeierVector.prototype.dot = function(o) {
         return this.x * o.x + this.y * o.y;
     };
 
 
-    Vector.prototype.add = function(o) {
+    MeierVector.prototype.add = function(o) {
         this.x += o.x; 
         this.y += o.y;
         return this;
     };
 
-    Vector.prototype.flip = function() {
+    MeierVector.prototype.flip = function() {
         var x  = this.x
         this.x = this.y; 
         this.y = x;
         return this;
     };
 
-    Vector.prototype.subtract = function(o) {
+    MeierVector.prototype.subtract = function(o) {
         this.x -= o.x; 
         this.y -= o.y;
         return this;
     };
 
-    Vector.prototype.distance = function(o) {
+    MeierVector.prototype.distance = function(o) {
         return Math.sqrt(Math.pow(this.x - o.x, 2) + Math.pow(this.y - o.y, 2));
     };
 
-    Vector.prototype.distanceSQ = function(o) {
+    MeierVector.prototype.distanceSQ = function(o) {
         return Math.pow(this.x - o.x, 2) + Math.pow(this.y - o.y, 2);
     };
 
-    Vector.prototype.perp = function() {
+    MeierVector.prototype.perp = function() {
         var tmp = -this.x;
         this.x = this.y;
         this.y = tmp;
@@ -95,19 +95,19 @@ define(function(require) {
     /// | y1 y2 | = x1*y2 - x2*y1  
     ///
     /// Parallel lines have a determinant/crossproduct of 0.
-    Vector.prototype.cross = function(other) {
+    MeierVector.prototype.cross = function(other) {
         return this.x * other.y - this.y * other.x;
     };
 
-    Vector.prototype.length = function(o) {
+    MeierVector.prototype.length = function(o) {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
     };
 
-    Vector.prototype.lengthSQ = function(o) {
+    MeierVector.prototype.lengthSQ = function(o) {
         return Math.pow(this.x, 2) + Math.pow(this.y, 2);
     };
 
-    Vector.prototype.trim = function(length) {
+    MeierVector.prototype.trim = function(length) {
         // TODO: do this without sqrt?
     
         // Division by zero is OK. You should've checked
@@ -120,19 +120,19 @@ define(function(require) {
         return this;
     };
 
-    Vector.prototype.scale = function(o) {
+    MeierVector.prototype.scale = function(o) {
         this.x *= o.x; 
         this.y *= o.y;
         return this;
     };
 
-    Vector.prototype.scaleScalar = function(scalar) {
+    MeierVector.prototype.scaleScalar = function(scalar) {
         this.x *= scalar; 
         this.y *= scalar;
         return this;
     };
 
-    Vector.prototype.normalize = function(o) {
+    MeierVector.prototype.normalize = function(o) {
         var len = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
     
         // I'd rather have NaN than weird math.
@@ -151,12 +151,12 @@ define(function(require) {
     ///  |a|       |  b . b
     ///
     /// "other" (b) is more of a line through origin 
-    /// than vector with a given magnitude.
+    /// than MeierVector with a given magnitude.
     ///
-    Vector.prototype.project = function(other) {
+    MeierVector.prototype.project = function(other) {
         var r = this.dot(other) / other.dot(other);
         
-        return new Vector(
+        return new MeierVector(
             r * other.x,
             r * other.y
         );
@@ -169,11 +169,11 @@ define(function(require) {
         // Wut? this works? what?
         var tmp = l / dot;
     
-        return new Vector(
+        return new MeierVector(
             tmp * other.x,
             tmp * other.y
         );*/
     };
 
-    return Vector;
+    return MeierVector;
 });

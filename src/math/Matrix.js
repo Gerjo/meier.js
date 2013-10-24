@@ -1,10 +1,10 @@
 define(function(require) {
     var Vector = require("meier/math/Vector");
 
-    /// 3x3 matrix for 2D vectors. Everything is as mutable
+    /// 3x3 MeierMatrix for 2D vectors. Everything is as mutable
     /// as possible.
     /// 
-    function Matrix(array) { 
+    function MeierMatrix(array) { 
     
         if(array instanceof Array) {
             this[0] = array.splice(0, 3);
@@ -21,31 +21,31 @@ define(function(require) {
         this.length = 3;
     }
 
-    Matrix.CreateIdentity = function() {
-        return new Matrix();
+    MeierMatrix.CreateIdentity = function() {
+        return new MeierMatrix();
     };
 
     /// Acccepts:
     /// [number, number]
     /// [Vector]
-    Matrix.CreateTranslation = function(x, y) {
+    MeierMatrix.CreateTranslation = function(x, y) {
         if(x instanceof Vector) {
-            return new Matrix([
+            return new MeierMatrix([
                 1, 0, x.x,
                 0, 1, x.y,
                 0, 0, 1
             ]);
         }
     
-        return new Matrix([
+        return new MeierMatrix([
             1, 0, x,
             0, 1, y,
             0, 0, 1
         ]);
     };
 
-    Matrix.CreateRotation = function(radians) {
-        var m = new Matrix();
+    MeierMatrix.CreateRotation = function(radians) {
+        var m = new MeierMatrix();
     
         var c = Math.cos(radians);
         var s = Math.sin(radians);
@@ -58,8 +58,8 @@ define(function(require) {
         return m;
     };
 
-    Matrix.prototype.clone = function() {
-        var m = new Matrix();
+    MeierMatrix.prototype.clone = function() {
+        var m = new MeierMatrix();
     
         m[0] = this[0].clone();
         m[1] = this[1].clone();
@@ -69,8 +69,8 @@ define(function(require) {
     };
 
 
-    Matrix.prototype.cofactors = function() {
-        var m = new Matrix();
+    MeierMatrix.prototype.cofactors = function() {
+        var m = new MeierMatrix();
     
         // 2x2 determinant:
         var determinant = function(a,b,c,d) {
@@ -99,8 +99,8 @@ define(function(require) {
     };
 
     // Immutable, since it needs a tmp copy anyway.
-    Matrix.prototype.product = function(other) {
-        var m = new Matrix();
+    MeierMatrix.prototype.product = function(other) {
+        var m = new MeierMatrix();
     
         var t = this;
         var o = other;
@@ -123,15 +123,15 @@ define(function(require) {
         return m;
     };
 
-    // Helper for the forgetfull. New matrix!
-    Matrix.prototype.adjugate = function() {
+    // Helper for the forgetfull. New MeierMatrix!
+    MeierMatrix.prototype.adjugate = function() {
         return this.cofactors().transpose();
     };
 
-    Matrix.prototype.multiply = function(scalar) {
+    MeierMatrix.prototype.multiply = function(scalar) {
     
         if(typeof scalar != 'number') {
-            throw new Error("Can only multiply a matrix by a number. Did you mean to take the product?");
+            throw new Error("Can only multiply a MeierMatrix by a number. Did you mean to take the product?");
         }
     
         this[0][0] *= scalar;
@@ -146,7 +146,7 @@ define(function(require) {
         return this;
     };
 
-    Matrix.prototype.transpose = function() {
+    MeierMatrix.prototype.transpose = function() {
     
         var toggle = function(a, aa, b, bb) {
             var tmp     = this[a][aa];
@@ -162,17 +162,17 @@ define(function(require) {
     };
 
     /// Note: this is a generic inverse. There might
-    /// be better ways. E.g., for a rotation matrix simply
+    /// be better ways. E.g., for a rotation MeierMatrix simply
     /// flipping the angle will be fine.
-    /// new matrix!
-    Matrix.prototype.inverse = function() {
+    /// new MeierMatrix!
+    MeierMatrix.prototype.inverse = function() {
     
-        // Determinant of original matrix:
+        // Determinant of original MeierMatrix:
         var determinant = this.determinant();
     
         // Awwww... you've found a singularity.
         if(determinant === 0) {
-            throw new Error("Cannot inverse a matrix with a determinant of 0.");
+            throw new Error("Cannot inverse a MeierMatrix with a determinant of 0.");
         }
     
     
@@ -184,18 +184,18 @@ define(function(require) {
     };
 
     /// Special method for vectors only:
-    Matrix.prototype.transform = function(vector) {
+    MeierMatrix.prototype.transform = function(vector) {
         return new Vector(
             this[0][0] * vector.x + this[0][1] * vector.y + this[0][2],
             this[1][0] * vector.x + this[1][1] * vector.y + this[1][2]
         );
     };
 
-    Matrix.prototype.trace = function() {
+    MeierMatrix.prototype.trace = function() {
         return this[0][0] + this[1][1] + this[2][2];
     };
 
-    Matrix.prototype.determinant = function() {
+    MeierMatrix.prototype.determinant = function() {
         return (this[0][0] * this[1][1] * this[2][2]) +
                (this[0][1] * this[1][2] * this[2][0]) +
                (this[0][2] * this[1][0] * this[2][1]) -
@@ -204,9 +204,9 @@ define(function(require) {
                (this[0][0] * this[1][2] * this[2][1]);
     };
 
-    Matrix.prototype.toString = function() {
+    MeierMatrix.prototype.toString = function() {
         return this[0].join(", ") + "\n" + this[1].join(", ") + "\n" + this[2].join(", ");
     };
     
-    return Matrix;
+    return MeierMatrix;
 });
