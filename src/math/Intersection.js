@@ -6,7 +6,7 @@ define(function(require) {
     var Disk        = require("meier/math/Disk");
     var Polynomial  = require("meier/math/Polynomial");
 
-    // Publically exposed interface:
+    // Publicly exposed interface:
     var exposed = {
         // Test-only, returns booleans. Internal math may
         // be optimized.
