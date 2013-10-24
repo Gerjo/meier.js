@@ -1,26 +1,31 @@
+define(function(require){
+    var Stopwatch = require("meier/aux/Stopwatch");
+    var Vector    = require("meier/math/Vector");
 
-function Projectile(position, angle) {
+    function Projectile(position, angle) {
     
-    this.position = position.clone();
-    this.velocity = Vector.CreateAngular(angle + Math.HalfPI).scaleScalar(3);
+        this.position = position.clone();
+        this.velocity = Vector.CreateAngular(angle + Math.HalfPI).scaleScalar(3);
     
-    this.timer = new Stopwatch();
-}
+        this.timer = new Stopwatch();
+    }
 
-Projectile.prototype.isAlive = function() {
-    return this.timer.peek() < 3000;
-};
+    Projectile.prototype.isAlive = function() {
+        return this.timer.peek() < 3000;
+    };
 
-Projectile.prototype.update = function(dt) {
+    Projectile.prototype.update = function(dt) {
     
-    this.position.add(this.velocity);
+        this.position.add(this.velocity);
     
-};
+    };
 
-Projectile.prototype.draw = function(r) {
+    Projectile.prototype.draw = function(r) {
+        r.begin();
+        r.circle(this.position,10);
+        r.fill("hotpink");
     
-    r.begin();
-    r.circle(this.position,10);
-    r.fill("hotpink");
-    
-};
+    };
+
+    return Projectile;
+});

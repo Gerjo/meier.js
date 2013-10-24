@@ -5,28 +5,19 @@
 <!-- Load the "engine" loader -->
 <script src="../../src/Meier.js"></script>
 
-<!-- Instantiate the lot: -->
 <script>
 
 // Load engine from this path:
-LoadEngine("../../src/");
-
-// At this point it's safe to load game code.
+Meier("../../src/");
 
 
-function init() {
-    // The world inherits the size of the container element. If you want
-    // a fixed size, just create a div and use CSS to give it a fixed
-    // size - and use said div as container.
-    var game = new Gun(document.getElementsByTagName("body")[0]);
-}
+Meier(function() {
+    require(["./Gun"], function(Gun) {
+        var game = new Gun(document.getElementsByTagName("body")[0]);
+    });
+});
 
 </script>
-
-<!-- Load game code: -->
-<script src="Gun.js"></script>
-<script src="Gunner.js"></script>
-<script src="Projectile.js"></script>
 
 
 <!-- Per default, an empty document has no height, and weird paddings. -->
@@ -40,6 +31,6 @@ body, html {
 </style>
 
 </head>
-<body onload="init();">
+<body>
 </body>
 </html>
