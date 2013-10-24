@@ -70,10 +70,52 @@ function Range(data) {
     return Math.abs(Math.max.apply(null, data) - Math.min.apply(null, data));
 }
 
-function Variance(data) {
+function UnbiasedCovariance(data1, data2) {
+    
+    if(!data1 || !data2 || data1.length != data2.length) {
+        throw new Error("Ranges not of equal length.");
+    }
+    
+    var u1  = Mean(data1);
+    var u2  = Mean(data2);
+    
+    var xy  = 0;
+        
+    data1.forEach(function(x, i) {
+        var y = data2[i];
+        xy += (x - u1) * (y - u2);
+    });
+    
+    xy /= data1.length - 1;
+    
+    return xy;
+}
+
+function Correlation(data1, data2) {
+    var v1  = UnbiasedVariance(data1);
+    var v2  = UnbiasedVariance(data2);
+        
+    var cov = UnbiasedCovariance(data1, data2);
+        
+    return cov / Math.sqrt(v1 * v2);
+}
+
+function Variance(data, biased) {
     var u     = Mean(data);
     var sigma = 0;
     var n     = data.length;
+    
+    data.forEach(function(x) {
+        sigma += Math.pow(x - u, 2);
+    });
+        
+    return sigma / n;
+}
+
+function UnbiasedVariance(data, biased) {
+    var u     = Mean(data);
+    var sigma = 0;
+    var n     = data.length - 1;
     
     data.forEach(function(x) {
         sigma += Math.pow(x - u, 2);
