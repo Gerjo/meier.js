@@ -63,10 +63,29 @@ var Meier = (function() {
     var loaded       = {};          // Files already loaded.
     var verbose      = false;       // Per default, no logging.
     
+    var stream = GetRequestStream();
+    
     // Actors like a C++ functor, sets up the engine file prefix.
     var exposed = function(prefix) {
         enginePrefix = prefix || "";
     }
+    
+    var fetch = function(url) {
+        console.log("Fetching: ", url);
+        
+		stream.open("GET", url, false);
+        
+		stream.onreadystatechange = function() {
+            console.log(stream.readyState);
+            if(stream.readyState == 4) {
+		        console.log("Response length:", stream.responseText.length, "bytes");
+                
+                eval(stream.responseText);
+            }
+        };
+		
+        stream.send(null);
+    };
     
     // Enable or disable logging.
     exposed.SetVerbose = function(beVerbose) {
@@ -75,6 +94,7 @@ var Meier = (function() {
     
     // Load files directly:
     exposed.Include = function(file) {
+        
         var normalized = file;
         
         // The ".js" file extension is optional. Append it here
@@ -98,6 +118,9 @@ var Meier = (function() {
             if(verbose) {
                 console.log("Loading: " + normalized);
             }
+            
+        
+            //fetch(normalized);
             
             loaded[normalized.toLowerCase()] = true;
             
@@ -128,3 +151,23 @@ var Meier = (function() {
 }());
 
 
+
+function GetRequestStream() {
+	var temp_xmlHttp = false;
+    
+	if(window.XMLHttpRequest) {
+    	temp_xmlHttp = new XMLHttpRequest();
+	} else if(window.ActiveXObject) {
+	    try {
+			temp_xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+	    } catch (e) {
+			try {
+				temp_xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch (e) {
+                throw new Error(e);
+				// Stone age browser.
+			}
+	    }
+	}
+	return temp_xmlHttp;
+}
