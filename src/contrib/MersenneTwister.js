@@ -78,7 +78,7 @@ function class__MersenneTwister__(window)
 	 * @param number, number, ...	
 	 * @see #setSeed(number, number, ...)
 	 */
-	var F = window[className] = function()
+	var F = function()
 	{
 		this.mt = new Array(N);
 		this.mti = N + 1;
@@ -276,7 +276,7 @@ function class__MersenneTwister__(window)
  * // 0ä»¥ä¸Š1ã‚ˆã‚Šå°ã•ã„ä¸å‹•å°æ•°ç‚¹åž‹ã®å€¤ã‚’ç”Ÿæˆã—ã¾ã™ï¼Ž
  * var r = Math.mersenneTwisterRandom();
  */
-Math.mersenneTwisterRandom = function()
+/*Math.mersenneTwisterRandom = function()
 {
 	Math.__MERSENNE_TWISTER__ = new MersenneTwister();
 
@@ -284,4 +284,4 @@ Math.mersenneTwisterRandom = function()
 		return Math.__MERSENNE_TWISTER__;
 	}
 }();
-
+*/
