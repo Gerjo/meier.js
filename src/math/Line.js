@@ -66,6 +66,6 @@ define(function(require) {
         );
     };
 
-return MeierLineSegment;
+    return MeierLineSegment;
 
 });
