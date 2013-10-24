@@ -1,5 +1,6 @@
 define(function(require) {
     var Vector = require("meier/math/Vector");
+    var Lerp   = require("meier/math/Lerp");
     
     /// Accepts:
     /// [Vector, Vector]
@@ -28,8 +29,8 @@ define(function(require) {
 
     MeierLineSegment.prototype.middle = function() {
         return new Vector(
-            LerpFloat(this.a.x, this.b.x, 0.5),
-            LerpFloat(this.a.y, this.b.y, 0.5)
+            Lerp.Float(this.a.x, this.b.x, 0.5),
+            Lerp.Float(this.a.y, this.b.y, 0.5)
         );
     };
 
