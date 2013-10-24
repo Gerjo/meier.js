@@ -7,7 +7,7 @@ define(function(require) {
         var Disk    = require("meier/math/Disk");
         var Intersection = require("meier/math/Intersection");
         
-        
+        require("meier/math/Angle");
     
         // Expose these to the world:
         var vertices = f.vertices = hull.clone();

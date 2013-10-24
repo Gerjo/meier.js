@@ -9,7 +9,7 @@ define(function(require) {
     var CreatePushFunction = require("./Pfn");
     
     require("./meier/math/Math");
-    require("./meier/math/Angles");
+    require("./meier/math/Angle");
     
     PushFunctionApp.prototype = new Game();
 
