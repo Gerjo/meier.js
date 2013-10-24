@@ -222,7 +222,6 @@ define(function(require) {
     };
 
     Input.prototype.triggerKeyboard = function(eventtype, event) {
-    
         this.listeners[eventtype].every(function (priorityCallback) {
             return priorityCallback.callback(event.keyCode, String.fromCharCode(event.keyCode));
         }.bind(this));
