@@ -4,6 +4,7 @@ define(function(require) {
     var Line        = require("meier/math/Line");
     var Rectangle   = require("meier/math/Rectangle");
     var Disk        = require("meier/math/Disk");
+    var Polynomial  = require("meier/math/Polynomial");
 
     // Publically exposed interface:
     var exposed = {
@@ -170,7 +171,7 @@ define(function(require) {
             return (Math.pow(b, 2) - 4 * a * c) >= 0;
         }
     
-        var roots = SolveQuadraticPolynomial(a, b, c);
+        var roots = Polynomial.SolveQuadratic(a, b, c);
     
         if(roots.length > 0) {
             // Tangent to count as secant. I doubt floating point
