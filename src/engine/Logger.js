@@ -2,37 +2,37 @@ define(function(require){
     var Size   = require("meier/math/Size");
     var Vector = require("meier/math/Vector");
     
-    function Stats(width, height) {
+    function Logger(width, height) {
         // Tweakable:
         this.size       = new Size(width, height);
         this.offset     = new Size(10, (height * 0.5) - 10);
-        this.stats      = {};
+        this.Logger      = {};
         this.fontSize   = 12;
         this.charWidth  = this.fontSize - 4;
         this.color      = "black";
     
         // Show by default:
-        this.showstats = true;
+        this.showLogger = true;
     
         // Calculated internals.
         this.columnWidth    = 1;
         this.estimatedWidth = 0;
     }
 
-    Stats.prototype.show = function(doShow) {
-        this.showstats = doShow;
+    Logger.prototype.show = function(doShow) {
+        this.showLogger = doShow;
     };
 
-    Stats.prototype.setColor = function(color) {
+    Logger.prototype.setColor = function(color) {
         this.color = color;
     };
 
-    Stats.prototype.log = function(key, value) {
+    Logger.prototype.log = function(key, value) {
         this.set(key, value);
     };
 
-    Stats.prototype.set = function(key, value) {
-        this.stats[key + ":"] = value;
+    Logger.prototype.set = function(key, value) {
+        this.Logger[key + ":"] = value;
     
         // Estimate the column with. Works due to monospaced font.
         this.columnWidth = Math.max(this.columnWidth, (key.length + 1) * this.charWidth);
@@ -42,16 +42,16 @@ define(function(require){
         this.estimatedWidth = Math.max(this.estimatedWidth, guess);
     };
 
-    Stats.prototype.delete = function(key) {
-        delete this.stats[key + ":"];
+    Logger.prototype.delete = function(key) {
+        delete this.Logger[key + ":"];
     };
 
-    Stats.prototype.update = function(dt) {
+    Logger.prototype.update = function(dt) {
     
     };
 
-    Stats.prototype.draw = function(context) {
-        if(!this.showstats) {
+    Logger.prototype.draw = function(context) {
+        if(!this.showLogger) {
             return;
         }
     
@@ -61,11 +61,11 @@ define(function(require){
         
         var font = "bold " + this.fontSize + "px Monospace";
 
-        for(var k in this.stats) {
-            if(this.stats.hasOwnProperty(k)) {
+        for(var k in this.Logger) {
+            if(this.Logger.hasOwnProperty(k)) {
             
                 context.text(k, x, y, this.color, "left", "top", font)
-                context.text(this.stats[k], x + this.columnWidth, y, this.color, "left", "top", font)
+                context.text(this.Logger[k], x + this.columnWidth, y, this.color, "left", "top", font)
             
                 y -= this.fontSize;
             }
@@ -73,5 +73,5 @@ define(function(require){
     
     };    
    
-   return Stats;
+   return Logger;
 });

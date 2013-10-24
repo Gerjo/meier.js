@@ -14,7 +14,7 @@ define(function(require) {
     var Stopwatch = require("meier/aux/Stopwatch");
     var Renderer  = require("meier/engine/Renderer");
     var Vector    = require("meier/math/Vector");
-    var Stats     = require("meier/aux/Stats");
+    var Logger    = require("meier/engine/Logger");
     var Input     = require("meier/engine/Input");
 
 
@@ -41,13 +41,14 @@ define(function(require) {
         this.renderer         = new Renderer(container, this.width, this.height);
     
         // Debug information:
-        this.stats            = new Stats(this.width, this.height);
+        this.log             = new Logger(this.width, this.height);
+        this.stats           = this.log; // Legacy support.
     
         // Keyboard, touch and mouse events:
-        this.input            = new Input(this.renderer.canvas, this.width, this.height, this.isTablet);
+        this.input           = new Input(this.renderer.canvas, this.width, this.height, this.isTablet);
     
         // Default loop:
-        this.intervalId       = setInterval(this._update.bind(this), 1000 / this.fps);
+        this.intervalId      = setInterval(this._update.bind(this), 1000 / this.fps);
     }
     
     Game.prototype.setFps = function(fps) {
@@ -69,8 +70,8 @@ define(function(require) {
             dt = 0.2;
         }
     
-        this.stats.log("FPS", Math.ceil(1 / dt) + "/" + this.fps);
-        this.stats.log("Clock", Math.floor(this.clock.peek() * 0.001));
+        this.log.log("FPS", Math.ceil(1 / dt) + "/" + this.fps);
+        this.log.log("Clock", Math.floor(this.clock.peek() * 0.001));
     
         // User defined update.
         this.update(dt);
@@ -93,9 +94,9 @@ define(function(require) {
         this.draw(this.renderer);
     
         // Update statistics (TODO: rework some things)
-        this.stats.update();
+        this.log.update();
     
-        this.stats.draw(this.renderer);
+        this.log.draw(this.renderer);
     };
 
     Game.prototype.update = function(dt) {
