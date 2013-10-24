@@ -1,6 +1,3 @@
-Meier.Include("meier/math/Math.js");
-
-
 /// Calculate the mean (average) of a collection.
 function Mean(data) {
     return data.reduce(function (a, b) {
