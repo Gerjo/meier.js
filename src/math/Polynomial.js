@@ -1,4 +1,8 @@
 define(function(require) {
+    /// My polynomial wish-list
+    function HornersMethod() {}
+    function RegulaFalsi() { }
+    function BasisSpline() {}
     
     return {
     

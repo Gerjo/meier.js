@@ -1,9 +1,3 @@
-
-/// My polynomial wish-list
-function HornersMethod() {}
-function RegulaFalsi() { }
-function BasisSpline() {}
-
 /// Approximation of sine function of an angle.
 /// @param {rads} some angle expressed in  [0, PI/4] radians.
 /// @return an approximation of sine.
