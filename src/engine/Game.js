@@ -102,6 +102,13 @@ define(function(require) {
             this.log.delete("Entities");
         }
     
+        this.log.log("Listeners", "#" + this.input.countListeners());
+    
+        // This probably only works in Chrome
+        if(window.performance && window.performance.memory) {
+            this.stats.set("Memory", Math.round(window.performance.memory.totalJSHeapSize * 10e-7) + "mb");
+        }
+    
         // User defined update.
         this.update(dt);
     
