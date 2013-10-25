@@ -46,6 +46,10 @@ define(function(require) {
         return this;
     };
 
+    Renderer.prototype.scale = function(scale) {
+        this.context.scale(scale, scale);
+    };
+
     /// Clear the canvas with a solid fill color:
     Renderer.prototype.clearSolid = function(color) {
         this.context.fillStyle = color;
