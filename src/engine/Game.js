@@ -138,10 +138,13 @@ define(function(require) {
     Game.prototype.update = function(dt) {
         
         for(var i = 0; i < this._entities.length; i++) {
-            this._entities[i].update(dt);
+            
+            if(this._entities[i]._delete !== true) {
+                this._entities[i].update(dt);
+            }
             
             // Remove the entity:
-            if(this._entities[i].delete === true) {
+            if(this._entities[i]._delete === true) {
                 this._entities[i]._onDelete(this);
                 this._entities.splice(i--, 1);
             }
@@ -153,7 +156,9 @@ define(function(require) {
         renderer.clear();
     
         this._entities.forEach(function(entity) {
-            entity._draw(renderer);
+            if(entity._delete !== true) {
+                entity._draw(renderer);
+            }
         });
     };
     

@@ -13,13 +13,12 @@ define(function(require) {
         this.scale     = 1;
         
         // A bounding box for click actions:
-        this.width     = w;
-        this.height    = h;
+        this.width     = w || 30;
+        this.height    = h || 30;
         
         // Flag to signify that entity must be removed.
-        this.delete    = false;
+        this._delete   = false;
         
-        this.clickable = false;
         
         // Per default, not added to the game just yet.
         this.game      = null;
@@ -30,8 +29,15 @@ define(function(require) {
         
         // Identifier for events, required if we ever
         // want to disable events.
-        this._eventHandlers = {};
+        this._eventHandlers = [];
+        
+        // A concrete shape, when left to "0" just the obb is used.
+        this.shape = null; // TODO: implement this.
     }
+    
+    Entity.prototype.delete = function() {
+        this._delete = true;
+    };
     
     // Event handlers, override them when "enableEvent" is called.
     Entity.prototype.onLeftClick    = function(input) { console.log("onLeftClick");  return true; }
@@ -145,12 +151,12 @@ define(function(require) {
     };
     
     Entity.prototype._onDelete = function(game) {
-        
+                
         // Remove all event listeners:
-        this._eventRegisterQueue.mutableFilter(function(handle) {
+        this._eventHandlers.mutableFilter(function(handle) {
             this.game.input.unsubscribe(handle);
             return false;
-        });
+        }.bind(this));
         
         // User delete:
         this.onDelete(game);

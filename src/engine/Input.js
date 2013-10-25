@@ -261,9 +261,9 @@ define(function(require) {
     
     /// Untested...
     Input.prototype.unsubscribe = function(callbackBundle) {
-    
+        
         if(callbackBundle.eventtype > Input.Events.COUNT) {
-            throw new Error("Unknown mouse event.");
+            throw new Error("Cannot unsubscribe unknown event: " + callbackBundle + " are you using a handle? (callbackbundle)");
         }
     
         var removed = 0;
@@ -277,7 +277,13 @@ define(function(require) {
             return true;
         });
     
-        console.log("Removed ", removed, "event listeners.");
+        //console.log("Removed ", removed, "event listeners.");
+    };
+    
+    Input.prototype.countListeners = function() {
+        return this.listeners.reduce(function(sum, item) {
+            return sum + item.length;
+        }, 0);
     };
 
     return Input;
