@@ -7,26 +7,26 @@ define(function(require) {
     Input.Events.COUNT = 0;
 
     // Simulated on tablets.
-    Input.Events.LEFT_CLICK  = Input.Events.COUNT++;
-    Input.Events.LEFT_DOWN   = Input.Events.COUNT++;
-    Input.Events.LEFT_UP     = Input.Events.COUNT++; 
-    Input.Events.MOUSE_MOVE  = Input.Events.COUNT++;
+    Input.LEFT_CLICK  = Input.Events.LEFT_CLICK  = Input.Events.COUNT++;
+    Input.LEFT_DOWN   = Input.Events.LEFT_DOWN   = Input.Events.COUNT++;
+    Input.LEFT_UP     = Input.Events.LEFT_UP     = Input.Events.COUNT++; 
+    Input.MOUSE_MOVE  = Input.Events.MOUSE_MOVE  = Input.Events.COUNT++;
 
     // Computers only:
-    Input.Events.RIGHT_DOWN  = Input.Events.COUNT++;
-    Input.Events.RIGHT_UP    = Input.Events.COUNT++;
-    Input.Events.RIGHT_CLICK = Input.Events.COUNT++;
-    //
-    Input.Events.KEY_DOWN    = Input.Events.COUNT++;
-    Input.Events.KEY_UP      = Input.Events.COUNT++;
+    Input.RIGHT_DOWN  = Input.Events.RIGHT_DOWN  = Input.Events.COUNT++;
+    Input.RIGHT_UP    = Input.Events.RIGHT_UP    = Input.Events.COUNT++;
+    Input.RIGHT_CLICK = Input.Events.RIGHT_CLICK = Input.Events.COUNT++;
+    Input.KEY_DOWN    = Input.Events.KEY_DOWN    = Input.Events.COUNT++;
+    Input.KEY_UP      = Input.Events.KEY_UP      = Input.Events.COUNT++;
 
     // Tablets only.
-    Input.Events.DOUBLE_TAP = Input.Events.COUNT++;
+    Input.DOUBLE_TAP  = Input.Events.DOUBLE_TAP  = Input.Events.COUNT++;
 
 
-    function PriorityCallback(priority, callback) {
-        this.priority = priority;
-        this.callback = callback;
+    function PriorityCallback(priority, callback, eventtype) {
+        this.priority  = priority;
+        this.callback  = callback;
+        this.eventtype = eventtype;
     }
 
     Input.prototype = new Point();
@@ -152,7 +152,7 @@ define(function(require) {
     
         container.onmouseup = function(event) {
             if(event.which === 3) {
-                this.trigger(Input.Events.RIGHT_UP, event);
+                //this.trigger(Input.Events.RIGHT_UP, event);
             
                 this.trigger(Input.Events.RIGHT_CLICK, event);
             
@@ -237,25 +237,47 @@ define(function(require) {
         return this.listeners[eventtype][this.listeners[eventtype].length - 1].priority;
     };
 
-    /// Event type, see enum {Input.Events}.
+    /// Event type, see enum {Mouse.Events}.
     /// Call back, return false to halt event bubble, e.g., menu blocks game.
     /// priority, higher gets called first. Defaults to highest.
     Input.prototype.subscribe = function(eventtype, callback, priority) {
-    
-        if(isNaN(eventtype) || eventtype > Input.Events.COUNT) {
-            throw new Error("Unknown mouse event. Have a look at the Input.Events enum.");
-        }
-    
         priority = priority || this.highest(eventtype);
     
+        if(eventtype > Input.Events.COUNT) {
+            throw new Error("Unknown mouse event.");
+        }
     
-        this.listeners[eventtype].push(new PriorityCallback(priority, callback));
+        var callbackBundle = new PriorityCallback(priority, callback, eventtype);
+    
+        this.listeners[eventtype].push(callbackBundle);
     
         // Re-sort, descending:
         this.listeners[eventtype].sort(function (a, b) {
             return b.priority - a.priority;
         });
     
+        return callbackBundle;
+    };
+    
+    /// Untested...
+    Input.prototype.unsubscribe = function(callbackBundle) {
+    
+        if(callbackBundle.eventtype > Input.Events.COUNT) {
+            throw new Error("Unknown mouse event.");
+        }
+    
+        var removed = 0;
+    
+        this.listeners[callbackBundle.eventtype] = this.listeners[callbackBundle.eventtype].filter(function(listener) {
+            if(listener == callbackBundle) {
+                ++removed;
+                return false;
+            }
+                
+            return true;
+        });
+    
+        console.log("Removed ", removed, "event listeners.");
     };
 
     return Input;
