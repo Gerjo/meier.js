@@ -52,6 +52,10 @@ define(function(require) {
         
             Lines: function (lineA, lineB) {
                 return false !== lines(lineA.a, lineA.b, lineB.a, lineB.b);
+            },
+            
+            PointInObb: function(point, boxCenter, boxWidth, boxHeight, boxRotation) {
+                return pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation);
             }
         },
     
@@ -96,6 +100,15 @@ define(function(require) {
         
             DiskLine: function(disk, line) { 
                 return diskLine(disk, line, false, false); 
+            },
+            
+            PointInObb: function(point, boxCenter, boxWidth, boxHeight, boxRotation) {
+                if(true === pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation)) {
+                    // What did you expect?
+                    return point.clone();
+                }
+                
+                return false;
             }
         },
     
@@ -108,6 +121,29 @@ define(function(require) {
             LineSegmentBetweenRectangles: NearestLineSegmentBetweenRectangles
         }
     };
+    
+    function pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation) {
+        // Precompute a few variables:
+        var sin = Math.sin(boxRotation);
+        var cos = Math.cos(boxRotation);
+        var hh  = boxHeight * 0.5;
+        var hw  = boxWidth * 0.5;
+        var x   = point.x - boxCenter.x;
+        var y   = point.y - boxCenter.y;
+        
+        // Rotate the point to box's frame (inlined 2x2 matrix):
+        var lx = cos * x - sin * y;
+        var ly = sin * y + cos * x;
+
+        // Simple point in rectangle test.
+        if(lx > -hw && lx < hw) {
+            if(ly > -hh && ly < hh) {
+                return true;
+            }            
+        }
+        
+        return false;
+    }
 
     function lines(p1, d1, p2, d2) {
         // Calculate slope "a" in "y = a * x + b":
