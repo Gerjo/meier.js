@@ -139,14 +139,17 @@ Array.prototype.merge = function(array) {
 
 /// Filter combined with a map.
 Array.prototype.filterMap = function(callback) {
-
-    for(var i = 0, r; i < this.length; ++i) {
-        r = callback(this[i]);
+    var r;
+    for(var k in this) {
+        if(parseInt(k, 10) == k) {
+        //for(var i = 0, r; i < this.length; ++i) {
+            r = callback(this[k]);
     
-        if(r === undefined) {
-            this.splice(i--, 1);
-        } else {
-            this[i] = r;
+            if(r === undefined) {
+                this.splice(k, 1);
+            } else {
+                this[k] = r;
+            }
         }
     }
 
@@ -155,9 +158,11 @@ Array.prototype.filterMap = function(callback) {
 
 /// Input filtering, inplace (mutable).
 Array.prototype.mutableFilter = function(callback, context) {
-    for(var i = 0; i < this.length; ++i) {
-        if(false === callback.call(context, this[i], i, this)) {
-            this.splice(i--, 1);
+    for(var k in this) {
+        if(parseInt(k, 10) == k) {
+            if(false === callback.call(context, this[k], k, this)) {
+                this.splice(k--, 1);
+            }
         }
     }
 };
