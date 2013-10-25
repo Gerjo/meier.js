@@ -16,6 +16,7 @@ define(function(require) {
     var Vector    = require("meier/math/Vector");
     var Logger    = require("meier/engine/Logger");
     var Input     = require("meier/engine/Input");
+    var Entity    = require("meier/engine/Entity");
 
 
     function Game(container) {
@@ -49,7 +50,27 @@ define(function(require) {
     
         // Default loop:
         this._intervalId     = setInterval(this._update.bind(this), 1000 / this._fps);
+        
+        // Build-in entity system. Optional usage.
+        this._entities       = [];
     }
+    
+    Game.prototype.add = function(entity) {
+        if(entity instanceof Entity) {
+            this._entities.push(entity);
+            entity._onAdd(this);
+        } else {
+            throw new Error("Game::add is only meant of entities.");
+        }
+    };
+    
+    Game.prototype.delete = function(entity) {
+        if(entity instanceof Entity) {
+            entity.delete = true;
+        } else {
+            throw new Error("Game::delete is only meant of entities.");
+        }
+    };
     
     Game.prototype.setFps = function(fps) {
         this._fps = fps;
@@ -72,6 +93,14 @@ define(function(require) {
     
         this.log.log("FPS", Math.ceil(1 / dt) + "/" + this._fps);
         this.log.log("Clock", Math.floor(this.clock.peek() * 0.001));
+    
+        // Show or hide entity count depending on whether there
+        // are any to begin with.
+        if(this._entities.length > 0) {
+            this.log.log("Entities", "#" + this._entities.length);
+        } else {
+            this.log.delete("Entities");
+        }
     
         // User defined update.
         this.update(dt);
@@ -100,14 +129,25 @@ define(function(require) {
     };
 
     Game.prototype.update = function(dt) {
-        // TODO: Override...
+        
+        for(var i = 0; i < this._entities.length; i++) {
+            this._entities[i].update(dt);
+            
+            // Remove the entity:
+            if(this._entities[i].delete === true) {
+                this._entities[i]._onDelete(this);
+                this._entities.splice(i--, 1);
+            }
+        }
     };
 
     Game.prototype.draw = function(renderer) {
         // Clear the canvas:
         renderer.clear();
     
-        // TODO: Override...
+        this._entities.forEach(function(entity) {
+            entity._draw(renderer);
+        });
     };
     
     return Game;
