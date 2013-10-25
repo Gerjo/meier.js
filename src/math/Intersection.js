@@ -133,8 +133,8 @@ define(function(require) {
         
         // Rotate the point to box's frame (inlined 2x2 matrix):
         var lx = cos * x - sin * y;
-        var ly = sin * y + cos * x;
-
+        var ly = sin * x + cos * y;
+        
         // Simple point in rectangle test.
         if(lx > -hw && lx < hw) {
             if(ly > -hh && ly < hh) {
