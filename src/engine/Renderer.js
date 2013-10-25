@@ -116,7 +116,7 @@ define(function(require) {
             h = d;
         }
         
-        this.context.rect(x - h * 0.5, y - h * 0.5, h, w);
+        this.context.rect(x - w * 0.5, y - h * 0.5, w, h);
 
         return this;
     };
