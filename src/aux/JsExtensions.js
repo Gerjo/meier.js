@@ -153,6 +153,14 @@ Array.prototype.filterMap = function(callback) {
     return this;
 };
 
+/// Input filtering, inplace (mutable).
+Array.prototype.mutableFilter = function(callback, context) {
+    for(var i = 0; i < this.length; ++i) {
+        if(false === callback.call(context, this[i], i, this)) {
+            this.splice(i--, 1);
+        }
+    }
+};
 
 /// Duplicate an array:
 Array.prototype.clone = function() { 
