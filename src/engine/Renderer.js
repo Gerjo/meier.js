@@ -207,19 +207,40 @@ define(function(require) {
     /// [Vector, Vector]
     /// [Number, Number, Number, Number]
     Renderer.prototype.line = function(a, b, c, d) {
+        
+        var fromX, fromY, toX, toY;
+    
         if(a instanceof LineSegment) {
-            this.context.moveTo(a.a.x, -a.a.y);
-            this.context.lineTo(a.b.x, -a.b.y);
+            fromX = a.a.x;
+            fromY = -a.a.y;
+            toX   = a.b.x;
+            toY   = -a.b.y;
+    
         } else if(a instanceof Vector && b instanceof Vector) {
-            this.context.moveTo(a.x, -a.y);
-            this.context.lineTo(b.x, -b.y);
+            fromX = a.x;
+            fromY = -a.y;
+            toX   = b.x;
+            toY   = -b.y;
         } else if(a instanceof Vector) {
-            this.context.moveTo(0, 0);
-            this.context.lineTo(a.x, -a.y); 
+            toX = a.x;
+            toY = -a.y;
+            fromX = 0;
+            fromY = 0;
+        } else if(c instanceof Vector) {
+            fromX = a;
+            fromY = -b;
+            toX   = c.x;
+            toY   = -c.y;
         } else {
-            this.context.moveTo(a, -b);
-            this.context.lineTo(c, -d);
+            fromX = a;
+            fromY = -b;
+            toX   = c;
+            toY   = -d;
         }
+        
+        this.context.moveTo(toX, toY);
+        this.context.lineTo(fromX, fromY);
+        
         return this;
     };
 
@@ -313,6 +334,10 @@ define(function(require) {
     
         return this;
     };
+    
+    Renderer.prototype.alpha = function(alpha) {
+        this.context.globalAlpha = alpha;
+    };
 
     /// Fill all draw calls since begin() with a given color.
     Renderer.prototype.fill = function(color) {
@@ -333,6 +358,8 @@ define(function(require) {
     /// [Vector]
     /// [LineSegment]
     /// [Vector, Vector]
+    /// [Number, Number, Vector]
+    /// [Vector, Number, Number]
     /// [Number, Number, Number, Number]
     Renderer.prototype.arrow = function(a, b, c, d) {
         var fromX, fromY, toX, toY;
@@ -353,6 +380,11 @@ define(function(require) {
             toY = -a.y;
             fromX = 0;
             fromY = 0;
+        } else if(c instanceof Vector) {
+            fromX = a;
+            fromY = -b;
+            toX   = c.x;
+            toY   = -c.y;
         } else {
             fromX = a;
             fromY = -b;
