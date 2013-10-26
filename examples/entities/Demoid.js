@@ -18,7 +18,7 @@ define(function(require) {
         this.enableEvent(
               Input.LEFT_DOWN
             , Input.LEFT_UP
-            , Input.RIGHT_DOWN
+            , Input.MOUSE_MOVE
         );
         
         // Scaling:
