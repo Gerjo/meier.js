@@ -17,7 +17,8 @@ define(function(require) {
         // One must subscribe for methods:
         this.enableEvent(
             Input.LEFT_DOWN,
-            Input.LEFT_UP
+            Input.LEFT_UP,
+            Input.MOUSE_MOVE
         );
         
         // Scaling:
@@ -42,15 +43,26 @@ define(function(require) {
         return clone;
     };
     
+    Demoid.prototype.onMouseMove = function(input) {
+        
+    };
+    
     Demoid.prototype.onLeftDown = function() {
-        this.fill = "red";        
+          
     };
     
     Demoid.prototype.onLeftUp = function() {
-        this.fill = "black";
+        
     };
     
     Demoid.prototype.update = function(dt) {
+        
+        if(this.containsPoint(this.game.input)) {
+            this.fill = "red";
+        } else {
+            this.fill = "black";
+        }
+        
         this.rotation += dt * 0.5;
         
         // Movement:
