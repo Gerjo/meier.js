@@ -41,16 +41,16 @@ define(function(require) {
     };
     
     // Event handlers, override them when "enableEvent" is called.
-    Entity.prototype.onLeftClick    = function(input) { console.log("onLeftClick");  return true; }
-    Entity.prototype.onLeftDown     = function(input) { console.log("onLeftDown");   return true; }
-    Entity.prototype.onLeftUp       = function(input) { console.log("onLeftUp");     return true; }
-    Entity.prototype.onMouseMove    = function(input) { console.log("onMouseMove");  return true; }
-    Entity.prototype.onRightDown    = function(input) { console.log("onRightDown");  return true; }
-    Entity.prototype.onRightUp      = function(input) { console.log("onRightUp");    return true; }
-    Entity.prototype.onRightClick   = function(input) { console.log("onRightClick"); return true; }
-    Entity.prototype.onKeyDown      = function(input) { console.log("onKeyDown");    return true; }
-    Entity.prototype.onKeyUp        = function(input) { console.log("onKeyUp");      return true; }
-    Entity.prototype.onDoubleTap    = function(input) { console.log("onDoubleTap");  return true; }
+    Entity.prototype.onLeftClick    = function(input) { console.log("Unoverridden event: onLeftClick");  return true; }
+    Entity.prototype.onLeftDown     = function(input) { console.log("Unoverridden event: onLeftDown");   return true; }
+    Entity.prototype.onLeftUp       = function(input) { console.log("Unoverridden event: onLeftUp");     return true; }
+    Entity.prototype.onMouseMove    = function(input) { console.log("Unoverridden event: onMouseMove");  return true; }
+    Entity.prototype.onRightDown    = function(input) { console.log("Unoverridden event: onRightDown");  return true; }
+    Entity.prototype.onRightUp      = function(input) { console.log("Unoverridden event: onRightUp");    return true; }
+    Entity.prototype.onRightClick   = function(input) { console.log("Unoverridden event: onRightClick"); return true; }
+    Entity.prototype.onKeyDown      = function(input) { console.log("Unoverridden event: onKeyDown");    return true; }
+    Entity.prototype.onKeyUp        = function(input) { console.log("Unoverridden event: onKeyUp");      return true; }
+    Entity.prototype.onDoubleTap    = function(input) { console.log("Unoverridden event: onDoubleTap");  return true; }
     
     Entity.prototype.enableEvent = function(event) {        
         for(var i = 0; i < arguments.length; ++i) {            
