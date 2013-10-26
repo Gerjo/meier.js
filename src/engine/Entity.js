@@ -183,6 +183,25 @@ define(function(require) {
         // Overwrite method.
     };
     
+    Entity.prototype.toWorld = function(local) {
+        // TODO: implement correctly.
+        return local.clone().add(this.position);
+    }; 
+    
+    Entity.prototype.toLocal = function(world) {
+        
+        var dx = world.x - this.position.x;
+        var dy = world.y - this.position.y;
+        
+        var sin = Math.sin(this.rotation);
+        var cos = Math.cos(this.rotation);
+        
+        return new Vector(
+            cos * dx - sin * dy, 
+            sin * dx + cos * dy
+        );
+    };
+    
     Entity.prototype._draw = function(renderer) {
         
         // Is there a draw function defined?
