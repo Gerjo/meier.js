@@ -1,6 +1,6 @@
 define(function(require) {
     
-    require("meier/contrib/MersenneTwister.js");
+    var MersenneTwister = require("meier/contrib/MersenneTwister");
     var Vector = require("meier/math/Vector");
     
     

@@ -1,3 +1,7 @@
+define(function(require) {
+    
+
+
 /*
  * NOTE :
  * 	This program is a JavaScript version of Mersenne Twister,
@@ -263,7 +267,10 @@ function class__MersenneTwister__(window)
 			/ 70368744177664.0; // 2^46
 	};
 
-} class__MersenneTwister__(window);
+    return F;
+} 
+
+    return class__MersenneTwister__(window);
 
 
 
@@ -285,3 +292,7 @@ function class__MersenneTwister__(window)
 	}
 }();
 */
+
+
+
+});
