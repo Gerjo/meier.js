@@ -16,9 +16,9 @@ define(function(require) {
         
         // One must subscribe for methods:
         this.enableEvent(
-            Input.LEFT_DOWN,
-            Input.LEFT_UP,
-            Input.MOUSE_MOVE
+              Input.LEFT_DOWN
+            , Input.LEFT_UP
+            , Input.RIGHT_DOWN
         );
         
         // Scaling:

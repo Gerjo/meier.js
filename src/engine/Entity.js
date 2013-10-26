@@ -91,7 +91,7 @@ define(function(require) {
         // A short-hand for "this". Reduces the number of "bind" calls.
         var entity = this;
         
-        this._eventRegisterQueue.mutableFilter(function(event) {
+        this._eventRegisterQueue.forEach(function(event) {
             
             var handle = null;
             
@@ -149,15 +149,19 @@ define(function(require) {
            
             return false;
         }.bind(this));
+        
+        this._eventRegisterQueue.clear();
     };
     
     Entity.prototype._onDelete = function(game) {
                 
         // Remove all event listeners:
-        this._eventHandlers.mutableFilter(function(handle) {
+        this._eventHandlers.forEach(function(handle) {
             this.game.input.unsubscribe(handle);
             return false;
         }.bind(this));
+        
+        this._eventHandlers.clear();
         
         // User delete:
         this.onDelete(game);
