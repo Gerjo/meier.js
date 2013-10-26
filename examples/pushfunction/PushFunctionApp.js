@@ -221,7 +221,6 @@ define(function(require) {
         var thickness = 4;
     
         renderer.begin();
-        //renderer.rectangle(-35, 30 + s * Math.TwoPI, s * Math.TwoPI + 60, s * Math.TwoPI + 60);
         renderer.rectangle(s * Math.PI - 5, s * Math.PI, s * Math.TwoPI + 60, s * Math.TwoPI + 60);
         renderer.fill("rgba(0, 0, 0, 0.1)");
     
