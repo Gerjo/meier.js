@@ -156,17 +156,6 @@ Array.prototype.filterMap = function(callback) {
     return this;
 };
 
-/// Input filtering, inplace (mutable).
-Array.prototype.mutableFilter = function(callback, context) {
-    for(var k in this) {
-        if(parseInt(k, 10) == k) {
-            if(false === callback.call(context, this[k], k, this)) {
-                this.splice(k--, 1);
-            }
-        }
-    }
-};
-
 /// Duplicate an array:
 Array.prototype.clone = function() { 
     return this.slice(0); 
