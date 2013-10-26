@@ -276,8 +276,10 @@ define(function(require) {
                 
             return true;
         });
-    
+
         //console.log("Removed ", removed, "event listeners.");
+        
+        return (removed > 0);
     };
     
     Input.prototype.countListeners = function() {
