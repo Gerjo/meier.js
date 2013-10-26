@@ -24,7 +24,7 @@ define(function(require) {
         // Default contructor, do nothing.
         if( ! container) {
             return;
-        }
+        }        
 
         this.isTablet = ('ontouchstart' in document.documentElement);
         this.isSlow   = false;

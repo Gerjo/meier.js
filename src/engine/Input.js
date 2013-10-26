@@ -2,6 +2,7 @@ define(function(require) {
     var Point  = require("meier/math/Vector");
     var Vector = Point;
     var Size   = require("meier/math/Size");
+    var Key    = require("meier/engine/Key");
 
     Input.Events = {};
     Input.Events.COUNT = 0;
@@ -31,12 +32,14 @@ define(function(require) {
 
     Input.prototype = new Point();
     function Input(container, width, height, isTablet) {
+        
+        // Always center the initial mouse position.
         Point.call(this, width * 0.5, height * 0.5);
     
-        this.isTablet  = isTablet;
-        this.container = container;
-        this.size      = new Size(width, height);
-        this.keystates = {};
+        this.isTablet   = isTablet;
+        this._container = container;
+        this._size      = new Size(width, height);
+        this._keystates = {};
     
         // Intialize empty listeners:
         this.listeners = [];
@@ -115,9 +118,9 @@ define(function(require) {
             return;
         }
     
-        // For IE?
+        // For IE? http://www.java2s.com/Tutorial/JavaScript/0280__Document/documentcaptureEvents.htm
         if(document.layers) {
-            document.captureEvents(Event.MOUSEDOWN || Event.CLICK);
+            document.captureEvents(Event.MOUSEDOWN | Event.CLICK);
         }
     
         // Browser sensitive logic. May need a rework.
@@ -126,7 +129,7 @@ define(function(require) {
                 this.trigger(Input.Events.MOUSE_MOVE, event);            
             }
         }.bind(this);    
-    
+            
         container.onclick = function(event) {
             if(event.which === 3) {
                 this.trigger(Input.Events.RIGHT_CLICK, event);
@@ -163,20 +166,25 @@ define(function(require) {
     
         //browser only?
         document.onkeydown = function(event) {
-        
-            if(event.shiftKey) {
-                // TODO: upper case / lower case.,
-                // TODO: capslock detection.
-            }
-        
-            //console.log(String.fromCharCode(event.keyCode), event.keyCode, event);
-            this.keystates[event.keyCode] = true;
+            // Internet Explorer requirement:
+            event = event || window.event;
+            
+            this._keystates[event.keyCode] = true;
             this.triggerKeyboard(Input.Events.KEY_DOWN, event);
+            
+            // This may block all other HTML inputfields.
+            event.preventDefault();
         }.bind(this);
     
         document.onkeyup = function(event) {
-            this.keystates[event.keyCode] = false;
+            // Internet Explorer requirement:
+            event = event || window.event;
+           
+            this._keystates[event.keyCode] = false;
             this.triggerKeyboard(Input.Events.KEY_UP, event);
+            
+            // This may block all other HTML inputfields.
+            event.preventDefault();
         }.bind(this);
     }
 
@@ -185,26 +193,26 @@ define(function(require) {
    
         // Chrome:
         if(event.x) {
-            x = event.x - this.container.offsetLeft + window.pageXOffset;
-            y = event.y - this.container.offsetTop  + window.pageYOffset;
+            x = event.x - this._container.offsetLeft + window.pageXOffset;
+            y = event.y - this._container.offsetTop  + window.pageYOffset;
     
         // Firefox:
         } else if(event.pageX) {
-            x = event.pageX - this.container.offsetLeft;
-            y = event.pageY - this.container.offsetTop;
+            x = event.pageX - this._container.offsetLeft;
+            y = event.pageY - this._container.offsetTop;
     
         // Internet Explorer: (untested!)
         } else if(event.clientX) {
-            x = event.clientX + document.body.scrollLeft - this.container.offsetLeft;
-            y = event.clientY + document.body.scrollTop - this.container.offsetTop;
+            x = event.clientX + document.body.scrollLeft - this._container.offsetLeft;
+            y = event.clientY + document.body.scrollTop - this._container.offsetTop;
         } 
     
         // Only count inside world bounds:
-        if(x >= 0 && y >= 0 && x <= this.size.w && y <= this.size.h) {
+        if(x >= 0 && y >= 0 && x <= this._size.w && y <= this._size.h) {
         
             // Transform to screen coordinates:
-            this.x = x - this.size.w * 0.5;
-            this.y = (this.size.h * 0.5) - y;
+            this.x = x - this._size.w * 0.5;
+            this.y = (this._size.h * 0.5) - y;
     
             // Trigger MOUSE_MOVE event:
             return true;
@@ -217,13 +225,23 @@ define(function(require) {
     Input.prototype.trigger = function(eventtype, event, location) {
     
         this.listeners[eventtype].every(function (priorityCallback) {
-            return priorityCallback.callback(location || this);
+            return priorityCallback.callback(this);
         }.bind(this));
     };
 
     Input.prototype.triggerKeyboard = function(eventtype, event) {
         this.listeners[eventtype].every(function (priorityCallback) {
-            return priorityCallback.callback(event.keyCode, String.fromCharCode(event.keyCode));
+            
+            // Returns a known key, or creates a new one.
+            var key = Key.fromCode(event.keyCode);
+            
+            // We're not passing "event" itself as it may contain
+            // browser specific-data that we don't want people to 
+            // use.
+            return priorityCallback.callback(
+                this,
+                key
+            );
         }.bind(this));
     };
 
@@ -286,6 +304,20 @@ define(function(require) {
         return this.listeners.reduce(function(sum, item) {
             return sum + item.length;
         }, 0);
+    };
+
+
+    /// Determine if a key is down. While this may work, you
+    /// risk missing events as you can only sample as frequently
+    /// as your FPS allows. Use events instead - and never
+    /// miss a key event.
+    Input.prototype.isKeyDown = function(key) {
+
+        if(this._keystates[key.code] === true) {
+            return true;
+        }
+        
+        return false;
     };
 
     return Input;
