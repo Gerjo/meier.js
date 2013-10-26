@@ -11,7 +11,6 @@ define(function(require) {
         this.add(
             new Demoid(-100, -15)
         );
-        
     }
     
     return Entities;
