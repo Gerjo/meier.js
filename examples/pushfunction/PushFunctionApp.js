@@ -5,6 +5,7 @@ define(function(require) {
     var Line   = require("meier/math/Line");
     var Input  = require("meier/engine/Input");
     var M      = require("meier/math/Math");
+    var Angle  = require("meier/math/Angle");
     var Vector = Point;
     
     var CreatePushFunction = require("./Pfn");
@@ -235,9 +236,9 @@ define(function(require) {
         if(this.f.bounds.length == 1) {
             renderer.begin().line(
                 0,
-                ToAbsoluteRadians(this.f.bounds.first().n) * s,
+                Angle.ToAbsoluteRadians(this.f.bounds.first().n) * s,
                 Math.TwoPI * s,
-                ToAbsoluteRadians(this.f.bounds.first().n) * s
+                Angle.ToAbsoluteRadians(this.f.bounds.first().n) * s
             ).stroke("black", thickness);
         
         } else {
@@ -245,11 +246,11 @@ define(function(require) {
                 var a = this.f.bounds[i].a;
                 var b = this.f.bounds[i].b;
                 var n = this.f.bounds[i].n;
-                var la = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].a);
-                var lb = DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].b);
+                var la = Angle.DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].a);
+                var lb = Angle.DeltaRelativeRadians(this.f.bounds[i].n, this.f.bounds[i].b);
 
                 var x = n * s;    
-                var y = ToAbsoluteRadians(n) * s;
+                var y = Angle.ToAbsoluteRadians(n) * s;
     
                 var line = new Line(
                     Math.min(x, x + s * la, x + s * lb), y, Math.max(x, x + s * la, x + s * lb), y

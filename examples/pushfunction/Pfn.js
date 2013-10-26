@@ -1,14 +1,13 @@
 define(function(require) {
 
     function CreatePushFunction(hull) {
-        var Vector  = require("meier/math/Vector");
-        var Line    = require("meier/math/Line");
-        var Segment = Line;
-        var Disk    = require("meier/math/Disk");
+        var Vector       = require("meier/math/Vector");
+        var Line         = require("meier/math/Line");
+        var Segment      = Line;
+        var Disk         = require("meier/math/Disk");
         var Intersection = require("meier/math/Intersection");
-        
-        require("meier/math/Angle");
-    
+        var Angle        = require("meier/math/Angle");
+            
         // Expose these to the world:
         var vertices = f.vertices = hull.clone();
         var normals  = f.normals  = [];
