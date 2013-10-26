@@ -12,7 +12,7 @@ define(function(require) {
     
     function Demoid(x, y) {
         // Call super class constructor:
-        Entity.call(this, x, y, 40, 30);
+        Entity.call(this, x, y, 40, 40);
         
         // One must subscribe for methods:
         this.enableEvent(
@@ -26,17 +26,19 @@ define(function(require) {
         this.stroke = 'black';
         this.fill   = 'black';
         
-        this.spawntimer = new Timer(300);
-        this.deathtimer = new Timer(400);
+        this.spawnothers = true;
         
-        this.velocity   = new Vector(200, 0);
+        this.deathtimer  = new Timer(2000);
+        this.spawntimer  = new Timer(200);
+        
+        this.velocity    = new Vector(200, 0);
     }
     
     Demoid.prototype.clone = function() {
-        var clone = new Demoid(this.position.x, this.position.y);
+        var clone      = new Demoid(this.position.x, this.position.y);
         clone.rotation = this.rotation;
         clone.velocity = this.velocity.clone();
-        
+        clone.ticks    = this.ticks;
         return clone;
     };
     
@@ -48,25 +50,27 @@ define(function(require) {
         this.fill = "black";
     };
     
-    Demoid.prototype.onAdd = function(game) {
-        
-    };
-    
     Demoid.prototype.update = function(dt) {
         this.rotation += dt * 0.5;
         
         // Movement:
         this.position.add(this.velocity.clone().scaleScalar(dt));
         
-        // Spawn more Demoids:
-        if(this.spawntimer.expired()) {
-            var demoid = this.clone();
-            demoid.velocity.perp();
-            this.game.add(demoid);
+        if(this.deathtimer.expired() && this.spawnothers !== true) {
+            this.delete();
+            return;
         }
         
-        if(this.deathtimer.expired()) {
-            this.delete();
+        if(this.spawntimer.expired() && this.spawnothers === true) {
+            this.velocity.perp();
+            for(var i = 0; i < 4; ++i) {
+                var demoid = this.clone();
+                demoid.spawnothers = false;
+                
+                this.game.add(demoid);
+                
+                this.velocity.perp();
+            }
         }
     };
     
@@ -77,8 +81,8 @@ define(function(require) {
         renderer.fill(this.fill);
         
         renderer.begin();
-        renderer.arrow(0, 0, this.width * 0.5, 0);
-        renderer.stroke("red", 2);
+        renderer.line(0, 0, this.toLocal(this.game.input));
+        renderer.stroke("rgba(0,0,0,0.1)", 2);
     };
     
     return Demoid;
