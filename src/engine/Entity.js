@@ -119,7 +119,7 @@ define(function(require) {
                 handle = this.game.input.subscribe(event, this.onLeftUp.bind(this));
                 break;
             case Input.MOUSE_MOVE:
-                handle = this.game.input.subscribe(event, ContainsHelper(this.onMouseMove));
+                handle = this.game.input.subscribe(event, this.onMouseMove);
                 break;
             case Input.RIGHT_DOWN:
                 handle = this.game.input.subscribe(event, ContainsHelper(this.onRightDown));
