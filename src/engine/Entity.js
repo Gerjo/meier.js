@@ -11,6 +11,7 @@ define(function(require) {
         this.position  = new Vector(x || 0, y || 0);
         this.rotation  = 0;
         this.scale     = 1;
+        this.opacity   = 0.5;
         
         // A bounding box for click actions:
         this.width     = w || 30;
@@ -189,6 +190,8 @@ define(function(require) {
             // Store the current canvas transform.
             renderer.save();
             
+            renderer.alpha(this.opacity);
+            
             // Transform the lot to match this entity.
             renderer.translate(this.position.x, this.position.y);
             renderer.scale(this.scale);
@@ -196,6 +199,8 @@ define(function(require) {
             
             // Actual draw stuff:
             this.draw(renderer);
+            
+            renderer.alpha(1);
             
             // Restore to the old transform.
             renderer.restore();
