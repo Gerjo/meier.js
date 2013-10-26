@@ -1,6 +1,9 @@
 define(function(require){
-    var Game   = require("meier/engine/Game");
-    var Gunner = require("./Gunner");
+    var Game        = require("meier/engine/Game");
+    var Vector      = require("meier/math/Vector");
+    var Random      = require("meier/math/Random");
+    var Pistoller   = require("./Pistoller");
+    var Zombie      = require("./Zombie");
     
     Gun.prototype = new Game();
 
@@ -8,35 +11,26 @@ define(function(require){
     {
     	//inherit everything that game is.
     	Game.call(this, container);
-	
-    	this.gunner = new Gunner(this);
-    	this.setFps(60);
-	
-    	this.projectiles = [];
+	    this.setFps(60);
+        
+    	this.pistoller = new Pistoller(this);
+        this.add(this.pistoller);
+        
+        this.zombies = [];
+        
+        this.addZombie(new Vector(-this.width * 0.6, 100), this.pistoller);
+        this.addZombie(new Vector(-this.width * 0.68, 200), this.pistoller);
+        this.addZombie(new Vector(-this.width * 0.5, 0), this.pistoller);
+        this.addZombie(new Vector(-this.width * 0.7, -100), this.pistoller);
+        this.addZombie(new Vector(-this.width * 0.9, -200), this.pistoller);
     }
-
-    Gun.prototype.update = function(dt) 
+    
+    Gun.prototype.addZombie = function(position, targetEntity)
     {
-    	this.gunner.update(dt);
-	
-    	//filter is een foreach waarin hij alles verwijderd dat niet aan het filter voldoet.
-    	this.projectiles = this.projectiles.filter(function(projectile) {
-    		projectile.update(dt);
-    		return projectile.isAlive();
-    	}); 
-    };
-
-
-    Gun.prototype.draw = function(r) 
-    {
-        r.clearSolid('gray');
-	
-    	this.gunner.draw(r);
-	
-    	this.projectiles.forEach(function(projectile) {
-    		projectile.draw(r);
-    	}); 
-    };
+        var zombie = new Zombie(position, targetEntity);
+        this.zombies.push(zombie);
+        this.add(zombie);
+    }
     
     return Gun;
 });
