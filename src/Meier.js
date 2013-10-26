@@ -35,7 +35,11 @@ var Meier = (function() {
                     requirejs.config({
                         paths: {
                             "meier" : path
-                        }
+                        },
+                        
+                        // Hopefully counter any browser cache.
+                        urlArgs: "v=" + (new Date()).getTime()
+                        
                     });
                                         
                     // Call initializer, if available:
