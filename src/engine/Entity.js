@@ -169,6 +169,7 @@ define(function(require) {
     
     Entity.prototype._onAdd = function(game) {
         this.game = game;
+        this.input = game.input;
         
         this._registerEvents();
         
