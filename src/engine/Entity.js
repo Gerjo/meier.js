@@ -48,9 +48,9 @@ define(function(require) {
     Entity.prototype.onRightDown    = function(input) { console.log("Unoverridden event: onRightDown");  return true; }
     Entity.prototype.onRightUp      = function(input) { console.log("Unoverridden event: onRightUp");    return true; }
     Entity.prototype.onRightClick   = function(input) { console.log("Unoverridden event: onRightClick"); return true; }
-    Entity.prototype.onKeyDown      = function(input) { console.log("Unoverridden event: onKeyDown");    return true; }
-    Entity.prototype.onKeyUp        = function(input) { console.log("Unoverridden event: onKeyUp");      return true; }
     Entity.prototype.onDoubleTap    = function(input) { console.log("Unoverridden event: onDoubleTap");  return true; }
+    Entity.prototype.onKeyDown      = function(input, key) { console.log("Unoverridden event: onKeyDown");    return true; }
+    Entity.prototype.onKeyUp        = function(input, key) { console.log("Unoverridden event: onKeyUp");      return true; }
     
     Entity.prototype.enableEvent = function(event) {        
         for(var i = 0; i < arguments.length; ++i) {            
