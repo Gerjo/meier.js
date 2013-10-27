@@ -29,6 +29,10 @@ define(function(require) {
             return mt.nextFloat() * (max - min) + min;
         },
         
+        Byte: function() {
+            return Math.round(255 * mt.nextFloat());
+        },
+        
         /// Array of floating points
         FloatArray: function(size) {
             var r = new Array(size);
