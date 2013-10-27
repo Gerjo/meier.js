@@ -14,6 +14,7 @@ Structure
 <br> online demo: [Animation and textures](http://gerjo.github.io/meier.js/examples/helloworld/helloworld.html);
 <br> online demo: [The coordinate system](http://gerjo.github.io/meier.js/examples/grid/grid.html);
 <br> online demo: [Audio](http://gerjo.github.io/meier.js/examples/audio/audio.html) [wip];
+<br> online demo: [Entities](http://gerjo.github.io/meier.js/examples/entities/entities.html) [the build-in entity system];
 <br> online demo: [Adriaan's peculiar game](http://gerjo.github.io/meier.js/examples/countermoon/game.html) [wip].
 
 **/src/engine/** 
