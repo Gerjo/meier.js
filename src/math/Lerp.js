@@ -1,7 +1,7 @@
 define(function(require) {
     var Vector = require("meier/math/Vector");
     
-    return {
+    var Lerp = {
         /// Lerp for floats:
         Float: function (a, b, t) {
             return a * (1 - t) + b * t;
@@ -14,10 +14,10 @@ define(function(require) {
 
         /// Lerp an RGBA color. Colors are R, G, B, A arrays.
         Color: function (a, b, t) {
-            return "rgba(" + LerpInt(a[0],   b[0], t) + ", " +
-                             LerpInt(a[1],   b[1], t) + ", " +
-                             LerpInt(a[2],   b[2], t) + ", " +
-                             LerpFloat(a[3], b[3], t) + ")";
+            return "rgba(" + Lerp.Int(a[0],   b[0], t) + ", " +
+                             Lerp.Int(a[1],   b[1], t) + ", " +
+                             Lerp.Int(a[2],   b[2], t) + ", " +
+                             Lerp.Float(a[3], b[3], t) + ")";
         },
 
         /// Lerp for vectors:
@@ -28,4 +28,6 @@ define(function(require) {
             );
         },
     }
+    
+    return Lerp;
 });
