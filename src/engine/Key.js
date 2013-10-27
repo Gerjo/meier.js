@@ -23,8 +23,6 @@ define(function(require) {
         return "Key [" + this.code + "]:" + this._name;
     };
     
-    
-    
     // Macro to make keys:
     function MakeKey(code, name) {
         Key[name]         = new Key(code, name);
