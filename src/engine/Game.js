@@ -62,6 +62,8 @@ define(function(require) {
         } else {
             throw new Error("Game::add is only meant of entities.");
         }
+        
+        return entity;
     };
     
     Game.prototype.delete = function(entity) {
