@@ -125,12 +125,14 @@ define(function(require) {
     
         // Browser sensitive logic. May need a rework.
         document.onmousemove = function(event) {
+            event = event || window.event;
             if(this.updatePosition(event) === true) {
                 this.trigger(Input.Events.MOUSE_MOVE, event);            
             }
         }.bind(this);    
             
         container.onclick = function(event) {
+            event = event || window.event;
             if(event.which === 3) {
                 this.trigger(Input.Events.RIGHT_CLICK, event);
             } else if(event.which === 1) {
@@ -141,11 +143,13 @@ define(function(require) {
     
         // Called on mouse down!
         container.oncontextmenu = function(event) {
+            event = event || window.event;
             event.preventDefault();       
             return false;
         }.bind(this);
     
         container.onmousedown = function(event) {
+            event = event || window.event;
             if(event.which === 3) {
                 this.trigger(Input.Events.RIGHT_DOWN, event);
             } else if(event.which === 1) {
@@ -154,6 +158,7 @@ define(function(require) {
         }.bind(this);
     
         container.onmouseup = function(event) {
+            event = event || window.event;
             if(event.which === 3) {
                 //this.trigger(Input.Events.RIGHT_UP, event);
             
@@ -166,7 +171,6 @@ define(function(require) {
     
         //browser only?
         document.onkeydown = function(event) {
-            // Internet Explorer requirement:
             event = event || window.event;
             
             this._keystates[event.keyCode] = true;
@@ -177,7 +181,6 @@ define(function(require) {
         }.bind(this);
     
         document.onkeyup = function(event) {
-            // Internet Explorer requirement:
             event = event || window.event;
            
             this._keystates[event.keyCode] = false;
@@ -191,8 +194,14 @@ define(function(require) {
     Input.prototype.updatePosition = function(event) {
         var x, y;
    
+        // Internet Explorer: (untested!)
+        if(event.clientX) {
+            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
+            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
+        
+
         // Chrome:
-        if(event.x) {
+        } else if(event.x) {
             x = event.x - this._container.offsetLeft + window.pageXOffset;
             y = event.y - this._container.offsetTop  + window.pageYOffset;
     
@@ -201,11 +210,7 @@ define(function(require) {
             x = event.pageX - this._container.offsetLeft;
             y = event.pageY - this._container.offsetTop;
     
-        // Internet Explorer: (untested!)
-        } else if(event.clientX) {
-            x = event.clientX + document.body.scrollLeft - this._container.offsetLeft;
-            y = event.clientY + document.body.scrollTop - this._container.offsetTop;
-        } 
+        }
     
         // Only count inside world bounds:
         if(x >= 0 && y >= 0 && x <= this._size.w && y <= this._size.h) {
