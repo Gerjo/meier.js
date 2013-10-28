@@ -11,6 +11,20 @@ Math.sgn = function(n) {
     return n >= 0 ? 1 : -1;
 }
 
+// Internet Explorer 7:
+if(typeof JSON == "undefined") {
+    JSON = {};
+}
+
+// Internet Explorer 7:
+if(typeof JSON.parse == "undefined") {
+    JSON.parse = function(data) {
+        // TODO: perhaps bundle an actual parser?
+        return eval("(" + data + ")");
+    } 
+}
+
+
 /// Parse JSON strings without silly exceptions that suggest
 /// your code is broken due to the incorrect line-numbers.
 ///
