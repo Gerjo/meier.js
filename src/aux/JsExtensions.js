@@ -176,7 +176,20 @@ Array.prototype.clone = function() {
     return this.slice(0); 
 }
 
-
+/// Kind of like reduce, without reducing.
+///
+Array.prototype.eachPair = function(callback) {
+    
+    for(var i = 0, j; i < this.length; ++i) {
+        j = (i === this.length - 1) ? 0 : i + 1;
+        
+        if(false === callback(this[i], this[j])) {
+            return false;
+        }
+    }
+    
+    return true;
+};
 
 /// Determine if a string ends with the given suffix:
 String.prototype.endsWith = function(suffix) {
