@@ -1,6 +1,10 @@
-/// This file adds functionality to existing javascript classes.
-/// 
-/// 
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 
 Math.QuarterPI     = Math.PI / 4;
 Math.TreeQuarterPI = Math.PI / 4 * 3;

@@ -5,7 +5,6 @@ After copy-pasting my own code around so many times, it seemed prudent to  deriv
 
 
 
-
 Structure
 =========
 
@@ -50,3 +49,10 @@ Work in progress
 
 **Web Sockets**
 <br>The client side is easy, but further study needs to be done for a generic server implementation, e.g., a server that simply forwards all messages to all clients is open for abuse - some form of authentication needs to be performed.
+
+License
+==========
+
+Copyright (C) 1013 Gerard J. Meier <gerjoo@gmail.com>
+
+N.B. I cannot quite agree with any pre-made license thus far - until I figure this out, a default copyright is to be assumed. Permissive licenses are available on request.

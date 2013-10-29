@@ -1,3 +1,10 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 ///
 /// Train of thought: leave most things up to the user. Just
 /// have some boilerplate code here.

@@ -1,3 +1,10 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 // http://testanything.org/wiki/index.php/Main_Page
 // https://github.com/substack/mocha-testling-ci-example/blob/master/test/beep.js
 //
