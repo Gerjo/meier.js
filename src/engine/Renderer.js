@@ -7,7 +7,7 @@ define(function(require) {
     var LineSegment = require("meier/math/Line");
     var Disk        = require("meier/math/Disk");
     var Rectangle   = require("meier/math/Rectangle");
-    
+    var Polygon     = require("meier/math/Polygon");
     
     /// Canvas wrapper. Lateron I'll add WebGL as a drop-in replacement.
     function Renderer(container, width, height) {
@@ -313,25 +313,53 @@ define(function(require) {
     };
 
     /// Accepts:
-    /// [Array of Vector]
+    /// [Polygon]
+    /// [Array<Vector>]
     /// NB: automatically closes the loop, if not closed.
-    Renderer.prototype.polygon = function(vertices) {
+    Renderer.prototype.polygon = function(a) {
     
-        // The minimal required minimum for the code not to crash.
-        if(vertices.length > 0) {
-    
-            this.context.moveTo(vertices[0].x, -vertices[0].y);
-    
-            for(var i = 1; i < vertices.length; ++i) {
-                this.context.lineTo(vertices[i].x, -vertices[i].y);
+        if(a instanceof Polygon) {
+            if(a.vertices.length > 0) {
+                
+                this.save();
+            
+                this.context.translate(
+                    this._translate.x + a.position.x,
+                    this._translate.y - a.position.y
+                );
+            
+                // TODO: move this duplicated code.
+                this.context.moveTo(a.vertices[0].x, -a.vertices[0].y);
+            
+                for(var i = 1; i < a.vertices.length; ++i) {
+                    this.context.lineTo(a.vertices[i].x, -a.vertices[i].y);
+                }
+
+                // Close the polygon loop:
+                if( ! a.vertices.first().equals(a.vertices.last())) {
+                    this.context.lineTo(a.vertices[0].x, -a.vertices[0].y);
+                }
+                
+                this.restore();
             }
+            
+        } else if(a instanceof Vector) {
+            // The minimal required minimum for the code not to crash.
+            if(a.length > 0) {
     
-            // Close the polygon loop:
-            if( ! vertices.first().equals(vertices.last())) {
-                this.context.lineTo(vertices[0].x, -vertices[0].y);
-            }
-        } 
+                this.context.moveTo(a[0].x, -a[0].y);
     
+                for(var i = 1; i < a.length; ++i) {
+                    this.context.lineTo(a[i].x, -a[i].y);
+                }
+    
+                // Close the polygon loop:
+                if( ! a.first().equals(vertices.last())) {
+                    this.context.lineTo(a[0].x, -a[0].y);
+                }
+            } 
+        }
+        
         return this;
     };
     
