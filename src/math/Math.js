@@ -241,51 +241,6 @@ define(function(require) {
             var per =  1 / (max - min)
             return per * current;
         },
-
-
-
-        /// Apply newton rapson iteration to approximate roots of a 
-        /// polynomal.
-        ///
-        /// let g be f'
-        ///
-        /// Example: find the root of f(x) = x^4 + x
-        /// Then we derrive f, which gives g(x) = 4 * x^3 + 1
-        ///
-        /// Note: this requires less iterations than Picard, but
-        /// it may not be possible to find a derivative.
-        ///
-        NewtonRaphsonIteration: function(f, g, initial, steps) {
-    
-            var r = initial - f(initial) / g(initial);
-    
-            if(steps > 0) {
-                return NewtonRaphsonIteration(f, g, r, steps - 1);
-            }
-    
-            return r;
-        },
-
-        /// Apply picard iteration to approximate roots of a polynomal.
-        /// let f be f(x) = y
-        /// then change that into:
-        /// let g be g(x) = x
-        ///
-        /// Example: find the root of f(x) = x^3 - 3x + 1
-        /// then we use g(x) = (x^3 + 1) / 3 
-        ///
-        /// Note: we simply isolated x.
-        ///
-        PicardIteration: function(g, initial, steps) {
-    
-            var r = g(initial);
-        
-            if(steps > 0) {
-                return PicardIteration(g, r, steps - 1);
-            }
-    
-            return r;
-        },
         
         /// Compute the factorial of a given number. Uses a switch case for
         /// 0 < n < 7, then resorts to a while loop. Granted javascript
