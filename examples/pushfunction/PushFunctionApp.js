@@ -9,6 +9,7 @@ define(function(require) {
     var Vector = Point;
     
     var CreatePushFunction = require("./Pfn");
+    var Hull = require("meier/math/Hull");
     
     require("./meier/math/Math");
     require("./meier/math/Angle");
@@ -143,7 +144,7 @@ define(function(require) {
         }
     
         // Find a new convex hull:
-        this.hull = M.PolyonGiftWrap(this.coordinates);
+        this.hull = Hull.GiftWrap(this.coordinates);
     
         // The push function expect all vertices relative to
         // the center-of-mass. We counter translate in order
