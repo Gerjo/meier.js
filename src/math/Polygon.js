@@ -9,7 +9,6 @@ define(function(require) {
     /// []
     ///
     /// TODO: rotate.
-    /// TODO: convex hull
     /// TODO: triangulate
     /// TODO: simplex
     /// TODO: SAT
@@ -36,10 +35,18 @@ define(function(require) {
         }
     }
     
+    /// Determine if this polygon is concave.
+    /// Runs in at most O(n).
+    ///
+    /// @return boolean indicating if concave.
     Polygon.prototype.isConcave = function() {
         return ! this.isConvex();
     };
     
+    /// Determine if this polygon is convex.
+    /// Runs in at most O(n).
+    ///
+    /// @return boolean indicating if convex.
     Polygon.prototype.isConvex = function() {
         
         // It might be weird, but a line would
