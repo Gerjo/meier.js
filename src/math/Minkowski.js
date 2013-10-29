@@ -6,8 +6,6 @@ define(function(require) {
         ConvexSum: function(a, b, renderer) {
             var r = [];
             
-            
-            
             a.forEach(function(p) {
                 var sub = b.map(function(q) {
                     return new Vector(q.x + p.x, q.y + p.y);
