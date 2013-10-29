@@ -3,6 +3,22 @@ define(function(require) {
     
     
     return {
+        
+        /// Determine the sign of a number.
+        ///
+        ///   if(n < 0)  -1 
+        ///   if(n == 0)  0 
+        ///   if(n > 0)   1  
+        ///
+        /// Special behaviour: returns 0 for the NaN constant or anything
+        /// else that's not a number. Though it's best not to rely on this.
+        ///
+        /// @param {n} the number.
+        /// @returns the sign, either -1, 0 or 1.
+        Sign: function(n) {
+            return (n > 0) ? 1 : (n < 0) ? -1 : 0
+        },
+        
         /// Approximation of sine function of an angle.
         /// @param {rads} some angle expressed in  [0, PI/4] radians.
         /// @return an approximation of sine.

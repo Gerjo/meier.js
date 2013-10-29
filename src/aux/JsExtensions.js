@@ -8,6 +8,7 @@ Math.HalfPI        = Math.PI / 2;
 Math.TwoPI         = Math.PI * 2;
 
 Math.sgn = function(n) {
+    console.log("This is deprecated. Use meier/math/Math.Sgn instead");
     return n >= 0 ? 1 : -1;
 }
 
