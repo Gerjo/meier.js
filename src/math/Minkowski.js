@@ -7,30 +7,36 @@ define(function(require) {
             var r = [];
             
             a.forEach(function(p) {
+                
+                // Perhaps some filtering? We don't need every coordinate.
                 var sub = b.map(function(q) {
                     return new Vector(q.x + p.x, q.y + p.y);
                 });
                 
-                renderer.begin();
-                renderer.polygon(sub);
-                renderer.stroke("black");
-                renderer.fill("rgba(0, 0, 0, 0.2)");
-
-                r.merge(sub);
+                if(renderer) {
+                    renderer.begin();
+                    renderer.polygon(sub);
+                    renderer.stroke("black");
+                    renderer.fill("rgba(0, 0, 0, 0.2)");
+                }
                 
+                r.merge(sub);
             });
             
+            // TODO: implement more efficient algorithm.
             var hull = Hull.GiftWrap(r);
             
-            renderer.begin();
-            renderer.polygon(hull);
-            renderer.stroke("black");
-            renderer.fill("rgba(0, 0, 0, 0.2)");
+            if(renderer) {
+                renderer.begin();
+                renderer.polygon(hull);
+                renderer.stroke("black");
+                renderer.fill("rgba(0, 0, 0, 0.2)");
             
-            renderer.begin();
-            renderer.polygon(a);
-            renderer.stroke("black");
-            renderer.fill("rgba(0, 0, 0, 0.2)");
+                renderer.begin();
+                renderer.polygon(a);
+                renderer.stroke("black");
+                renderer.fill("rgba(0, 0, 0, 0.2)");
+            }
             
             return r;
         }
