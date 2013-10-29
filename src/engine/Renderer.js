@@ -343,7 +343,7 @@ define(function(require) {
                 this.restore();
             }
             
-        } else if(a instanceof Vector) {
+        } else if(a instanceof Array) {
             // The minimal required minimum for the code not to crash.
             if(a.length > 0) {
     
