@@ -354,7 +354,7 @@ define(function(require) {
                 }
     
                 // Close the polygon loop:
-                if( ! a.first().equals(vertices.last())) {
+                if( ! a.first().equals(a.last())) {
                     this.context.lineTo(a[0].x, -a[0].y);
                 }
             } 
