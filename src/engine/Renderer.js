@@ -316,10 +316,7 @@ define(function(require) {
     /// [Polygon]
     /// [Array<Vector>]
     /// NB: automatically closes the loop, if not closed.
-    Renderer.prototype.polygon = function(a, fancy) {
-        fancy = fancy || false;
-        
-        var isClosed;
+    Renderer.prototype.polygon = function(a) {
         
         if(a instanceof Polygon) {
             if(a.vertices.length > 0) {
@@ -340,14 +337,6 @@ define(function(require) {
                 // Close the polygon loop:
                 if( ! a.vertices.first().equals(a.vertices.last())) {
                     this.context.lineTo(a.vertices[0].x, -a.vertices[0].y);
-                }
-                
-                if(fancy) {
-                    for(var i = 0; i < a.vertices.length; ++i) {
-                        this.circle(a.vertices[i].x, a.vertices[i].y, 5);
-                    }
-                    
-                    this.circle(0, 0, 3);
                 }
                 
                 this.restore();
