@@ -10,6 +10,7 @@ define(function(require) {
     var Vector       = require("meier/math/Vector");
     var Input        = require("meier/engine/Input");
     var Intersection = require("meier/math/Intersection");
+    var Matrix       = require("meier/math/Matrix");
     
     // Short-hand access: less typing.
     var PointInObb   = Intersection.Test.PointInObb;
@@ -239,23 +240,54 @@ define(function(require) {
         // Overwrite method.
     };
     
+    /// cos  -sin  0     1   0  -t.x     v.x
+    /// sin   cos  1  .  0   1  -t.y  .  v.y
+    ///  0     0   1     0   0     1       1
+    ///
+    ///
+    /// 1   0  -t.x     cos  -sin  0  v.x
+    /// 0   1  -t.y  .  sin   cos  1  v.y
+    /// 0   0     1     0     0    1    1
     Entity.prototype.toWorld = function(local) {
-        // TODO: implement correctly.
-        return local.clone().add(this.position);
+        var rotation = this.rotation;
+        
+        
+        var r = Matrix.CreateRotation(rotation);
+        var t = Matrix.CreateTranslation(this.position.x, this.position.y);
+        
+        var T = t.product(r);
+        
+        // Inlined vector multiplication:
+        return T.transform(local);  
     }; 
     
+    ///  cos   sin  0     1   0  -t.x     v.x
+    /// -sin   cos  1  .  0   1  -t.y  .  v.y
+    ///  0     0   0     0   0     1     v.x
     Entity.prototype.toLocal = function(world) {
+        var rotation = this.rotation;
         
-        var dx = world.x - this.position.x;
-        var dy = world.y - this.position.y;
+        //var r = Matrix.CreateRotation(-rotation);
+        //var t = Matrix.CreateTranslation(-this.position.x, -this.position.y);
+        //var T = r.product(t);
+        //return T.transform(world); 
         
-        var sin = Math.sin(this.rotation);
-        var cos = Math.cos(this.rotation);
         
+        // Inlined vector multiplication:
+        
+        // "counter rotate"
+        var sin = Math.sin(-rotation);
+        var cos = Math.cos(-rotation);
+        
+        var x = this.position.x;
+        var y = this.position.y;
+          
+        // Inlined vector multiplication:
         return new Vector(
-            cos * dx - sin * dy, 
-            sin * dx + cos * dy
-        );
+            cos * world.x - sin * world.y + -x * cos + -y * -sin,
+            sin * world.x + cos * world.y + -x * sin + -y * cos
+        
+        );  
     };
     
     Entity.prototype._draw = function(renderer) {
