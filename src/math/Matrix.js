@@ -131,7 +131,7 @@ define(function(require) {
         return m;
     };
 
-    // Helper for the forgetfull. New MeierMatrix!
+    // Helper for the forgetfull. New Matrix!
     MeierMatrix.prototype.adjugate = function() {
         return this.cofactors().transpose();
     };
@@ -170,12 +170,12 @@ define(function(require) {
     };
 
     /// Note: this is a generic inverse. There might
-    /// be better ways. E.g., for a rotation MeierMatrix simply
+    /// be better ways. E.g., for a rotation Matrix simply
     /// flipping the angle will be fine.
-    /// new MeierMatrix!
+    /// new Matrix!
     MeierMatrix.prototype.inverse = function() {
     
-        // Determinant of original MeierMatrix:
+        // Determinant of original Matrix:
         var determinant = this.determinant();
     
         // Awwww... you've found a singularity.
