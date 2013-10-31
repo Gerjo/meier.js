@@ -39,10 +39,8 @@ Work in progress
 <br>Extend the entity with physics and refined collision shapes - or defer to, say, box2D.
 
 **Audio**
-<br>More thorough testing and iPad support. It runs fine in Firefox and webkit derivatives.
+<br>IE and iPad support are lacking. Also "audio sprites" must be implemented. 
 
-**Crossplatform testing**
-<br>This lot has never been tested in IE.
 
 **Muli-touch controls**
 <br>This API has yet to be exposed.
@@ -53,6 +51,6 @@ Work in progress
 License
 ==========
 
-Copyright (C) 1013 Gerard J. Meier <gerjoo@gmail.com>
+Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
 
 N.B. I cannot quite agree with any pre-made license thus far - until I figure this out, a default copyright is to be assumed. Permissive licenses are available on request.
