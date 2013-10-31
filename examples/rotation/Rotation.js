@@ -10,36 +10,43 @@ define(function(require) {
     function Rotation(container) {
         Game.call(this, container);
         
-        var step = 30;
-        var p = new Vector(2, 2);
+        this.setFps(30);        
         
-        var r = Matrix.CreateRotation(Math.PI / 6);
-        var t = Matrix.CreateTranslation(120, 120);
+        var q = new Vector(4, 3);
         
-        var q = t.product(r).transform(p);
+        var r = Matrix.CreateRotation(Math.PI / -3);
+        var t = Matrix.CreateTranslation(0, 0);
         
-        
-        // Round to nearest multiple of 20:
-        this.moving = new Frame(0, 0); 
+        var T = r.product(t);
+                
+        var p = T.transform(q);
+                
+        this.moving = new Frame(-20, 40); 
         this.fixed  = new Frame(0, 0, this.width, this.height);
+        this.sub    = new Frame(210, 10);
+        this.subsub = new Frame(100, -210);
         
         // Rotate relative to parent.
-        this.moving.position.x = 120;
-        this.moving.position.y = 120;
         this.moving.rotation = Math.PI / 6;
+        this.sub.rotation = Math.PI / 6;
+        this.sub.v = 1;
+        this.subsub.v = -2;
         
-        this.moving.add(new Pixel(p.x * step, p.y * step));
-        this.fixed.add(new Pixel(q.x * step, q.y * step));
         
         
+        this.sub.add(this.subsub);
+        this.moving.add(this.sub);
         this.fixed.add(this.moving);
         this.add(this.fixed);
     }
     
+    Rotation.prototype.update = function(dt) {
+        Game.prototype.update.call(this, dt);
+    };
+    
     
     Rotation.prototype.draw = function(r) {
         Game.prototype.draw.call(this, r);
-
     };
     
     return Rotation;
