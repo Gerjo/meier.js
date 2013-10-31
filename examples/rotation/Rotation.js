@@ -4,7 +4,6 @@ define(function(require) {
     var Pixel  = require("meier/prefab/Pixel");
     var Vector = require("meier/math/Vector");
     var Matrix = require("meier/math/Matrix");
-
     
     Rotation.prototype = new Game();
     function Rotation(container) {
@@ -31,13 +30,11 @@ define(function(require) {
         this.sub.rotation = Math.PI / 6;
         this.sub.v = 1;
         this.subsub.v = -2;
-        
-        
-        
+                
         this.sub.add(this.subsub);
         this.moving.add(this.sub);
         this.fixed.add(this.moving);
-        this.add(this.fixed);
+        this.add(this.fixed);        
     }
     
     Rotation.prototype.update = function(dt) {
