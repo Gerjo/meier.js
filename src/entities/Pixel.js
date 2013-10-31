@@ -10,10 +10,8 @@ define(function(require) {
     
     Pixel.prototype.draw = function(renderer) {
         renderer.begin();
-        renderer.circle(0, 0, 2);
-        renderer.stroke(this.color);
-        
-        Entity.prototype.draw.call(this, renderer);
+        renderer.circle(0, 0, 2);    
+        renderer.stroke(this.color);   
     };
     
     return Pixel;
