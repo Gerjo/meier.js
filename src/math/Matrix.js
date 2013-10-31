@@ -7,7 +7,8 @@
 
 define(function(require) {
     var Vector = require("meier/math/Vector");
-
+    var Round  = require("meier/math/Math").Round;
+    
     /// 3x3 MeierMatrix for 2D vectors. Everything is as mutable
     /// as possible.
     /// 
@@ -212,7 +213,27 @@ define(function(require) {
     };
 
     MeierMatrix.prototype.toString = function() {
-        return this[0].join(", ") + "\n" + this[1].join(", ") + "\n" + this[2].join(", ");
+        return JSON.stringify(this);
+    };
+    
+    MeierMatrix.prototype.pretty = function() {
+        var out = "", n, l = 8;
+        
+        for(var row = 0; row < this.length; ++row) {
+            for(var col = 0; col < this[row].length; ++col) {
+                n = Round(this[row][col], 3) + "";
+                
+                out += n;
+                
+                for(var i = n.length; i < l; ++i) {
+                    out += " ";
+                }
+            }
+            
+            out += "\n";
+        }
+        
+        return out;
     };
     
     return MeierMatrix;
