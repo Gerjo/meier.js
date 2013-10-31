@@ -240,54 +240,53 @@ define(function(require) {
         // Overwrite method.
     };
     
-    /// cos  -sin  0     1   0  -t.x     v.x
-    /// sin   cos  1  .  0   1  -t.y  .  v.y
-    ///  0     0   1     0   0     1       1
-    ///
-    ///
+
     /// 1   0  -t.x     cos  -sin  0  v.x
     /// 0   1  -t.y  .  sin   cos  1  v.y
     /// 0   0     1     0     0    1    1
     Entity.prototype.toWorld = function(local) {
-        var rotation = this.rotation;
+        var t = this.movingToFixed();
         
+        var e = this.parent;
         
-        var r = Matrix.CreateRotation(rotation);
-        var t = Matrix.CreateTranslation(this.position.x, this.position.y);
+        while(e) {
+            t = e.movingToFixed().product(t);
+            e = e.parent;
+        }
         
-        var T = t.product(r);
-        
-        // Inlined vector multiplication:
-        return T.transform(local);  
+        return t.transform(local);
     }; 
+    
+    /// Create a matrix that transforms local coordinates
+    /// to world coordinates.
+    Entity.prototype.movingToFixed = function() {
+        var r = Matrix.CreateRotation(this.rotation);
+        var t = Matrix.CreateTranslation(this.position.x, this.position.y);
+        return t.product(r);
+    };
+    
+    /// Create a matrix that transforms local coordinates
+    /// to world coordinates.
+    Entity.prototype.fixedToMoving = function() {
+        var r = Matrix.CreateRotation(-this.rotation);
+        var t = Matrix.CreateTranslation(-this.position.x, -this.position.y);
+        return r.product(t);
+    };
     
     ///  cos   sin  0     1   0  -t.x     v.x
     /// -sin   cos  1  .  0   1  -t.y  .  v.y
-    ///  0     0   0     0   0     1     v.x
+    ///   0     0   0     0   0     1     v.x
     Entity.prototype.toLocal = function(world) {
-        var rotation = this.rotation;
+        var t = this.fixedToMoving();
         
-        //var r = Matrix.CreateRotation(-rotation);
-        //var t = Matrix.CreateTranslation(-this.position.x, -this.position.y);
-        //var T = r.product(t);
-        //return T.transform(world); 
+        var e = this.parent;
         
+        while(e) {
+            t = t.product(e.fixedToMoving());
+            e = e.parent;
+        }
         
-        // Inlined vector multiplication:
-        
-        // "counter rotate"
-        var sin = Math.sin(-rotation);
-        var cos = Math.cos(-rotation);
-        
-        var x = this.position.x;
-        var y = this.position.y;
-          
-        // Inlined vector multiplication:
-        return new Vector(
-            cos * world.x - sin * world.y + -x * cos + -y * -sin,
-            sin * world.x + cos * world.y + -x * sin + -y * cos
-        
-        );  
+        return t.transform(world);
     };
     
     Entity.prototype._draw = function(renderer) {
