@@ -41,13 +41,13 @@ define(function(require) {
         this.clock           = new Stopwatch(); // Wall Clock.
         this._fps            = 15;              // Desired framerate
         this._dttimer        = new Stopwatch(); // Delta time counter.
-        this.width           = container.offsetWidth;
-        this.height          = container.offsetHeight;
+        this.width           = parseInt(container.offsetWidth / 2, 10) * 2;
+        this.height          = parseInt(container.offsetHeight / 2, 10) * 2;
         this.hw              = this.width  * 0.5;
         this.hh              = this.height * 0.5;    
         
         this._renderer       = new Renderer(container, this.width, this.height);
-    
+        
         // Debug information:
         this.log             = new Logger(this.width, this.height);
         this.stats           = this.log; // Legacy support.
@@ -121,6 +121,7 @@ define(function(require) {
         // User defined update.
         this.update(dt);
     
+    
         /// Reset the transform to an identity matrix:
         /// We can tweak the letters in:
         /// a b 0
@@ -130,8 +131,8 @@ define(function(require) {
             1,  0, 
             0,  1, 
         
-            // Draw from center. A half pixel offset 
-            // gives sharper lines.
+            // Draw from center. A 0.5 offset is given to align the game
+            // coordinate frame with canvas coordinate frame.
             this._renderer.hw + 0.5,
             this._renderer.hh + 0.5);
     
