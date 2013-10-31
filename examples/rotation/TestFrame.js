@@ -1,6 +1,7 @@
 define(function(require) {
     var Frame = require("meier/prefab/Frame");
     var Pixel  = require("meier/prefab/Pixel");
+    var Sprite = require("meier/prefab/Sprite");
     
     TestFrame.prototype = new Frame();
     function TestFrame(x, y, w, h) {
@@ -8,7 +9,10 @@ define(function(require) {
         
         this.v       = 1;
         
-        this.add(this.p = new Pixel());        
+        this.add(this.p = new Pixel());     
+        
+        this.add(new Sprite(0, 0, 100, 100, "../helloworld/burger.png"));
+           
     }
     
     TestFrame.prototype.update = function(dt) {
@@ -35,6 +39,8 @@ define(function(require) {
         r.line(local.x, local.y, local.x, 0);
         r.line(local.x, local.y, 0, local.y);
         r.stroke("rgba(0, 0, 0, 0.3)");
+        
+        
     };
     
     return TestFrame;
