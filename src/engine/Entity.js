@@ -12,7 +12,7 @@ define(function(require) {
     var Intersection = require("meier/math/Intersection");
     
     // Short-hand access: less typing.
-    var PointInObb = Intersection.Test.PointInObb;
+    var PointInObb   = Intersection.Test.PointInObb;
     
     function Entity(x, y, w, h) {
         // Transformation properties:
@@ -28,9 +28,11 @@ define(function(require) {
         // Flag to signify that entity must be removed.
         this._delete   = false;
         
-        
         // Per default, not added to the game just yet.
         this.game      = null;
+        
+        // Available once nested (iff).
+        this.parent    = null;
         
         // Actor might not be added. Queue any requested
         // event subscriptions until we can register them.
@@ -42,7 +44,22 @@ define(function(require) {
         
         // A concrete shape, when left to "0" just the obb is used.
         this.shape = null; // TODO: implement this.
+        
+        this._entities = [];
     }
+    
+    Entity.prototype.add = function(entity) {
+        if(entity instanceof Entity) {
+            this._entities.push(entity);
+            entity.parent = this;
+            // This is to be called when added to the world.
+            // entity._onAdd(this);
+        } else {
+            throw new Error("Game::add is only meant for entities.");
+        }
+        
+        return entity;
+    };
     
     Entity.prototype.delete = function() {
         this._delete = true;
@@ -57,8 +74,8 @@ define(function(require) {
     Entity.prototype.onRightUp      = function(input) { console.log("Unoverridden event: onRightUp");    return true; }
     Entity.prototype.onRightClick   = function(input) { console.log("Unoverridden event: onRightClick"); return true; }
     Entity.prototype.onDoubleTap    = function(input) { console.log("Unoverridden event: onDoubleTap");  return true; }
-    Entity.prototype.onKeyDown      = function(input, key) { console.log("Unoverridden event: onKeyDown");    return true; }
-    Entity.prototype.onKeyUp        = function(input, key) { console.log("Unoverridden event: onKeyUp");      return true; }
+    Entity.prototype.onKeyDown      = function(input, key) { console.log("Unoverridden event: onKeyDown"); return true; }
+    Entity.prototype.onKeyUp        = function(input, key) { console.log("Unoverridden event: onKeyUp");   return true; }
     
     Entity.prototype.enableEvent = function(event) {        
         for(var i = 0; i < arguments.length; ++i) {            
@@ -162,26 +179,40 @@ define(function(require) {
     };
     
     Entity.prototype._onDelete = function(game) {
-                
+    
+        // Delete children:
+        this._entities.forEach(function(child) {
+            child._onDelete();
+        });
+    
         // Remove all event listeners:
         this._eventHandlers.forEach(function(handle) {
             this.game.input.unsubscribe(handle);
             return false;
         }.bind(this));
         
+        // A thorough clean.
+        this._entities.clear();
         this._eventHandlers.clear();
         
-        // User delete:
+        // User defined delete:
         this.onDelete(game);
     };
     
     Entity.prototype._onAdd = function(game) {
-        this.game = game;
+        this.game  = game;
         this.input = game.input;
         
         this._registerEvents();
         
+        // User defined onAdd function:
         this.onAdd(game);
+        
+        // Inform the sub entities:
+        this._entities.forEach(function(child) {
+            child._onAdd(game);
+        });
+        
     };
     
     Entity.prototype.onAdd = function(game) {
@@ -193,6 +224,18 @@ define(function(require) {
     };
 
     Entity.prototype.update = function(dt) {
+        this._entities.forEach(function(child) {
+            child.update(dt);
+        });
+        
+        // Overwrite method.
+    };
+    
+    Entity.prototype.draw = function(renderer) {
+        this._entities.forEach(function(child) {
+            child._draw(renderer);
+        });        
+        
         // Overwrite method.
     };
     
@@ -216,27 +259,23 @@ define(function(require) {
     };
     
     Entity.prototype._draw = function(renderer) {
+        // Store the current canvas transform.
+        renderer.save();
         
-        // Is there a draw function defined?
-        if(this.draw) {
-            // Store the current canvas transform.
-            renderer.save();
-            
-            renderer.alpha(this.opacity);
-            
-            // Transform the lot to match this entity.
-            renderer.translate(this.position.x, this.position.y);
-            renderer.scale(this.scale);
-            renderer.rotate(this.rotation);
-            
-            // Actual draw stuff:
-            this.draw(renderer);
-            
-            renderer.alpha(1);
-            
-            // Restore to the old transform.
-            renderer.restore();
-        }
+        renderer.alpha(this.opacity);
+                
+        // Transform the lot to match this entity.
+        renderer.translate(this.position.x, this.position.y);
+        renderer.scale(this.scale);
+        renderer.rotate(this.rotation);
+        
+        // Actual draw stuff:
+        this.draw(renderer);
+        
+        renderer.alpha(1);
+        
+        // Restore to the old transform.
+        renderer.restore();
     }
     
     
