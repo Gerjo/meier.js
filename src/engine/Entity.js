@@ -19,7 +19,7 @@ define(function(require) {
         this.position  = new Vector(x || 0, y || 0);
         this.rotation  = 0;
         this.scale     = 1;
-        this.opacity   = 0.5;
+        this.opacity   = 1;
         
         // A bounding box for click actions:
         this.width     = w || 30;
