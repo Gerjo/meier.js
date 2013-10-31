@@ -83,7 +83,7 @@ define(function(require) {
 
     /// Rotate any subsequent draw calls:
     Renderer.prototype.rotate = function(radians) {
-        this.context.rotate(radians);
+        this.context.rotate(-radians);
         this._rotation = radians;
         return this;
     };
