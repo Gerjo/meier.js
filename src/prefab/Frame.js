@@ -1,36 +1,23 @@
 define(function(require) {
     var Entity = require("meier/engine/Entity");
-    var Pixel  = require("meier/entities/Pixel");
+    var Pixel  = require("meier/prefab/Pixel");
     
     Frame.prototype = new Entity();
     function Frame(x, y, w, h) {
         Entity.call(this, x, y, w || 180, h || 180);
         
-        this.spacing = 30;
-        this.v       = 1;
+        this.spacing    = 30;
         
-        this.gridcolor = "rgba(0,0,0,0.1)";
-        this.axiscolor = "rgba(0,0,0,0.3)";
-        this.backdrop  = "rgba(0,0,0,0.1)";
-        this.shownum   = true;
+        this.gridcolor  = "rgba(0,0,0,0.1)";
+        this.axiscolor  = "rgba(0,0,0,0.3)";
+        this.backdrop   = "rgba(0,0,0,0.1)";
+        this.shownum    = true;
         this.labelcolor = "black";
-        this.labelfont  = "10px monospace"; 
-        
-        this.add(this.p = new Pixel());
+        this.labelfont  = "10px monospace";
     }
     
-    Frame.prototype.update = function(dt) {
-                
-        if(this.position.x != 0) {
-            this.rotation += dt * this.v;
-        }
-        
-        this.p.position = this.toLocal(this.input.clone());
-        
-        Entity.prototype.update.call(this, dt);
-    };
-    
     Frame.prototype.draw = function(r) {
+        Entity.prototype.draw.call(this, r);
         
         var steps = Math.max(this.width, this.height) / this.spacing;
         var s = (steps * 0.5 * this.spacing);
@@ -61,21 +48,10 @@ define(function(require) {
                 }
             }
         }.bind(this));
-
-        var local = this.toLocal(this.input);
-
-        r.begin();
-        r.circle(local, 2);
-        r.stroke("green");
         
-        r.begin();
-        r.line(local.x, local.y, local.x, 0);
-        r.line(local.x, local.y, 0, local.y);
-        r.stroke("rgba(0, 0, 0, 0.3)");
-
-        Entity.prototype.draw.call(this, r);
+        
     };
-    
+        
     return Frame;
     
 });

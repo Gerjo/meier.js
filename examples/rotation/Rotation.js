@@ -1,7 +1,7 @@
 define(function(require) {
     var Game   = require("meier/engine/Game");
-    var Frame  = require("meier/entities/Frame");
-    var Pixel  = require("meier/entities/Pixel");
+    var Frame  = require("./TestFrame");
+    var Pixel  = require("meier/prefab/Pixel");
     var Vector = require("meier/math/Vector");
     var Matrix = require("meier/math/Matrix");
 
