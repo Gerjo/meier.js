@@ -28,7 +28,8 @@ define(function(require) {
             return m;
         };
         
-        M.CreateProjection = function(v) {
+        /// Project on an axis.
+        M.CreateAxisProjection = function(v) {
             
             if(v.numrows < rows || v.numrows < columns) {
                 throw new Error("Vector[" + v.numrows + "] size doesn't fit in matrix[" +
@@ -48,9 +49,26 @@ define(function(require) {
             return m;
         }
         
+        M.CreateXoZ = function(angle) {
+            var sin = Math.sin(angle);
+            var cos = Math.cos(angle);
+            
+            var m = new M();
+            
+            m._[At(0,0)] =  cos;
+            m._[At(0,2)] =  sin;
+            
+            m._[At(1,1)] =  1;
+            
+            m._[At(2,0)] =  -sin;
+            m._[At(2,2)] =   cos;
+            
+            return m;
+        };
+        
         M.CreateXoY = function(angle) {
             var sin = Math.sin(angle);
-            var cos = Math.sin(angle);
+            var cos = Math.cos(angle);
             
             var m = new M();
             
@@ -65,17 +83,19 @@ define(function(require) {
         
         M.CreateYoZ = function(angle) {
             var sin = Math.sin(angle);
-            var cos = Math.sin(angle);
+            var cos = Math.cos(angle);
             
             var m = new M();
             
+            ///
+            /// cos -sin
+            /// sin cos
+            
             m._[At(0,0)] =  1;
-            
-            m._[At(1,0)] =  cos;
-            m._[At(1,1)] =  sin;
-            
-            m._[At(2,0)] =  -sin;
-            m._[At(2,1)] =  cos;
+            m._[At(1,1)] =  cos;
+            m._[At(1,2)] =  sin;
+            m._[At(2,1)] =  -sin;
+            m._[At(2,2)] =  cos;
             
             return m;
         };
@@ -193,8 +213,10 @@ define(function(require) {
             
             
             for(var i = 0; i < vector.numrows; ++i) {
+                r._[i] = 0;
+                
                 for(var j = 0; j < vector.numrows; ++j) {
-                    r._[i] += vector._[i] * this._[At(i, j)];
+                    r._[i] += vector._[j] * this._[At(i, j)];
                 }
             }
             // TODO: hack transform.
