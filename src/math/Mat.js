@@ -122,19 +122,19 @@ define(function(require) {
             var m    = new M();
               
             // First column:
-            m._[At(0,0)] = u._[0] * u._[0] + cos;
-            m._[At(1,0)] = u._[1] * u._[0] + sin * u._[2];
-            m._[At(2,0)] = u._[2] * u._[0] - sin * u._[1];
+            m._[At(0,0)] = u._[0] * u._[0] * vers + cos;
+            m._[At(1,0)] = u._[1] * u._[0] * vers + sin * u._[2];
+            m._[At(2,0)] = u._[2] * u._[0] * vers - sin * u._[1];
                
             // Second column:
-            m._[At(0,1)] = u._[1] * u._[0] - sin * u._[2];
-            m._[At(1,1)] = u._[1] * u._[1] + cos;
-            m._[At(2,1)] = u._[2] * u._[1] + sin * u._[0];
+            m._[At(0,1)] = u._[0] * u._[1] * vers - sin * u._[2];
+            m._[At(1,1)] = u._[1] * u._[1] * vers + cos;
+            m._[At(2,1)] = u._[2] * u._[1] * vers + sin * u._[0];
                
             // Third column:
-            m._[At(0,2)] = u._[1] * u._[0] + sin * u._[1];
-            m._[At(1,2)] = u._[2] * u._[1] - sin * u._[0];
-            m._[At(2,2)] = u._[2] * u._[2] + cos;
+            m._[At(0,2)] = u._[0] * u._[2] * vers + sin * u._[1];
+            m._[At(1,2)] = u._[1] * u._[2] * vers - sin * u._[0];
+            m._[At(2,2)] = u._[2] * u._[2] * vers + cos;
             
             return m;
         };
