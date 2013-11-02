@@ -117,7 +117,7 @@ define(function(require) {
             var u    = axis.clone().normalize();
             var sin  = Math.sin(angle);
             var cos  = Math.cos(angle);
-            var vers = 1 - cos;
+            var vers = 1 - cos; // versine
             
             var m    = new M();
               
@@ -156,6 +156,30 @@ define(function(require) {
                     throw new Error("Cannot use initial data. Array size doesn't match matrix size.");
                 }
             }
+        }
+        
+        if(isSquare && rows == 2) {
+            M.prototype.determinant = function() {
+                return this._[0] * this._[3] - this._[1] * this._[2]; 
+            };
+        } else if(isSquare && rows == 3) {
+            M.prototype.determinant = function() {
+                return (this._[At(0,0)] * this._[At(1,1)] * this._[At(2,2)]) +
+                       (this._[At(0,1)] * this._[At(1,2)] * this._[At(2,0)]) +
+                       (this._[At(0,2)] * this._[At(1,0)] * this._[At(2,1)]) -
+                       (this._[At(0,2)] * this._[At(1,1)] * this._[At(2,0)]) -
+                       (this._[At(0,1)] * this._[At(1,0)] * this._[At(2,2)]) -
+                       (this._[At(0,0)] * this._[At(1,2)] * this._[At(2,1)]);
+            };
+        } else {
+            M.prototype.determinant = function() {
+                if(!isSquare) {
+                    throw new Error("Matrix must be square.");
+                }
+                
+                throw new Error("TODO: implement.");
+                
+            };
         }
         
         M.prototype.transpose = function() {
