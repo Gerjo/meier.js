@@ -61,7 +61,6 @@ Array.prototype.random = function() {
     return this[Math.floor(Math.random() * this.length)];
 };
 
-
 /// Retrieve unique values from this array. Non javascript
 /// primitives (number, string) should use a custom compare
 /// function, else "references" are compared. Without the
@@ -200,6 +199,40 @@ String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
+/// Determine if a string starts with the given prefix:
+String.prototype.startsWith = function(suffix) {
+    
+    if(this.length < suffix.length) {
+        return false;
+    }
+    
+    for(var i = suffix.length - 1; i >= 0; --i) {
+        if(this[i] != suffix[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+};
+
+
+String.prototype.trim = function(string) {
+    if(typeof string == "undefined") {
+        return this.replace(/^\s+|\s+$/g, '');
+    }
+    
+    var r = this;
+    
+    while(r.endsWith(string)) {
+        r = r.substr(0, r.length - string.length);
+    }
+    
+    while(r.startsWith(string)) {
+        r = r.substr(string.length);
+    }
+    
+    return r;
+};
 
 /// Add support for context binding on older platforms e.g.: the ipad 1 or older ipods.
 ///
