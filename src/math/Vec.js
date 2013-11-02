@@ -27,6 +27,14 @@ define(function(require) {
             }
         }
         
+
+        /// In case we have an instance, but we are unsure about the number
+        /// of rows. This methods gives the type that one can instantiate.
+        /// e.g., var typeclone = new vector.type();
+        V.prototype.type = function() {
+            return V;
+        };
+        
         V.prototype.clone = function() {
             var v = new V();
             
@@ -78,6 +86,5 @@ define(function(require) {
         };
         
         return V;
-        
     };
 });
