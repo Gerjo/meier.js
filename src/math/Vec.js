@@ -27,6 +27,21 @@ define(function(require) {
             }
         }
         
+        V.prototype.equals = function(o) {
+            
+            if(o.numrows !== this.numrows) {
+                return false;
+            }
+            
+            
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                if(this._[i] !== o._[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
 
         /// In case we have an instance, but we are unsure about the number
         /// of rows. This methods gives the type that one can instantiate.
@@ -83,6 +98,22 @@ define(function(require) {
             }
             
             return r;
+        };
+        
+        V.prototype.pretty = function() {
+            var out = "", n, l = 6, d = 2;
+        
+            for(var i = 0, n; i < this.numrows; ++i) {
+                n = Round(this._[i], d) + "";
+            
+                out += n;
+            
+                for(var k = n.length; k < l; ++k) {
+                    out += " ";
+                }
+            }
+        
+            return out;
         };
         
         return V;
