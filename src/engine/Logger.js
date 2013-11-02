@@ -62,8 +62,7 @@ define(function(require){
         if(!this.showLogger) {
             return;
         }
-    
-    
+        
         var x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
         var y = this.offset.h;
         
