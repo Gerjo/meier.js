@@ -152,12 +152,48 @@ define(function(require) {
             return m;
         };
         
+        M.prototype.trace = function() {
+            if( ! isSquare) {
+                throw new Error("Trace is only defined for n*n square matrices.");
+            }
+            
+            var r = 0;
+            
+            for(var i = this.numrows - 1; i > 0; --i) {
+                r += this._[At(i, i)];
+            }
+            
+            return r;
+        };
+        
+        M.prototype.product = function(o) {
+            if(o.numcolumns !== this.numrows) {
+                throw new Error("Cannot multiply, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
+                "] and [" + o.numrows + "x" + o.numcolumns + "]");
+            }
+            
+            var m = new (Builder(o.numcolumns, this.numrows))();
+            
+            for(var i = 0; i < m.numrows; ++i) {
+                for(var j = 0; j < m.numcolumns; ++j) {
+                    
+                    m._[i * m.numcolumns + j] = 0; // for good measure.
+                    
+                    for(var k = 0; k < o.numrows; ++k) {
+                        m._[i * m.numcolumns + j] += this._[At(i, k)] * o.at(k, j);
+                    }
+                }
+            }
+            
+            return m;
+        };
+        
         M.prototype.transform = function(vector) {
             var r = new (vector.type())();
             
             
             for(var i = 0; i < vector.numrows; ++i) {
-                for(var j = 0; j < vector.numrows; ++j) {                    
+                for(var j = 0; j < vector.numrows; ++j) {
                     r._[i] += vector._[i] * this._[At(i, j)];
                 }
             }
@@ -189,6 +225,24 @@ define(function(require) {
             }
         
             return out;
+        };
+        
+        M.prototype.wolfram = function() {
+            var r = "{";
+        
+            for(var i = 0; i < this.numrows; ++i) {
+                r += "{"
+            
+                for(var j = 0; j < this.numcolumns; ++j) {
+                    r += this._[At(i, j)] + ",";
+                }
+            
+                r = r.trim(",") + "},"
+            }
+        
+            r = r.trim(",") + "}";
+        
+            return r;
         };
         
         return M;
