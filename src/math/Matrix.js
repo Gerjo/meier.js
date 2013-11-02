@@ -236,5 +236,23 @@ define(function(require) {
         return out;
     };
     
+    MeierMatrix.prototype.wolfram = function() {
+        var r = "{";
+        
+        for(var i = 0; i < this.length; ++i) {
+            r += "{"
+            
+            for(var j = 0; j < this[i].length; ++j) {
+                r += this[i][j] + ",";
+            }
+            
+            r = r.trim(",") + "},"
+        }
+        
+        r = r.trim(",") + "}";
+        
+        return r;
+    };
+    
     return MeierMatrix;
 });
