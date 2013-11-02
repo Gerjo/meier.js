@@ -1,17 +1,18 @@
 define(function(require) {
+    var Round = require("meier/math/Math").Round;
     
     var Storage = Float32Array || Array;
     
     return function(rows) {
         
         Object.defineProperties(V.prototype, {
-            "x": { get: function () { return this._[0]; }, set: function (v) { this._[0] = v; return this; } },
-            "y": { get: function () { return this._[1]; }, set: function (v) { this._[2] = v; return this; } },
+            "x": { get: function () { return this._[0]; }, set: function (v) { this._[0] = v; } },
+            "y": { get: function () { return this._[1]; }, set: function (v) { this._[1] = v; } },
         });
         
         if(rows > 2) {
             Object.defineProperties(V.prototype, {
-                "z": { get: function () { return this._[2]; }, set: function (v) { this._[2] = v; return this; } },
+                "z": { get: function () { return this._[2]; }, set: function (v) { this._[2] = v; } },
             });
         }
         
