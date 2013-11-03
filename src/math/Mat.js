@@ -158,6 +158,16 @@ define(function(require) {
             }
         }
         
+        M.prototype.clone = function() {
+            var m = new M();
+            
+            for(var i = this.num - 1; i >= 0; --i) {
+                m._[i] = this._[i];
+            }
+            
+            return m;
+        };
+        
         /////////////////////////////////////////////////////////////////////
         // DETERMINANT specialisation.
         /////////////////////////////////////////////////////////////////////
