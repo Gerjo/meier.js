@@ -93,6 +93,35 @@ define(function(require) {
             return m;
         }
         
+        /// Z X Z rotation.
+        M.CreateEulerAngles = function(precession, nutation, spin) {
+            var m = new M();
+            
+            var a = Math.cos(precession);
+            var b = Math.sin(precession);
+            var c = Math.cos(nutation);
+            var d = Math.sin(nutation);
+            var e = Math.cos(spin);
+            var f = Math.sin(spin);
+            
+            // First row:
+            m._[At(0, 0)] =  a*e - f*b*c;
+            m._[At(0, 1)] = -a*f - e*b*c
+            m._[At(0, 2)] =  d*b;
+            
+            // Second row:
+            m._[At(1, 0)] =  b*e + f*a*c;
+            m._[At(1, 1)] = -b*f + e*a*c;
+            m._[At(1, 2)] = -a*d;
+            
+            // Third row:
+            m._[At(2, 0)] = f*d;
+            m._[At(2, 1)] = e*d;
+            m._[At(2, 2)] = c;
+            
+            return m;
+        };
+        
         M.CreateXoZ = function(angle) {
             var sin = Math.sin(angle);
             var cos = Math.cos(angle);
