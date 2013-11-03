@@ -178,6 +178,18 @@ define(function(require) {
             return out;
         };
         
+        V.prototype.wolfram = function() {
+            var r = "{";
+        
+            for(var i = 0; i < this.numrows; ++i) {
+                r += this._[i] + ", ";
+            }
+        
+            r = r.trim(", ") + "}";
+        
+            return r;
+        };
+        
         return V;
     };
 });
