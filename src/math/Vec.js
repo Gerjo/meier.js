@@ -38,12 +38,21 @@ define(function(require) {
             }
         }
         
+        V.prototype.clone = function() {
+            var r = new V();
+            
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r._[i] = this._[i];
+            }
+            
+            return r;
+        }
+        
         V.prototype.equals = function(o) {
             
             if(o.numrows !== this.numrows) {
                 return false;
             }
-            
             
             for(var i = this.numrows - 1; i >= 0; --i) {
                 if(this._[i] !== o._[i]) {
@@ -52,7 +61,7 @@ define(function(require) {
             }
             
             return true;
-        }
+        };
 
         /// In case we have an instance, but we are unsure about the number
         /// of rows. This methods gives the type that one can instantiate.
@@ -129,9 +138,9 @@ define(function(require) {
                 }
                 
                 return new V ( 
-                    this._[1] * o._[2] - this._[2] * 0._[1],
-                    this._[2] * o._[0] - this._[0] * 0._[2],
-                    this._[0] * o._[1] - this._[1] * 0._[0]
+                    this._[1] * o._[2] - this._[2] * o._[1],
+                    this._[2] * o._[0] - this._[0] * o._[2],
+                    this._[0] * o._[1] - this._[1] * o._[0]
                 );
             };
         } else {
