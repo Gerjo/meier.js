@@ -254,19 +254,9 @@ define(function(require) {
                 throw new Error("Cannot multiply, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
                 "] and [" + o.numrows + "x" + o.numcolumns + "]");
             }
-            
-            //        x x
-            //        x x
-            //        x x 
-            // x x x    
-            // x x x           
-            //
-            
-            //var m = new (Builder(o.numcolumns, this.numrows))();
-            
+         
             var m = new (Builder(this.numrows, o.numcolumns))();
 
-            
             for(var row = 0; row < m.numrows; ++row) {
                 for(var col = 0; col < m.numcolumns; ++col) {
                     m._[row * m.numcolumns + col] = 0;
@@ -284,17 +274,6 @@ define(function(require) {
                     
                 }
             }
-            
-            /*for(var i = 0; i < m.numrows; ++i) {
-                for(var j = 0; j < m.numcolumns; ++j) {
-                    
-                    m._[i * m.numcolumns + j] = 0; // for good measure.
-                    
-                    for(var k = 0; k < m.numrows; ++k) {
-                        m._[i * m.numcolumns + j] += this._[At(i, k)] * o.at(k, j);
-                    }
-                }
-            }*/
             
             return m;
         };
