@@ -29,11 +29,11 @@ define(function(require) {
             this._[0] = x || 0;
             this._[1] = y || 0;
             
-            if(this.numrows == 2) {
+            if(this.numrows == 3) {
                 this._[2] = z || 0;
             }
             
-            if(this.numrows == 3) {
+            if(this.numrows == 4) {
                 this._[3] = w || 0;
             }
         }
