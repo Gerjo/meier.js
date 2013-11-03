@@ -392,7 +392,36 @@ define(function(require) {
                     r._[i] += vector._[j] * this._[At(i, j)];
                 }
             }
-            // TODO: hack transform.
+            
+            // Pretend the given vector has some homogeneous coordinates.
+            if(this.numcolumns > vector.numrows) {
+                for(var i = vector.numrows; i < this.numcolumns; ++i) {
+                    for(var j = 0; j < vector.numrows; ++j) {
+                        r._[j] += this._[At(j, i)];
+                    }
+                }
+                
+            }
+            
+            // HACK!
+            if(this.numrows === 4 && this.numcolumns === 4 && vector.numrows === 3) {
+                var w = vector._[0] * this._[At(3, 0)] +
+                        vector._[1] * this._[At(3, 1)] +
+                        vector._[2] * this._[At(3, 2)] +
+                                      this._[At(3, 3)]; 
+                
+                if(w != 1 && w != 0) {
+                    r._[0] /= w;
+                    r._[1] /= w;
+                    r._[2] /= w;
+                }
+                
+                if(verbose === true) {
+                    console.log("Hack w:" + w);
+                }
+                
+                //console.log("Hack w:" + w);
+            }
             
             return r;
         };
