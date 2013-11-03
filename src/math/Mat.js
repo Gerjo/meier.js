@@ -161,13 +161,13 @@ define(function(require) {
             var m = new M();
             
             ///
-            /// cos -sin
-            /// sin cos
+            ///    cos -sin
+            ///    sin cos
             
             m._[At(0,0)] =  1;
             m._[At(1,1)] =  cos;
-            m._[At(1,2)] =  sin;
-            m._[At(2,1)] =  -sin;
+            m._[At(1,2)] =  -sin;
+            m._[At(2,1)] =  sin;
             m._[At(2,2)] =  cos;
             
             return m;
