@@ -212,6 +212,27 @@ define(function(require) {
             return m;
         };
         
+        M.CreateTranslation = function(v) {
+            if(v.numrows > rows) {
+                throw new Error("Cannot create translation, too many rows in vector.");
+            }
+            
+            var m = new M();
+            
+            
+            
+            for(var i = 0; i < v.numrows; ++i) {
+                m._[At(i, i)]         = 1;
+                m._[At(i, columns-1)] = v._[i];
+            }
+            
+            for(var i = v.numrows - columns; i < columns; ++i) {
+                m._[At(i, i)] = 1;
+            }
+            
+            return m;
+        };
+        
         function M(data) {
             this.numrows    = rows;
             this.numcolumns = columns;
