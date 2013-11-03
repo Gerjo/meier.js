@@ -15,10 +15,19 @@ define(function(require){
     
     var M      = require("meier/math/Mat")(3);
     var V      = require("meier/math/Vec")(3);
+    var V2     = require("meier/math/Vec")(2);
+    var V3     = require("meier/math/Vec")(3);
     
     
     var M32    = require("meier/math/Mat")(3, 2);
     var M23    = require("meier/math/Mat")(2, 3);
+    
+    var M23 = require("meier/math/Mat")(2, 3);
+    var M32 = require("meier/math/Mat")(3, 2);
+    var M44 = require("meier/math/Mat")(4, 4);
+    
+    var M33 = require("meier/math/Mat")(3, 3);
+    
     
     Test.prototype = new Game();
     function Test(container) {
@@ -27,23 +36,48 @@ define(function(require){
      
         this.add(new Frame(0,0,this.width, this.height));
         
-        //var v = new V(1, 1, 1);
-        //var m = M.CreateAngleAxisRotation(Math.PI/2, v);
+        /*var a = new M32([
+            1, 0, 
+            0, 1,
+            1, 0
+        ]);
         
-        //console.log(m.pretty());
+        
+        //     x x x x
+        //     x x x x
+        // x x
+        // x x
+        
+        var at = a.transpose();
+        
+        
+        var t = a.product(at.product(a).inverse().product(at));
+        
+        
+        console.log(t.pretty());*/
+        
+        this.proj = M44.CreatePerspectiveProjection(0, 3000, Math.PI/2);
+       
+        console.log(this.proj.pretty());
+        
+        console.log(this.proj.transform(new V(100, 100, 4), true).wolfram());
+        
         
         this.rot = Math.PI/4;
         
-        var r = M.CreateYoZ(this.rot);
         
-        console.log(r.pretty());
         
         this.box = [
-            new V(0, 0, 0),
-            new V(100, 0, 0),
-            
-            new V(100, 100, 0),
-            new V(0, 100, 0)
+        new V(0, 0, 0),
+        new V(100, 0, 0),
+        new V(100, 100, 0),
+        new V(0, 100, 0),
+        
+        new V(0, 100, 200),
+        new V(100, 100, 200),
+        new V(100, 0, 200),
+        
+        new V(0, 0, 200)
         ];
         
         
@@ -68,7 +102,10 @@ define(function(require){
         // Window.
         var view = M.CreateAxisProjection(new V(1, 1, 1));
         
-        //var r = M.CreateAngleAxisRotation(this.rot, new V(1, 0, 0));
+     
+        var r = M.CreateAngleAxisRotation(this.input.x / 100, new V(0, 1, 0));
+                
+        r = r.product(M.CreateAngleAxisRotation(this.input.y / -100, new V(1, 0, 0)));
         
        // this.rot = Math.PI / 2;
        
@@ -81,30 +118,28 @@ define(function(require){
        // About x axis
        //var r = M.CreateYoZ(this.rot);
        
-       
-       
        //var r = M.CreateIdentity();
-       var r = M.CreateYoZ(this.rot);
+        //var r = M.CreateYoZ(this.rot);
+        
+        r = M.CreateEulerAngles(this.rot, this.rot, this.rot);
+        
         
         var poly = [];
         
         for(var i = 0, p; i < this.box.length; ++i) {
-            p = r.transform(this.box[i]);
-            //p = this.box[i];
-            //p = view.transform(p);
+            p = this.box[i];
             
-            //p.x = 8;
+            p = r.transform(p);
             
             poly.push(p);
-            
-            
+                        
             renderer.circle(p.x, p.y, 2);
-            //renderer.circle(this.box[i].x, this.box[i].y, 2);
         }
         
         renderer.polygon(poly);
         
         renderer.stroke("red");
+        renderer.fill("rgba(0,0,0,0.1)");
         
         renderer.restore();
     }
