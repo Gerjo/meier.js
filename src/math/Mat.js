@@ -9,6 +9,19 @@ define(function(require) {
     var Builder = function(rows, columns) {
         columns = typeof columns === "undefined" ? rows : columns;
         
+        if(isNaN(rows) || typeof rows !== "number") {
+            throw new Error("Cannot import matrix. Invalid row size.");
+        }
+        
+        if(isNaN(columns) || typeof columns !== "number") {
+            throw new Error("Cannot import matrix. Invalid column size.");
+        }
+        
+        if(rows < 2 || columns < 2) {
+            throw new Error("Matrices smaller than 2x2 are not supported yet.");
+        }
+        
+        
         var isSquare = rows === columns;
         var length   = rows * columns;
         

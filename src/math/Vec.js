@@ -5,6 +5,14 @@ define(function(require) {
     
     return function(rows) {
         
+        if(isNaN(rows) || typeof rows !== "number") {
+            throw new Error("Cannot import vector. Invalid row size.");
+        }
+        
+        if(rows < 2) {
+            throw new Error("Vector row size smaller than 2 is not yet supported.");
+        }
+        
         Object.defineProperties(V.prototype, {
             "x": { get: function () { return this._[0]; }, set: function (v) { this._[0] = v; } },
             "y": { get: function () { return this._[1]; }, set: function (v) { this._[1] = v; } },
