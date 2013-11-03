@@ -25,7 +25,6 @@ define(function(require){
     var M23 = require("meier/math/Mat")(2, 3);
     var M32 = require("meier/math/Mat")(3, 2);
     var M44 = require("meier/math/Mat")(4, 4);
-    
     var M33 = require("meier/math/Mat")(3, 3);
     
     
@@ -33,6 +32,7 @@ define(function(require){
     function Test(container) {
         Game.call(this, container);
         
+        this.setFps(60);
      
         this.add(new Frame(0,0,this.width, this.height));
         
@@ -80,7 +80,21 @@ define(function(require){
         new V(0, 0, 200)
         ];
         
+        this.rot = 12;
         
+        var param = M.CreateEulerParametersTransform(this.rot, new V(1, 1, 1));
+        var axis = M.CreateAngleAxisRotation(this.rot, new V(1, 1, 1));
+        
+        console.log("eulerparam:");
+        console.log(param.pretty());
+        
+        console.log("axis angle:");
+        console.log(axis.pretty());
+        
+        var euler = M.CreateEulerAngles(Math.PI/6, Math.PI/4, Math.PI/3);
+        
+        console.log("euler angles:");
+        console.log(euler.pretty());
         
     }
     
@@ -94,54 +108,54 @@ define(function(require){
     Test.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        renderer.save();
-        renderer.begin();
-        //renderer.scale(30);
+        //this.rot = Math.PI/3;
         
         
-        // Window.
-        var view = M.CreateAxisProjection(new V(1, 1, 1));
         
-     
-        var r = M.CreateAngleAxisRotation(this.input.x / 100, new V(0, 1, 0));
-                
-        r = r.product(M.CreateAngleAxisRotation(this.input.y / -100, new V(1, 0, 0)));
+        var euler = M.CreateEulerAngles(this.rot, this.rot, this.rot);
+
+        var z = M.CreateXoY(this.rot);
+        var y = M.CreateXoZ(this.rot);
+        var x = M.CreateYoZ(this.rot);
         
-       // this.rot = Math.PI / 2;
-       
-       // Rotate as usual.
-       //var r = M.CreateXoY(this.rot);
-       
-       // About y axis
-       //var r = M.CreateXoZ(this.rot);
-       
-       // About x axis
-       //var r = M.CreateYoZ(this.rot);
-       
-       //var r = M.CreateIdentity();
-        //var r = M.CreateYoZ(this.rot);
+        var xyz = z.product(x).product(y);
         
-        r = M.CreateEulerAngles(this.rot, this.rot, this.rot);
+        var t1 = M44.CreateTranslation(new V(-100, 0, 0));
+        var t2 = M44.CreateTranslation(new V(100, 0, 0));
         
+        var param = M.CreateEulerParametersTransform(this.rot, new V(1, 1, 1));
+        var axis = M.CreateAngleAxisRotation(this.rot, new V(1, 1, 1));
         
+        // Build first polytope:
         var poly = [];
-        
         for(var i = 0, p; i < this.box.length; ++i) {
             p = this.box[i];
-            
-            p = r.transform(p);
-            
+            p = param.transform(p);
+            p = t1.transform(p);
             poly.push(p);
-                        
-            renderer.circle(p.x, p.y, 2);
         }
-        
+        renderer.begin();
         renderer.polygon(poly);
-        
-        renderer.stroke("red");
+        renderer.stroke("black");
         renderer.fill("rgba(0,0,0,0.1)");
+        renderer.text("Euler–Rodrigues", 300, 20, "black");    
         
-        renderer.restore();
+        //return false;
+        
+        // Build second polytope:
+        var poly2 = [];
+        for(var i = 0, p; i < this.box.length; ++i) {
+            p = this.box[i];
+            p = axis.transform(p);
+            p = t2.transform(p);
+            poly2.push(p);
+        }
+        renderer.begin();
+        renderer.polygon(poly2);
+        renderer.stroke("red");
+        renderer.fill("rgba(255,0,0,0.1)");    
+        renderer.text("Axis angle rotation", 300, 40, "red");    
+        
     }
     
     return Test;
