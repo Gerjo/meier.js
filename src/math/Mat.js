@@ -382,9 +382,14 @@ define(function(require) {
             return m;
         };
         
-        M.prototype.transform = function(vector) {
+        
+        /// Transform vectors for graphics purposes. Does probably 
+        /// not do what you'd expect.
+        ///
+        M.prototype.transform = function(vector, verbose) {
             var r = new (vector.type())();
             
+            // Multiply what we can:
             for(var i = 0; i < vector.numrows; ++i) {
                 r._[i] = 0;
                 
@@ -458,10 +463,10 @@ define(function(require) {
                 r += "{"
             
                 for(var j = 0; j < this.numcolumns; ++j) {
-                    r += this._[At(i, j)] + ",";
+                    r += this._[At(i, j)] + ", ";
                 }
             
-                r = r.trim(",") + "},"
+                r = r.trim(", ") + "},"
             }
         
             r = r.trim(",") + "}";
