@@ -10,21 +10,31 @@ define(function(require) {
             "y": { get: function () { return this._[1]; }, set: function (v) { this._[1] = v; } },
         });
         
-        if(rows > 2) {
+        if(rows == 3) {
             Object.defineProperties(V.prototype, {
                 "z": { get: function () { return this._[2]; }, set: function (v) { this._[2] = v; } },
             });
         }
         
-        function V(x, y, z) {
+        if(rows == 3) {
+            Object.defineProperties(V.prototype, {
+                "w": { get: function () { return this._[3]; }, set: function (v) { this._[3] = v; } },
+            });
+        }
+        
+        function V(x, y, z, w) {
             this.numrows = rows;
             
             this._ = new Storage(this.numrows);
             this._[0] = x || 0;
             this._[1] = y || 0;
             
-            if(this.numrows > 2) {
+            if(this.numrows == 2) {
                 this._[2] = z || 0;
+            }
+            
+            if(this.numrows == 3) {
+                this._[3] = w || 0;
             }
         }
         
@@ -100,6 +110,40 @@ define(function(require) {
             
             return r;
         };
+        
+        ///////////////////////////////////////////////////////////////////////
+        // CROSS PRODUCT specialisation:
+        ///////////////////////////////////////////////////////////////////////
+        if(rows == 2) {
+            V.prototype.cross = function(o) {
+                if(rows != o.numrows) {
+                    throw new Error("Cannot cross. Row count does not match.");
+                } 
+                
+                return this._[0] * o._[1] - this._[1] * o._[0];
+            };
+        } else if(rows == 3) {
+            V.prototype.cross = function(o) {
+                if(rows != o.numrows) {
+                    throw new Error("Cannot cross. Row count does not match.");
+                }
+                
+                return new V ( 
+                    this._[1] * o._[2] - this._[2] * 0._[1],
+                    this._[2] * o._[0] - this._[0] * 0._[2],
+                    this._[0] * o._[1] - this._[1] * 0._[0]
+                );
+            };
+        } else {
+            V.prototype.cross = function(o) {
+                if(rows != o.numrows) {
+                    throw new Error("Cannot cross. Row count does not match.");
+                } 
+                
+                // TODO: once matrix determinant logic works, copy paste that.
+                throw new Error("TODO: implement cross product for n > 3");
+            };
+        }
         
         V.prototype.pretty = function() {
             var out = "", n, l = 6, d = 2;
