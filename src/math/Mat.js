@@ -233,6 +233,39 @@ define(function(require) {
             return m;
         };
         
+        M.CreateEulerParametersTransform = function(theta, axis) {
+            
+            if(axis.numrows < 3) {
+                throw new Error("CreateEulerParametersTransform the axis needs at least 3 components.");
+            }
+            
+            var u = axis.clone().normalize();
+            
+            var e0 = Math.cos(theta / 2);
+            var e1 = u._[0] * Math.sin(theta / 2);
+            var e2 = u._[1] * Math.sin(theta / 2);
+            var e3 = u._[2] * Math.sin(theta / 2);
+            
+            var m = new M();
+            
+            // First row
+            m._[At(0,0)] = e0*e0 + e1*e1 - e2*e2 - e3*e3;
+            m._[At(0,1)] = 2 * (e1*e2 - e0*e3);
+            m._[At(0,2)] = 2 * (e0*e2 + e1*e3);
+            
+            // Second row
+            m._[At(1,0)] = 2 * (e0*e3 + e1*e2);
+            m._[At(1,1)] = e0*e0 - e1*e1 + e2*e2 - e3*e3;
+            m._[At(1,2)] = 2 * (e2*e3 - e0*e1);
+            
+            // Third row
+            m._[At(2,0)] = 2 * (e1*e3 - e0*e2);
+            m._[At(2,1)] = 2 * (e0*e1 + e2*e3);
+            m._[At(2,2)] = e0*e0 - e1*e1 - e2*e2 + e3*e3;
+
+            return m;
+        };
+        
         function M(data) {
             this.numrows    = rows;
             this.numcolumns = columns;
