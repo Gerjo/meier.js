@@ -41,6 +41,37 @@ define(function(require) {
             return m;
         };
         
+        M.CreatePerspectiveProjection = function(near, far, fieldOfView) {
+            if(rows < 4 || rows < 4) {
+                throw new Error("Perspective only available for [4x4] matrices.");
+            }
+            
+            var fn = far - near;
+            
+            var a = far / fn;
+            var b = a * near;//f * n / fn;
+            var s = 1 / Math.tan(fieldOfView * 0.5)
+            
+            var m = new M([
+                s,  0,  0,  0,    
+                0,  s,  0,  0,
+                0,  0, -a, -1,
+                0,  0, -b,  0
+            ]);
+            
+            return m;
+        };
+        
+        M.CreatePlaneProjection = function(normal) {
+            var m = new M();
+            
+            var a = 3;
+            var b = 3;
+            
+            
+            return m;
+        };
+        
         /// Project on an axis.
         M.CreateAxisProjection = function(v) {
             
