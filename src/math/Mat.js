@@ -158,6 +158,9 @@ define(function(require) {
             }
         }
         
+        /////////////////////////////////////////////////////////////////////
+        // DETERMINANT specialisation.
+        /////////////////////////////////////////////////////////////////////
         if(isSquare && rows == 2) {
             M.prototype.determinant = function() {
                 return this._[0] * this._[3] - this._[1] * this._[2]; 
@@ -174,10 +177,45 @@ define(function(require) {
         } else {
             M.prototype.determinant = function() {
                 if(!isSquare) {
-                    throw new Error("Matrix must be square.");
+                    throw new Error("Matrix must be square for determinant.");
                 }
                 
-                throw new Error("TODO: implement.");
+                throw new Error("TODO: implement determinant.");
+                
+            };
+        }
+        
+        /////////////////////////////////////////////////////////////////////
+        // INVERSE specialisation.
+        /////////////////////////////////////////////////////////////////////
+        if(isSquare && rows == 2) {
+            M.prototype.inverse = function() {
+                var m = new M();
+                var d = this.determinant();
+                
+                if(d == 0) {
+                    console.error("Cannot inverse a matrix with determinant 0.");
+                    
+                    return m;
+                }
+                
+                d = 1 / d;
+                
+                m._[0] = this._[3] * d;
+                m._[3] = this._[0] * d;
+                
+                m._[1] = -this._[1] * d;
+                m._[2] = -this._[2] * d;
+                
+                return m;
+            };
+        } else {
+            M.prototype.inverse = function() {
+                if(!isSquare) {
+                    throw new Error("Matrix must be square for inverse.");
+                }
+                
+                throw new Error("TODO: implement inverse.");
                 
             };
         }
@@ -211,30 +249,58 @@ define(function(require) {
         };
         
         M.prototype.product = function(o) {
-            if(o.numcolumns !== this.numrows) {
+            //if(this.numrows !== o.numcolumns) {
+            if(this.numrows !== o.numrows && o.numrows !== this.numcolumns) {
                 throw new Error("Cannot multiply, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
                 "] and [" + o.numrows + "x" + o.numcolumns + "]");
             }
             
-            var m = new (Builder(o.numcolumns, this.numrows))();
+            //        x x
+            //        x x
+            //        x x 
+            // x x x    
+            // x x x           
+            //
             
-            for(var i = 0; i < m.numrows; ++i) {
+            //var m = new (Builder(o.numcolumns, this.numrows))();
+            
+            var m = new (Builder(this.numrows, o.numcolumns))();
+
+            
+            for(var row = 0; row < m.numrows; ++row) {
+                for(var col = 0; col < m.numcolumns; ++col) {
+                    m._[row * m.numcolumns + col] = 0;
+                    
+                    for(var k = 0; k < this.numcolumns; ++k) {
+                        m._[row * m.numcolumns + col] += (
+                            this._[At(row, k)] * o.at(k, col)
+                        );
+                        
+                        if(isNaN(m._[row * m.numcolumns + col])) {
+                            console.log("Error: col:",col, "k:",k);
+                        }
+                        
+                    }
+                    
+                }
+            }
+            
+            /*for(var i = 0; i < m.numrows; ++i) {
                 for(var j = 0; j < m.numcolumns; ++j) {
                     
                     m._[i * m.numcolumns + j] = 0; // for good measure.
                     
-                    for(var k = 0; k < o.numrows; ++k) {
+                    for(var k = 0; k < m.numrows; ++k) {
                         m._[i * m.numcolumns + j] += this._[At(i, k)] * o.at(k, j);
                     }
                 }
-            }
+            }*/
             
             return m;
         };
         
         M.prototype.transform = function(vector) {
             var r = new (vector.type())();
-            
             
             for(var i = 0; i < vector.numrows; ++i) {
                 r._[i] = 0;
