@@ -1,5 +1,7 @@
 define(function(require){
     var Game         = require("meier/engine/Game");
+    var Input        = require("meier/engine/Input");
+    var Key          = require("meier/engine/Key");
     var AvlTree      = require("meier/collections/AvlTree");
     var Polygon      = require("meier/math/Polygon");
     var Vector       = require("meier/math/Vector");
@@ -30,160 +32,65 @@ define(function(require){
     
     Test.prototype = new Game();
     function Test(container) {
+        
         Game.call(this, container);
         
         this.setFps(60);
-     
         this.add(new Frame(0,0,this.width, this.height));
         
-        /*var a = new M32([
-            1, 0, 
-            0, 1,
-            1, 0
-        ]);
+
+        this.rotation = new V3(0, 0, 0.1);
         
-        
-        //     x x x x
-        //     x x x x
-        // x x
-        // x x
-        
-        var at = a.transpose();
-        
-        
-        var t = a.product(at.product(a).inverse().product(at));
-        
-        
-        console.log(t.pretty());*/
-        
-        this.proj = M44.CreatePerspectiveProjection(0, 3000, Math.PI/2);
-       
-        console.log(this.proj.pretty());
-        
-        console.log(this.proj.transform(new V(100, 100, 4), true).wolfram());
-        
-        
-        this.rot = Math.PI/4;
-        
-        
-        
-        this.box = [
-        new V(0, 0, 0),
-        new V(100, 0, 0),
-        new V(100, 100, 0),
-        new V(0, 100, 0),
-        
-        new V(0, 100, 200),
-        new V(100, 100, 200),
-        new V(100, 0, 200),
-        
-        new V(0, 0, 200)
-        ];
-        
-        this.rot = 12;
-        
-        var param = M.CreateEulerParametersTransform(this.rot, new V(1, 1, 1));
-        var axis = M.CreateAngleAxisRotation(this.rot, new V(1, 1, 1));
-        
-        console.log("eulerparam:");
-        console.log(param.pretty());
-        
-        console.log("axis angle:");
-        console.log(axis.pretty());
-        
-        var euler = M.CreateEulerAngles(Math.PI/6, Math.PI/4, Math.PI/3);
-        
-        console.log("euler angles:");
-        console.log(euler.pretty());
-        
+        this.input.subscribe(Input.KEY_DOWN, function(input, key) {
+            
+        });
     }
     
     Test.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
-        this.rot += dt;
-        
         
     };
     
     Test.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        //this.rot = Math.PI/3;
+        var s = M33.CreateScale(30);
+        var z = M33.CreateXoY(this.rotation.z);
+        var y = M33.CreateXoZ(this.input.x / 300);
+        var x = M33.CreateYoZ(this.input.y / -300);
         
+        var v = x.product(s).product(z).product(y);
         
+        var p = new V3(2, -5, 4);
+        var q = new V3(4,  2, 4);
+        var c = p.cross(q);
         
-        var euler = M.CreateEulerAngles(this.rot, this.rot, this.rot);
-
-        var z = M.CreateXoY(this.rot);
-        var y = M.CreateXoZ(this.rot);
-        var x = M.CreateYoZ(this.rot);
+        console.log(c.length() / p.length());
         
-        var xyz = z.product(x).product(y);
-        
-        var t1 = M44.CreateTranslation(new V(-350, 0, 0));
-        var t2 = M44.CreateTranslation(new V(-150, 0, 0));
-        var t3 = M44.CreateTranslation(new V(150, 0, 0));
-        var t4 = M44.CreateTranslation(new V(300, 0, 0));
-        
-        var param = M.CreateEulerParametersTransform(this.rot, new V(1, 1, 1));
-        var axis = M.CreateAngleAxisRotation(this.rot, new V(1, 1, 1));
-        
-        // Build first polytope:
-        var poly1 = [];
-        for(var i = 0, p; i < this.box.length; ++i) {
-            p = this.box[i];
-            p = param.transform(p);
-            p = t1.transform(p);
-            poly1.push(p);
-        }
         renderer.begin();
-        renderer.polygon(poly1);
-        renderer.stroke("black");
-        renderer.fill("rgba(0,0,0,0.1)");
-        renderer.text("Euler–Rodrigues (1,1,1)", -350, -40, "black");    
+        renderer.line(
+            v.transform(p).x,
+            v.transform(p).y,
+            v.transform(q).x,
+            v.transform(q).y
+        );
+        
+        renderer.arrow(0,0,
+            v.transform(c).x,
+            v.transform(c).y
+        );
+        
+        renderer.stroke("red", 1);
         
         
-        // Build second polytope:
-        var poly2 = [];
-        for(var i = 0, p; i < this.box.length; ++i) {
-            p = this.box[i];
-            p = axis.transform(p);
-            p = t2.transform(p);
-            poly2.push(p);
-        }
         renderer.begin();
-        renderer.polygon(poly2);
-        renderer.stroke("red");
-        renderer.fill("rgba(255,0,0,0.1)");    
-        renderer.text("Axis angle rotation (1,1,1)", -130, -40, "red");    
-        
-        // Build third polytope:
-        var poly3 = [];
-        for(var i = 0, p; i < this.box.length; ++i) {
-            p = this.box[i];
-            p = euler.transform(p);
-            p = t3.transform(p);
-            poly3.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly3);
-        renderer.stroke("blue");
-        renderer.fill("rgba(0,0,255,0.1)");    
-        renderer.text("XZX Euler Angles", 150, -40, "blue");    
-        
-        // Build third polytope:
-        var poly4 = [];
-        for(var i = 0, p; i < this.box.length; ++i) {
-            p = this.box[i];
-            p = xyz.transform(p);
-            p = t4.transform(p);
-            poly4.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly4);
-        renderer.stroke("green");
-        renderer.fill("rgba(0,255,0,0.1)");    
-        renderer.text("XYZ rotation", 300, -40, "green");    
+        [new V3(6,0,0), new V3(0,6,0), new V3(0,0,6)].forEach(function(a) {
+            renderer.arrow(0,0,
+                v.transform(a).x,
+                v.transform(a).y
+            );
+        });
+        renderer.stroke("black", 2);
         
     }
     
