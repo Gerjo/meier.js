@@ -120,27 +120,28 @@ define(function(require){
         
         var xyz = z.product(x).product(y);
         
-        var t1 = M44.CreateTranslation(new V(-100, 0, 0));
-        var t2 = M44.CreateTranslation(new V(100, 0, 0));
+        var t1 = M44.CreateTranslation(new V(-350, 0, 0));
+        var t2 = M44.CreateTranslation(new V(-150, 0, 0));
+        var t3 = M44.CreateTranslation(new V(150, 0, 0));
+        var t4 = M44.CreateTranslation(new V(300, 0, 0));
         
         var param = M.CreateEulerParametersTransform(this.rot, new V(1, 1, 1));
         var axis = M.CreateAngleAxisRotation(this.rot, new V(1, 1, 1));
         
         // Build first polytope:
-        var poly = [];
+        var poly1 = [];
         for(var i = 0, p; i < this.box.length; ++i) {
             p = this.box[i];
             p = param.transform(p);
             p = t1.transform(p);
-            poly.push(p);
+            poly1.push(p);
         }
         renderer.begin();
-        renderer.polygon(poly);
+        renderer.polygon(poly1);
         renderer.stroke("black");
         renderer.fill("rgba(0,0,0,0.1)");
-        renderer.text("Euler–Rodrigues", 300, 20, "black");    
+        renderer.text("Euler–Rodrigues (1,1,1)", -350, -40, "black");    
         
-        //return false;
         
         // Build second polytope:
         var poly2 = [];
@@ -154,7 +155,35 @@ define(function(require){
         renderer.polygon(poly2);
         renderer.stroke("red");
         renderer.fill("rgba(255,0,0,0.1)");    
-        renderer.text("Axis angle rotation", 300, 40, "red");    
+        renderer.text("Axis angle rotation (1,1,1)", -130, -40, "red");    
+        
+        // Build third polytope:
+        var poly3 = [];
+        for(var i = 0, p; i < this.box.length; ++i) {
+            p = this.box[i];
+            p = euler.transform(p);
+            p = t3.transform(p);
+            poly3.push(p);
+        }
+        renderer.begin();
+        renderer.polygon(poly3);
+        renderer.stroke("blue");
+        renderer.fill("rgba(0,0,255,0.1)");    
+        renderer.text("XZX Euler Angles", 150, -40, "blue");    
+        
+        // Build third polytope:
+        var poly4 = [];
+        for(var i = 0, p; i < this.box.length; ++i) {
+            p = this.box[i];
+            p = xyz.transform(p);
+            p = t4.transform(p);
+            poly4.push(p);
+        }
+        renderer.begin();
+        renderer.polygon(poly4);
+        renderer.stroke("green");
+        renderer.fill("rgba(0,255,0,0.1)");    
+        renderer.text("XYZ rotation", 300, -40, "green");    
         
     }
     
