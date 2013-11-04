@@ -41,6 +41,17 @@ define(function(require) {
             return m;
         };
         
+        M.CreateScale = function(s) {
+            var m = new M();
+            
+            // Load identity matrix. May fail on some sizes.
+            for(var i = columns - 1; i >= 0; --i) {
+                m._[At(i, i)] = s;
+            }
+            
+            return m;
+        };
+        
         M.CreatePerspectiveProjection = function(near, far, fieldOfView) {
             if(rows < 4 || rows < 4) {
                 throw new Error("Perspective only available for [4x4] matrices.");
