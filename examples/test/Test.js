@@ -11,8 +11,6 @@ define(function(require){
     var Frame        = require("meier/prefab/Frame");
     var Pixel        = require("meier/prefab/Pixel");
     var Matrix       = require("meier/math/Matrix");
-    var Matrix4      = require("meier/math/Matrix4");
-    var Vector3      = require("meier/math/Vector3");
     
     
     var M      = require("meier/math/Mat")(3);
@@ -64,9 +62,7 @@ define(function(require){
         var p = new V3(2, -5, 4);
         var q = new V3(4,  2, 4);
         var c = p.cross(q);
-        
-        console.log(c.length() / p.length());
-        
+                
         renderer.begin();
         renderer.line(
             v.transform(p).x,
