@@ -5,14 +5,39 @@
  !*
  !*/
 
+///
+/// .width .height
+/// .position.x, .position.y
+///
 
 define(function(require) {
-    var Vector = require("meier/math/Vector");
+    var Vector    = require("meier/math/Vector");
+    var Rectangle = require("meier/math/Rectangle");
+    
+    function ActorRectangle(actor, rectangle) {
+        var hh = actor.width * 0.5;
+        var hw = actor.height * 0.5;
+        
+        var b = {
+            min: { x: actor.position.x - hw , y: actor.position.y - hh },
+            max: { x: actor.position.x + hw , y: actor.position.y + hh },
+        };
+        
+        var a = rectangle;
+        
+        return a.min.x <= b.max.x &&
+               b.min.x <= a.max.x &&
+               a.min.y <= b.max.y &&
+               b.min.y <= a.max.y ;
+    }
     
     // My query-by-criterion-self-adjusting-tree.
     function Tree(w, h) {
         // Creation constructor:
         if(w && h) {
+            var hh = h * 0.5;
+            var hw = w * 0.5;
+            
             this.root = new Node(0, 0, w, h);
     
         // Default constructor, in case of inheritance:
@@ -29,22 +54,23 @@ define(function(require) {
         //this.root = new Node(0, 0, w, h);
     };
 
-    Tree.prototype.insert = function(actor) {
+    Tree.prototype.add = function(actor) {
         this.root.insert(actor);
     };
 
-    Tree.prototype.draw = function(context) {
-        context.beginPath();
-        context.fillStyle = "rgba(0, 0, 0, 0.1)";
-        context.strokeStyle = "rgba(255, 0, 0, 0.1)";
-        this.root.draw(context);
+    Tree.prototype.draw = function(renderer) {
+        renderer.begin();
+        this.root.draw(renderer);
+        renderer.stroke("rgba(0, 0, 0, 0.5)");
+        renderer.fill("rgba(0, 0, 0, 0.1)");
     };
 
     Tree.prototype.visit = function(criterion, callback) {
-    
+        
         var out = [];
     
         this.root.getAllSpaces(out, criterion);
+            
     
         for(var k = 0; k < out.length; ++k) {
             if( ! callback(out[k])) {
@@ -92,7 +118,7 @@ define(function(require) {
     };
 
 
-    function Criterion( minimalSize, maximalSize, minimalEntities, maximalEntities, permitDiagonal) {
+    function Criterion(minimalSize, maximalSize, minimalEntities, maximalEntities, permitDiagonal) {
         this.minimalSize     = minimalSize || 1;
         this.maximalSize     = maximalSize || 10;
         this.minimalEntities = minimalEntities || 1;
@@ -107,18 +133,25 @@ define(function(require) {
     Criterion.Response.DISBURSE = 1;
     Criterion.Response.PASS     = 2;
 
-
+    
     Node.Counter = 0;
 
-    function Node(x1, y1, x2, y2) {
+    function Node(x, y, w ,h) {
+        
         this.id        = Node.Counter++;
-        this.rectangle = new Rectangle(x1, y1, x2, y2);
+        this.rectangle = new Rectangle(x, y, w, h);
         this.flag      = 0;
         this.actors    = [];
     
         this.left  = null;
         this.right = null;
         this.hasDisbursed = false;
+        
+        var hw = w * 0.5;
+        var hh = h * 0.5;
+        
+        this.x = x;
+        this.y 
     }
 
     Node.prototype.getActorsFromRectangle = function(out, rectangle, tolerance) {
@@ -187,7 +220,8 @@ define(function(require) {
 
     // TODO: Rename? Node / Space consistency...
     Node.prototype.getAllSpaces = function(out, criterion) {
-        switch(this.getCriterionReponse(criterion)) {
+        var c = this.getCriterionReponse(criterion);
+        switch(c) {
             case Criterion.Response.PASS:
                 out.push(this);
                 break;
@@ -204,6 +238,9 @@ define(function(require) {
                 this.right.getAllSpaces(out, criterion);
     
                 break;
+            default:
+                throw new Error("Unacceptable error. Criterion response is unknown:" + c);
+                
         }
     };
 
@@ -265,7 +302,7 @@ define(function(require) {
     };
 
     Node.prototype.insert = function(actor) {
-        if(this.rectangle.intersects(actor.rectangle)) {
+        if(ActorRectangle(actor, this.rectangle)) {
             this.flag |= actor.type;        
             this.actors.push(actor);
         }
@@ -285,29 +322,18 @@ define(function(require) {
         this.right && this.right.clear();
     };
 
-    Node.prototype.draw = function(context) {
-    
-        context.fillRect(
+    Node.prototype.draw = function(renderer) {
+        
+        //console.log("drw", this.rectangle);
+        
+        renderer.rectangle(
             this.rectangle.min.x, 
             this.rectangle.min.y, 
             this.rectangle.max.x - this.rectangle.min.x, 
             this.rectangle.max.y - this.rectangle.min.y);
     
-        if(this.actors.length > 0) {
-            context.strokeRect(
-            this.rectangle.min.x, 
-            this.rectangle.min.y, 
-            this.rectangle.max.x - this.rectangle.min.x, 
-            this.rectangle.max.y - this.rectangle.min.y);
-        }
-    
-        this.left  && this.left.draw(context);
-        this.right && this.right.draw(context);
-    };
-
-    Node.prototype.visit = function(criteron, callback) {
-    
-        return true;
+        this.left  && this.left.draw(renderer);
+        this.right && this.right.draw(renderer);
     };
 
     Node.prototype.getCriterionReponse = function(heuristic) {
@@ -397,6 +423,9 @@ define(function(require) {
             }
         }  
     };
+    
+    Tree.Criterion = Criterion;
+    Tree.Node      = Node;
     
     return Tree;
 });

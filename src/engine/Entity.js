@@ -21,6 +21,7 @@ define(function(require) {
         this.rotation  = 0;
         this.scale     = 1;
         this.opacity   = 1;
+        this.type      = 0;
         
         // A bounding box for click actions:
         this.width     = w || 30;

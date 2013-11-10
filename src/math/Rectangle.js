@@ -9,7 +9,6 @@ define(function(require) {
     var Vector = require("meier/math/Vector");
     var Size   = require("meier/math/Size");
     
-
     ///
     /// Special note: min should always be less than max. Internal
     /// algorithms are optimized for that assumption.
@@ -24,8 +23,8 @@ define(function(require) {
     /// +----------+
     ///
     function Rectangle(a, b, c, d) {
-        this.min = new Point(a, b);
-        this.max = new Point(c, d);
+        this.min = new Vector(a, b);
+        this.max = new Vector(c, d);
     }
 
     Rectangle.prototype.clone = function() {
