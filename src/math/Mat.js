@@ -30,7 +30,7 @@ define(function(require) {
             return row * columns + column;
         }
         
-        M.CreateIdentity = function(v) {
+        M.CreateIdentity = function() {
             var m = new M();
             
             // Load identity matrix. May fail on some sizes.
@@ -69,16 +69,6 @@ define(function(require) {
                 0,  0, -a, -1,
                 0,  0, -b,  0
             ]);
-            
-            return m;
-        };
-        
-        M.CreatePlaneProjection = function(normal) {
-            var m = new M();
-            
-            var a = 3;
-            var b = 3;
-            
             
             return m;
         };
@@ -224,12 +214,12 @@ define(function(require) {
         };
         
         M.CreateTranslation = function(v) {
+            
             if(v.numrows > rows) {
                 throw new Error("Cannot create translation, too many rows in vector.");
             }
             
             var m = new M();
-            
             
             
             for(var i = 0; i < v.numrows; ++i) {

@@ -1,7 +1,18 @@
 define(function(require) {
-    var Round = require("meier/math/Math").Round;
+    var Round = function(num, precision) {
+        if(precision > 0) {
+            var exp = Math.pow(10, precision)
+            return parseInt(num * exp + 0.5, 10) / exp;
+
+        } else if(precision < 0) {
+            var exp = Math.pow(10, -precision)
+            return parseInt(num / exp + 0.5, 10) * exp;
+        }
+
+        return parseInt(num + 0.5);
+    };
     
-    var Storage = Float32Array || Array;
+    var Storage = Float64Array;// || Array;
     
     return function(rows) {
         
@@ -45,6 +56,107 @@ define(function(require) {
                 this._[3] = w || 0;
             }
         }
+        
+        V.prototype.distance = function(o) {
+            return Math.sqrt(this.distanceSQ(o));
+        };
+
+        V.prototype.distanceSQ = function(o) {
+            var r = 0;
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r += Math.pow(this._[i] - o._[i], 2);
+            }
+            
+            return r;
+        };
+        
+        ///////////////////////////////////////////////////
+        // 2D only.
+        ///////////////////////////////////////////////////
+        if(rows === 2) {
+            V.prototype.perp = function() {
+                var tmp = -this._[0];
+                this._[0] = this._[1];
+                this._[1] = tmp;
+                return this;
+            };
+            
+            V.prototype.angle = function() {
+                return Math.atan2(this._[1], this._[0]);
+            };
+            
+            V.prototype.angleBetween = function(other) {
+                
+                var angle = Math.acos(
+                    this.dot(other) / Math.sqrt(this.lengthSQ() * other.lengthSQ())
+                );
+    
+                if(-this._[1] * other._[0] + this._[0] * other._[1] < 0) {
+                    return -angle;
+                }
+    
+                return angle;
+            };
+            
+            V.CreateAngular = function(radians, radius) {
+                radius = radius || 1;
+                
+                return new V(Math.cos(radians) * radius, Math.sin(radians) * radius);
+            };
+        }
+        
+        V.prototype.trim = function(length) {
+            
+            var l = length / this.length();
+            
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                this._[i] *= l;
+            }
+                        
+            return this;
+        }; 
+        
+        V.prototype.add = function(v) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] += v._[i];
+            }
+            return this;
+        }; 
+        
+        V.prototype.addScalar = function(scalar) {
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                this._[i] += scalar;
+            }
+            return this;
+        }; 
+        
+        V.prototype.subtract = function(v) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] -= v._[i];
+            }
+            return this;
+        };
+        
+        V.prototype.subtractScalar = function(scalar) {
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                this._[i] -= scalar;
+            }
+            return this;
+        }; 
+        
+        V.prototype.scale = function(v) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] *= v._[i];
+            }            
+            return this;
+        };
+        
+        V.prototype.scaleScalar = function(v) {
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                this._[i] *= v;
+            }
+            return this;
+        };
         
         V.prototype.clone = function() {
             var r = new V();
@@ -92,7 +204,7 @@ define(function(require) {
             var r = 0;
             
             for(var i = this.numrows - 1; i >= 0; --i) {
-                r += this._[i] * this._[i];
+                r += Math.pow(this._[i], 2);
             }
             
             return r;
@@ -188,6 +300,16 @@ define(function(require) {
             r = r.trim(", ") + "}";
         
             return r;
+        };
+        
+        V.prototype.wolfram.project = function(other) {
+            throw new Error("TODO: implemented vector projection.");
+            var r = this.dot(other) / other.dot(other);
+        
+            return new V(
+                r * other.x,
+                r * other.y
+            );
         };
         
         return V;

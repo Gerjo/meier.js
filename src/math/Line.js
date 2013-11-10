@@ -6,17 +6,18 @@
  !*/
 
 define(function(require) {
-    var Vector = require("meier/math/Vector");
+    var Vector = require("meier/math/Vec")(2);
     var Lerp   = require("meier/math/Lerp");
     
     /// Accepts:
     /// [Vector, Vector]
     /// [number, number, number, number]
     function MeierLineSegment(a, b, c, d) {
-    
-        if(a instanceof Vector) {
+            
+        if(a && a._) {
             this.a = a;
             this.b = b;
+                        
         } else {
             this.a = new Vector(a, b);
             this.b = new Vector(c, d);

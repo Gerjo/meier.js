@@ -9,13 +9,20 @@
 define(function(require) {
     
     var Size        = require("meier/math/Size");
-    var Matrix      = require("meier/math/Matrix");
-    var Vector      = require("meier/math/Vector");
+    var Matrix      = require("meier/math/Mat")(3, 3);
+    var Vector      = require("meier/math/Vec")(2);
     var Texture     = require("meier/engine/Texture");
     var LineSegment = require("meier/math/Line");
     var Disk        = require("meier/math/Disk");
     var Rectangle   = require("meier/math/Rectangle");
     var Polygon     = require("meier/math/Polygon");
+    
+    
+    // Macro to determine if argument is a vector.
+    function IsVector(v) {
+        // Nice duck typing. If it has x & y, it must be a vector.
+        return v && v.hasOwnProperty('x') || v && v._;
+    }
     
     /// Canvas wrapper. Lateron I'll add WebGL as a drop-in replacement.
     function Renderer(container, width, height) {
@@ -111,7 +118,7 @@ define(function(require) {
             w = a.width();
             h = a.height();
     
-        } else if(a instanceof Vector) {
+        } else if(IsVector(a)) {
             x = a.x;
             y = -a.y;
             w = b;
@@ -135,7 +142,7 @@ define(function(require) {
     /// [Texture, Number, Number, Number, Number]
     Renderer.prototype.texture = function(texture, x, y, width, height) {
     
-    	if(x instanceof Vector) {
+    	if(IsVector(x)) {
     		height = width;
     		width = y;
     		y = x.y;
@@ -178,7 +185,7 @@ define(function(require) {
     /// [Vector, number]
     /// [Disk]
     Renderer.prototype.circle = function(a, b, c) {
-        if(a instanceof Vector) {
+        if(IsVector(a)) {
             this.context.moveTo(a.x + b, -a.y);
             this.context.arc(a.x, -a.y, b, 0, 2 * Math.PI);
         
@@ -202,7 +209,7 @@ define(function(require) {
     /// [Number, Number, Number, Number, Number]
     /// [Vector, Number, Number, Number]
     Renderer.prototype.arc = function(a, b, c, d, e) {
-        if(a instanceof Vector) {
+        if(IsVector(a)) {
             this.context.arc(a.x, -a.y, b, c, d);
         } else {
             this.context.arc(a, -b, c, d, e);
@@ -224,17 +231,17 @@ define(function(require) {
             toX   = a.b.x;
             toY   = -a.b.y;
     
-        } else if(a instanceof Vector && b instanceof Vector) {
+        } else if(IsVector(a) && IsVector(b)) {
             fromX = a.x;
             fromY = -a.y;
             toX   = b.x;
             toY   = -b.y;
-        } else if(a instanceof Vector) {
+        } else if(IsVector(a)) {
             toX = a.x;
             toY = -a.y;
             fromX = 0;
             fromY = 0;
-        } else if(c instanceof Vector) {
+        } else if(IsVector(c)) {
             fromX = a;
             fromY = -b;
             toX   = c.x;
@@ -312,7 +319,7 @@ define(function(require) {
     Renderer.prototype.vector = function(a, b) {
         this.context.moveTo(0, 0);
     
-        if(a instanceof Vector) {
+        if(IsVector(a)) {
             this.context.lineTo(a.x, -a.y);
         } else {
             this.context.lineTo(a, -b);
@@ -405,17 +412,17 @@ define(function(require) {
             toX   = a.b.x;
             toY   = -a.b.y;
     
-        } else if(a instanceof Vector && b instanceof Vector) {
+        } else if(IsVector(a) && IsVector(b)) {
             fromX = a.x;
             fromY = -a.y;
             toX   = b.x;
             toY   = -b.y;
-        } else if(a instanceof Vector) {
+        } else if(IsVector(a)) {
             toX = a.x;
             toY = -a.y;
             fromX = 0;
             fromY = 0;
-        } else if(c instanceof Vector) {
+        } else if(IsVector(c)) {
             fromX = a;
             fromY = -b;
             toX   = c.x;

@@ -6,7 +6,7 @@
  !*/
 
 define(function(require) {
-    var Vector      = require("meier/math/Vector");
+    var Vector      = require("meier/math/Vec")(2);
     var Line        = require("meier/math/Line");
     var Rectangle   = require("meier/math/Rectangle");
     var Disk        = require("meier/math/Disk");

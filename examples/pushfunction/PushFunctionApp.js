@@ -1,7 +1,7 @@
 
 define(function(require) {
     var Game   = require("meier/engine/Game");
-    var Point  = require("meier/math/Vector");
+    var Point  = require("meier/math/Vec")(2);
     var Line   = require("meier/math/Line");
     var Input  = require("meier/engine/Input");
     var M      = require("meier/math/Math");
@@ -11,8 +11,6 @@ define(function(require) {
     var CreatePushFunction = require("./Pfn");
     var Hull = require("meier/math/Hull");
     
-    require("./meier/math/Math");
-    require("./meier/math/Angle");
     
     PushFunctionApp.prototype = new Game();
 

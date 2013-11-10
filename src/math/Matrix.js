@@ -9,6 +9,8 @@ define(function(require) {
     var Vector = require("meier/math/Vector");
     var Round  = require("meier/math/Math").Round;
     
+    console.log("Warning: using deprecated matrix class.");
+    
     /// 3x3 MeierMatrix for 2D vectors. Everything is as mutable
     /// as possible.
     /// 

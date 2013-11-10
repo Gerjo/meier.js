@@ -7,10 +7,10 @@
 
 
 define(function(require) {
-    var Vector       = require("meier/math/Vector");
     var Input        = require("meier/engine/Input");
     var Intersection = require("meier/math/Intersection");
-    var Matrix       = require("meier/math/Matrix");
+    var Matrix       = require("meier/math/Mat")(3, 3);
+    var Vector       = require("meier/math/Vec")(2);
     
     // Short-hand access: less typing.
     var PointInObb   = Intersection.Test.PointInObb;
@@ -53,8 +53,12 @@ define(function(require) {
         if(entity instanceof Entity) {
             this._entities.push(entity);
             entity.parent = this;
-            // This is to be called when added to the world.
-            // entity._onAdd(this);
+            
+            // Only call when a parent is available. Else it'll be 
+            // called later on.
+            if(this.parent) {
+                entity._onAdd(this);
+            }
         } else {
             throw new Error("Game::add is only meant for entities.");
         }
@@ -260,16 +264,19 @@ define(function(require) {
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.movingToFixed = function() {
-        var r = Matrix.CreateRotation(this.rotation);
-        var t = Matrix.CreateTranslation(this.position.x, this.position.y);
+        var r = Matrix.CreateXoY(this.rotation);
+        var t = Matrix.CreateTranslation(this.position);
         return t.product(r);
     };
     
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.fixedToMoving = function() {
-        var r = Matrix.CreateRotation(-this.rotation);
-        var t = Matrix.CreateTranslation(-this.position.x, -this.position.y);
+        var r = Matrix.CreateXoY(-this.rotation);
+        var t = Matrix.CreateTranslation(new Vector(-this.position.x, -this.position.y));
+        
+        //console.log(t.pretty());
+        
         return r.product(t);
     };
     
@@ -280,6 +287,8 @@ define(function(require) {
         var t = this.fixedToMoving();
         
         var e = this.parent;
+        
+        //console.log(t.pretty());
         
         while(e) {
             t = t.product(e.fixedToMoving());
@@ -296,7 +305,7 @@ define(function(require) {
         renderer.alpha(this.opacity);
                 
         // Transform the lot to match this entity.
-        renderer.translate(this.position.x, this.position.y);
+        renderer.translate(this.position._[0], this.position._[1]);
         renderer.scale(this.scale);
         renderer.rotate(this.rotation);
         

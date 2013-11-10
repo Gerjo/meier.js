@@ -6,6 +6,8 @@
  !*/
 
 define(function(require) {
+    var V2 = require("meier/math/Vec")(2);
+    return V2;
 
     MeierVector.CreateAngular = function(rotation, radius) {
         radius = radius || 1;

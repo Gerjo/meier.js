@@ -2,18 +2,18 @@ define(function(require) {
     var Game   = require("meier/engine/Game");
     var Frame  = require("./TestFrame");
     var Pixel  = require("meier/prefab/Pixel");
-    var Vector = require("meier/math/Vector");
-    var Matrix = require("meier/math/Matrix");
+    var Vector = require("meier/math/Vec")(2);
+    var Matrix = require("meier/math/Mat")(3,3);
     
     Rotation.prototype = new Game();
     function Rotation(container) {
         Game.call(this, container);
         
-        this.setFps(30);        
+        this.setFps(60);        
         
         var q = new Vector(4, 3);
         
-        var r = Matrix.CreateRotation(Math.PI / -3);
+        var r = Matrix.CreateXoY(Math.PI / -3);
         var t = Matrix.CreateTranslation(0, 0);
         
         var T = r.product(t);
@@ -47,5 +47,4 @@ define(function(require) {
     };
     
     return Rotation;
-    
 });

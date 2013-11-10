@@ -13,7 +13,7 @@ define(function(require) {
     /// (x - a)^2 + (y - b)^2 = r^2
     function Disk(x, y, r) {
     
-        if(x instanceof Vector) {
+        if(x && (x.hasOwnProperty('x') || x._)) {
             this.position = x.clone();
             this.radius   = y;
         } else {

@@ -1,13 +1,14 @@
 define(function(require) {
 
     function CreatePushFunction(hull) {
-        var Vector       = require("meier/math/Vector");
+        var Vector       = require("meier/math/Vec")(2);
         var Line         = require("meier/math/Line");
         var Segment      = Line;
         var Disk         = require("meier/math/Disk");
         var Intersection = require("meier/math/Intersection");
         var Angle        = require("meier/math/Angle");
-            
+        var M            = require("meier/math/Math");
+        
         // Expose these to the world:
         var vertices = f.vertices = hull.clone();
         var normals  = f.normals  = [];
@@ -46,7 +47,7 @@ define(function(require) {
             a = Intersection.Get.DiskLine(disk, new Line(center, vertices[i]))[0].angle();
             b = Intersection.Get.DiskLine(disk, new Line(center, vertices[j]))[0].angle();
             n = Intersection.Get.DiskLine(disk, new Line(center, normals[i]))[1].angle();
-        
+                                                
             // Project axis of interest onto a disk, with this set, if
             // a force falls between a and b, angle n will be assumed.
             bounds[i] = {
@@ -72,6 +73,11 @@ define(function(require) {
     
         function InRange(angle, a, b) {
             var base = Vector.CreateAngular(angle);
+            
+            var c = Vector.CreateAngular(a);
+            
+            //console.log("{" + M.Round(base.x, 2) + "," + M.Round(base.y, 2) + "}x{" + M.Round(c.x, 2) + "," + M.Round(c.y, 2) + "} =", base.cross(c));
+            
             return base.cross(Vector.CreateAngular(a)) >= 0 
                     && base.cross(Vector.CreateAngular(b)) <= 0
         }
@@ -82,7 +88,7 @@ define(function(require) {
         
             // Out-of-bounds:
             if( ! InRange(bound.n, bound.a, bound.b)) {
-                    
+
                 // See if "bound" fits in any other bound.
                 var r = bounds.every(function(whom) {
                 
@@ -111,7 +117,7 @@ define(function(require) {
                 // the bounds weren't merged either. Usually this
                 // means something is NaN or a floatpoint error.
                 if(r) {
-                    //console.log("Murphy's law.");
+                    console.log("Murphy's law.");
                     f.isDegenerate = true;
                 }
             }
@@ -124,10 +130,16 @@ define(function(require) {
             
                 var pair = bound.r.flatten().unique();
                   
+                if(pair.length > 2) {
+                    console.log("Floating point error? more pairs.", pair.join(", "));
+                }
+                  
                 bound.a = pair[0];
                 bound.b = pair[1];
             }
         });
+        
+        //console.log(bounds);
        
         // Ironically, the push function as a function is only
         // usefull for simulations - not calculations. 

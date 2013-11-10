@@ -2,7 +2,7 @@ define(function(require) {
     var Entity       = require("meier/engine/Entity");
     var Input        = require("meier/engine/Input");
     var Timer        = require("meier/aux/Timer");
-    var Vector       = require("meier/math/Vector");
+    var Vector       = require("meier/math/Vec")(2);
     var PointInObb   = require("meier/math/Intersection").Test.PointInObb;
     
     

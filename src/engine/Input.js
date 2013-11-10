@@ -6,8 +6,7 @@
  !*/
 
 define(function(require) {
-    var Point  = require("meier/math/Vector");
-    var Vector = Point;
+    var Vector = require("meier/math/Vec")(2);
     var Size   = require("meier/math/Size");
     var Key    = require("meier/engine/Key");
 
@@ -37,12 +36,12 @@ define(function(require) {
         this.eventtype = eventtype;
     }
 
-    Input.prototype = new Point();
+    Input.prototype = new Vector();
     function Input(container, width, height, isTablet) {
         
         // Always center the initial mouse position.
-        Point.call(this, width * 0.5, height * 0.5);
-    
+        Vector.call(this, width * 0.5, height * 0.5);
+        
         this.isTablet   = isTablet;
         this._container = container;
         this._size      = new Size(width, height);
@@ -109,8 +108,8 @@ define(function(require) {
                     }
             
                     // Update last location:
-                    lastTap.x = this.x;
-                    lastTap.y = this.y;
+                    lastTap.x = this._[0];
+                    lastTap.y = this._[1];
                 
                 } else {
                     // No double-tap listeres, trigger event right away.
@@ -223,8 +222,8 @@ define(function(require) {
         if(x >= 0 && y >= 0 && x <= this._size.w && y <= this._size.h) {
         
             // Transform to screen coordinates:
-            this.x = x - this._size.w * 0.5;
-            this.y = (this._size.h * 0.5) - y;
+            this._[0] = x - this._size.w * 0.5;
+            this._[1] = (this._size.h * 0.5) - y;
     
             // Trigger MOUSE_MOVE event:
             return true;
