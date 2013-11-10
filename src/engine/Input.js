@@ -236,7 +236,7 @@ define(function(require) {
     Input.prototype.trigger = function(eventtype, event, location) {
     
         this.listeners[eventtype].every(function (priorityCallback) {
-            return priorityCallback.callback(this);
+            return false !== priorityCallback.callback(this);
         }.bind(this));
     };
 
