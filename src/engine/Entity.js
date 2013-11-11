@@ -317,7 +317,34 @@ define(function(require) {
         
         // Restore to the old transform.
         renderer.restore();
-    }
+    };
+    
+    
+    Entity.NaiveIntersection = function(entity, b) {
+        var ehw = entity.width  * 0.5;
+        var ehh = entity.height * 0.5;        
+        
+        var bhw = b.width  * 0.5;
+        var bhh = b.height * 0.5;
+    
+        return (
+            ((b.position.x - bhw < entity.position.x - ehw && b.position.x + bhw > entity.position.x - ehw)
+            ||
+            (b.position.x - bhw < entity.position.x + ehw && b.position.x + bhw > entity.position.x + ehw))
+            &&
+            ((b.position.y - bhh < entity.position.y - ehh && b.position.y + bhh > entity.position.y - ehh)
+            ||
+            (b.position.y - bhh < entity.position.y + ehh && b.position.y + bhh > entity.position.y + ehh))
+        ) || (
+            ((entity.position.x - ehw < b.position.x - bhw && entity.position.x + ehw > b.position.x - bhw)
+            ||
+            (entity.position.x - ehw < b.position.x + bhw && entity.position.x + ehw > b.position.x + bhw))
+            &&
+            ((entity.position.y - ehw < b.position.y - bhw && entity.position.y + ehw > b.position.y - bhw)
+            ||
+            (entity.position.y - ehw < b.position.y + bhw && entity.position.y + ehw > b.position.y + bhw))
+        );
+    };
     
     
     return Entity;

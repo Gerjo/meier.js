@@ -1,8 +1,17 @@
+/// rectangle circle
+/// 
+///
+///
 define(function(require) {
     
+    var NodeIdCounter = 0;
     
     function Tree(w, h) {
-        this.root = new Node(0, 0, w, h);
+        if(w && h) {
+            this.root = new Node(0, 0, w, h);
+        } else {
+            this.root = null;
+        }
     }
     
     Tree.prototype.draw = function(renderer) {
@@ -46,8 +55,14 @@ define(function(require) {
         return true;
     };
     
+    Tree.prototype.getNeighbours = function(criterion, node) {
+        var out = [];
+        this.root.getNeighbours(out, criterion, node);
+        return out;
+    };
     
     function Node(x, y, w, h) {
+        this.id = ++NodeIdCounter;
         this.x  = x;
         this.y  = y;
         this.w  = w;
@@ -88,7 +103,6 @@ define(function(require) {
         var ehw = entity.width  * 0.5;
         var ehh = entity.height * 0.5;
         
-      
         return (
             ((this.x - this.hw < entity.position.x - ehw && this.x + this.hw > entity.position.x - ehw)
             ||
@@ -97,6 +111,14 @@ define(function(require) {
             ((this.y - this.hh < entity.position.y - ehh && this.y + this.hh > entity.position.y - ehh)
             ||
             (this.y - this.hh < entity.position.y + ehh && this.y + this.hh > entity.position.y + ehh))
+        ) || (
+            ((entity.position.x - ehw < this.x - this.hw && entity.position.x + ehw > this.x - this.hw)
+            ||
+            (entity.position.x - ehw < this.x + this.hw && entity.position.x + ehw > this.x + this.hw))
+            &&
+            ((entity.position.y - ehw < this.y - this.hw && entity.position.y + ehw > this.y - this.hw)
+            ||
+            (entity.position.y - ehw < this.y + this.hw && entity.position.y + ehw > this.y + this.hw))
         );
     };
     
@@ -109,9 +131,33 @@ define(function(require) {
         );
     };
     
-    Node.prototype.intersectsRectangle = function(rectangle) {
-        // TODO: write this.
-        return true;
+    Node.prototype.intersects = function(node) {
+        
+        if(node === this) {
+            //console.log("Potential error, self intersection test.");
+            //return true;
+        }
+                
+        return (
+            ((this.x - this.hw <= node.x - node.hw && this.x + this.hw >= node.x - node.hw)
+            ||
+            (this.x - this.hw <= node.x + node.hw && this.x + this.hw >= node.x + node.hw))
+            &&
+            ((this.y - this.hh <= node.y - node.hh && this.y + this.hh >= node.y - node.hh)
+            ||
+            (this.y - this.hh <= node.y + node.hh && this.y + this.hh >= node.y + node.hh))
+        )/* ||
+        // Not quite required unless the criterion varies from the one used to
+        // obtain "node". TODO: inside test?
+        (
+            ((node.x - node.hw <= this.x - this.hw && node.x + node.hw >= this.x - this.hw)
+            ||
+            (node.x - node.hw <= this.x + this.hw && node.x + node.hw >= this.x + this.hw))
+            &&
+            ((node.y - node.hh <= this.y - this.hh && node.y + node.hh >= this.y - this.hh)
+            ||
+            (node.y - node.hh <= this.y + this.hh && node.y + node.hh >= this.y + this.hh))
+        )*/;        
     };
     
     Node.prototype.clear = function() {
@@ -139,10 +185,6 @@ define(function(require) {
     };
     
     Node.prototype.partition = function() {
-        
-        if(this.w < 10) {
-            return;
-        }
         
         if( ! this.isLeaf()) {
             return;
@@ -173,9 +215,9 @@ define(function(require) {
                 // good numEntities and width are in range.
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solid) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solid) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 return Criterion.Response.PASS;
             } else if(width <= heuristic.minimalSize) {
@@ -204,9 +246,9 @@ define(function(require) {
                 }
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solids) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solids) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 // Cannot shrink. Deal with it.
                 return Criterion.Response.PASS;
@@ -238,8 +280,6 @@ define(function(require) {
                     }
                 
                     return this.left.getNodeAt(criterion, center) || this.right.getNodeAt(criterion, center);
-                default:
-                    throw new Error("Internal error: invalid Criterion response.");
             }
         }
         
@@ -265,14 +305,12 @@ define(function(require) {
                 this.right.getAllNodes(out, criterion);
     
                 break;
-            default:
-                throw new Error("Unacceptable error. Criterion response is unknown:" + c);
         }
     };
     
-    Node.prototype.getNeighbours = function(out, node, criterion) {
+    Node.prototype.getNeighbours = function(out, criterion, node) {
 
-        if(this.intersectsRectangle(node.rectangle)) {
+        if(this.intersects(node)) {
             switch(this.getCriterionReponse(criterion)) {
                 case Criterion.Response.PASS:
                     if(this != node) {
@@ -287,16 +325,16 @@ define(function(require) {
                         throw new Error("Disburse failed.");
                     }
                 
-                    this.left.getNeighbours(out, node, criterion);
-                    this.right.getNeighbours(out, node, criterion);
-
+                    this.left.getNeighbours(out, criterion, node);
+                    this.right.getNeighbours(out, criterion, node);
+                    
                     break;
             }
         }  
     };
     
     Node.prototype.draw = function(renderer) {
-        renderer.rectangle(this.x, this.y, this.w, this.h);
+        renderer.rectangle(Math.round(this.x), Math.round(this.y), Math.round(this.w), Math.round(this.h));
         if(this.left) {
             this.left.draw(renderer);
         }
@@ -310,8 +348,8 @@ define(function(require) {
     function Criterion(minimalSize, maximalSize, minimalEntities, maximalEntities, permitDiagonal) {
         this.minimalSize     = minimalSize || 1;
         this.maximalSize     = maximalSize || 10;
-        this.minimalEntities = minimalEntities || 0;
-        this.maximalEntities = maximalEntities || 2;
+        this.minimalEntities = minimalEntities || 2;
+        this.maximalEntities = maximalEntities || 20;
         this.permitDiagonal  = permitDiagonal || false;
         this.solid           = 0;
     }
