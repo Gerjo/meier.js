@@ -1,7 +1,7 @@
 define(function(require){
     var Intersection = require("meier/math/Intersection");
     var Heap         = require("meier/collections/Heap");
-    var Tree         = require("meier/collections/FooTree");
+    var Tree         = require("meier/collections/CriterionTree");
     var Rectangle    = require("meier/math/Rectangle");
     var LineSegment  = require("meier/math/Line");
     var Vector       = require("meier/math/vec")(2);
@@ -11,9 +11,7 @@ define(function(require){
     // My tree enriched with pathfinding and line of sight tools.
     function MyTree(width, height) {
         Tree.apply(this, arguments);
-    
     }
-
 
     MyTree.prototype.canSeePoint = function(actor, point, solid, context) {
         var volume = new Rectangle(
@@ -202,6 +200,9 @@ define(function(require){
         //console.log("Goal was not found.");
         return false;
     };
+    
+    MyTree.Node = Tree.Node;
+    MyTree.Criterion = Tree.Criterion;
     
     return MyTree;
     

@@ -1,11 +1,11 @@
 define(function(require) {
     var Game      = require("meier/engine/Game");
-    var Tree      = require("meier/collections/FooTree");
-    var FancyTree = require("meier/collections/FancyTree");
+    var Tree      = require("meier/collections/FancyTree");
     var Unit      = require("./Unit");
     var Random    = require("meier/math/Random");
     var Vector    = require("meier/math/Vec")(2);
     var TestRect  = require("meier/math/Intersection").Rectangles;
+    var dat       = require("meier/contrib/datgui");
     
     var NaiveIntersection = require("meier/engine/Entity").NaiveIntersection;
     
@@ -14,18 +14,35 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(60);
         
-        this.tree = new FancyTree(this.width, this.height);
+        this.numEntities = 400;
         
-        Random.Seed(3);
-        for(var i = 0; i < 400; ++i) {
-            this.add(new Unit(Random.Range(-this.hw, this.hw), Random.Range(-this.hh, this.hh))); 
-        }       
+        this.gui = new dat.GUI();
+    	this.gui.add(this, 'numEntities', 0, 1000);
+        
+        this.tree = new Tree(this.width, this.height);
+        
+        Random.Seed(3);      
     }
     
     TreeApp.prototype.add = function(entity) {
         Game.prototype.add.call(this, entity);
         
         this.tree.add(entity);
+    };
+    
+    TreeApp.prototype.update = function(dt) {
+        Game.prototype.update.call(this, dt);
+    
+        var c = this._entities.length;
+        while(c > this.numEntities) {
+            this._entities[--c].delete();
+        }
+        
+        while(c < this.numEntities -1) {
+            this.add(new Unit(Random.Range(-this.hw, this.hw), Random.Range(-this.hh, this.hh)));
+            ++c;
+        }
+    
     };
     
     TreeApp.prototype.draw = function(renderer) {

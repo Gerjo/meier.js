@@ -1,75 +1,49 @@
-/**
- !* Part of meier.js - a game and math prototype library.
- !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
- !*
- !*
- !*/
-
+/// rectangle circle
+/// 
 ///
-/// .width .height
-/// .position.x, .position.y
 ///
-
 define(function(require) {
-    var Vector    = require("meier/math/Vector");
-    var Rectangle = require("meier/math/Rectangle");
     
-    function ActorRectangle(actor, rectangle) {
-        var hh = actor.width * 0.5;
-        var hw = actor.height * 0.5;
-        
-        var b = {
-            min: { x: actor.position.x - hw , y: actor.position.y - hh },
-            max: { x: actor.position.x + hw , y: actor.position.y + hh },
-        };
-        
-        var a = rectangle;
-        
-        return a.min.x <= b.max.x &&
-               b.min.x <= a.max.x &&
-               a.min.y <= b.max.y &&
-               b.min.y <= a.max.y ;
-    }
+    var NodeIdCounter = 0;
     
-    // My query-by-criterion-self-adjusting-tree.
     function Tree(w, h) {
-        // Creation constructor:
         if(w && h) {
-            var hh = h * 0.5;
-            var hw = w * 0.5;
-            
             this.root = new Node(0, 0, w, h);
-    
-        // Default constructor, in case of inheritance:
         } else {
             this.root = null;
         }
     }
-
-    Tree.prototype.clear = function() {
-        var w = this.root.rectangle.max.x - this.root.rectangle.min.x;
-        var h = this.root.rectangle.max.y - this.root.rectangle.min.y;
-   
-        this.root.clear();
-        //this.root = new Node(0, 0, w, h);
-    };
-
-    Tree.prototype.add = function(actor) {
-        this.root.insert(actor);
-    };
-
+    
     Tree.prototype.draw = function(renderer) {
-        renderer.begin();
         this.root.draw(renderer);
-        renderer.stroke("rgba(0, 0, 0, 0.5)");
-        renderer.fill("rgba(0, 0, 0, 0.1)");
+        return this;
     };
-
+    
+    Tree.prototype.add = function(entity) {
+        if(entity instanceof Array) {
+            entity.forEach(this.root.add.bind(this.root));
+        } else {
+            this.root.add(entity);
+        }
+        return this;
+    };
+    
+    Tree.prototype.clear = function() {
+        this.root = new Node(this.root.x, this.root.y, this.root.w, this.root.h);
+        
+        //this.root.clear();
+        return this;
+    };
+    
+    Tree.prototype.getNodeAt = function(criterion, center) {
+        return this.root.getNodeAt(criterion, center);
+    };
+    
     Tree.prototype.visit = function(criterion, callback) {
         
         var out = [];
     
-        this.root.getAllSpaces(out, criterion);
+        this.root.getAllNodes(out, criterion);
             
     
         for(var k = 0; k < out.length; ++k) {
@@ -80,173 +54,30 @@ define(function(require) {
     
         return true;
     };
-
-    /// Return actors that fit in a rectangle with a given tolerance. The
-    /// tolerance will only make the search area larger - not smaller. If
-    /// an actor is contained within the rectangle it shall always be
-    /// returned, no matter the tolerance.
-    Tree.prototype.getActorsFromRectangle = function(rectangle, tolerance) {
     
-    
-        if( ! tolerance) {
-            // Determined by guessing.
-            //tolerance = Math.max(rectangle.width() * 0.1, 10);
-            tolerance = 10;
-        }
-    
-        var out    = {
-            actors: [],
-            rectangles: [],
-            lookup: []
-        };
-    
-        this.root.getActorsFromRectangle(out, rectangle, tolerance);
-    
-        delete out.lookup;
-    
-        return out; // out.entities
-    };
-
-    Tree.prototype.getNodeAt = function(criterion, center) {
-        return this.root.getNodeAt(criterion, center);
-    };
-
-    Tree.prototype.getNeighbours = function(node, criterion) {
+    Tree.prototype.getNeighbours = function(criterion, node) {
         var out = [];
-        this.root.getNeighbours(out, node, criterion);
+        this.root.getNeighbours(out, criterion, node);
         return out;
     };
-
-
-    function Criterion(minimalSize, maximalSize, minimalEntities, maximalEntities, permitDiagonal) {
-        this.minimalSize     = minimalSize || 1;
-        this.maximalSize     = maximalSize || 10;
-        this.minimalEntities = minimalEntities || 1;
-        this.maximalEntities = maximalEntities || 2;
-        this.permitDiagonal  = permitDiagonal || false;
-        this.solid           = 0;
-    }
-
-    // Not so type safe enum.
-    Criterion.Response = {};
-    Criterion.Response.FAIL     = 0;
-    Criterion.Response.DISBURSE = 1;
-    Criterion.Response.PASS     = 2;
-
     
-    Node.Counter = 0;
-
-    function Node(x, y, w ,h) {
-        
-        this.id        = Node.Counter++;
-        this.rectangle = new Rectangle(x, y, w, h);
-        this.flag      = 0;
-        this.actors    = [];
-    
-        this.left  = null;
-        this.right = null;
+    function Node(x, y, w, h) {
+        this.id = ++NodeIdCounter;
+        this.x  = x;
+        this.y  = y;
+        this.w  = w;
+        this.h  = h;
+        this.hw = w * 0.5;
+        this.hh = h * 0.5;
+        this.flag     = 0;
+        this.left     = null;
+        this.right    = null;
+        this.entities = [];
         this.hasDisbursed = false;
-        
-        var hw = w * 0.5;
-        var hh = h * 0.5;
-        
-        this.x = x;
-        this.y 
     }
-
-    Node.prototype.getActorsFromRectangle = function(out, rectangle, tolerance) {
-        var Intersects = Intersection.Test.Rectangles;
-
-        // If this is empty, prune all children.
-        if(this.actors.length === 0) {
-            return;
-        }
-
-        // Future note: rather than recurse, if the entity count is small enough
-        // it's more sensible to hit-test directly. Say, when n < 4 or along
-        // those lines.
-
-        if(this.rectangle.width() > tolerance || this.rectangle.height() > tolerance) {
-            this.disburse();
-        }
-
-        // Has children, traverse when boundingbox fits:
-        if( ! this.isLeaf()) {
-        
-            if(Intersects(rectangle, this.left.rectangle) === true) {
-                this.left.getActorsFromRectangle(out, rectangle, tolerance);
-            }
-        
-            if(Intersects(rectangle, this.right.rectangle) === true) {
-                this.right.getActorsFromRectangle(out, rectangle, tolerance);
-            }
     
-        // Leaf node, push entities.  
-        } else {
-        
-            for(var i = 0; i < this.actors.length; ++i) {
-                if( ! out.lookup[this.actors[i].id] ) {
-                    out.lookup[this.actors[i].id] = true;
-                
-                    out.actors.push(this.actors[i]);
-                
-                    //console.log("*");
-                }
-            }
-        
-            out.rectangles.push(this.rectangle);
-        }
-    };
-
-    Node.prototype.getNodeAt = function(criterion, center) {
-        if(this.rectangle.containsPoint(center)) {
-            switch(this.getCriterionReponse(criterion)) {
-                case Criterion.Response.PASS:
-                    return this;
-            
-                case Criterion.Response.DISBURSE:
-                    this.disburse();
-                    if(this.isLeaf()) {
-                        console.log(this);
-                        throw new Error("Disburse failed.");
-                    }
-                
-                    return this.left.getNodeAt(criterion, center) || this.right.getNodeAt(criterion, center);
-            }
-        }
-    
-        return null;
-    };
-
-    // TODO: Rename? Node / Space consistency...
-    Node.prototype.getAllSpaces = function(out, criterion) {
-        var c = this.getCriterionReponse(criterion);
-        switch(c) {
-            case Criterion.Response.PASS:
-                out.push(this);
-                break;
-
-            case Criterion.Response.DISBURSE:
-                this.disburse();
-        
-                if(this.isLeaf()) {
-                    console.log(this);
-                    throw new Error("Disburse failed.");
-                }
-
-                this.left.getAllSpaces(out, criterion);
-                this.right.getAllSpaces(out, criterion);
-    
-                break;
-            default:
-                throw new Error("Unacceptable error. Criterion response is unknown:" + c);
-                
-        }
-    };
-
     Node.prototype.disburse = function() {
         if(this.hasDisbursed === true) {
-            //console.log("already disbursed. isLeaf:", this.isLeaf(), "disbursed?",this.hasDisbursed);
             return;
         }
 
@@ -254,103 +85,139 @@ define(function(require) {
     
         this.partition();
     
-        // We might not able to partition at anytime. E.g., a
-        // 0 volume space.
         if(this.isLeaf()) {
             console.log("Warning: potential partition fail");
             return;
         }
     
-        for(var k = 0; k < this.actors.length; ++k) {
-            this.left.insert(this.actors[k]);
-            this.right.insert(this.actors[k]);
+        for(var k = 0; k < this.entities.length; ++k) {
+            this.left.add(this.entities[k]);
+            this.right.add(this.entities[k]);
         }
     };
-
-    Node.prototype.partition = function(depth) {
     
-        if( ! this.isLeaf()) {
-            //console.log(this);
-            //throw new Error("cannot partition non leaf");
-            return;
-        }
-    
-        var w = this.rectangle.max.x - this.rectangle.min.x;
-        var h = this.rectangle.max.y - this.rectangle.min.y;
-
-        var hw = w * 0.5;
-        var hh = h * 0.5;
-    
-        var x = this.rectangle.min.x;
-        var y = this.rectangle.min.y
-   
-        var x2 = this.rectangle.max.x;
-        var y2 = this.rectangle.max.y;
-    
-        if(w > h) {
-            this.left  = new Node(x, y, x2 - hw, y2);
-            this.right = new Node(x + hw, y, x2, y2);
-        } else {
-            this.left  = new Node(x, y, x2, y + hh);
-            this.right = new Node(x, y + hh, x2, y2);
-        }
+    /// Programmed for anything that has these properties:
+    /// x, y, width, height
+    ///
+    Node.prototype.contains = function(entity) {
+        var ehw = entity.width  * 0.5;
+        var ehh = entity.height * 0.5;
+        
+        return (
+            ((this.x - this.hw < entity.position.x - ehw && this.x + this.hw > entity.position.x - ehw)
+            ||
+            (this.x - this.hw < entity.position.x + ehw && this.x + this.hw > entity.position.x + ehw))
+            &&
+            ((this.y - this.hh < entity.position.y - ehh && this.y + this.hh > entity.position.y - ehh)
+            ||
+            (this.y - this.hh < entity.position.y + ehh && this.y + this.hh > entity.position.y + ehh))
+        ) || (
+            ((entity.position.x - ehw < this.x - this.hw && entity.position.x + ehw > this.x - this.hw)
+            ||
+            (entity.position.x - ehw < this.x + this.hw && entity.position.x + ehw > this.x + this.hw))
+            &&
+            ((entity.position.y - ehw < this.y - this.hw && entity.position.y + ehw > this.y - this.hw)
+            ||
+            (entity.position.y - ehw < this.y + this.hw && entity.position.y + ehw > this.y + this.hw))
+        );
     };
+    
+    Node.prototype.containsPoint = function(point) {
 
-    Node.prototype.isLeaf = function() {
-        // TODO: inline.
-        return !( this.left && this.right );
+        return (
+            (this.x - this.hw < point.x && this.x + this.hw > point.x)
+            &&
+            (this.y - this.hh < point.y && this.y + this.hh > point.y)
+        );
     };
-
-    Node.prototype.insert = function(actor) {
-        if(ActorRectangle(actor, this.rectangle)) {
-            this.flag |= actor.type;        
-            this.actors.push(actor);
+    
+    Node.prototype.intersects = function(node) {
+        
+        if(node === this) {
+            //console.log("Potential error, self intersection test.");
+            //return true;
         }
+                
+        return (
+            ((this.x - this.hw <= node.x - node.hw && this.x + this.hw >= node.x - node.hw)
+            ||
+            (this.x - this.hw <= node.x + node.hw && this.x + this.hw >= node.x + node.hw))
+            &&
+            ((this.y - this.hh <= node.y - node.hh && this.y + this.hh >= node.y - node.hh)
+            ||
+            (this.y - this.hh <= node.y + node.hh && this.y + this.hh >= node.y + node.hh))
+        )/* ||
+        // Not quite required unless the criterion varies from the one used to
+        // obtain "node". TODO: inside test?
+        (
+            ((node.x - node.hw <= this.x - this.hw && node.x + node.hw >= this.x - this.hw)
+            ||
+            (node.x - node.hw <= this.x + this.hw && node.x + node.hw >= this.x + this.hw))
+            &&
+            ((node.y - node.hh <= this.y - this.hh && node.y + node.hh >= this.y - this.hh)
+            ||
+            (node.y - node.hh <= this.y + this.hh && node.y + node.hh >= this.y + this.hh))
+        )*/;        
     };
-
+    
     Node.prototype.clear = function() {
-        if(this.actors.length <= 0) {
+        if(this.length > 0) {
+            this.entities.clear();
+            this.flag        = 0;
+            this.hasDisbured = false;
+            
+            if( ! this.isLeaf()) {
+                this.left.clear();
+                this.right.clear();
+            }
+        }
+    };
+    
+    Node.prototype.add = function(entity) {
+        
+        if(this.contains(entity)) {
+            this.entities.push(entity);
+        }
+    };
+    
+    Node.prototype.isLeaf = function() {
+        return this.left == null;
+    };
+    
+    Node.prototype.partition = function() {
+        
+        if( ! this.isLeaf()) {
             return;
         }
-    
-        this.flags  = 0;
-        this.actors = [];
-    
-        this.hasDisbursed = false;
-    
-        this.left  && this.left.clear();
-        this.right && this.right.clear();
-    };
-
-    Node.prototype.draw = function(renderer) {
         
-        //console.log("drw", this.rectangle);
+        var hhh = this.hh * 0.5;
+        var hhw = this.hw * 0.5;
         
-        renderer.rectangle(
-            this.rectangle.min.x, 
-            this.rectangle.min.y, 
-            this.rectangle.max.x - this.rectangle.min.x, 
-            this.rectangle.max.y - this.rectangle.min.y);
-    
-        this.left  && this.left.draw(renderer);
-        this.right && this.right.draw(renderer);
+        if(this.w > this.h) {
+            this.left  = new Node(this.x - hhw, this.y, this.hw, this.h);
+            this.right = new Node(this.x + hhw, this.y, this.hw, this.h);
+            
+        } else {
+            this.left  = new Node(this.x, this.y - hhh, this.w, this.hh);
+            this.right = new Node(this.x, this.y + hhh, this.w, this.hh);
+        }
     };
-
+    
     Node.prototype.getCriterionReponse = function(heuristic) {
-        var width  = this.rectangle.max.x - this.rectangle.min.x;
-        var height = this.rectangle.max.y - this.rectangle.min.y;
+        var width  = this.w;
+        var height = this.h;
 
     
-        var num = this.actors.length;
+        var num = this.entities.length;
     
         if(num >= heuristic.minimalEntities && num <= heuristic.maximalEntities) {
             if(width >= heuristic.minimalSize && width <= heuristic.maximalSize) {
                 // good numEntities and width are in range.
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solid) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solid) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 return Criterion.Response.PASS;
             } else if(width <= heuristic.minimalSize) {
@@ -379,9 +246,9 @@ define(function(require) {
                 }
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solids) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solids) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 // Cannot shrink. Deal with it.
                 return Criterion.Response.PASS;
@@ -398,10 +265,52 @@ define(function(require) {
             return Criterion.Response.FAIL;
         }
     };
+    
+    Node.prototype.getNodeAt = function(criterion, center) {
+        if(this.containsPoint(center)) {
+            switch(this.getCriterionReponse(criterion)) {
+                case Criterion.Response.PASS:
+                    return this;
+            
+                case Criterion.Response.DISBURSE:
+                    this.disburse();
+                    if(this.isLeaf()) {
+                        console.log(this);
+                        throw new Error("Disburse failed.");
+                    }
+                
+                    return this.left.getNodeAt(criterion, center) || this.right.getNodeAt(criterion, center);
+            }
+        }
+        
+        return null;
+    };
+    
+    Node.prototype.getAllNodes = function(out, criterion) {
+        var c = this.getCriterionReponse(criterion);
+        switch(c) {
+            case Criterion.Response.PASS:
+                out.push(this);
+                break;
 
-    Node.prototype.getNeighbours = function(out, node, criterion) {
-        // TODO: use intersection.
-        if(this.rectangle.intersects(node.rectangle)) {
+            case Criterion.Response.DISBURSE:
+                this.disburse();
+        
+                if(this.isLeaf()) {
+                    console.log(this);
+                    throw new Error("Disburse failed.");
+                }
+
+                this.left.getAllNodes(out, criterion);
+                this.right.getAllNodes(out, criterion);
+    
+                break;
+        }
+    };
+    
+    Node.prototype.getNeighbours = function(out, criterion, node) {
+
+        if(this.intersects(node)) {
             switch(this.getCriterionReponse(criterion)) {
                 case Criterion.Response.PASS:
                     if(this != node) {
@@ -416,16 +325,43 @@ define(function(require) {
                         throw new Error("Disburse failed.");
                     }
                 
-                    this.left.getNeighbours(out, node, criterion);
-                    this.right.getNeighbours(out, node, criterion);
-
+                    this.left.getNeighbours(out, criterion, node);
+                    this.right.getNeighbours(out, criterion, node);
+                    
                     break;
             }
         }  
     };
     
-    Tree.Criterion = Criterion;
+    Node.prototype.draw = function(renderer) {
+        renderer.rectangle(Math.round(this.x), Math.round(this.y), Math.round(this.w), Math.round(this.h));
+        if(this.left) {
+            this.left.draw(renderer);
+        }
+        
+        if(this.right) {
+            this.right.draw(renderer);
+        }
+        
+    };
+    
+    function Criterion(minimalSize, maximalSize, minimalEntities, maximalEntities, permitDiagonal) {
+        this.minimalSize     = minimalSize || 1;
+        this.maximalSize     = maximalSize || 10;
+        this.minimalEntities = minimalEntities || 2;
+        this.maximalEntities = maximalEntities || 20;
+        this.permitDiagonal  = permitDiagonal || false;
+        this.solid           = 0;
+    }
+
+    // Enum with response types.
+    Criterion.Response = {};
+    Criterion.Response.FAIL     = 0;
+    Criterion.Response.DISBURSE = 1;
+    Criterion.Response.PASS     = 2;
+    
     Tree.Node      = Node;
+    Tree.Criterion = Criterion;
     
     return Tree;
 });
