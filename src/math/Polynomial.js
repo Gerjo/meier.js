@@ -6,12 +6,22 @@
  !*/
 
 define(function(require) {
+    var Factorial = require("meier/math/Math").Factorial;
+    
     /// My polynomial wish-list
     function HornersMethod() {}
     function RegulaFalsi() { }
     function BasisSpline() {}
     
-    return {
+    var self = {
+        /// Calculate Bernstein basis polynomials.
+        ///
+        /// @param d Available options?
+        /// @param n Amount selected?
+        /// @return float indicating the binomial coefficient
+        BinomialCoefficient: function(d, n) {
+            return Factorial(d) / (Factorial(d - n) * Factorial(n));
+        },
     
         /// Calculate Bernstein basis polynomials.
         ///
@@ -22,7 +32,7 @@ define(function(require) {
         BernsteinBasis: function(d, n, x) {
     
             // Binomial coefficient:
-            var b = Factorial(d) / (Factorial(d - n) * Factorial(n));
+            var b = self.BinomialCoefficient();
 
             // Bernstein polynomial:
             return b * Math.pow(x, n) * Math.pow(1 - x, d - n);
@@ -117,7 +127,7 @@ define(function(require) {
                     -b / (2 * a)
                 ];
         
-            // Two real solution:
+            // Two real solutions:
             } else if(discriminant > 0) {
                 var root = Math.sqrt(discriminant);
         
@@ -175,4 +185,6 @@ define(function(require) {
             return r;
         }
     };
+    
+    return self;
 });
