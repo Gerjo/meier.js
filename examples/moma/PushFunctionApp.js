@@ -209,7 +209,7 @@ define(function(require) {
         // Translate the whole canvas, the function is always
         // drawn from the origin.
         renderer.save();
-        renderer.translate(-370, -270);
+        renderer.translate(-this.hw + 40 * Math.PI - 80, -this.hh + 40 * Math.PI - 80);
         this.drawPushFunction(renderer);
         renderer.restore();
     };
