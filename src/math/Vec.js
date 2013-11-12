@@ -215,12 +215,14 @@ define(function(require) {
         };
         
         V.prototype.normalize = function() {
-            var l = 1 / this.length();
+            var l = this.length();
             
-            for(var i = this.numrows - 1; i >= 0; --i) {
-                this._[i] *= l;
+            if(l !== 0) {
+                l = 1 / l;
+                for(var i = this.numrows - 1; i >= 0; --i) {
+                    this._[i] *= l;
+                }
             }
-            
             return this;
         };
         
