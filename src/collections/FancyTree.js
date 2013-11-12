@@ -4,7 +4,7 @@ define(function(require){
     var Tree         = require("meier/collections/CriterionTree");
     var Rectangle    = require("meier/math/Rectangle");
     var LineSegment  = require("meier/math/Line");
-    var Vector       = require("meier/math/vec")(2);
+    var Vector       = require("meier/math/Vec")(2);
     
     MyTree.prototype = new Tree();
 
