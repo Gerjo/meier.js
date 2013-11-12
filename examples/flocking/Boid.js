@@ -25,12 +25,10 @@ define(function(require) {
         [1, -1].forEach(function(sign) {
             if(this.position.x * sign > this.game.hw) {
                 this.position.x = -this.game.hw * sign;
-                //this.velocity.x *= -1;
             }
         
             if(this.position.y * sign > this.game.hh) {
                 this.position.y = -this.game.hh * sign;
-                //this.velocity.y *= -1;
             }
         }.bind(this));
     };
