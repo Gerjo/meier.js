@@ -1,6 +1,6 @@
 define(function(require){
     var Entity   = require("meier/engine/Entity");
-    var Grid     = require("meier/prefab/grid");
+    var Grid     = require("meier/prefab/Grid");
     var Input    = require("meier/engine/Input");
     var Pixel    = require("meier/prefab/Pixel");
     var GiftWrap = require("meier/math/Hull").GiftWrap;
