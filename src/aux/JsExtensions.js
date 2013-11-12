@@ -181,11 +181,17 @@ Array.prototype.clone = function() {
 
 /// Kind of like reduce, without reducing.
 ///
-Array.prototype.eachPair = function(callback) {
+Array.prototype.eachPair = function(callback, wraparound) {
     
-    for(var i = 0, j; i < this.length; ++i) {
+    if(typeof wraparound != "boolean") {
+        wraparound = true;
+    }
+    
+    var len = (wraparound) ? this.length : this.length - 1;
+    
+    for(var i = 0, j; i < len; ++i) {
         j = (i === this.length - 1) ? 0 : i + 1;
-        
+                
         if(false === callback(this[i], this[j])) {
             return false;
         }

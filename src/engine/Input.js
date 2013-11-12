@@ -10,7 +10,7 @@ define(function(require) {
     var Size   = require("meier/math/Size");
     var Key    = require("meier/engine/Key");
 
-    Input.Events = {};
+    Input.Events       = {};
     Input.Events.COUNT = 0;
 
     // Simulated on tablets.
@@ -28,6 +28,35 @@ define(function(require) {
 
     // Tablets only.
     Input.DOUBLE_TAP  = Input.Events.DOUBLE_TAP  = Input.Events.COUNT++;
+
+    InputCursorCount = 0;
+    Input.Cursor     = {};
+    Input.Cursor.FINGER = "pointer";
+    Input.Cursor.DEFAULT = "default";
+    Input.Cursor.CROSSHAIR = "crosshair";
+    
+    Input.Cursor.POINTER = "pointer";
+    Input.Cursor.AUTO = "auto";
+    Input.Cursor.ALL_SCROLL = "all-scroll";
+    Input.Cursor.HELP = "help";
+    Input.Cursor.INHERIT = "inherit";
+    Input.Cursor.MOVE = "move";
+    Input.Cursor.PROGRESS = "progress";
+    Input.Cursor.TEXT = "text";
+    Input.Cursor.VERTICAL_TEXT = "vertical-text";
+    Input.Cursor.WAIT = "wait";
+    Input.Cursor.NO_DROP = "no-drop";
+    Input.Cursor.NOT_ALLOWED = "not-allowed";
+    Input.Cursor.E_RESIZE = "e-resize";
+    Input.Cursor.N_RESIZE = "n-resize";
+    Input.Cursor.S_RESIZE = "s-resize";
+    Input.Cursor.W_RESIZE = "w-resize";
+    Input.Cursor.COL_RESIZE = "col-resize";
+    Input.Cursor.ROW_RESIZE = "row-resize";
+    Input.Cursor.NE_RESIZE = "ne-resize";
+    Input.Cursor.NW_RESIZE = "nw-resize";
+    Input.Cursor.SE_RESIZE = "se-resize";
+    Input.Cursor.SW_RESIZE = "sw-resize";
 
 
     function PriorityCallback(priority, callback, eventtype) {
@@ -196,6 +225,10 @@ define(function(require) {
             event.preventDefault();
         }.bind(this);
     }
+
+    Input.prototype.cursor = function(cursortype) {
+        this._container.style.cursor = cursortype;
+    };
 
     Input.prototype.updatePosition = function(event) {
         var x, y;

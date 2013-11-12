@@ -6,7 +6,6 @@
  !*/
 
 define(function() {
-    var Vector = require("meier/math/Vec")(2);
     
     return {
         /// Calculate the convex hull that wraps a bunch of coordinates. Used

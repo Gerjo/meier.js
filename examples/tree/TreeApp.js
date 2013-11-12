@@ -14,7 +14,7 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(60);
         
-        this.numEntities = 400;
+        this.numEntities = 200;
         
         this.gui = new dat.GUI();
     	this.gui.add(this, 'numEntities', 0, 1000);

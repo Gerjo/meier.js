@@ -3,14 +3,15 @@ define(function(require) {
     
     Pixel.prototype = new Entity();
     function Pixel(x, y, color) {
-        Entity.call(this, x || 0, y || 0);
+        Entity.call(this, x || 0, y || 0, 2, 2);
         
         this.color = color || "black";
+        
     }
     
     Pixel.prototype.draw = function(renderer) {
         renderer.begin();
-        renderer.circle(0, 0, 2);    
+        renderer.circle(0, 0, this.width);    
         renderer.stroke(this.color);   
     };
     
