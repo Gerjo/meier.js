@@ -1,5 +1,5 @@
 define(function(require) {
-    var Frame = require("meier/prefab/Frame");
+    var Frame = require("meier/prefab/Grid");
     var Pixel  = require("meier/prefab/Pixel");
     var Sprite = require("meier/prefab/Sprite");
     
