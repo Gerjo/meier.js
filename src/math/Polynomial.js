@@ -7,6 +7,7 @@
 
 define(function(require) {
     var Factorial = require("meier/math/Math").Factorial;
+    var GJE       = require("meier/math/Math").GaussJordanElimination;
     
     /// My polynomial wish-list
     function HornersMethod() {}
@@ -66,6 +67,52 @@ define(function(require) {
             }
     
             return result;
+        },
+
+        /// Find a polynomial that runs through the given points. Internally
+        /// uses Gauss-Jordan elimination. No back-substitution.
+        ///
+        PolynomialPath: function(points) {
+            // Dynamic matrix builder, loaded "late" to avoid circular
+            // dependancy.
+            var M   = require("meier/math/Mat");
+            
+            var degree = points.length;
+            
+            // Matrices:
+            var m = new (M(degree, degree))();
+            var v = new (M(degree, 1))();
+            
+            for(var row = 0, p; row < degree; ++row) {
+                p = points[row];
+            
+                // Known locations:
+                v.set(row, 0, p.y);
+            
+                // Fill the augmented matrix:
+                for(var col = 0; col < degree; ++col) {
+                    m.set(row, col, Math.pow(p.x, col));
+                }
+            }
+            
+            // Solve system of linear equations:
+            var r = GJE(m, v);
+            
+            // Build JavaScript code that contains the polynomial:
+            var fn = "return ";
+            for(var i = 0, d; i < degree; ++i) {
+                fn += r.at(i, 0) + " * Math.pow(x, " + i + ") + ";
+            }
+            fn = fn.trim(" + ") + ";";
+        
+            try{
+                return new Function("x", fn);
+            } catch(e) {
+                console.error("Unable to create PolynomialPath. Code:");
+                console.error(fn);
+            }
+            
+            return null;
         },
 
 
