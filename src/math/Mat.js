@@ -301,6 +301,11 @@ define(function(require) {
             }
         }
         
+        // A class that knows its own anonymous "type"!
+        M.prototype.type = function() {
+            return M;
+        };
+        
         M.prototype.clone = function() {
             var m = new M();
             
