@@ -185,9 +185,9 @@ define(function(require) {
         }.bind(this);
         
         if(this.lagrange !== null) {
-            this.plot(renderer, this.lagrange, "blue", 0)
-            this.plot(renderer, this.gauss, "red", 0)
-            this.plot(renderer, errorfn, "green", 1)
+            this.plot(renderer, this.lagrange, "blue", 4)
+            this.plot(renderer, this.gauss, "red", 2)
+            this.plot(renderer, errorfn, "green", 2)
         }
     };
     
