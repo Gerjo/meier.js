@@ -92,29 +92,24 @@ define(function(require) {
         
         var r = GJE(m, v);
         
-        
         var poly = "";
-        var fn = "return ";
         var pretty = "";
         
         for(var i = 0, d; i < degree; ++i) {
             d = i; //degree - i - 1;
             poly += r.at(i, 0) + "x^" + d + " + ";
             pretty += Round(r.at(i, 0), 5) + "x^" + d + " + ";
-            fn += r.at(i, 0) + " * Math.pow(x, " + d + ") + ";
         }
         
         
-        pretty = pretty.trim(" + ");
+        this.text = pretty = pretty.trim(" + ");
         poly = poly.trim(" + ");
-        fn = fn.trim(" + ") + ";";
         
-        this.gauss = new Function("x", fn);
-        this.text = pretty;
+        // We're solving again (to test the system):
+        this.gauss = Polynomial.PolynomialPath(coordinates);
         
         console.log(poly);
         //console.log(fn);
-        
         //console.log(r.pretty());
     };
     
