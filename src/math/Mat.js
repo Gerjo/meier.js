@@ -362,13 +362,55 @@ define(function(require) {
                 
                 return m;
             };
+        } else if(isSquare && rows == 3) {
+            M.prototype.inverse = function() {
+                var minors = new M();
+                var det = this.determinant();
+    
+                // Awwww... you've found a singularity.
+                if(det === 0) {
+                    console.error("Cannot inverse a Matrix with a determinant of 0.");
+                    return false;
+                }
+    
+                // 2x2 determinant:
+                var Determinant = function(a, b, c, d) {
+                    return a * d - b * c;
+                };
+    
+                /// Signs:
+                /// + - +
+                /// - + -
+                /// + - +
+        
+                // Matrix of minors:
+                minors._[At(0, 0)] = Determinant(this._[At(1,1)], this._[At(1,2)], this._[At(2,1)], this._[At(2,2)]);
+                minors._[At(0, 1)] = -Determinant(this._[At(1,0)], this._[At(1,2)], this._[At(2,0)], this._[At(2,2)]);
+                minors._[At(0, 2)] = Determinant(this._[At(1,0)], this._[At(1,1)], this._[At(2,0)], this._[At(2,1)]);
+
+                minors._[At(1, 0)] = -Determinant(this._[At(0,1)], this._[At(0,2)], this._[At(2,1)], this._[At(2,2)]);
+                minors._[At(1, 1)] = Determinant(this._[At(0,0)], this._[At(0,2)], this._[At(2,0)], this._[At(2,2)]);
+                minors._[At(1, 2)] = -Determinant(this._[At(0,0)], this._[At(0,1)], this._[At(2,0)], this._[At(2,1)]);
+    
+                minors._[At(2, 0)] = Determinant(this._[At(0,1)], this._[At(0,2)], this._[At(1,1)], this._[At(1,2)]);
+                minors._[At(2, 1)] = -Determinant(this._[At(0,0)], this._[At(0,2)], this._[At(1,0)], this._[At(1,2)]);
+                minors._[At(2, 2)] = Determinant(this._[At(0,0)], this._[At(0,1)], this._[At(1,0)], this._[At(1,1)]);
+                
+                var adjugate = minors.transpose();
+                
+                
+                adjugate.multiply(1 / det);
+                
+                return adjugate;
+            };
+            
         } else {
             M.prototype.inverse = function() {
                 if(!isSquare) {
                     throw new Error("Matrix must be square for inverse.");
                 }
                 
-                throw new Error("TODO: implement inverse.");
+                throw new Error("TODO: implement matrix inverse.");
                 
             };
         }
@@ -431,6 +473,15 @@ define(function(require) {
             return m;
         };
         
+        M.prototype.multiply = function(number) {
+            for(var row = 0; row < this.numrows; ++row) {
+                for(var col = 0; col < this.numcolumns; ++col) {
+                    this._[At(row, col)] *= number;
+                }
+            }
+            
+            return this;
+        };
         
         /// Transform vectors for graphics purposes. Does probably 
         /// not do what you'd expect.
