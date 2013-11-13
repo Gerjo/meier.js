@@ -8,7 +8,6 @@
 define(function(require) {
     var Vector = require("meier/math/Vector");
     
-    
     return {
         
         /// Determine the sign of a number.
@@ -273,89 +272,150 @@ define(function(require) {
         },
 
         /// A half-baked implementation of Gauss-Jordan elemination.
-        /// Untested with zero values, don't expect this to work. It
-        /// serves as food for the brain to come up with something
-        /// better.
+        /// 
         ///
-        /// Input format: an array with the following significant indices:
-        /// 0 1 2 |  9
-        /// 3 4 5 | 10
-        /// 6 7 8 | 11
-        ///
-        /// Output: an array containing the x, y and z values.
-        GaussJordanElimination: function(a) {
-            var r;
-    
-            // TODO: Account for zero values by swapping rows.
-            // TODO: Some operations are redundant.
-            // TODO: Arguments to accept matrices and such.
-            // TODO: Use this to calculate the inverse of matrices
-            // TODO: Use reduced row echelon to solve, rather than
-            // full blown Gauss-Jordan.
-    
-            // first row 1 x x
-            a[1] /= a[0];
-            a[2] /= a[0];
-            a[9] /= a[0];
-            a[0] /= a[0];
-    
-            // second row 0 x x
-            r = a[3] / a[0];
-            a[3]  -= (r * a[0]);
-            a[4]  -= (r * a[1]);
-            a[5]  -= (r * a[2]);
-            a[10] -= (r * a[9]);
-    
-            // third row 0 x x
-            r =  a[6] / a[0];
-            a[6]  -= (r * a[0]);
-            a[7]  -= (r * a[1]);
-            a[8]  -= (r * a[2]);
-            a[11] -= (r * a[9]);
+        GaussJordanElimination: function(input, out) {
+            
+            if( ! input || ! input._) {
+                throw new Error("GaussJordanElimination - argument is probably not a matrix.");
+            }
+            
+            if(input.numrows !== input.numcolumns) {
+                throw new Error("GaussJordanElimination - matrix is not square.");
+            }
+            
+            /// A sort of macro to access indices.
+            function At(row, column) {
+                return row * input.numcolumns + column;
+            }
+            
+            //var out = [1, 1, 1, 1];
+            
+            var matrix = input.clone();
+            
+            var size = matrix.numcolumns;
+            var n, swapped = false;
+            
+            console.log(matrix.wolfram());
+            
+            // Set pivots:
+            for(var i = 0; i < size; ++i) {
+                
+                if(matrix.at(i, i) === 0) {
+                    swapped = false;
+                    for(var j = i + 1; j < size; ++j) {
+                        if(matrix.at(j, i) != 0) {
+                            matrix.swapRows(i, j);
+                            out.swapRows(i, j);
+                            console.log("swap rows:", i, "and", j);
+                            swapped = true;
+                            break;
+                        }
+                    }
+                    
+                    if( ! swapped) {
+                        console.log("Unable to find suitable pivot value. Rework logic!");
+                    }
+                }
+            }
+            
+            
+            console.log("Initial:");
+            console.log(matrix.pretty());
+            
+            // Lower triangle:
+            for(var it = 0; it < size; ++it) {
+                for(var row = it + 1; row < size; ++row) {
+                    var pivot = matrix._[At(it, it)];
+                    var ratio = matrix._[At(row, it)] / pivot;
+                
+                    //console.log("\n pivot row[" + it + "] ratio: " + ratio);
+                
+                    if(ratio == 0) {
+                        console.error("pivot ratio is zero");
+                    }
+                
+                    for(var col = 0; col < size; ++col) {
+                        matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
+                        
+                        var r = out._[At(row, col)] - (ratio * out._[At(it, col)]);
+                        
+                        //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
+                        
+                        out._[At(row, col)] = r;
+                    }
+                }
+            }
+            
+            for(var row = 0; row < size; ++row) {
+                var pivot = matrix.at(row, row);
+                
+                // Self-normalize:
+                if(pivot != 1) {
+                
+                    for(var col = 0; col < size; ++col) {
+                        matrix._[At(row, col)] /= pivot;
+                        
+                        out._[At(row, col)] /= pivot;
+                    }
+                }
+            }
+            
+            console.log("Lower Triangle:");
+            console.log(matrix.pretty());
+            console.log("right side:");
+            console.log(out.pretty());
+            
+            //return matrix;
+            
+            for(var it = size - 1; it > 0; --it) 
+            {
+                var pivot = matrix._[At(it, it)];
+                
+                for(var row = 0; row < it; ++row) {
+                    var ratio = matrix._[At(row, it)] / pivot;
+                    
+                    if(ratio == 0) {
+                        console.error("pivot ratio is zero");
+                    }
+                    
+                    //console.log("pivot[row " + it + "] " + pivot + " ratio: " + ratio);
+                    
+                    for(var col = 0; col < size; ++col) {
+                        matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
+                        
+                        
+                        var r = out._[At(row, col)] - (ratio * out._[At(it, col)]);
 
-            // third row: 0 0 x
-            r = -(a[7] / a[4]);
-            a[6]  += (r * a[3]);
-            a[7]  += (r * a[4]);
-            a[8]  += (r * a[5]);
-            a[11] += (r * a[10]);
-    
-            // Second row: 0 1 x
-            a[3]  /= a[4];
-            a[5]  /= a[4];
-            a[10] /= a[4];
-            a[4]  /= a[4];
-    
-            // Third row: 0 0 1
-            a[6]  /= a[8];
-            a[7]  /= a[8];
-            a[11] /= a[8];
-            a[8]  /= a[8];
-    
-            // First row 1 0 x
-            r = -(a[1] / a[4]);
-            a[0] += (r * a[3])
-            a[1] += (r * a[4])
-            a[2] += (r * a[5])
-            a[9] += (r * a[10])
-    
-            // First row 1 0 0
-            r = -(a[2] / a[8]);
-            a[0] += (r * a[6])
-            a[1] += (r * a[7])
-            a[2] += (r * a[8])
-            a[9] += (r * a[11])
-    
-            // Second row 0 1 0
-            r = -(a[5] / a[8]);
-            a[3]  += (r * a[6])
-            a[4]  += (r * a[7])
-            a[5]  += (r * a[8])
-            a[10] += (r * a[11])
-    
-            return [
-                a[9], a[10], a[11]
-            ];
+                        //console.log(row, col, out._[At(row, col)]);
+                        
+                        //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
+                        
+                        
+                        out._[At(row, col)] = r;
+                        
+                    }
+                    
+                }
+                
+                //break;
+            }
+            /*
+            */
+            
+            console.log("Left over:");
+            console.log(matrix.pretty());
+            
+            console.log("Return (inverse):");
+            console.log(out.pretty());
+            
+            //console.log("Actual inverse:");
+            //console.log(input.inverse().pretty())
+            //console.log("out determinant:", out.determinant());
+            
+            console.log("Should be identity:");
+            console.log(out.product(input).pretty());
+            
         }
     };// End return
 }); // End define
