@@ -42,24 +42,23 @@ define(function(require) {
                  (-0.163891331e-3 - 0.1275240287e-2 * rads) * rads) * rads) * rads) * rads) * rads;
         },
 
-        /// Round numbers to the specified precision. Halves 
-        /// are rounded up. 
+        /// Round numbers to the specified precision.
         ///
         /// @param {num} the to be rounded number.
         /// @param {precision} rounding precision. Accepts negative numbers.
         /// @return the rounded number.
         Round: function (num, precision) {
-    
-            if(precision > 0) {
+            
+            if(precision > 0 && parseInt(num, 10) != num) {
                 var exp = Math.pow(10, precision)
-                return parseInt(num * exp + 0.5, 10) / exp;
+                return Math.round(num * exp) / exp;
     
             } else if(precision < 0) {
                 var exp = Math.pow(10, -precision)
-                return parseInt(num / exp + 0.5, 10) * exp;
+                return Math.round(num / exp) * exp;
             }
-    
-            return parseInt(num + 0.5);
+            
+            return Math.round(num);
         },
 
         /// Test if the argument is an integer. NaN and infinity
