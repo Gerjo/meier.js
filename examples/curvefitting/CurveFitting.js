@@ -79,8 +79,8 @@ define(function(require) {
             // Known locations:
             v.set(row, 0, p.y);
             
+            // Fill the augmented matrix:
             for(var col = 0; col < degree; ++col) {
-                //console.log(col);
                 m.set(row, col, Math.pow(p.x, col));
             }
             
