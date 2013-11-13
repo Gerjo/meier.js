@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src="../../src/Meier.js"></script>
+
+<script>
+
+
+Meier("../../src");
+Meier(function() {
+    require(["./ProbabilityApp"], function(ProbabilityApp) {
+        new ProbabilityApp(document.getElementsByTagName("body")[0]);
+    });
+});
+
+</script>
+
+
+<!-- Per default, an empty document has no height, and weird paddings. -->
+<style>
+body, html {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+</style>
+
+</head>
+<body>
+</body>
+</html>
