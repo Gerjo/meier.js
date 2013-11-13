@@ -12,7 +12,7 @@ define(function(require) {
         return parseInt(num + 0.5);
     };
     
-    var Storage = Float64Array;// || Array;
+
     
     return function(rows) {
         
@@ -41,10 +41,31 @@ define(function(require) {
             });
         }
         
+        var CreateArray;
+    
+        // iPad 1 and IE < 10 support.
+        if(typeof Float64Array === "undefined") {
+            
+            // Loop unrolling experiment:
+            var fn = "return [";
+        
+            for(var i = rows - 1; i >= 0; --i) {
+                fn += "0,"
+            }
+       
+            CreateArray = new Function(fn.trim(",") + "];");
+        
+        } else {
+            CreateArray = function(size) {
+                // Values are automatically initialized to "0".
+                return new Float64Array(size);
+            }
+        }
+        
         function V(x, y, z, w) {
             this.numrows = rows;
             
-            this._ = new Storage(this.numrows);
+            this._ = CreateArray(this.numrows);
             this._[0] = x || 0;
             this._[1] = y || 0;
             
