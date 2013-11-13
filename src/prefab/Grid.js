@@ -14,6 +14,8 @@ define(function(require) {
         this.shownum    = true;
         this.labelcolor = "black";
         this.labelfont  = "10px monospace";
+        
+        this.reallabels = false;
     }
     
     Frame.prototype.draw = function(r) {
@@ -35,12 +37,17 @@ define(function(require) {
             
             for(var i = 0; i <= hsteps * 0.5; ++i) {
                 var x = i * this.spacing * j;
+                var label = this.reallabels ? i * j * this.spacing : i * j;
+                
                 r.begin();
                 
                 r.line(-w, x, w, x);
                 
                 if(this.shownum && i != 0) {
-                    r.text(i * j, -2, x, this.labelcolor, "right", "middle", this.labelfont);
+                    if(this.reallabels) {
+                        
+                    }
+                    r.text(label, -2, x, this.labelcolor, "right", "middle", this.labelfont);
                 }
                 
                 if(i == 0) {
@@ -56,12 +63,14 @@ define(function(require) {
             
             for(var i = 0; i <= wsteps * 0.5; ++i) {
                 var x = i * this.spacing * j;
+                var label = this.reallabels ? i * j * this.spacing : i * j;
+                
                 r.begin();
                 r.line(x, -h, x, h);
                 
                 
                 if(this.shownum && i != 0) {
-                    r.text(i * j, x, 0, this.labelcolor, "center", "top", this.labelfont);
+                    r.text(label, x, 0, this.labelcolor, "center", "top", this.labelfont);
                 }
                 
                 if(i == 0) {
