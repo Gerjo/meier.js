@@ -148,6 +148,7 @@ define(function(require) {
                 } else {
                     // No double-tap listeres, trigger event right away.
                     this.trigger(Input.Events.LEFT_CLICK, event);
+                    this.trigger(Input.Events.LEFT_UP, event);
                 }
             
                 return false;
