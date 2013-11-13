@@ -4,7 +4,22 @@
 define(function(require) {
     var Round = require("meier/math/Math").Round;
     
-    var Storage = Float32Array || Array;
+    var CreateArray;
+    
+    // iPad 1 and IE < 10 support.
+    if(typeof Float64Array === "undefined") {
+        CreateArray = function(size) {
+            var arr = new Array(size);
+            for(var i = size - 1; i >= 0; --i) {
+                arr[i] = 0;
+            }
+            return arr;
+        }
+    } else {
+        CreateArray = function(size) {
+            return new Float64Array(size);
+        }
+    }
     
     var Builder = function(rows, columns) {
         columns = typeof columns === "undefined" ? rows : columns;
@@ -273,7 +288,7 @@ define(function(require) {
             this.num        = rows * columns;
             
             // Hidden, indexing doesn't work as expected.
-            this._ = new Storage(length);
+            this._ = CreateArray(length);
             
             if(data && data instanceof Array) {
                 if(data.length == this.num) {
