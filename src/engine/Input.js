@@ -91,9 +91,14 @@ define(function(require) {
         
             container.ontouchstart = function(event) {
                 event.preventDefault();
-            
-                this.updatePosition(event);
-            
+                
+                // Trigger a move event. Allows the user to
+                // update any mouse positions prior to the 
+                // botton event.
+                if(this.updatePosition(event) === true) {
+                    this.trigger(Input.Events.MOUSE_MOVE, event);            
+                }
+                
                 this.trigger(Input.Events.LEFT_DOWN, event);
             
                 return false;
