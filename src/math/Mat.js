@@ -32,9 +32,9 @@ define(function(require) {
             throw new Error("Cannot import matrix. Invalid column size.");
         }
         
-        if(rows < 2 || columns < 2) {
-            throw new Error("Matrices smaller than 2x2 are not supported yet.");
-        }
+        //if(rows < 2 || columns < 2) {
+        //    throw new Error("Matrices smaller than 2x2 are not supported yet.");
+        //}
         
         
         var isSquare = rows === columns;
