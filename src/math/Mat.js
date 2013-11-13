@@ -531,6 +531,20 @@ define(function(require) {
             return r;
         };
         
+        M.prototype.swapRows = function(i, j) {
+            if(i == j) {
+                return this;
+            }
+            
+            for(var col = 0, tmp; col < this.numcolumns; ++col) {
+                tmp = this._[At(i, col)];
+                this._[At(i, col)] = this._[At(j, col)];
+                this._[At(j, col)] = tmp;
+            }
+            
+            return this;
+        };
+        
         M.prototype.at = function(row, column) {
             return this._[At(row, column)];
         };
