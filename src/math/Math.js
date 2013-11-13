@@ -289,6 +289,11 @@ define(function(require) {
                 return row * input.numcolumns + column;
             }
             
+            /// 
+            function At2(row, column) {
+                return row * out.numcolumns + column;
+            }
+            
             //var out = [1, 1, 1, 1];
             
             var matrix = input.clone();
@@ -296,7 +301,7 @@ define(function(require) {
             var size = matrix.numcolumns;
             var n, swapped = false;
             
-            console.log(matrix.wolfram());
+            //console.log(matrix.wolfram());
             
             // Set pivots:
             for(var i = 0; i < size; ++i) {
@@ -307,6 +312,7 @@ define(function(require) {
                         if(matrix.at(j, i) != 0) {
                             matrix.swapRows(i, j);
                             out.swapRows(i, j);
+                            
                             console.log("swap rows:", i, "and", j);
                             swapped = true;
                             break;
@@ -320,8 +326,8 @@ define(function(require) {
             }
             
             
-            console.log("Initial:");
-            console.log(matrix.pretty());
+            //console.log("Initial:");
+            //console.log(matrix.pretty());
             
             // Lower triangle:
             for(var it = 0; it < size; ++it) {
@@ -338,11 +344,13 @@ define(function(require) {
                     for(var col = 0; col < size; ++col) {
                         matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
                         
-                        var r = out._[At(row, col)] - (ratio * out._[At(it, col)]);
+                        if(col < out.numcolumns) {
+                            var r = out._[At2(row, col)] - (ratio * out._[At2(it, col)]);
                         
-                        //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
+                            //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
                         
-                        out._[At(row, col)] = r;
+                            out._[At2(row, col)] = r;
+                        }
                     }
                 }
             }
@@ -356,17 +364,19 @@ define(function(require) {
                     for(var col = 0; col < size; ++col) {
                         matrix._[At(row, col)] /= pivot;
                         
-                        out._[At(row, col)] /= pivot;
+                        if(col < out.numcolumns) {
+                            out._[At2(row, col)] /= pivot;
+                        }
                     }
                 }
             }
             
-            console.log("Lower Triangle:");
-            console.log(matrix.pretty());
-            console.log("right side:");
-            console.log(out.pretty());
+            //console.log("Left Triangle:");
+            //console.log(matrix.pretty());
+            //console.log("right side:");
+            //console.log(out.pretty());
             
-            //return matrix;
+            // We do a full elimination. Though for some cases we can back-substitute from here on.
             
             for(var it = size - 1; it > 0; --it) 
             {
@@ -384,16 +394,16 @@ define(function(require) {
                     for(var col = 0; col < size; ++col) {
                         matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
                         
-                        
-                        var r = out._[At(row, col)] - (ratio * out._[At(it, col)]);
+                        if(col < out.numcolumns) {
+                            var r = out._[At2(row, col)] - (ratio * out._[At2(it, col)]);
 
-                        //console.log(row, col, out._[At(row, col)]);
+                            //console.log(row, col, out._[At(row, col)]);
                         
-                        //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
+                            //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
                         
                         
-                        out._[At(row, col)] = r;
-                        
+                            out._[At2(row, col)] = r;
+                        }
                     }
                     
                 }
@@ -403,19 +413,20 @@ define(function(require) {
             /*
             */
             
-            console.log("Left over:");
-            console.log(matrix.pretty());
+            //console.log("Left side: [reduced row echelon form]");
+            //console.log(matrix.pretty());
             
-            console.log("Return (inverse):");
-            console.log(out.pretty());
+            //console.log("Right side:");
+            //console.log(out.pretty());
             
             //console.log("Actual inverse:");
             //console.log(input.inverse().pretty())
             //console.log("out determinant:", out.determinant());
             
-            console.log("Should be identity:");
-            console.log(out.product(input).pretty());
+            //console.log("Should be identity:");
+            //console.log(out.product(input).pretty());
             
+            return out;
         }
     };// End return
 }); // End define
