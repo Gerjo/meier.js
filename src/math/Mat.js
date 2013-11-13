@@ -550,8 +550,17 @@ define(function(require) {
             return this;
         };
         
+        M.prototype.index = function(row, column) {
+            return At(row, column);
+        };
+        
         M.prototype.at = function(row, column) {
             return this._[At(row, column)];
+        };
+        
+        M.prototype.set = function(row, column, value) {
+            this._[At(row, column)] = value;
+            return this;
         };
         
         M.prototype.pretty = function() {
