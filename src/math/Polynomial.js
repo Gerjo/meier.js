@@ -36,7 +36,7 @@ define(function(require) {
         BernsteinBasis: function(d, n, x) {
     
             // Binomial coefficient:
-            var b = self.BinomialCoefficient();
+            var b = self.BinomialCoefficient(d, n);
 
             // Bernstein polynomial:
             return b * Math.pow(x, n) * Math.pow(1 - x, d - n);
