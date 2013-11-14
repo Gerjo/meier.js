@@ -159,6 +159,9 @@ define(function(require) {
             height = texture.height;
         }
  
+        if( ! texture.isLoaded) {
+            return this;
+        }
     
         this.context.drawImage(
                 texture.image,     // The image
