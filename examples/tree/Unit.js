@@ -5,12 +5,14 @@ define(function(require) {
     Unit.prototype = new Entity();
     function Unit(x, y) {
         Entity.call(this, x, y, 10, 10);
-        this.velocity = Random.Vector().scaleScalar(100);
+        this.velocity = Random.Vector().scaleScalar(30);
         this.color = "black";
+        
+        this.width  = Random.Range(10, 15);
+        this.height = Random.Range(10, 15);
     }
     
     Unit.prototype.update = function(dt) {
-        
         
         this.position.add(this.velocity.clone().scaleScalar(dt));
         
@@ -25,6 +27,8 @@ define(function(require) {
                 this.velocity.y *= -1;
             }
         }.bind(this));
+        
+        
     };
     
     Unit.prototype.draw = function(renderer) {
