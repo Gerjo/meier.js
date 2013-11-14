@@ -262,12 +262,12 @@ define(function(require) {
                 case 6: return 720;
             }
     
-            var r = 1;
+            var r = 720;
     
-            while( n-- > 1) {
-                r *= n;
+            while( n-- > 6) {
+                r *= n + 1;
             }
-    
+        
             return r;
         },
 
