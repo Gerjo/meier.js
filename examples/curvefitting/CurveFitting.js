@@ -1,5 +1,6 @@
 define(function(require) {
     var Game       = require("meier/engine/Game");
+    var Input      = require("meier/engine/Input");
     var Grid       = require("meier/prefab/Grid");
     var Vector     = require("meier/math/Vec")(2);
     var Pixel      = require("meier/prefab/Pixel");
@@ -7,6 +8,7 @@ define(function(require) {
     var Sign       = require("meier/math/Math").Sign;
     var Round      = require("meier/math/Math").Round;
     var Polynomial = require("meier/math/Polynomial");
+    
     
     // Dynamic matrix builder:
     var M   = require("meier/math/Mat");
@@ -40,6 +42,8 @@ define(function(require) {
         this.onLeftDown(new Vector(-100, 50));
         this.onLeftDown(new Vector(100, 60));
         this.onLeftDown(new Vector(200, -50));
+        
+        this.input.cursor(Input.Cursor.FINGER);
         
         /*var m66 = new M66([
             0, 2, 4, 5, 3, 4,

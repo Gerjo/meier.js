@@ -29,6 +29,8 @@ define(function(require) {
         this.recompute();
         
         this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
+        
+        this.input.cursor(Input.Cursor.FINGER);
     }
     
     BezierApp.prototype.onLeftDown = function(input) {
