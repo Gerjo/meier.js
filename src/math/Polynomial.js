@@ -15,7 +15,10 @@ define(function(require) {
     function BasisSpline() {}
     
     var self = {
-        /// Calculate Bernstein basis polynomials.
+        /// Binomial coefficient:
+        ///   k         k!
+        ///  --- = -----------
+        ///   n    n! (k - n)!
         ///
         /// @param d Available options?
         /// @param n Amount selected?
