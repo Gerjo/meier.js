@@ -40,13 +40,9 @@ define(function(require) {
                 var label = this.reallabels ? i * j * this.spacing : i * j;
                 
                 r.begin();
-                
                 r.line(-w, x, w, x);
                 
                 if(this.shownum && i != 0) {
-                    if(this.reallabels) {
-                        
-                    }
                     r.text(label, -2, x, this.labelcolor, "right", "middle", this.labelfont);
                 }
                 
@@ -68,7 +64,6 @@ define(function(require) {
                 r.begin();
                 r.line(x, -h, x, h);
                 
-                
                 if(this.shownum && i != 0) {
                     r.text(label, x, 0, this.labelcolor, "center", "top", this.labelfont);
                 }
@@ -79,9 +74,7 @@ define(function(require) {
                     r.stroke(this.gridcolor);
                 }
             }
-        }.bind(this));
-        
-        
+        }.bind(this));        
     };
         
     return Frame;

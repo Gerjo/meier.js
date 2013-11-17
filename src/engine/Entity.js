@@ -267,6 +267,7 @@ define(function(require) {
     Entity.prototype.movingToFixed = function() {
         var r = Matrix.CreateXoY(this.rotation);
         var t = Matrix.CreateTranslation(this.position);
+        
         return t.product(r);
     };
     
@@ -275,8 +276,6 @@ define(function(require) {
     Entity.prototype.fixedToMoving = function() {
         var r = Matrix.CreateXoY(-this.rotation);
         var t = Matrix.CreateTranslation(new Vector(-this.position.x, -this.position.y));
-        
-        //console.log(t.pretty());
         
         return r.product(t);
     };
