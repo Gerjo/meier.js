@@ -24,6 +24,7 @@ define(function(require) {
         this.sorted    = [];
         this.degree    = 0;
         
+        // Fake some clicks for some initial coordinates:
         this.grid.onLeftDown(new Vector(-100, 50));
         this.grid.onLeftDown(new Vector(100, 50));
         this.grid.onLeftDown(new Vector(0, -50));
@@ -85,7 +86,6 @@ define(function(require) {
         
     };
     
-    
     BezierApp.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
     };
@@ -97,14 +97,15 @@ define(function(require) {
         renderer.text("Bezier curve sorted on x coordinates.", -this.hw + 10, this.hh - 30, "rgba(0, 0, 255, 0.7)", "left", "top");
         renderer.text("Bernstein polynomials.", -this.hw + 10, this.hh - 50, "rgba(0, 0, 0, 0.7)", "left", "top");
         
-        
+        // There are multiple bernstein polynomials:
         this.bernstein.forEach(function(path) {
             renderer.begin();
-            for(var i = 1; i < path.length; ++i) {
-                renderer.line(path[i - 1], path[i]);
-            }
-            renderer.stroke("rgba(0, 0, 0, 0.3)");
+            path.eachPair(function(a, b) {
+                renderer.line(a, b);
+            }, false);
+            renderer.stroke("rgba(0, 0, 0, 0.3)", 1);
         }.bind(this));
+        
         
         renderer.begin();
         this.bezier.eachPair(function(a, b) {
