@@ -14,68 +14,33 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(15);
         
-        this.add(new Grid(0, 0, this.width, this.height));
+        this.add(this.grid = new Grid(0, 0, this.width, this.height));
+        this.grid.setEditable(true);
+        
+        this.grid.onChange = this.recompute.bind(this);
         
         this.bernstein = [];
         this.bezier    = [];
         this.sorted    = [];
         this.degree    = 0;
         
-    
-        this.add(new Pixel(-100, 50));
-        this.add(new Pixel(100, 50));
-        this.add(new Pixel(0, -50));
-        
-        this.recompute();
-        
-        this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
+        this.grid.onLeftDown(new Vector(-100, 50));
+        this.grid.onLeftDown(new Vector(100, 50));
+        this.grid.onLeftDown(new Vector(0, -50));
         
         this.input.cursor(Input.Cursor.FINGER);
     }
-    
-    BezierApp.prototype.onLeftDown = function(input) {
-        
-        var entities = this._entities.filter(function (entity) {
-            if(entity instanceof Pixel) {
-                if(entity.position.distance(input) < entity.width * 2) {
-                    entity.delete();
-                    return false;
-                }
-            }
-            return true;
-        });
-        
-        // Something got deleted:
-        if(entities.length != this._entities.length) {
-            this._entities = entities;
-        
-        // Nothing deleted, let's add one:
-        } else {
-            this.add(new Pixel(input.x, input.y));
-        }
-        
-        // Regenerate convex hull:
-        this.recompute();
-        
-    };
-    
-    BezierApp.prototype.recompute = function() {
-        
+
+    BezierApp.prototype.recompute = function(coordinates) {
+
         // Reset internals:
         this.bernstein   = [];
         this.bezier      = [];
         this.sorted      = [];
         this.degree      = 0;
         
-        var coordinates  = [];
         var steps        = 100;
         var stepsize     = 1 / steps;
-        
-        this._entities.forEach(function(e) {
-            if(e instanceof Pixel) {
-                coordinates.push(e.position);
-            }
-        }.bind(this));
         
         var sorted = coordinates.clone().sort(function(a, b) {
             return a.x - b.x;
