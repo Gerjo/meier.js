@@ -233,6 +233,50 @@ define(function(require) {
             }
     
             return r;
+        },
+        
+        /// Find a linear regression using the least squares
+        /// criterion. Yields b0 and b1 in:
+        ///     y = b0 + b1 * x
+        ///
+        /// In case non array data is used, a custom getter must be
+        /// supplied, e.g., for vectors use:
+        ///
+        ///     function(row) { return [row.x, row.y]; }
+        ///
+        ///
+        /// @param {data} an array containing the data.
+        /// @param {getter} an optional custom getter for row values.
+        /// @return An array containing b0 and b1 and indices 
+        ///         0 and 1, respectively.
+        LeastSquaresLinearRegression: function(data, getter) {
+            
+            // Assign a default trivial case getter:
+            if( ! getter) {
+                getter = function(row) {
+                    return row;
+                };
+            }
+        
+            var xy = 0;
+            var x = 0, xsq = 0;
+            var y = 0;
+            var n = 0;
+        
+            data.forEach(function(pair) {
+                pair = getter(pair, n);
+            
+                xsq += Math.pow(pair[0], 2);
+                x   += pair[0];
+                y   += pair[1];
+                xy  += pair[0] * pair[1];
+                ++n;
+            });
+        
+            var b1 = (xy - x * y / n) / (xsq - Math.pow(x, 2) / n);
+            var b0 = (y - b1 * x) / n;
+        
+            return [b0, b1];
         }
     };
     
