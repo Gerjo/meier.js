@@ -45,7 +45,12 @@ define(function(require) {
         var local = this.toLocal(input);
         
         var coordinates = [];
+
+        // Reset the extremes:
+        this.min   = new Vector(Infinity, Infinity);    
+        this.max   = new Vector(-Infinity, -Infinity);  
         
+        // Find an entity in range, and delete it.
         var entities = this._entities.filter(function(entity) {
             if(entity instanceof Pixel) {
                 if(entity.position.distance(local) < entity.width * 2) {
@@ -53,9 +58,9 @@ define(function(require) {
                     return false;
                 }
                 
+                // Update the new extremes:
                 this.min.x = Math.min(this.min.x, entity.position.x);
                 this.max.x = Math.max(this.max.x, entity.position.x);
-                
                 this.min.y = Math.min(this.min.y, entity.position.y);
                 this.max.y = Math.max(this.max.y, entity.position.y);
                 
