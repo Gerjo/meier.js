@@ -11,9 +11,7 @@ define(function(require) {
         this.setFps(60);
         
         
-        this.add(new Canvas(0, 0, 300, 300, this._renderer.context));
-        
-        
+        this.add(new Canvas(0, 0, 300, 300, this._renderer.context));        
     }
     
     ProbabilityApp.prototype.update = function(dt) {

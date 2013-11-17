@@ -1,5 +1,7 @@
 define(function(require) {
     var Entity = require("meier/engine/Entity");
+    var Vector = require("meier/math/Vec")(2);
+    var Input  = require("meier/engine/Input");
     var Pixel  = require("meier/prefab/Pixel");
     
     Frame.prototype = new Entity();
@@ -15,8 +17,85 @@ define(function(require) {
         this.labelcolor = "black";
         this.labelfont  = "10px monospace";
         
-        this.reallabels = false;
+        this._showRealLabels = false;
+        this._isEditable     = false;
+        
+        // Extremes of added coordinates:
+        this.min   = new Vector(Infinity, Infinity);    
+        this.max   = new Vector(-Infinity, -Infinity);  
     }
+    
+    Frame.prototype.onChange = function(coordinates) {
+        console.log("Unoverridden onChange method in grid.");
+    };
+    
+    Frame.prototype.add = function(entity) {
+        if(entity instanceof Pixel) {
+            this.min.x = Math.min(this.min.x, entity.position.x);
+            this.min.y = Math.min(this.min.y, entity.position.y);
+
+            this.max.x = Math.max(this.max.x, entity.position.x);
+            this.max.y = Math.max(this.max.x, entity.position.x);
+        }
+        
+        Entity.prototype.add.call(this, entity);
+    };
+    
+    Frame.prototype.onLeftDown = function(input) {
+        var local = this.toLocal(input);
+        
+        var coordinates = [];
+        
+        var entities = this._entities.filter(function(entity) {
+            if(entity instanceof Pixel) {
+                if(entity.position.distance(local) < entity.width * 2) {
+                    entity.delete();
+                    return false;
+                }
+                
+                this.min.x = Math.min(this.min.x, entity.position.x);
+                this.max.x = Math.max(this.max.x, entity.position.x);
+                
+                this.min.y = Math.min(this.min.y, entity.position.y);
+                this.max.y = Math.max(this.max.y, entity.position.y);
+                
+                coordinates.push(entity.position);
+            }
+            
+            return true;
+        }.bind(this));
+        
+        // Something was removed.
+        if(entities.length != this._entities.length) {
+            this._entities = entities;
+            
+        // Nothing was removed, let's add a pixel:
+        } else {
+            var pixel = new Pixel(input.x, input.y);
+            pixel.width = 4;
+
+            this.add(pixel);
+
+            coordinates.push(pixel.position);
+        }
+        
+        // Trigger event.
+        this.onChange(coordinates);
+    };
+    
+    Frame.prototype.setRealLabels = function(showRealLabels) {
+        this._showRealLabels = showRealLabels;
+    };
+    
+    Frame.prototype.setEditable = function(isEditable) {
+        this._isEditable = isEditable;
+                
+        if(isEditable) {
+            this.enableEvent(Input.LEFT_DOWN);
+        } else {
+            this.disableEvent(Input.LEFT_DOWN);
+        }
+    };
     
     Frame.prototype.draw = function(r) {
         Entity.prototype.draw.call(this, r);
@@ -37,7 +116,7 @@ define(function(require) {
             
             for(var i = 0; i <= hsteps * 0.5; ++i) {
                 var x = i * this.spacing * j;
-                var label = this.reallabels ? i * j * this.spacing : i * j;
+                var label = this._showRealLabels ? i * j * this.spacing : i * j;
                 
                 r.begin();
                 r.line(-w, x, w, x);
@@ -59,7 +138,7 @@ define(function(require) {
             
             for(var i = 0; i <= wsteps * 0.5; ++i) {
                 var x = i * this.spacing * j;
-                var label = this.reallabels ? i * j * this.spacing : i * j;
+                var label = this._showRealLabels ? i * j * this.spacing : i * j;
                 
                 r.begin();
                 r.line(x, -h, x, h);

@@ -8,7 +8,7 @@ define(function(require) {
     var Sign       = require("meier/math/Math").Sign;
     var Round      = require("meier/math/Math").Round;
     var Polynomial = require("meier/math/Polynomial");
-    
+    var LSQ        = require("meier/math/Polynomial").LeastSquaresLinearRegression;
     
     // Dynamic matrix builder:
     var M   = require("meier/math/Mat");
@@ -20,51 +20,34 @@ define(function(require) {
     var M66 = require("meier/math/Mat")(6, 6);
     var M61 = require("meier/math/Mat")(6, 1);
     
+
+    
     CurveFitting.prototype = new Game();
     function CurveFitting(container) {
         Game.call(this, container);
         
-        var grid = new Grid(0, 0, this.width, this.height);
-        grid.reallabels = true;
+        this.grid = new Grid(0, 0, this.width, this.height);
+        this.grid.setRealLabels(true);
+        this.grid.setEditable(true);
         
-        this.add(grid);
-        
-        this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
-        
+        this.add(this.grid);
+                
+        this.lsq = null;
         this.gauss = null;
         this.lagrange = null;
-        this.minx = Infinity;
-        this.maxx = -Infinity;
+        
+        this.grid.onChange = this.recompute.bind(this);
         
         
         // Fake touches for some initial coordinates:
-        this.onLeftDown(new Vector(-260, -50));
-        this.onLeftDown(new Vector(-100, 50));
-        this.onLeftDown(new Vector(100, 60));
-        this.onLeftDown(new Vector(200, -50));
+        this.grid.onLeftDown(new Vector(-260, -50));
+        this.grid.onLeftDown(new Vector(-100, 50));
+        this.grid.onLeftDown(new Vector(100, 60));
+        this.grid.onLeftDown(new Vector(200, -50));
+        
         
         this.input.cursor(Input.Cursor.FINGER);
-        
-        /*var m66 = new M66([
-            0, 2, 4, 5, 3, 4,
-            4, 0, 1, 3, 2, 5,
-            2, 3, 0, 1, 9, 2,
-            1, 2, 4, 0, 3, 7,
-            6, 2, 3, 5, 0, 7,
-            3, 5, 5, 1, 3, 0,
-        ]);
-        
-        var m33 = new M33([
-            2, 2, 4,
-            4, 5, 1,
-            2, 3, 3
-        ]);
-        
-        GJE(
-            m66,
-            new M61([1,1,1,1,1,1])
-        );*/
-            
+              
         this.text = "";
     }
     
@@ -90,10 +73,6 @@ define(function(require) {
             
         }
         
-        
-        //console.log(m.pretty());
-        //console.log(v.pretty());
-        
         var r = GJE(m, v);
         
         var poly = "";
@@ -113,59 +92,29 @@ define(function(require) {
         this.gauss = Polynomial.PolynomialPath(coordinates);
         
         console.log(poly);
-        //console.log(fn);
-        //console.log(r.pretty());
     };
     
     
-    CurveFitting.prototype.onLeftDown = function(input) {
+    CurveFitting.prototype.recompute = function(coordinates) {
         
-        
-        var coordinates = [];
-        
-        
-        var entities = this._entities.filter(function(entity) {
-            if(entity instanceof Pixel) {
-                if(entity.position.distance(this.input) < entity.width * 2) {
-                    entity.delete();
-                    return false;
-                }
-                
-                this.minx = Math.min(this.minx, entity.position.x);
-                this.maxx = Math.max(this.maxx, entity.position.x);
-                
-                coordinates.push(entity.position);
-            }
-            
-            return true;
-        }.bind(this));
-        
-        
-        if(entities.length != this._entities.length) {
-            this._entities = entities;
-        } else {
-            var pixel = new Pixel(input.x, input.y);
-            pixel.width = 4;
-            this.add(pixel);
-            
-            this.minx = Math.min(this.minx, pixel.position.x);
-            this.maxx = Math.max(this.maxx, pixel.position.x);
-            
-            coordinates.push(pixel.position);
-        }
         
         if(coordinates.length >= 2) {
             this.lagrange = Polynomial.Lagrange(coordinates);
             this.findgauss(coordinates);
+            
+            
+            var regression = LSQ(coordinates, function(v) { return [v.x, v.y]; });
+            
+            this.lsq = function(x) {
+                return regression[0] + x * regression[1];
+            };
+            
         } else {
             this.lagrange = null;
             this.gauss = null;
+            this.lsq = null;
             this.text = "";
         }
-        
-        this._entities.sort(function(a, b) {
-            return a.position.x - b.position.x;
-        });
     };
     
     CurveFitting.prototype.draw = function(renderer) {
@@ -174,6 +123,7 @@ define(function(require) {
         renderer.text("Lagrange polynomial", -this.hw + 10, this.hh - 10, "blue", "left")
         renderer.text("By solving equation (Gauss-Jordan)", -this.hw + 10, this.hh - 30, "red", "left")
         renderer.text("Difference between them", -this.hw + 10, this.hh - 50, "green", "left")
+        renderer.text("Linear regression (least squares)", -this.hw + 10, this.hh - 70, "grey", "left")
         
         renderer.text("Polynomial found:", -this.hw + 10, -50, "black", "left")
         renderer.text(this.text, -this.hw + 10, -70, "black", "left", "center", "11px monospace")
@@ -183,23 +133,25 @@ define(function(require) {
             return (this.lagrange(x) - this.gauss(x));
         }.bind(this);
         
+        
         if(this.lagrange !== null) {
-            this.plot(renderer, this.lagrange, "blue", 4)
-            this.plot(renderer, this.gauss, "red", 2)
-            this.plot(renderer, errorfn, "green", 2)
+            this.plot(renderer, this.lagrange, "blue", 4);
+            this.plot(renderer, this.gauss, "red", 2);
+            this.plot(renderer, this.lsq, "grey", 2);
+            this.plot(renderer, errorfn, "green", 2);
         }
     };
     
     CurveFitting.prototype.plot = function(renderer, f, color, width) {
-        var step = (this.maxx - this.minx) / 100;
+        var step = (this.grid.max.x - this.grid.min.x) / 100;
         
         var previous = new Vector(
-            this.minx,
-            f(this.minx)
+            this.grid.min.x,
+            f(this.grid.min.x)
         );
         
         renderer.begin();
-        for(var x = this.minx + step, y; x < this.maxx; x += step) {
+        for(var x = this.grid.min.x + step, y; x < this.grid.max.x; x += step) {
             y = f(x);
             
             renderer.line(previous.x, previous.y, x, y);
