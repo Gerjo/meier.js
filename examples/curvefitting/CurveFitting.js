@@ -8,7 +8,6 @@ define(function(require) {
     var Sign       = require("meier/math/Math").Sign;
     var Round      = require("meier/math/Math").Round;
     var Polynomial = require("meier/math/Polynomial");
-    var LSQ        = require("meier/math/Polynomial").LeastSquaresLinearRegression;
     
     // Dynamic matrix builder:
     var M   = require("meier/math/Mat");
@@ -32,7 +31,6 @@ define(function(require) {
         
         this.add(this.grid);
                 
-        this.lsq = null;
         this.gauss = null;
         this.lagrange = null;
         
@@ -102,13 +100,6 @@ define(function(require) {
             this.lagrange = Polynomial.Lagrange(coordinates);
             this.findgauss(coordinates);
             
-            
-            var regression = LSQ(coordinates, function(v) { return [v.x, v.y]; });
-            
-            this.lsq = function(x) {
-                return regression[0] + x * regression[1];
-            };
-            
         } else {
             this.lagrange = null;
             this.gauss = null;
@@ -123,7 +114,6 @@ define(function(require) {
         renderer.text("Lagrange polynomial", -this.hw + 10, this.hh - 10, "blue", "left")
         renderer.text("By solving equation (Gauss-Jordan)", -this.hw + 10, this.hh - 30, "red", "left")
         renderer.text("Difference between them", -this.hw + 10, this.hh - 50, "green", "left")
-        renderer.text("Linear regression (least squares)", -this.hw + 10, this.hh - 70, "grey", "left")
         
         renderer.text("Polynomial found:", -this.hw + 10, -50, "black", "left")
         renderer.text(this.text, -this.hw + 10, -70, "black", "left", "center", "11px monospace")
@@ -137,7 +127,6 @@ define(function(require) {
         if(this.lagrange !== null) {
             this.plot(renderer, this.lagrange, "blue", 4);
             this.plot(renderer, this.gauss, "red", 2);
-            this.plot(renderer, this.lsq, "grey", 2);
             this.plot(renderer, errorfn, "green", 2);
         }
     };
