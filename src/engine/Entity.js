@@ -21,6 +21,7 @@ define(function(require) {
         this.rotation  = 0;
         this.scale     = 1;
         this.opacity   = 1;
+        this.visible   = true;
         this.type      = 0;
         
         // A bounding box for click actions:
@@ -240,7 +241,9 @@ define(function(require) {
     
     Entity.prototype.draw = function(renderer) {
         this._entities.forEach(function(child) {
-            child._draw(renderer);
+            if(child.visible === true) {
+                child._draw(renderer);
+            }
         });        
         
         // Overwrite method.
