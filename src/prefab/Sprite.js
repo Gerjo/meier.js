@@ -37,6 +37,10 @@ define(function(require){
         this._opacityModifier = 0;
     }
     
+    Sprite.prototype.add = function(entity) {
+        throw new Error("Sprites are not designed as a composite. Use entity instead.");
+    };
+    
     Sprite.prototype.fade = function(amount) {
         this._opacityModifier = amount;
     };
