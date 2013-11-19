@@ -1,6 +1,7 @@
 define(function(require){
     var Entity  = require("meier/engine/Entity");
     var Texture = require("meier/engine/Texture");
+    var Lerp    = require("meier/math/Lerp").Lerp;
     
     Sprite.prototype = new Entity();
     function Sprite(x, y, w, h, image) {
@@ -30,9 +31,31 @@ define(function(require){
         } else {
             this._isLoaded = false;
         }
+        
+        this._dt = 0;
+        
+        this._opacityModifier = 0;
     }
     
+    Sprite.prototype.fade = function(amount) {
+        this._opacityModifier = amount;
+    };
+    
     Sprite.prototype.update = function(dt) {
+        this._dt += dt;
+        
+        if(this._opacityModifier != 0) {
+            this.opacity += this._opacityModifier * dt;
+        
+            if(this.opacity > 1) {
+                this.opacity          = 1;
+                this._opacityModifier = 0;
+            } else if(this.opacity < 0) {
+                this.opacity          = 0;
+                this._opacityModifier = 0;
+            }
+        }
+        
         if(this._texture.isLoaded && !this._isLoaded) {
             this.width     = this._texture.width;
             this.height    = this._texture.height;
