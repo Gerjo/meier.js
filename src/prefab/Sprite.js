@@ -67,8 +67,12 @@ define(function(require){
         }
     };
     
-    Sprite.prototype.draw = function(renderer) {        
-        renderer.texture(this._texture, 0, 0, this.width, this.height);
+    Sprite.prototype.draw = function(renderer) {
+        // Only draw when visible. Some browsers apparently attempt to render
+        // at "0" opacity - which is silly.
+        if(this.opacity > 0) {
+            renderer.texture(this._texture, 0, 0, this.width, this.height);
+        }
     };
     
     return Sprite;
