@@ -114,6 +114,7 @@ define(function(require) {
     };
     
     Entity.prototype.containsPoint = function(point) {
+        // TODO: recurse.
         return PointInObb(point, this.position, this.width * this.scale, this.height * this.scale, this.rotation);
     };
     
