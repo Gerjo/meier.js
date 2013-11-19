@@ -296,7 +296,7 @@ define(function(require) {
             
             //var out = [1, 1, 1, 1];
             
-            var matrix = input.clone();
+            var matrix = input;//.clone();
             
             var size = matrix.numcolumns;
             var n, swapped = false;
@@ -313,14 +313,14 @@ define(function(require) {
                             matrix.swapRows(i, j);
                             out.swapRows(i, j);
                             
-                            console.log("swap rows:", i, "and", j);
+                            //console.log("GaussJordanElimination: swap rows:", i, "and", j);
                             swapped = true;
                             break;
                         }
                     }
                     
                     if( ! swapped) {
-                        console.log("Unable to find suitable pivot value. Rework logic!");
+                        console.log("GaussJordanElimination: Unable to find suitable pivot value. Rework logic!");
                     }
                 }
             }
@@ -338,7 +338,7 @@ define(function(require) {
                     //console.log("\n pivot row[" + it + "] ratio: " + ratio);
                 
                     if(ratio == 0) {
-                        console.error("pivot ratio is zero");
+                        console.error("GaussJordanElimination - pivot ratio is zero");
                     }
                 
                     for(var col = 0; col < size; ++col) {
@@ -386,7 +386,7 @@ define(function(require) {
                     var ratio = matrix._[At(row, it)] / pivot;
                     
                     if(ratio == 0) {
-                        console.error("pivot ratio is zero");
+                        console.error("GaussJordanElimination - pivot ratio is zero");
                     }
                     
                     //console.log("pivot[row " + it + "] " + pivot + " ratio: " + ratio);
