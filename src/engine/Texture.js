@@ -28,7 +28,7 @@ define(function(require) {
         
             this.isLoaded = true;
         
-            console.log("Texture [" + this.width + "x" + this.height + "] [" + this.src + "] loaded!");
+            //console.log("Texture [" + this.width + "x" + this.height + "] [" + this.src + "] loaded!");
         }.bind(this);
     }
     
