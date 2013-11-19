@@ -57,7 +57,7 @@ define(function(require) {
             
             // Only call when a parent is available. Else it'll be 
             // called later on.
-            if(this.parent) {
+            if(this.game) {
                 entity._onAdd(this);
             }
         } else {
