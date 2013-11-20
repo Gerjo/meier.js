@@ -31,9 +31,7 @@ define(function(require){
         } else {
             this._isLoaded = false;
         }
-        
-        this._dt = 0;
-        
+                
         this._opacityModifier = 0;
     }
     
@@ -46,7 +44,6 @@ define(function(require){
     };
     
     Sprite.prototype.update = function(dt) {
-        this._dt += dt;
         
         if(this._opacityModifier != 0) {
             this.opacity += this._opacityModifier * dt;
