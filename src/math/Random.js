@@ -31,9 +31,18 @@ define(function(require) {
             return mt.nextBoolean();
         },
         
-        /// Returns a floating point.
+        /// Depricated.
         Range: function(min, max) {
             return mt.nextFloat() * (max - min) + min;
+        },
+        
+        /// Returns a floating point.
+        FloatInRange: function(min, max) {
+            return mt.nextFloat() * (max - min) + min;
+        },
+        
+        IntegerInRange: function(min, max) {
+            return Math.round(mt.nextFloat() * (max - min) + min);
         },
         
         Byte: function() {
