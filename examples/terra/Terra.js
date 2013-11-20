@@ -3,9 +3,11 @@ define(function(require) {
     var Game   = require("meier/engine/Game");
     var Entity = require("meier/engine/Entity");
     var Sprite = require("meier/prefab/Sprite");
+    var SpriteSet = require("meier/prefab/SpriteSet");
     
     var Part     = require("./Part");
     var Elements = require("./Elements");
+    
     
     Terra.prototype = new Game();
     function Terra(container) {
@@ -64,13 +66,14 @@ define(function(require) {
         this.winAnimation = false;
         
         this.buttons = [
-            new Sprite("images/counterclockwise.png"),
-            new Sprite("images/clockwise.png")
+            new Sprite("images/point_right.png"),
+            new Sprite("images/point_left.png")
         ];
         
         this.buttons[0].position.y = this.buttons[1].position.y = -250;
-        this.buttons[0].position.x = 250;
+        this.buttons[0].position.x = 280;
         this.buttons[1].position.x = -this.buttons[0].position.x;
+        this.buttons[0].scale = this.buttons[1].scale = 0.8;
         
         this.buttons[0].onLeftDown = this.ccw.bind(this);
         this.buttons[1].onLeftDown = this.cw.bind(this);
@@ -79,7 +82,29 @@ define(function(require) {
         
         this.buttons.forEach(this.world.add.bind(this.world));
         this.input.subscribe(Input.MOUSE_MOVE, this.onMouseMove.bind(this));
+        
+        
+        this.add(this.audio = new SpriteSet(-this.hw + 35, this.hh - 28, "images/speaker.png", "images/speaker-off.png"));
+        this.audio.scale = 0.8;
+        this.audio.onLeftDown = this.audioToggle.bind(this);
+        this.audio.enableEvent(Input.LEFT_DOWN);
+        this.enableAudio = true;
     }
+    
+    Terra.prototype.audioToggle = function() {
+        
+        // We will disable:
+        if(this.enableAudio) {
+            this.audio.opacity = 0.5;
+            this.audio.showOnly(1);
+        // We will enable:
+        } else {
+            this.audio.opacity = 1;
+            this.audio.showOnly(0);
+        }
+        
+        this.enableAudio = !this.enableAudio;
+    };
     
     Terra.prototype.onMouseMove = function(input) {
         
@@ -155,12 +180,9 @@ define(function(require) {
                     part.lucht(-1);
                 }
             }
-            
-            // Find the lowest common score:
-            var lowest = Math.min.apply(null, part.scores);
-            
+       
             // Lowest score of all lowest scores:
-            min = Math.min(min, lowest);
+            min = Math.min(min, Math.min.apply(null, part.scores));
             
         }.bind(this));
         
@@ -176,7 +198,7 @@ define(function(require) {
     
     Terra.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
-        
+                
         // Cloud animation:
         this.clouds.rotation += dt * 0.1;
         
@@ -187,8 +209,10 @@ define(function(require) {
                 if(this.lockmovement) {
                     dampening = 4;
                 }
-            
-                this.elements.rotation += (this.target - this.elements.rotation) * dt * dampening;
+                
+                var velocity = (this.target - this.elements.rotation) * dt * dampening;
+                // TODO: minimal velocity?
+                this.elements.rotation += velocity;
             }
         
             if( this.lockmovement ) {
