@@ -191,7 +191,7 @@ define(function(require) {
     };
     
     Part.prototype.restart = function() {
-        this.scores.map(function() { return 1; });
+        this.scores = this.scores.map(function() { return 1; });
         
         this.terrain.rotation = 0;
     };
