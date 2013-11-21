@@ -363,11 +363,26 @@ define(function(require) {
     /// miss a key event.
     Input.prototype.isKeyDown = function(key) {
 
+        // Assume the string hash representation of a key is used.
+        if(typeof key === "string") {
+            // Find the key by it's string hash representation:
+            var k = Key._lookupString[key];
+            
+            // It's found!
+            if(k instanceof Key) {
+                key = k;
+            } else {
+                // Invalid key, mostlikely.
+                return false;
+            }
+        }
+
         if(this._keystates[key.code] === true) {
             return true;
         }
         
         return false;
+
     };
 
     return Input;

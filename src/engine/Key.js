@@ -10,7 +10,8 @@ define(function(require) {
    
    
    
-    Key._lookup  = [];
+    Key._lookup       = [];
+    Key._lookupString = [];
     Key.fromCode = function(code) {
         
         // Known key, return it right away:
@@ -27,6 +28,7 @@ define(function(require) {
         this._name = name || ("unknown_" + code);
     }
     
+    // A unique representation of this object.
     Key.prototype.toString = function() {
         return "Key [" + this.code + "]:" + this._name;
     };
@@ -35,6 +37,8 @@ define(function(require) {
     function MakeKey(code, name) {
         Key[name]         = new Key(code, name);
         Key._lookup[code] = Key[name];
+        
+        Key._lookupString[Key[name]] = Key[name];
         
         return Key[name];
     }
