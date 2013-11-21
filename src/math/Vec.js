@@ -137,6 +137,15 @@ define(function(require) {
             return this;
         }; 
         
+        // Flip the signs:
+        V.prototype.flip = function() {
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                this._[i] *= -1;
+            }
+            
+            return this;
+        };
+        
         V.prototype.add = function(v) {
             for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
                 this._[i] += v._[i];
