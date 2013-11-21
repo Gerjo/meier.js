@@ -1,5 +1,7 @@
 define(function(require) {
     var Game     = require("meier/engine/Game");
+    var Input    = require("meier/engine/Input");
+    var Key      = require("meier/engine/Key");
     var Vector3  = require("meier/math/Vec")(3);
     var Matrix33 = require("meier/math/Mat")(3, 3);
     var Matrix44 = require("meier/math/Mat")(4, 4);
@@ -29,10 +31,71 @@ define(function(require) {
         this.add(new Grid(0, 0, this.width, this.height));
         
         this.setFps(60);
+        
+        this.position = new Vector3(100, 100, 0);
+        this.lookat   = new Vector3(1);
+        
+        this.keys = {};
+        this.keys[Key.A] = new Vector3(1, 0, 0);
+        this.keys[Key.D] = new Vector3(-1, 0, 0);
+        this.keys[Key.W] = new Vector3(0, 1, 0);
+        this.keys[Key.S] = new Vector3(0, -1, 0);
     }
     
     ThreeD.prototype.update = function(dt) {
-        this.rotation += dt;
+        
+        this.lookat.x = this.input.x / 1000;
+        this.lookat.y = this.input.y / 1000;
+       
+        var movement;
+        var m;
+       
+        for(var k in this.keys) {
+            if(this.keys.hasOwnProperty(k)) {
+                
+                if(this.input.isKeyDown(k)) {
+                    movement = this.keys[k];
+                    
+                    if( ! m) {
+                        m = Matrix33.CreateXoY();
+                    }
+                    
+                    this.position.add(movement);
+                    
+                }
+            }
+        }
+        
+        this.rotation += dt * 0.1;
+    };
+    
+    ThreeD.prototype.createCamera = function(eye, center) {
+        
+        
+        center = this.position.clone().add(this.lookat)//new Vector3(0, 0, 0);
+        eye    = this.position;//new Vector3(200, 200, 200);
+        
+        //var r  = Matrix33.CreateAngleAxisRotation(this.input.x / 100, new Vector3(0, 0, 1));
+        
+        //eye = r.transform(eye);
+        
+        var up = new Vector3(0, 0, 1);
+        var n = eye.clone().subtract(center).normalize();
+        var u = up.cross(n).normalize();
+        var v = n.cross(u);
+        
+        var m = new Matrix44([
+            u.x, v.x, n.x, 0,
+            u.y, v.y, n.y, 0,
+            u.z, v.z, n.z, 0,
+            
+            u.flip().dot(eye),
+            v.flip().dot(eye),
+            n.flip().dot(eye),
+            1
+        ]).transpose();        
+        
+        return m;
     };
     
     ThreeD.prototype.draw = function(renderer) {
@@ -52,6 +115,7 @@ define(function(require) {
         var t3 = Matrix44.CreateTranslation(new Vector3(150, 0, 0));
         var t4 = Matrix44.CreateTranslation(new Vector3(300, 0, 0));
         
+        var camera = this.createCamera();
         
         // Build first polytope:
         var poly1 = [];
@@ -59,6 +123,7 @@ define(function(require) {
             p = this.coordinates[i];
             p = param.transform(p);
             p = t1.transform(p);
+            p = camera.transform(p);
             poly1.push(p);
         }
         renderer.begin();
@@ -74,6 +139,7 @@ define(function(require) {
             p = this.coordinates[i];
             p = axis.transform(p);
             p = t2.transform(p);
+            p = camera.transform(p);
             poly2.push(p);
         }
         renderer.begin();
@@ -88,6 +154,8 @@ define(function(require) {
             p = this.coordinates[i];
             p = euler.transform(p);
             p = t3.transform(p);
+            p = camera.transform(p);
+
             poly3.push(p);
         }
         renderer.begin();
@@ -102,6 +170,8 @@ define(function(require) {
             p = this.coordinates[i];
             p = xyz.transform(p);
             p = t4.transform(p);
+            p = camera.transform(p);
+
             poly4.push(p);
         }
         renderer.begin();
