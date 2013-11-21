@@ -32,7 +32,11 @@ define(function(require){
             this._isLoaded = false;
         }
                 
+        // Fading amount:
         this._opacityModifier = 0;
+        
+        // Repeated fading?
+        this._glow            = false;
     }
     
     Sprite.prototype.add = function(entity) {
@@ -41,6 +45,18 @@ define(function(require){
     
     Sprite.prototype.fade = function(amount) {
         this._opacityModifier = amount;
+        this._glow = false;
+    };
+    
+    Sprite.prototype.glow = function(amount) {
+        
+        if(amount == 0) {
+            this._glow = false;
+        } else {
+            this._glow = true;
+        }
+        
+        this._opacityModifier = amount;
     };
     
     Sprite.prototype.update = function(dt) {
@@ -48,12 +64,24 @@ define(function(require){
         if(this._opacityModifier != 0) {
             this.opacity += this._opacityModifier * dt;
         
-            if(this.opacity > 1) {
-                this.opacity          = 1;
-                this._opacityModifier = 0;
-            } else if(this.opacity < 0) {
-                this.opacity          = 0;
-                this._opacityModifier = 0;
+            if(this.opacity > 1 && this._opacityModifier > 0) {
+                if(this._glow === true) {
+                    this.opacity          = 1;
+                    this._opacityModifier = -this._opacityModifier;
+                    
+                } else {
+                    this.opacity          = 1;
+                    this._opacityModifier = 0;   
+                }
+            } else if(this.opacity < 0 && this._opacityModifier < 0) {
+                if(this._glow === true) {
+                    this.opacity          = 0;
+                    this._opacityModifier = -this._opacityModifier;  
+                    
+                } else {
+                    this.opacity          = 0;
+                    this._opacityModifier = 0;
+                }
             }
         }
         
