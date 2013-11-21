@@ -334,16 +334,6 @@ define(function(require) {
             return r;
         };
         
-        V.prototype.wolfram.project = function(other) {
-            throw new Error("TODO: implemented vector projection.");
-            var r = this.dot(other) / other.dot(other);
-        
-            return new V(
-                r * other.x,
-                r * other.y
-            );
-        };
-        
         return V;
     };
 });
