@@ -1,12 +1,12 @@
 define(function(require) {
-    var Input  = require("meier/engine/Input");
-    var Game   = require("meier/engine/Game");
-    var Entity = require("meier/engine/Entity");
-    var Sprite = require("meier/prefab/Sprite");
+    var Input     = require("meier/engine/Input");
+    var Game      = require("meier/engine/Game");
+    var Entity    = require("meier/engine/Entity");
+    var Sprite    = require("meier/prefab/Sprite");
     var SpriteSet = require("meier/prefab/SpriteSet");
     
-    var Part     = require("./Part");
-    var Elements = require("./Elements");
+    var Part      = require("./Part");
+    var Elements  = require("./Elements");
     
     
     Terra.prototype = new Game();
@@ -21,6 +21,7 @@ define(function(require) {
         
         this.relic    = new Sprite("images/relic.png");
         this.kruis    = new Sprite("images/kruis.png");
+        this.glow     = new Sprite("images/glow.png");
         this.clouds   = new Sprite("images/clouds.png");
         this.bluering = new Sprite("images/bluering.png");
         this.elements = new Elements();
@@ -51,6 +52,7 @@ define(function(require) {
         this.parts.forEach(this.world.add.bind(this.world));
         this.world.add(this.elements);    
         
+        this.world.add(this.glow); this.glow.fade(-1);
         this.world.add(this.kruis);
         
         // Go to rotation:
@@ -83,14 +85,43 @@ define(function(require) {
         this.buttons.forEach(this.world.add.bind(this.world));
         this.input.subscribe(Input.MOUSE_MOVE, this.onMouseMove.bind(this));
         
-        
         this.add(this.audio = new SpriteSet(-this.hw + 35, this.hh - 28, "images/speaker.png", "images/speaker-off.png"));
         this.audio.scale = 0.8;
         this.audio.onLeftDown = this.audioToggle.bind(this);
         this.audio.enableEvent(Input.LEFT_DOWN);
         this.enableAudio = true;
+        
+        // actionname -> methodname
+        
+        this.gainRelation = {
+            "lucht": "lucht", "zon": "zon", "regen": "regen", "maan": "maan"
+        };
+        
+        this.loseRelation = {
+            "lucht": "regen", "zon": "lucht", "regen": "zon", "maan": "maan"
+        };
+        
+        this.winimage.onLeftDown = this.restart.bind(this);
+        this.winimage.enableEvent(Input.LEFT_DOWN);
     }
     
+    Terra.prototype.restart = function() {
+        this.winimage.fade(-2);
+        this.winAnimation = false;
+        
+        this.kruis.rotation = 0;
+        this.home     = 0;
+        this.target   = 0;
+        this.attempts = 0;
+        
+        this.parts.forEach(function(part, i) {
+            part.restart();
+        });
+        
+        // Do not propegate event:
+        return false;
+    };
+
     Terra.prototype.audioToggle = function() {
         
         // We will disable:
@@ -103,24 +134,70 @@ define(function(require) {
             this.audio.showOnly(0);
         }
         
-        this.enableAudio = !this.enableAudio;
+        this.enableAudio = ! this.enableAudio;
     };
     
     Terra.prototype.onMouseMove = function(input) {
         
+        if(this.winAnimation) {
+            return;
+        }
+        
         var lookAheadRange =  Math.PI / 8;
+        var sequence;
         
         if( ! this.lockmovement) {
+            
             // Look ahead functionality:
             if(this.buttons[0].containsPoint(input)) {
                 this.target = this.home + lookAheadRange;
                 this.input.cursor(Input.Cursor.FINGER);
+                
+                
+                sequence = this.sequence.clone();
+                sequence.unshift(sequence.pop());
+                sequence.unshift(sequence.pop());
+                sequence.unshift(sequence.pop());
+                sequence.unshift(sequence.pop());
+                
+                this.parts.forEach(function(part, i) {
+
+                    part.showPreview(this.gainRelation[sequence[i]]);
+                    
+                    if(this.attempts % 3 == 2) {
+                        part.showPenalty(this.loseRelation[sequence[i]]);
+                    }
+
+                }.bind(this));
+                
+                
+                
             } else if(this.buttons[1].containsPoint(input)) {
                 this.target = this.home - lookAheadRange;
                 this.input.cursor(Input.Cursor.FINGER);
+                
+                
+                sequence = this.sequence.clone();
+                sequence.push(sequence.shift());
+                sequence.push(sequence.shift());
+                
+                this.parts.forEach(function(part, i) {
+
+                    part.showPreview(this.gainRelation[sequence[i]]);
+                    
+                    if(this.attempts % 3 == 2) {
+                        part.showPenalty(this.loseRelation[sequence[i]]);
+                    }
+
+                }.bind(this));
+                
             } else {
                 this.target = this.home;
                 this.input.cursor(Input.Cursor.DEFAULT);
+                
+                this.parts.forEach(function(part) {
+                    part.hidePreview();
+                });
             }
         }
     };
@@ -144,7 +221,6 @@ define(function(require) {
             this.lockmovement = true;
             
             this.sequence.push(this.sequence.shift());
-            
         }
     };
     
@@ -155,32 +231,16 @@ define(function(require) {
         this.parts.forEach(function(part) {
             var id = part.id;
             
+            part.hidePreview();
+            
             var gain = this.sequence[id];
             
-            if(gain === "lucht") {
-                part.lucht(1);
-            } else if(gain === "regen") {
-                part.regen(1);
-            } else if(gain === "zon") {
-                part.zon(1);
-            }
+            (part[this.gainRelation[gain]])(1);
             
-            // Penality round!
             if(this.attempts % 3 == 2) {
-                // Blow the rain away:
-                if(gain === "lucht") {
-                    part.regen(-1);
-                    
-                // Dry the sunshine:
-                } else if(gain === "regen") {
-                    part.zon(-1);
-                    
-                // Sun causes air to drop:
-                } else if(gain === "zon") {
-                    part.lucht(-1);
-                }
+                (part[this.loseRelation[gain]])(-1);
             }
-       
+               
             // Lowest score of all lowest scores:
             min = Math.min(min, Math.min.apply(null, part.scores));
             
@@ -194,6 +254,13 @@ define(function(require) {
         
         // Proceed to the next attempt:
         ++this.attempts;
+        
+        // Glow to signify a penalty round:
+        if(this.attempts % 3 == 2) {
+            this.glow.glow(2);
+        } else {
+            this.glow.fade(-1);
+        }
     };
     
     Terra.prototype.update = function(dt) {
@@ -203,6 +270,7 @@ define(function(require) {
         this.clouds.rotation += dt * 0.1;
         
         if( ! this.winAnimation) {
+            
             if(this.target != this.rotation) {
                 var dampening = 1;
             
@@ -222,17 +290,21 @@ define(function(require) {
                 }
             }
         } else {
+            // Hide the glow:
+            this.glow.fade(-1);
+            
+            // Rotate some of the world:
             this.elements.rotation += dt;
-            this.kruis.rotation += dt;
+            this.kruis.rotation    += dt;
             
             this.parts.forEach(function(part) {
                 part.terrain.rotation = this.kruis.rotation;
             }.bind(this));
         }
         
-        
         // Different z-index, but rotate together:
         this.bluering.rotation = this.elements.rotation;
+        this.glow.rotation = this.kruis.rotation;
     };
     
     return Terra;

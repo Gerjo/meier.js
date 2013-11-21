@@ -1,7 +1,8 @@
 define(function(require) {
     
-    var Entity = require("meier/engine/Entity");
-    var Sprite = require("meier/prefab/Sprite");
+    var Entity    = require("meier/engine/Entity");
+    var Sprite    = require("meier/prefab/Sprite");
+    var SpriteSet = require("meier/prefab/SpriteSet");
     
     
     Part.prototype = new Entity();
@@ -9,6 +10,7 @@ define(function(require) {
         Entity.call(this);
         
         this.id = id;
+        this.font = "20px monospace bold";
         
         this.rotation = id * Math.PI / 2;
         
@@ -30,7 +32,7 @@ define(function(require) {
         }.bind(this));
         
         
-        this.images = [
+        this.scoreImages = [
             [new Sprite("images/regen_1.png"), new Sprite("images/regen_2.png"), new Sprite("images/regen_3.png"), new Sprite("images/regen_4.png")],
             [new Sprite("images/lucht_1.png"), new Sprite("images/lucht_2.png"), new Sprite("images/lucht_3.png"), new Sprite("images/lucht_4.png")],
             [new Sprite("images/zon_1.png"), new Sprite("images/zon_2.png"), new Sprite("images/zon_3.png"), new Sprite("images/zon_4.png")]
@@ -44,7 +46,7 @@ define(function(require) {
         ];
         
         // Some hardcoded positioning:
-        this.images.forEach(function(images, i) {
+        this.scoreImages.forEach(function(images, i) {
             
             images.forEach(function(sprite) {
                 sprite.rotation = Math.PI / 2;
@@ -69,13 +71,34 @@ define(function(require) {
             }.bind(this));
             
         }.bind(this));
+        
+        
+        this.modifiedImages = [
+            new SpriteSet("images/plus_0.png", "images/plus_1.png", "images/remove_1.png"),
+            new SpriteSet("images/plus_0.png", "images/plus_2.png", "images/remove_2.png"),
+            new SpriteSet("images/plus_0.png", "images/plus_3.png", "images/remove_3.png")
+        ];
+        
+        this.modifiedImages[0].position.x = -242;
+        this.modifiedImages[0].position.y = -43;
+        this.modifiedImages[0].rotation = Math.PI / 2;
+        
+        this.modifiedImages[1].position.x = -193;
+        this.modifiedImages[1].position.y = -150;
+        this.modifiedImages[1].rotation = Math.PI / 2;
+        
+        this.modifiedImages[2].position.x = -101;
+        this.modifiedImages[2].position.y = -222;
+        this.modifiedImages[2].rotation = Math.PI / 2;
+        
+        this.modifiedImages.forEach(this.add.bind(this));
     }
     
     Part.prototype.update = function(dt) {
         Entity.prototype.update.call(this, dt);
 
         // Show correct score images:
-        this.images.forEach(function(images, i) {
+        this.scoreImages.forEach(function(images, i) {
             images.forEach(function(image, j) {
                 
                 if(j == this.scores[i]) {
@@ -108,6 +131,44 @@ define(function(require) {
         
     };
     
+    Part.prototype.showPenalty = function(whom) {
+        if(whom == "zon") {
+            this.modifiedImages[2].fade(2, 2);
+        } else if(whom == "regen") {
+            this.modifiedImages[0].fade(2, 2);
+        } else if(whom == "lucht") {
+            this.modifiedImages[1].fade(2, 2);
+        } else if(whom == "maan") {
+            
+        } else {
+            console.error("Part.showPreview no preview available for id: " + whom);
+        }
+    };
+    
+    Part.prototype.showPreview = function(whom) {
+        if(whom == "zon") {
+            this.modifiedImages[2].fadeOnly(1, 2);
+        } else if(whom == "regen") {
+            this.modifiedImages[0].fadeOnly(1, 2);
+        } else if(whom == "lucht") {
+            this.modifiedImages[1].fadeOnly(1, 2);
+        } else if(whom == "maan") {
+            
+        } else {
+            console.error("Part.showPreview no preview available for id: " + whom);
+        }
+    };
+    
+    Part.prototype.hidePreview = function() {
+        this.modifiedImages[0].fadeOnly(0, 2);
+        this.modifiedImages[1].fadeOnly(0, 2);
+        this.modifiedImages[2].fadeOnly(0, 2);
+    };
+    
+    Part.prototype.maan = function(change) {
+        // Does nothing.
+    };
+    
     Part.prototype.zon = function(change) {
         this.scores[2] += change;
         
@@ -127,6 +188,12 @@ define(function(require) {
         
         this.scores[1] = Math.max(0, this.scores[1]);
         this.scores[1] = Math.min(3, this.scores[1]);
+    };
+    
+    Part.prototype.restart = function() {
+        this.scores.map(function() { return 1; });
+        
+        this.terrain.rotation = 0;
     };
     
     return Part;
