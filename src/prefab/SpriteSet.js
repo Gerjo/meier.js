@@ -36,8 +36,10 @@ define(function(require) {
             if(typeof arguments[i] == "string") {
                 texture = new Texture(arguments[i]);
                 
-                // Ad-hoc create a property:
-                texture._spriteSetVisible = false;
+                // Ad-hoc create a a few properties:
+                texture._spriteSetVisible      = false;
+                texture._spriteSetFadeModifier = 1;
+                texture._spriteSetOpacity      = 1;
                 
                 this._textures.push(texture);
             }
@@ -49,6 +51,8 @@ define(function(require) {
         }    
         
         Entity.call(this, x, y, w, h);
+        
+        this._dt = 1/30; // A better estimate than "0".
     }
     
     SpriteSet.prototype.showOnly = function() {
@@ -62,6 +66,7 @@ define(function(require) {
     };
     
     SpriteSet.prototype.update = function(dt) {
+        this._dt = dt;
         if( ! this._isloaded) {
             if(this._textures[0] && this._textures[0].isLoaded) {
                 // Inherit size from first texture:
@@ -72,14 +77,10 @@ define(function(require) {
         }
     };
     
-    SpriteSet.prototype.fade = function(index, modifier) {
-        
-    };
-    
     SpriteSet.prototype.showOnly = function(index) {
         
-        if(index > this._textures.length) {
-            throw new Error("SpriteSet - show index out-of-bounds. Requested index: " + index);
+        if(index >= this._textures.length || index < 0) {
+            throw new Error("SpriteSet - showOnly index out-of-bounds. Requested index: " + index);
         }
         
         for(var i = this._textures.length - 1; i >= 0; --i) {
@@ -89,20 +90,63 @@ define(function(require) {
         this._textures[index]._spriteSetVisible = true;
     };
     
+    SpriteSet.prototype.fadeOnly = function(index, modifier) {
+        modifier = isNaN(modifier) ? 0.1 : modifier;
+        
+        if(index >= this._textures.length || index < 0) {
+            throw new Error("SpriteSet - fadeOnly index out-of-bounds. Requested index: " + index);
+        }
+        
+        for(var i = this._textures.length - 1; i >= 0; --i) {
+            
+            // Negate the modifier:
+            this._textures[i]._spriteSetFadeModifier = -modifier;
+        }
+        
+        this._textures[index]._spriteSetFadeModifier = modifier;
+        this._textures[index]._spriteSetVisible = true; // Just in case it's hidden.
+    };
+    
     SpriteSet.prototype.show = function(index) {
         
-        if(index > this._textures.length) {
+        if(index >= this._textures.length || index < 0) {
             throw new Error("SpriteSet - show index out-of-bounds. Requested index: " + index);
         }
         
         this._textures[index]._spriteSetVisible = true;
     };
     
+    SpriteSet.prototype.fade = function(index, modifier) {
+        modifier = isNaN(modifier) ? 0.1 : modifier;
+        
+        if(index >= this._textures.length || index < 0) {
+            throw new Error("SpriteSet - fade index out-of-bounds. Requested index: " + index);
+        }
+        
+        this._textures[index]._spriteSetVisible = true; // In case it's hidden.
+        this._textures[index]._spriteSetFadeModifier = modifier;
+    };
+    
     SpriteSet.prototype.draw = function(renderer) {  
         if(this.opacity > 0) {            
-            for(var i = 0; i < this._textures.length; ++i) {
-                if(this._textures[i]._spriteSetVisible === true) {
-                    renderer.texture(this._textures[i], 0, 0, this.width, this.height);
+            for(var i = 0, texture; i < this._textures.length; ++i) {
+                texture = this._textures[i];
+                
+                if(texture._spriteSetFadeModifier != 0) {
+                    texture._spriteSetOpacity += texture._spriteSetFadeModifier * this._dt;
+                    
+                    if(texture._spriteSetOpacity > 1) {
+                        texture._spriteSetOpacity      = 1;
+                        texture._spriteSetFadeModifier = 0;
+                    } else if(texture._spriteSetOpacity < 0) {
+                        texture._spriteSetOpacity      = 0;
+                        texture._spriteSetFadeModifier = 0;
+                    }
+                }
+                
+                if(texture._spriteSetVisible === true) {
+                    renderer.opacity(texture._spriteSetOpacity);
+                    renderer.texture(texture, 0, 0, this.width, this.height);
                 }
             }
         }
