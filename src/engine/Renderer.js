@@ -54,6 +54,12 @@ define(function(require) {
         this.context.restore();
         return this;
     };
+    
+    /// Transparently clear the canvas:
+    Renderer.prototype.opacity = function(level) {
+        this.context.globalAlpha = level;
+        return this;
+    };
 
     /// Transparently clear the canvas:
     Renderer.prototype.clear = function() {
