@@ -32,20 +32,32 @@ define(function(require) {
         
         this.setFps(60);
         
-        this.position = new Vector3(100, 100, 0);
-        this.lookat   = new Vector3(1);
+        this.position  = new Vector3(100, 100, 0);
+        this.rotations = new Vector3(0, 0, 0);
         
         this.keys = {};
         this.keys[Key.A] = new Vector3(1, 0, 0);
         this.keys[Key.D] = new Vector3(-1, 0, 0);
         this.keys[Key.W] = new Vector3(0, 1, 0);
         this.keys[Key.S] = new Vector3(0, -1, 0);
+        
+        
+        this.forward = new Vector3(0, 1, 0);
+        
+        this.xyz     = Matrix33.CreateIdentity();
     }
     
     ThreeD.prototype.update = function(dt) {
+                
+        this.rotations.x = this.input.x / -(this.hw * 0.5);
+        this.rotations.z = this.input.y / (this.hh * 0.5);
+       
         
-        this.lookat.x = this.input.x / 1000;
-        this.lookat.y = this.input.y / 1000;
+        var z   = Matrix33.CreateXoY(this.rotations.x);
+        var y   = Matrix33.CreateXoZ(this.rotations.y);
+        var x   = Matrix33.CreateYoZ(this.rotations.z);
+        this.xyz = z.product(x).product(y);
+        
        
         var movement;
         var m;
@@ -54,11 +66,7 @@ define(function(require) {
             if(this.keys.hasOwnProperty(k)) {
                 
                 if(this.input.isKeyDown(k)) {
-                    movement = this.keys[k];
-                    
-                    if( ! m) {
-                        m = Matrix33.CreateXoY();
-                    }
+                    movement = this.xyz.transform(this.keys[k]).scaleScalar(10);
                     
                     this.position.add(movement);
                     
@@ -71,8 +79,10 @@ define(function(require) {
     
     ThreeD.prototype.createCamera = function(eye, center) {
         
+       
+        var lookat = this.xyz.transform(this.forward);
         
-        center = this.position.clone().add(this.lookat)//new Vector3(0, 0, 0);
+        center = this.position.clone().add(lookat)//new Vector3(0, 0, 0);
         eye    = this.position;//new Vector3(200, 200, 200);
         
         //var r  = Matrix33.CreateAngleAxisRotation(this.input.x / 100, new Vector3(0, 0, 1));
