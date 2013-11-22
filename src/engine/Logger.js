@@ -63,7 +63,12 @@ define(function(require){
             return;
         }
         
-        var x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
+        // Right side:
+        //var x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
+        
+        // Left side:
+        var x = this.size.w * -0.5 + this.offset.w;
+        
         var y = this.offset.h;
         
         var font = "bold " + this.fontSize + "px Monospace";
