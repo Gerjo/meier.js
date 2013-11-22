@@ -189,7 +189,7 @@ define(function(require) {
             for(var x = 0; x < this.pixels.length; ++x) {
         
                 if(this.showGridPoints) {
-                    renderer.circle(this.pixels[y][x].position, 3);
+                    renderer.rectangle(this.pixels[y][x].position, 6, 6);
                 }
             }
         }
