@@ -153,6 +153,13 @@ define(function(require) {
             return this;
         }; 
         
+        V.prototype.addScaled = function(v, scalar) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] += v._[i] * scalar;
+            }
+            return this;
+        }; 
+        
         V.prototype.addScalar = function(scalar) {
             for(var i = this.numrows - 1; i >= 0; --i) {
                 this._[i] += scalar;
