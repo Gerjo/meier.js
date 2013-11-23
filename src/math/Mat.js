@@ -25,11 +25,11 @@ define(function(require) {
         columns = typeof columns === "undefined" ? rows : columns;
         
         if(isNaN(rows) || typeof rows !== "number") {
-            throw new Error("Cannot import matrix. Invalid row size.");
+            throw new Error("Cannot import matrix. Invalid row size: " + rows);
         }
         
         if(isNaN(columns) || typeof columns !== "number") {
-            throw new Error("Cannot import matrix. Invalid column size.");
+            throw new Error("Cannot import matrix. Invalid column size.: " + columns);
         }
         
         //if(rows < 2 || columns < 2) {
