@@ -162,6 +162,7 @@ define(function(require) {
         // For IE? http://www.java2s.com/Tutorial/JavaScript/0280__Document/documentcaptureEvents.htm
         if(document.layers) {
             document.captureEvents(Event.MOUSEDOWN | Event.CLICK);
+            //document.captureEvents(Event.MOUSEDOWN | Event.CLICK | Event.KEYDOWN | Event.KEYPRESS | Event.KEYUP);
         }
     
         // Browser sensitive logic. May need a rework.
