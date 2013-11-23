@@ -4,29 +4,34 @@ define(function(require) {
     var Grid         = require("meier/prefab/Grid");
     var Vector       = require("meier/math/Vec")(2);
     var Random       = require("meier/math/Random");
+    var Round        = require("meier/math/Math").Round;
     var M            = require("meier/math/Mat");
     var dat          = require("meier/contrib/datgui");
     var LeastSquares = require("meier/math/Polynomial").LeastSquares;
     
 
+    
     RegressionApp.prototype = new Game();
     function RegressionApp(container) {
         Game.call(this, container);
         
         this.log.right().bottom();
         
-        // Will eventually hold the polynomial functions of x:
-        this.functions = [];
+        // Will eventually hold the polynomial function of x:
+        this.function = null;
         
         // Cache of the coordinates from which the polynomial
         // is derrived.
         this.coordinates = [];
         
         // Initial degree:
-        this.polynomialDegree = 1;
+        this.polynomialDegree = 0;
+        
+        // Matrix with polynomial coefficients:
+        this.coefficients = null;
         
         this.gui = new dat.GUI();
-        this.gui.add(this, "polynomialDegree", 1, 50).step(1).onChange(this.recompute.bind(this));
+        this.gui.add(this, "polynomialDegree", 0, 50).step(1).onChange(this.recompute.bind(this));
         
         
         
@@ -43,7 +48,7 @@ define(function(require) {
         
         Random.Seed(1);
         
-        for(var x = -hw; x <= hw; x += Random.Range(20, 65)) {
+        for(var x = -hw; x <= hw; x += Random.Range(20, 165)) {
             var t = (x + hw) / w * Math.PI;
             
             var v = new Vector(x, Math.sin(t) * 100);
@@ -62,14 +67,6 @@ define(function(require) {
             // No coordinates given, use the cache:
             coordinates = this.coordinates;
         }
-      
-        // Reset existing (previous) functions:
-        this.functions.clear();
-                
-        // Keep the previous function:
-        //while(this.functions.length > 1) {
-        //    this.functions.pop();
-        //}
                     
         // Parse the integer bit from a number:
         var degree = parseInt(this.polynomialDegree, 10);
@@ -84,42 +81,57 @@ define(function(require) {
         this.polynomialDegree = degree;
         
         // Find the coefficients (this call does all the magic)
-        var coefficients = LeastSquares(degree, coordinates);
-        
+        this.coefficients  = LeastSquares(degree + 1, coordinates);
         
         // Create polynomial function of x:
-        this.functions.unshift(function(x) {
+        this.function = function(x) {
             var r = 0;
         
-            coefficients.eachRow(0, function(val, i) {                
+            this.coefficients.eachRow(0, function(val, i) {                
                 r += val * Math.pow(x, i);
             });
         
             return r;
-        }.bind(this));
+        }.bind(this);
         
   
         
     };
     
+    RegressionApp.prototype.polynomialName = function(count) {
+        // Kindly taken from wikipedia:
+        return ["constant", "linear", "quadratic", 
+                "cubic", "quartic", "quintic", "sextic", 
+                "septic", "octic", "nonic", "decic"][count];
+    };
+    
     RegressionApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
+        var name = this.polynomialName(this.polynomialDegree);
         
-        renderer.text("Polynomial degree: " + this.polynomialDegree, -this.hw + 10, this.hh - 10, "black", "left")
+        if(name) {
+            name = " - " + name;
+        } else {
+            name = "";
+        }
+        
+        renderer.text("Polynomial degree: " + this.polynomialDegree + name, -this.hw + 10, this.hh - 10, "black", "left");
+        
+        renderer.text("Coefficients:", -this.hw + 10, this.hh - 30, "black", "left");
+        
+        if(this.coefficients) {
+            this.coefficients.eachRow(0, function(val, i) {
+                
+                // Pretty alignment:
+                var prefix = val > 0 ? " " : "";
+                
+                renderer.text("  " + prefix + val.toFixed(10), -this.hw + 10, this.hh - 50 - i * 20, "black", "left");
+            }.bind(this));
+        }
 
 
-        this.functions.forEach(function(fn, i) {
-            var color = "rgba(0, 0, 0, 1)";
-            var width = 1;
-            
-            if(i === 0) {
-                color = "red";
-                width = 2;
-            }
-            
-            this.plot(renderer, fn, color, width);
-        }.bind(this));
+        this.plot(renderer, this.function, "red", 2);
 
     };
     
