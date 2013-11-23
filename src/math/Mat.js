@@ -563,6 +563,23 @@ define(function(require) {
             return this;
         };
         
+    
+        M.prototype.eachRow = function(column, callback) {
+            for(var i = 0; i < this.numrows; ++i) {
+                callback(this._[At(i, column)], i);
+            }
+            
+            return this;
+        };
+        
+        M.prototype.eachColumn = function(row, callback) {
+            for(var i = 0; i < this.numcolumns; ++i) {
+                callback(this._[At(row, i)], i);
+            }
+            
+            return this;
+        };
+        
         M.prototype.pretty = function() {
             var out = "", n, l = 6, d = 2;
         
