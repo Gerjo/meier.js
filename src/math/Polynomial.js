@@ -6,8 +6,11 @@
  !*/
 
 define(function(require) {
-    var Factorial = require("meier/math/Math").Factorial;
-    var GJE       = require("meier/math/Math").GaussJordanElimination;
+    var Factorial   = require("meier/math/Math").Factorial;
+    var GaussJordan = require("meier/math/Math").GaussJordanElimination;
+    
+    // Dynamic matrix builder:
+    var M          = require("meier/math/Mat");
     
     /// My polynomial wish-list
     function HornersMethod() {}
@@ -99,7 +102,7 @@ define(function(require) {
             }
             
             // Solve system of linear equations:
-            var r = GJE(m, v);
+            var r = GaussJordan(m, v);
             
             // Build JavaScript code that contains the polynomial:
             var fn = "return ";
@@ -236,7 +239,11 @@ define(function(require) {
         },
         
         /// Find a linear regression using the least squares
-        /// criterion. Yields b0 and b1 in:
+        /// criterion. This seems to be used in fields that
+        /// never use matrices, or before the "student" is 
+        /// introduced to matrices.
+        ///
+        /// Yields b0 and b1 in:
         ///     y = b0 + b1 * x
         ///
         /// In case non array data is used, a custom getter must be
@@ -249,6 +256,7 @@ define(function(require) {
         /// @param {getter} an optional custom getter for row values.
         /// @return An array containing b0 and b1 and indices 
         ///         0 and 1, respectively.
+        /// @see LeastSquares for non-linear regression.
         LeastSquaresLinearRegression: function(data, getter) {
             
             // Assign a default trivial case getter:
@@ -277,6 +285,51 @@ define(function(require) {
             var b0 = (y - b1 * x) / n;
         
             return [b0, b1];
+        },
+        
+        /// Curve fitting using least squares, up to any degree.
+        /// If you want a linear regression, use "LeastSquaresLinearRegression"
+        /// instead, which is probably more efficient internally.
+        ///
+        /// @param degree The desired polynomial degree
+        /// @param coordinates An array of 2d vectors.
+        /// @return A matrix containing the polynomial coefficients.
+        /// @see LeastSquaresLinearRegression for linear regression.
+        LeastSquares: function(degree, coordinates) {
+        
+            // Augmented matrix (up to a given degree):
+            var A = new (M(coordinates.length, degree))();
+        
+            // Solution vector:
+            var B = new (M(coordinates.length, 1))();
+        
+            // Fill the augmented matrix:
+            for(var row = 0, p; row < coordinates.length; ++row) {
+                p = coordinates[row];
+            
+                // Known locations:
+                B.set(row, 0, p.y);
+            
+                // x is raised to the polynomial power:
+                for(var col = 0; col < degree; ++col) {
+                    A.set(row, col, Math.pow(p.x, col));
+                }
+            }
+        
+            var At = A.transpose();
+        
+            // Since the matrices A and B are not compatiple in size, we 
+            // multiply both sides by A's transpose, this is OK because both 
+            // sides remain in balance. The resulting matrices can be used 
+            // for Gaussian elemination. 
+        
+            var AtA = At.product(A);
+            var AtB = At.product(B);
+        
+            // R will contain the polynomial coefficients.
+            var R = GaussJordan(AtA, AtB);
+        
+            return R;
         }
     };
     
