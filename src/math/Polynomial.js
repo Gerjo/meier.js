@@ -297,7 +297,7 @@ define(function(require) {
         /// @see LeastSquaresLinearRegression for linear regression.
         LeastSquares: function(degree, coordinates) {
         
-            if(degree <= 0) {
+            if(degree < 0) {
                 throw new Error("LeastSquares - cannot work with a degree less than 1. Given: " + degree);
             }
         
