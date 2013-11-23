@@ -29,7 +29,7 @@ define(function(require) {
         this.gridSpacing = 30;
         
         // Mouse attraction force:
-        this.mouseForce = 1;
+        this.mouseForce = 20;
         
         // Force dampening:
         this.dampening = 0.98;
@@ -46,7 +46,7 @@ define(function(require) {
     	this.gui.add(this, 'lineQuality', 2, 100).onChange(this.restart.bind(this));
         
         // Change on the fly:
-    	this.gui.add(this, 'mouseForce', -20, 20);
+    	this.gui.add(this, 'mouseForce', -30, 30);
     	this.gui.add(this, 'dampening', 0.8, 1, 0.001);
         
     	this.gui.add(this, 'showGridPoints');
