@@ -35,7 +35,7 @@ define(function(require) {
         this.dampening = 0.98;
         
         // Show the little sample points:
-        this.showGridPoints = false;
+        this.showParticles = false;
         this.showLines  = true;
         this.showPoints = false;
         
@@ -49,7 +49,7 @@ define(function(require) {
     	this.gui.add(this, 'mouseForce', -30, 30);
     	this.gui.add(this, 'dampening', 0.8, 1, 0.001);
         
-    	this.gui.add(this, 'showGridPoints');
+    	this.gui.add(this, 'showParticles');
         
     	this.gui.add(this, 'showLines');
     	this.gui.add(this, 'showPoints');
@@ -188,7 +188,7 @@ define(function(require) {
         for(var y = 0; y < this.pixels.length; ++y) {
             for(var x = 0; x < this.pixels.length; ++x) {
         
-                if(this.showGridPoints) {
+                if(this.showParticles) {
                     renderer.rectangle(this.pixels[y][x].position, 6, 6);
                 }
             }
