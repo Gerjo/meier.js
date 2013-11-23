@@ -14,44 +14,89 @@ define(function(require){
         // Tweakable:
         this.size       = new Size(width, height);
         this.offset     = new Size(10, (height * 0.5) - 10);
-        this.logger     = {};
+        this.data       = {};
         this.fontSize   = 12;
         this.charWidth  = this.fontSize - 4;
+        this.charHeight = this.fontSize;
         this.color      = "black";
+        this.numRows    = 0;
     
         // Show by default:
         this.showLogger = true;
     
         // Calculated internals.
-        this.columnWidth    = 1;
-        this.estimatedWidth = 0;
+        this.columnWidth     = 1;
+        this.estimatedWidth  = 0;
+        
+        // Align left, or right?
+        this._left = true;
+        this._top  = true;
     }
+    
+    Logger.prototype.left = function() {
+        this._left = true;
+        return this;
+    };
+    
+    Logger.prototype.right = function() {
+        this._left = false;
+        return this;
+    };
+    
+    Logger.prototype.top = function() {
+        this._top = true;
+        return this;
+    };
+    
+    Logger.prototype.bottom = function() {
+        this._top = false;
+        return this;
+    };
 
     Logger.prototype.show = function(doShow) {
         this.showLogger = doShow;
+        return this;
     };
 
     Logger.prototype.setColor = function(color) {
         this.color = color;
+        return this;
     };
 
     Logger.prototype.log = function(key, value) {
         this.set(key, value);
+        return this;
     };
 
     Logger.prototype.set = function(key, value) {
-        this.logger[key + ":"] = value;
+        key = key + ":";
+        
+        if( ! this.data.hasOwnProperty(key)) {
+            // New entry, increment count:
+            ++this.numRows;
+        }
+        
+        this.data[key] = value;
     
-        // Estimate the column with. Works due to monospaced font.
+        // Estimate the column width. Works due to monospaced font.
         this.columnWidth = Math.max(this.columnWidth, (key.length + 1) * this.charWidth);
     
         var guess = (value.toString().length) * this.charWidth + this.columnWidth;
   
         this.estimatedWidth = Math.max(this.estimatedWidth, guess);
+        
+        return this;
     };
 
     Logger.prototype.delete = function(key) {
-        delete this.logger[key + ":"];
+        
+        if( this.data.hasOwnProperty(key)) {
+            // Excisting entry is removed. Decrement count:
+            --this.numRows;
+        }
+        
+        delete this.data[key + ":"];
+        return this;
     };
 
     Logger.prototype.update = function(dt) {
@@ -63,26 +108,31 @@ define(function(require){
             return;
         }
         
-        // Right side:
-        //var x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
+        var x, y;
         
-        // Left side:
-        var x = this.size.w * -0.5 + this.offset.w;
+        if(this._left) {
+            x = this.size.w * -0.5 + this.offset.w;
+        } else {
+            x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
+        }
         
-        var y = this.offset.h;
-        
+        if(this._top) {
+            y = this.offset.h;
+        } else {
+            y = this.size.h * -0.5 + this.numRows * this.charHeight + 20;
+        }
+                
         var font = "bold " + this.fontSize + "px Monospace";
 
-        for(var k in this.logger) {
-            if(this.logger.hasOwnProperty(k)) {
+        for(var k in this.data) {
+            if(this.data.hasOwnProperty(k)) {
             
                 context.text(k, x, y, this.color, "left", "top", font)
-                context.text(this.logger[k], x + this.columnWidth, y, this.color, "left", "top", font)
+                context.text(this.data[k], x + this.columnWidth, y, this.color, "left", "top", font)
             
                 y -= this.fontSize;
             }
         }
-    
     };    
    
    return Logger;
