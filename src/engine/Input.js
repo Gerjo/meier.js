@@ -211,8 +211,10 @@ define(function(require) {
             }
         }.bind(this);
     
-        //browser only?
-        document.onkeydown = function(event) {
+
+
+
+        container.onkeydown = function(event) {
             event = event || window.event;
             
             this._keystates[event.keyCode] = true;
@@ -222,7 +224,7 @@ define(function(require) {
             event.preventDefault();
         }.bind(this);
     
-        document.onkeyup = function(event) {
+        container.onkeyup = function(event) {
             event = event || window.event;
            
             this._keystates[event.keyCode] = false;
