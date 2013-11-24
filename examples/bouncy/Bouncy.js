@@ -46,7 +46,7 @@ define(function(require) {
     	this.gui.add(this, 'lineQuality', 2, 100).onChange(this.restart.bind(this));
         
         // Change on the fly:
-    	this.gui.add(this, 'mouseForce', -30, 30);
+    	this.gui.add(this, 'mouseForce', -40, 40);
     	this.gui.add(this, 'dampening', 0.8, 1, 0.001);
         
     	this.gui.add(this, 'showParticles');
@@ -138,7 +138,7 @@ define(function(require) {
     
     Bouncy.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
-        
+                
         renderer.begin();
         
         var weight;
