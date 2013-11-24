@@ -17,6 +17,8 @@ define(function(require) {
     function PushFunctionApp(container) {    
         // Call super class' constructor:
         Game.apply(this, arguments);
+        
+        this.log.right();
     
         this.stats.show(true);
         this.stats.setColor("black");

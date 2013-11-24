@@ -14,6 +14,8 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(15);
         
+        this.log.right();
+        
         this.add(this.grid = new Grid(0, 0, this.width, this.height));
         this.grid.setEditable(true);
         
