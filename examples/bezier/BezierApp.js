@@ -95,7 +95,7 @@ define(function(require) {
     BezierApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        renderer.text("Bezier curve unsorted.", -this.hw + 10, this.hh - 10, "rgba(255, 0, 0, 0.7)", "left", "top");
+        renderer.text("Bezier curve.", -this.hw + 10, this.hh - 10, "rgba(255, 0, 0, 0.7)", "left", "top");
         //renderer.text("Bezier curve sorted on x coordinates.", -this.hw + 10, this.hh - 30, "rgba(0, 0, 255, 0.7)", "left", "top");
         renderer.text("Bernstein polynomials.", -this.hw + 10, this.hh - 50, "rgba(0, 0, 0, 0.7)", "left", "top");
         
