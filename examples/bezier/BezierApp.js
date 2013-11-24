@@ -105,7 +105,7 @@ define(function(require) {
             path.eachPair(function(a, b) {
                 renderer.line(a, b);
             }, false);
-            renderer.stroke("rgba(0, 0, 0, 0.3)", 1);
+            renderer.stroke("rgba(0, 0, 0, 0.5)", 2);
         }.bind(this));
         
         
