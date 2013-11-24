@@ -28,8 +28,8 @@ define(function(require) {
         
         // Fake some clicks for some initial coordinates:
         this.grid.onLeftDown(new Vector(-100, 50));
+        this.grid.onLeftDown(new Vector(0, 150));
         this.grid.onLeftDown(new Vector(100, 50));
-        this.grid.onLeftDown(new Vector(0, -50));
         
         this.input.cursor(Input.Cursor.FINGER);
     }
@@ -96,7 +96,7 @@ define(function(require) {
         Game.prototype.draw.call(this, renderer);
         
         renderer.text("Bezier curve unsorted.", -this.hw + 10, this.hh - 10, "rgba(255, 0, 0, 0.7)", "left", "top");
-        renderer.text("Bezier curve sorted on x coordinates.", -this.hw + 10, this.hh - 30, "rgba(0, 0, 255, 0.7)", "left", "top");
+        //renderer.text("Bezier curve sorted on x coordinates.", -this.hw + 10, this.hh - 30, "rgba(0, 0, 255, 0.7)", "left", "top");
         renderer.text("Bernstein polynomials.", -this.hw + 10, this.hh - 50, "rgba(0, 0, 0, 0.7)", "left", "top");
         
         // There are multiple bernstein polynomials:
@@ -115,12 +115,12 @@ define(function(require) {
         }, false);
         renderer.stroke("rgba(255, 0, 0, 0.7)", 2);
         
-        renderer.begin();
+        /*renderer.begin();
         this.sorted.eachPair(function(a, b) {
             renderer.line(a, b);
         }, false);
         renderer.stroke("rgba(0, 0, 255, 0.7)", 2);
-        
+        */
         renderer.text("Bezier Degree: " + this.degree, -this.hw + 10, -this.hh + 10, "black", "left", "bottom");
     };
     
