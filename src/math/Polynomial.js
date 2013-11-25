@@ -121,7 +121,6 @@ define(function(require) {
             return null;
         },
 
-
         /// Find the lagrange polynomial that runs through all the given control points.
         /// http://mathworld.wolfram.com/LagrangeInterpolatingPolynomial.html
         ///

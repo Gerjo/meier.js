@@ -134,7 +134,7 @@ define(function(require) {
     };
     
     CurveFitting.prototype.plot = function(renderer, f, color, width) {
-        var step = (this.grid.max.x - this.grid.min.x) / 100;
+        var step = (this.grid.max.x - this.grid.min.x) / 200;
         
         var previous = new Vector(
             this.grid.min.x,
