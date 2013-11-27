@@ -210,7 +210,7 @@ define(function(require) {
             var r = initial - f(initial) / g(initial);
     
             if(steps > 0) {
-                return NewtonRaphsonIteration(f, g, r, steps - 1);
+                return self.NewtonRaphsonIteration(f, g, r, steps - 1);
             }
     
             return r;
@@ -231,7 +231,7 @@ define(function(require) {
             var r = g(initial);
         
             if(steps > 0) {
-                return PicardIteration(g, r, steps - 1);
+                return self.PicardIteration(g, r, steps - 1);
             }
     
             return r;
