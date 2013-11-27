@@ -19,6 +19,7 @@ define(function(require) {
         
         this._showRealLabels = false;
         this._isEditable     = false;
+        this._showPoints     = true;
         
         // Extremes of added coordinates:
         this.min   = new Vector(Infinity, Infinity);    
@@ -29,6 +30,12 @@ define(function(require) {
         console.log("Unoverridden onChange method in grid.");
     };
     
+    Frame.prototype.showPoints = function(doShow) {
+        this._showPoints = doShow;
+        return this;
+    };
+    
+    
     Frame.prototype.add = function(entity) {
         if(entity instanceof Pixel) {
             this.min.x = Math.min(this.min.x, entity.position.x);
@@ -36,9 +43,13 @@ define(function(require) {
 
             this.max.x = Math.max(this.max.x, entity.position.x);
             this.max.y = Math.max(this.max.x, entity.position.x);
+            
+        // It's probably a vector of sorts:
+        } else if( ! isNaN(entity.x)) {
+            return this.add(new Pixel(entity.x, entity.y));
         }
         
-        Entity.prototype.add.call(this, entity);
+        return Entity.prototype.add.call(this, entity);
     };
     
     Frame.prototype.onLeftDown = function(input) {
@@ -103,7 +114,10 @@ define(function(require) {
     };
     
     Frame.prototype.draw = function(r) {
-        Entity.prototype.draw.call(this, r);
+        
+        if(this._showPoints) {
+            Entity.prototype.draw.call(this, r);
+        }
         
         var wsteps = this.width  / this.spacing;
         var hsteps = this.height / this.spacing;
