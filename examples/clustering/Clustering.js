@@ -158,8 +158,13 @@ define(function(require) {
             
         }.bind(this));
 
+        this.voronoi(renderer);
     };
     
+    
+    Clustering.prototype.voronoi = function(renderer) {
+        
+    };
     
     
     return Clustering;
