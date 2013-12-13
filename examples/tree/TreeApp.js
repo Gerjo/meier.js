@@ -1,6 +1,6 @@
 define(function(require) {
     var Game      = require("meier/engine/Game");
-    var Tree      = require("meier/collections/FancyTree");
+    var Tree      = require("meier/collections/CriterionTree");
     var Unit      = require("./Unit");
     var Random    = require("meier/math/Random");
     var Vector    = require("meier/math/Vec")(2);
