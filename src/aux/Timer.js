@@ -25,5 +25,9 @@ define(function(require) {
         return hasExpired;
     };
     
+    Timer.prototype.reset = function() {
+        this.startTime = new Date().getTime();
+    };
+    
     return Timer;
 });
