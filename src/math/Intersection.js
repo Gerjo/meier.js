@@ -309,7 +309,7 @@ define(function(require) {
 
         // Special case: both axis overlap:
         if(pen.y === 0 && pen.x === 0) {
-            return new LineSegment(0, 0, 0, 0);
+            return new Line(0, 0, 0, 0);
         }
 
         // Set the correct line, toggle to "rectA to rectB" not "min to max":
@@ -320,7 +320,7 @@ define(function(require) {
             max.y   = tmp;
         }
 
-        return new LineSegment(min.x, min.y, max.x, max.y);
+        return new Line(min.x, min.y, max.x, max.y);
     }
 
     function SegmentNearestPoint(point, segment) {
@@ -349,7 +349,7 @@ define(function(require) {
                 yy = y1 + param * D;
             }
         
-            return new Point(xx, yy);
+            return new Vector(xx, yy);
         
         } (point.x, point.y, segment.a.x, segment.a.y, segment.b.x, segment.b.y));
     }
@@ -464,8 +464,8 @@ define(function(require) {
         }
     
         return {
-            "entry": new Point(x0, y0),
-            "exit": new Point(x1, y1)
+            "entry": new Vector(x0, y0),
+            "exit": new Vector(x1, y1)
         };
     }
 
@@ -531,10 +531,10 @@ define(function(require) {
     
         return {
             // Point of rectangle entry:
-            "entry": new Point(ray.a.x + dir.x * Tnear, ray.a.y + dir.y * Tnear),
+            "entry": new Vector(ray.a.x + dir.x * Tnear, ray.a.y + dir.y * Tnear),
         
             // Point of rectangle exit:
-            "exit": new Point(ray.a.x + dir.x * Tfar, ray.a.y + dir.y * Tfar)
+            "exit": new Vector(ray.a.x + dir.x * Tfar, ray.a.y + dir.y * Tfar)
         };
     }
 
