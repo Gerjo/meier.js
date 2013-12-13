@@ -270,6 +270,7 @@ define(function(require) {
         
             return r;
         },
+        
 
         /// A half-baked implementation of Gauss-Jordan elemination.
         /// 
@@ -427,6 +428,39 @@ define(function(require) {
             //console.log(out.product(input).pretty());
             
             return out;
+        },
+        
+        ClosestVector: function(v, array) {
+            var best = array[0];
+            var dist = Infinity;
+            
+            for(var i = 0; i < array.length; ++i) {
+                var d = v.distanceSQ(array[i]);
+                
+                if(d < dist) {
+                    best = array[i];
+                    dist = d;
+                }
+            }
+            
+            return best;
+        },
+        
+        FarthestVector: function(v, array) {
+            var best = array[0];
+            var dist = -Infinity;
+            
+            for(var i = 0; i < array.length; ++i) {
+                var d = v.distanceSQ(array[i]);
+                
+                if(d > dist) {
+                    best = array[i];
+                    dist = d;
+                }
+            }
+            
+            return best;
         }
+        
     };// End return
 }); // End define
