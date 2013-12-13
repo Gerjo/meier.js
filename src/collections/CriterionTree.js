@@ -11,7 +11,7 @@ define(function(require) {
     var Vector       = require("meier/math/Vec")(2);
     
     // Tmp include:
-    var Types        = {}; Types.SOLID = 2;
+    //var Types        = {}; Types.SOLID = 2;
  
     
     var NodeIdCounter = 0;
@@ -163,11 +163,11 @@ define(function(require) {
         }
     
         var c = new Tree.Criterion();
-        c.minimalSize     = 30;
-        c.maximalSize     = 50;
+        c.minimalSize     = 1;
+        c.maximalSize     = 10;
         c.minimalEntities = 0;
-        c.maximalEntities = 5;
-        c.solid           = Types.SOLID;
+        c.maximalEntities = 0;
+        //c.solid           = Types.SOLID;
     
         var start = this.getNodeAt(c, a);
         var end   = this.getNodeAt(c, b);
@@ -180,7 +180,7 @@ define(function(require) {
             c.maximalSize     = 30;
             c.minimalEntities = 1;
             c.maximalEntities = 10;
-            c.solid = Types.SOLID;
+            //c.solid = Types.SOLID;
         
             start = this.getNodeAt(c, a);
         }
@@ -471,9 +471,9 @@ define(function(require) {
                 // good numEntities and width are in range.
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solid) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solid) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 return Criterion.Response.PASS;
             } else if(width <= heuristic.minimalSize) {
@@ -502,9 +502,9 @@ define(function(require) {
                 }
             
                 // NOTE: untested (26th august)
-                if(this.flag & heuristic.solids) {
-                    return Criterion.Response.DISBURSE;
-                }
+                //if(this.flag & heuristic.solids) {
+                //    return Criterion.Response.DISBURSE;
+                //}
 
                 // Cannot shrink. Deal with it.
                 return Criterion.Response.PASS;
