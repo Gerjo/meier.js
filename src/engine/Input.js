@@ -76,6 +76,8 @@ define(function(require) {
         this._size      = new Size(width, height);
         this._keystates = {};
     
+        var body = document.getElementsByTagName("body")[0];
+        
         // Intialize empty listeners:
         this.listeners = [];
         for(var i = 0; i < Input.Events.COUNT; ++i) {
@@ -210,11 +212,11 @@ define(function(require) {
                 this.trigger(Input.Events.LEFT_UP, event);
             }
         }.bind(this);
-    
-
-
-
-        container.onkeydown = function(event) {
+        
+        // The "body" element cannot capture keystrokes. Use "document" instead.
+        var keyElement = (container == body) ? document : container;
+        
+        keyElement.onkeydown = function(event) {
             event = event || window.event;
             
             this._keystates[event.keyCode] = true;
@@ -224,7 +226,7 @@ define(function(require) {
             event.preventDefault();
         }.bind(this);
     
-        container.onkeyup = function(event) {
+        keyElement.onkeyup = function(event) {
             event = event || window.event;
            
             this._keystates[event.keyCode] = false;
