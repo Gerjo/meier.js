@@ -60,6 +60,8 @@ define(function(require) {
         
         // Build-in entity system. Optional usage.
         this._entities       = [];
+        
+        this._doClear        = true;
     }
     
     Game.prototype.add = function(entity) {
@@ -79,6 +81,10 @@ define(function(require) {
         } else {
             throw new Error("Game::delete is only meant of entities.");
         }
+    };
+    
+    Game.prototype.setAutoClear = function(autoClear) {
+        this._doClear = autoClear;
     };
     
     Game.prototype.setFps = function(fps) {
@@ -164,9 +170,12 @@ define(function(require) {
     };
 
     Game.prototype.draw = function(renderer) {
+        
         // Clear the canvas:
-        renderer.clear();
-    
+        if(this._doClear) {
+            renderer.clear();
+        }
+        
         this._entities.forEach(function(entity) {
             if(entity._delete !== true) {
                 entity._draw(renderer);
