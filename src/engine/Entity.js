@@ -356,9 +356,9 @@ define(function(require) {
             ||
             (entity.position.x - ehw < b.position.x + bhw && entity.position.x + ehw > b.position.x + bhw))
             &&
-            ((entity.position.y - ehw < b.position.y - bhw && entity.position.y + ehw > b.position.y - bhw)
+            ((entity.position.y - ehh < b.position.y - bhh && entity.position.y + ehh > b.position.y - bhh)
             ||
-            (entity.position.y - ehw < b.position.y + bhw && entity.position.y + ehw > b.position.y + bhw))
+            (entity.position.y - ehh < b.position.y + bhh && entity.position.y + ehh > b.position.y + bhh))
         );
     };
     
