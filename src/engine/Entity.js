@@ -9,6 +9,7 @@
 define(function(require) {
     var Input        = require("meier/engine/Input");
     var Intersection = require("meier/math/Intersection");
+    var Rectangle    = require("meier/math/Rectangle");
     var Matrix       = require("meier/math/Mat")(3, 3);
     var Vector       = require("meier/math/Vec")(2);
     
@@ -75,6 +76,13 @@ define(function(require) {
     
     Entity.prototype.delete = function() {
         this._delete = true;
+    };
+    
+    /// Retrieve a rectangle bounding volume
+    Entity.prototype.rectangle = function() {
+        var hw = this.width * 0.5;
+        var hh = this.height * 0.5;
+        return new Rectangle(this.position.x - hw, this.position.y - hh, this.position.x + hw, this.position.y + hh);
     };
     
     // Event handlers, override them when "enableEvent" is called.
