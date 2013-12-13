@@ -202,6 +202,20 @@ define(function(require) {
             return this;
         };
         
+        V.prototype.clamp = function(min, max) {
+          
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                if(this._[i] < min) {
+                    this._[i] = min;
+                }
+                
+                if(this._[i] > max) {
+                    this._[i] = max;
+                }
+            }
+            return this;
+        };
+        
         V.prototype.clone = function() {
             var r = new V();
             
