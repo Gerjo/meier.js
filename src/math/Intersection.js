@@ -358,8 +358,8 @@ define(function(require) {
         // TODO: look up that way to test an intersect at the same time.
         if(rectanglesTest(a, b)) {
             return new Rectangle(
-                Math.min(a.min.x, b.min.x), Math.min(a.min.y, b.min.y),
-                Math.max(a.max.x, b.max.x), Math.max(a.max.y, b.max.y)
+                Math.max(a.min.x, b.min.x), Math.max(a.min.y, b.min.y),
+                Math.min(a.max.x, b.max.x), Math.min(a.max.y, b.max.y)
             );
         }
     
