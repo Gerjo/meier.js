@@ -15,6 +15,8 @@ define(function(require) {
     // Short-hand access: less typing.
     var PointInObb   = Intersection.Test.PointInObb;
     
+    var UniqueEntityCounter = 0;
+    
     function Entity(x, y, w, h) {
         // Transformation properties:
         this.position  = new Vector(x || 0, y || 0);
@@ -27,6 +29,9 @@ define(function(require) {
         // A bounding box for click actions:
         this.width     = w || 30;
         this.height    = h || 30;
+        
+        // A unique hash for each entity:
+        this.hash = ++UniqueEntityCounter;
         
         // Flag to signify that entity must be removed.
         this._delete   = false;
