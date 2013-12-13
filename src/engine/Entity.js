@@ -245,11 +245,19 @@ define(function(require) {
     };
 
     Entity.prototype.update = function(dt) {
-        this._entities.forEach(function(child) {
-            child.update(dt);
-        });
         
-        // Overwrite method.
+        for(var i = 0; i < this._entities.length; i++) {
+            
+            if(this._entities[i]._delete !== true) {
+                this._entities[i].update(dt);
+            }
+            
+            // Remove the entity:
+            if(this._entities[i]._delete === true) {
+                this._entities[i]._onDelete(this);
+                this._entities.splice(i--, 1);
+            }
+        }
     };
     
     Entity.prototype.draw = function(renderer) {
