@@ -44,7 +44,7 @@ define(function(require) {
         var CreateArray;
     
         // iPad 1 and IE < 10 support.
-        if(typeof Float64Array === "undefined") {
+        if(true || typeof Float64Array === "undefined") {
             
             // Loop unrolling experiment:
             var fn = "return [";
