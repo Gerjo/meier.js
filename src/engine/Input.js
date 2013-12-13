@@ -6,9 +6,10 @@
  !*/
 
 define(function(require) {
-    var Vector = require("meier/math/Vec")(2);
-    var Size   = require("meier/math/Size");
-    var Key    = require("meier/engine/Key");
+    var Vector  = require("meier/math/Vec")(2);
+    var Size    = require("meier/math/Size");
+    var Key     = require("meier/engine/Key");
+    var Gamepads = require("meier/engine/Gamepads");
 
     Input.Events       = {};
     Input.Events.COUNT = 0;
@@ -76,6 +77,8 @@ define(function(require) {
         this._size      = new Size(width, height);
         this._keystates = {};
     
+        this.gamepads   = new Gamepads(this);
+        
         var body = document.getElementsByTagName("body")[0];
         
         // Intialize empty listeners:
@@ -236,6 +239,11 @@ define(function(require) {
             event.preventDefault();
         }.bind(this);
     }
+
+    Input.prototype.update = function(dt) {
+        // The gamepad does some polling.
+        this.gamepads.update(dt);
+    };
 
     Input.prototype.cursor = function(cursortype) {
         this._container.style.cursor = cursortype;
