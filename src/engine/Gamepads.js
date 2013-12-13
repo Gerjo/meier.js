@@ -5,6 +5,7 @@
  !*
  !*/
 
+/// An implementation of how gamepad in code ought to work
 define(function(require) {
     var Vector = require("meier/math/Vec")(2);
     
@@ -26,7 +27,6 @@ define(function(require) {
         
         this.previous = {};
         this.previous.a = function() { return 1 === hub._previous[index].buttons[0]; };
-        
     }
     
     Controller.prototype.connected = function() {
@@ -95,6 +95,9 @@ define(function(require) {
     Controller.prototype.leftTrigger  = function() { return this._hub._gamepads[this._index].buttons[6]; };
     Controller.prototype.rightTrigger = function() { return this._hub._gamepads[this._index].buttons[7]; };
     
+    // Null object pattern, I suppose? The idea is that the end user doesn't
+    // have to test if the controller is connected. It simply returns false
+    // for all buttons and exis.
     function DummyInternalController() {
         this.axes    = [0, 0, 0, 0];
         this.buttons = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -125,6 +128,8 @@ define(function(require) {
         }
         
         this._numberConnected = 0;
+        
+        this.hasSupport = (window.navigator.webkitGamepads || window.navigator.webkitGetGamepads);
     }
     
     /// Shorthand method.
@@ -155,8 +160,12 @@ define(function(require) {
     
     Gamepad.prototype.update = function(dt) {
         
-        // Re-acquire gamepad state:
+        // Not all browsers are blessed with gamepad support.
+        if( ! this.hasSupport) {
+            return;
+        }
         
+        // Re-acquire gamepad state:
         var pads = window.navigator.webkitGamepads || window.navigator.webkitGetGamepads();
         
         this._numberConnected = 0;
@@ -168,9 +177,7 @@ define(function(require) {
                 
                 // Previous state
                 this._previous[i] = this._gamepads[i];
-                
-                //console.log("prev:", this._previous[i].buttons[0], "cur:", pads[i].buttons[0]);
-                
+         
                 // New state
                 this._gamepads[i] = pads[i];
                 
