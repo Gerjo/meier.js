@@ -1,3 +1,11 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
+
 define(function(require) {
     var Entity = require("meier/engine/Entity");
     var Input  = require("meier/engine/Input");
@@ -5,6 +13,7 @@ define(function(require) {
     var Vector = require("meier/math/Vec")(2);
     
     Sketch.prototype = new Entity();
+    
     function Sketch(x, y, w, h)  {
         Entity.call(this, x || 0, y || 0, w || 100, h || 100);
         
@@ -38,18 +47,19 @@ define(function(require) {
         }
         
         var stats = {};
-        stats.onpix = 0;
-        stats.min   = new Vector( Infinity,  Infinity);
-        stats.max   = new Vector(-Infinity, -Infinity);
-        stats.xbar  = 0;
-        stats.ybar  = 0;
+        stats.onpix  = 0;
+        stats.minx   = Infinity;
+        stats.maxx   = -Infinity;
+        stats.miny   = Infinity;
+        stats.maxy   = -Infinity;
+        stats.xbar   = 0;
+        stats.ybar   = 0;
         stats.x2bar  = 0;
         stats.y2bar  = 0;
         stats.x2ybr  = 0;
         stats.xy2br  = 0;
         stats.xege   = 0;
         stats.xegvy  = 0; 
-        
         stats.yege   = 0;
         stats.yegvx  = 0;
         
@@ -90,10 +100,10 @@ define(function(require) {
                 
                 
                 // Determine bounds
-                if(stats.min.x > x) { stats.min.x = x; }
-                if(stats.max.x < x) { stats.max.x = x; }
-                if(stats.min.y > y) { stats.min.y = y; }
-                if(stats.max.y < y) { stats.max.y = y; }
+                if(stats.minx > x) { stats.minx = x; }
+                if(stats.maxx < x) { stats.maxx = x; }
+                if(stats.miny > y) { stats.miny = y; }
+                if(stats.maxy < y) { stats.maxy = y; }
             }
             
             previous = on;
@@ -108,11 +118,11 @@ define(function(require) {
             }
         }
 
-        stats.width  = (stats.max.x - stats.min.x) + 1;
-        stats.height = (stats.max.y - stats.min.y) + 1;
+        stats.width  = (stats.maxx - stats.minx) + 1;
+        stats.height = (stats.maxy - stats.miny) + 1;
                         
-        stats.xbox   = stats.min.x + (stats.max.x - stats.min.x) * 0.5;
-        stats.ybox   = stats.min.y + (stats.max.y - stats.min.y) * 0.5;
+        stats.xbox   = stats.minx + (stats.maxx - stats.minx) * 0.5;
+        stats.ybox   = stats.miny + (stats.maxy - stats.miny) * 0.5;
 
         stats.xbar = (stats.xbar - stats.onpix * stats.xbox) / stats.width;
         stats.ybar = (stats.ybar - stats.onpix * stats.ybox) / stats.height;
@@ -232,7 +242,7 @@ define(function(require) {
         
         //if(this.stats) {
         //    this.context.beginPath();
-        //    this.context.rect(this.stats.min.x+1,this.stats.min.y+1,this.stats.max.x-this.stats.min.x-1,this.stats.max.y-this.stats.min.y-1);
+        //    this.context.rect(this.stats.minx+1,this.stats.miny+1,this.stats.maxx-this.stats.minx-1,this.stats.maxy-this.stats.miny-1);
         //    this.context.strokeStyle = "black";
         //    this.context.stroke();
         //}
