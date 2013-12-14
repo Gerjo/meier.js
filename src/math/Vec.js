@@ -334,6 +334,28 @@ define(function(require) {
             };
         }
         
+        // Take the lowest value between this and other.
+        V.prototype.min = function(other) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                if(this._[i] > v._[i]) {
+                    this._[i] = v._[i];
+                }
+            }  
+            
+            return this;
+        };
+        
+        // Take the highest value between this and other.
+        V.prototype.max = function(other) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                if(this._[i] < v._[i]) {
+                    this._[i] = v._[i];
+                }
+            }  
+            
+            return this;
+        };
+        
         V.prototype.pretty = function() {
             var out = "", n, l = 6, d = 2;
         
