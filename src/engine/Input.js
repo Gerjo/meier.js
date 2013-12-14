@@ -83,7 +83,7 @@ define(function(require) {
         
         
         // The "body" element cannot capture keystrokes. Use "document" instead.
-        var eventContainer = (container == body) ? document : container;
+        var eventContainer = document;//(container == body) ? document : container;
         
         
         // Intialize empty listeners:
