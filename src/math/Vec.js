@@ -35,7 +35,7 @@ define(function(require) {
             });
         }
         
-        if(rows == 3) {
+        if(rows == 4) {
             Object.defineProperties(V.prototype, {
                 "w": { get: function () { return this._[3]; }, set: function (v) { this._[3] = v; } },
             });
