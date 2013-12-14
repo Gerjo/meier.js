@@ -45,6 +45,7 @@ define(function(require) {
         this.height          = parseInt(container.offsetHeight / 2, 10) * 2;
         this.hw              = this.width  * 0.5;
         this.hh              = this.height * 0.5;    
+        this.htmlContainer   = container;
         
         this._renderer       = new Renderer(container, this.width, this.height);
         
