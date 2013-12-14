@@ -207,7 +207,7 @@ define(function(require) {
         container.onmouseup = function(event) {
             event = event || window.event;
             if(event.which === 3) {
-                //this.trigger(Input.Events.RIGHT_UP, event);
+                this.trigger(Input.Events.RIGHT_UP, event);
             
                 this.trigger(Input.Events.RIGHT_CLICK, event);
             
