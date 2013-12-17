@@ -39,11 +39,8 @@ define(function(require) {
             count += layers[i] * (layers[i-1] + 1);
         }
         
-        console.log(count)
-        
-        
         if(! ( weights instanceof Array)) {
-            weights = Random.RangeArray(count, -5, 5);
+            weights = Random.RangeArray(count, -10, 10);
         }
         
         // Create new layers filled with neurons
@@ -55,7 +52,6 @@ define(function(require) {
                 
                 // Output layer is linear
                 if(layer == layers.length - 1) {
-                    console.log("ident");
                     activation = Identity;
                 }
                 
@@ -114,8 +110,22 @@ define(function(require) {
             throw new Error("Input length does not match expected output.")
         }
         
+        // Odd, but could be a use-case. A non trained network.
+        if(inputValues.length == 0) {
+            return;
+        }
+        
+        // Removing 1 as that is the bias unit.
+        if(inputValues[0].length != this.layers.first().length - 1) {
+            throw new Error("Input length does not match input layer. " + inputValues[0].length + "/" + (this.layers.first().length-1));
+        }
+        
+        if(expectedValues[0].length != this.layers.last().length) {
+            throw new Error("Expected values length does not match output layer. " + expectedValues[0].length + "/" + this.layers.last().length)
+        }
+        
         var learningRate = 0.01;
-        var reps = 10;
+        var reps = 1;
         
         //inputValues = inputValues.slice(inputValues.length - 1);
         //expectedValues = expectedValues.slice(expectedValues.length - 1);
@@ -124,12 +134,13 @@ define(function(require) {
         // Use shuffled input.
         var indices = Array.Range(0, inputValues.length).shuffle();
         
+        var avgerror = 0;
+        
         for(var k = 0; k < indices.length; ++k) {
             var i = indices[k];
 
             var input    = inputValues[i];
             var expected = expectedValues[i];
-            var output   = this.classify(input);
             
             var hash     = input.join();
             
@@ -140,9 +151,15 @@ define(function(require) {
             //console.log("derp");
             
             for(var rep = 0; rep < reps; ++rep) {
+                var output = this.classify(input);
+                
+                avgerror = 0;
                 
                 // Compute errors (back propegation)
                 for(var layer = this.layers.length - 1; layer >= 0; --layer) {
+                    
+                    
+                    
                     // For each neuron in said layer                
                     this.layers[layer].forEach(function(neuron, j) {
                     
@@ -152,8 +169,8 @@ define(function(require) {
                             // y - t
                             neuron.error = output[j] - expected[j];
                             
-                            // Record output error
-                            this.errors[hash].push(neuron.error); 
+                            avgerror += Math.pow(neuron.error, 2);
+                            
                         } else {
                             
                             // z * (1 - z) * sigma(w, delta)
@@ -175,24 +192,44 @@ define(function(require) {
                             neuron.error = neuron.x * (1 - neuron.x) * neuron.error;
                             
                         }
-                    }.bind(this));      
+                    }.bind(this));
                 }
+                
+                
+                // Average the errors
+                avgerror = Math.sqrt(avgerror / this.layers.last().length);
+                // Record output error
+                this.errors[hash].push(avgerror); 
+                                
             
                 // Adjust weights
                 for(var layer = 0; layer < this.layers.length; ++layer) {
                     this.layers[layer].forEach(function(neuron, j) {
                         neuron.next.forEach(function(synapse) {
+                            
+                            if(neuron == synapse.next) {
+                                throw new Error("Neuron is it's own successor.");
+                            }
+                            
                             synapse.change = learningRate * neuron.x * synapse.next.error;
                             synapse.w -= synapse.change;
                         });
                     });
+                    
+                    //console.log("  iter");
                 }
+                
+                //var out = output.map(function(n) {
+                //    return n.toFixed(2);
+                //}).join();
             
-                console.log("[" + input.join() + "] generated: " + Round(output, 3) + ", expected: " + expected);
+                //console.log("[" + input.join() + "] generated: [" + out + "], expected: [" + expected + "], rms-error:", avgerror);
             }
             //break;
         }
         
+        
+        return avgerror;
     };
     
     Nnet.prototype.classify = function(input) {
@@ -240,19 +277,18 @@ define(function(require) {
         return output;
     };
     
-    /// For debug and educative purposes
-    Nnet.prototype.draw = function(renderer, x, y, w, h) {
+    Nnet.prototype.drawErrorGraphs = function(renderer) {
         
-        var ypos = 200;
+        var ypos = 100;
+        var j = 0;
         for(var k in this.errors) {
             
-            while(this.errors[k].length > 100) {
+            while(this.errors[k].length > 200) {
                 this.errors[k].shift();
             }
             
-            renderer.text("class: [" + k + "]", -435, ypos + 50, "black", "left");
-            renderer.text("error: " + this.errors[k].last().toFixed(2), -435, ypos + 35, "black", "left");
-            
+            //renderer.text("class: [" + k + "]", -435, ypos + 50, "black", "left");
+        
             if(this.errors.hasOwnProperty(k)) {
                 renderer.begin();
                 
@@ -266,16 +302,33 @@ define(function(require) {
                 //console.log("derp");
             }
             
-            ypos -= 100;
+            renderer.text("error: " + this.errors[k].last().toFixed(2), -435, ypos + 15, "red", "left");
+            
+            
+            ypos -= 30;
+            
+            // Don't bother going offscreen
+            if(j > 10) {
+                break;
+            }
         }
+    };
+    
+    /// For debug and educative purposes
+    Nnet.prototype.draw = function(renderer, x, y, w, h) {
+        
+        this.drawErrorGraphs(renderer);
+
+        
+        return;
         
         // Find layer with the most units:
         var largest = this.layers.reduce(function(p, c) {
             return c.length > p ? c.length : p;
         }, 0);
         
-        var radius = 15; // Desired radius of each neuron.
-        var spacing = new Vector(40, 40);
+        var radius = 30; // Desired radius of each neuron.
+        var spacing = new Vector(100, 80);
         
         var offset = new Vector(
                 (this.layers.length-1) * spacing.x * -0.5 + x,
