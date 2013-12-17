@@ -79,6 +79,16 @@ Array.prototype.shuffle = function(){
     return this;
 };
 
+// Create a range.
+Array.Range = function(from, to) {
+    var arr = new Array(to - from);
+    for(var i = from; i < to; ++i) {
+        arr[i] = i;
+    }
+    
+    return arr;
+};
+
 /// Retrieve unique values from this array. Non javascript
 /// primitives (number, string) should use a custom compare
 /// function, else "references" are compared. Without the
