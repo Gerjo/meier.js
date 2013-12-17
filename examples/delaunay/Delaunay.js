@@ -39,8 +39,8 @@ define(function(require) {
             
         } else {
             this.center = new Vector(
-                this.a.x + (bPos.x * cPos.lengthSQ() - cPos.x * bPos.lengthSQ()) / d,
-                this.a.y + (cPos.y * bPos.lengthSQ() - bPos.y * cPos.lengthSQ()) / d
+                this.a.x + (cPos.y * bPos.lengthSQ() - bPos.y * cPos.lengthSQ()) / d,
+                this.a.y + (bPos.x * cPos.lengthSQ() - cPos.x * bPos.lengthSQ()) / d
             );
             
             this.radius = this.a.distance(this.center);                        
@@ -93,8 +93,8 @@ define(function(require) {
         
         
         this.grid.onLeftDown(new Vector(100, 100));
-        //this.grid.onLeftDown(new Vector(0, 100));
-        //this.grid.onLeftDown(new Vector(100, 0));
+        this.grid.onLeftDown(new Vector(0, 100));
+        this.grid.onLeftDown(new Vector(-10, 10));
     }
 
 
