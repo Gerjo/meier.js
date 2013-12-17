@@ -159,6 +159,14 @@ define(function(require) {
                 }
             });
             
+            triangles = triangles.filter(function(triangle) {
+                var r = triangle.a == s.a || triangle.b == s.a || triangle.c == s.a ||
+                        triangle.a == s.b || triangle.b == s.b || triangle.c == s.b ||
+                        triangle.a == s.c || triangle.b == s.c || triangle.c == s.c;
+                  
+                return !r;
+            });
+            
             triangles.forEach(function(triangle) {
 
                 renderer.begin();
