@@ -122,8 +122,8 @@ define(function(require) {
             w = a.width();
             h = a.height();
             
-            x = a.min.x + w * 0.5;
-            y = -a.min.y - h * 0.5; 
+            x = a.min.x;// - w * 0.5;
+            y = -a.min.y;// - h * 0.5; 
     
         } else if(IsVector(a)) {
             x = a.x;
