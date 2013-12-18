@@ -6,6 +6,7 @@ define(function(require) {
     var Pixel     = require("meier/prefab/Pixel");
     var Vector    = require("meier/math/Vec")(2);
     var dat       = require("meier/contrib/datgui");
+    var Hull      = require("meier/math/Hull").GiftWrap;
 
     var Triangulate  = require("meier/math/Delaunay").Triangulate;
 
@@ -50,7 +51,24 @@ define(function(require) {
     Delaunay.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 
-        var triangles = Triangulate(this.coordinates);
+        var coordinates = this.coordinates.clone();
+        var triangles = Triangulate(coordinates);
+
+        coordinates.forEach(function(coordinate, i) {
+            
+            
+            coordinate.neighbours.sort(function(a, b) {
+                return Math.atan2(a.y - coordinate.y, a.x - coordinate.x) - 
+                        Math.atan2(b.y - coordinate.y, b.x - coordinate.x)
+            });
+            
+            renderer.begin();
+            renderer.polygon(coordinate.neighbours);
+            renderer.opacity(0.4);
+            renderer.fill(["hotpink","blue","green","gray","cyan","yellow","purple"][i%7]);
+            renderer.opacity(1);
+            
+        });
 
         triangles.forEach(function(triangle) {
 
@@ -59,9 +77,8 @@ define(function(require) {
             renderer.stroke("rgba(255,0,0,0.8)", 2);
             
             renderer.begin();
-            renderer.circle(triangle.center, triangle.radius);
-            renderer.stroke("rgba(0, 0, 0, 0.8)");
-            renderer.fill("rgba(0, 0, 0, 0.05)");
+            renderer.circle(triangle.center, 2);
+            renderer.fill("rgba(0, 0, 0, 1)");
         });
     };
     
