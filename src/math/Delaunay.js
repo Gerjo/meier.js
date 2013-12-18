@@ -43,9 +43,9 @@ define(function(require) {
     };
     
     Triangle.prototype.draw = function(renderer) {
-        renderer.arrow(this.a, this.b);
-        renderer.arrow(this.b, this.c);
-        renderer.arrow(this.c, this.a);
+        renderer.line(this.a, this.b);
+        renderer.line(this.b, this.c);
+        renderer.line(this.c, this.a);
     };
     
     // Within the triangle:
