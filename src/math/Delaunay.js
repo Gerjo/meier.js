@@ -63,11 +63,71 @@ define(function(require) {
         return this.center.distanceSQ(vertex) < this.radiusSQ;
     };
     
-    var exposed = {
+    
+    function SortSiteCounterClock(site) {
+        // Sort vertices counter clockwise (great for drawing)
+        site.neighbours.sort(function(a, b) {
+            return Math.atan2(a.y - site.y, a.x - site.x) - 
+            Math.atan2(b.y - site.y, b.x - site.x)
+        });
+    }
+    
+    var self = {
         
         Triangle: Triangle,
         
-        Triangulate: function(coordinates) {
+        
+        Voronoi: function(coordinates, w, h) {
+            
+            w = w || 32768 * 0.25;
+            h = h || 32768 * 0.25;
+            
+            var corners = [
+                new Vector(-w, h),
+                new Vector(w, -h),
+                new Vector(-w, -h),
+                new Vector(w, h)
+            ];
+            
+            var indices   = [0, 0, 0, 0];
+            var scores    = [Infinity, Infinity, Infinity, Infinity];
+            
+            var triangles = self.Triangulate(coordinates, true);
+                        
+            coordinates.forEach(function(site, i) {
+                
+                SortSiteCounterClock(site);
+                
+                for(var j = 0; j < corners.length; ++j) {
+                    var d = corners[j].distanceSQ(site);
+                    
+                    if(d < scores[j]) {
+                        scores[j]  = d;
+                        indices[j] = i;
+                    }
+                }
+            });
+            
+            for(var i = 0; i < corners.length; ++i) {
+                coordinates[indices[i]].neighbours.push(corners[i]);
+                
+                SortSiteCounterClock(coordinates[indices[i]]);
+            }
+                
+            
+            return triangles;
+        },
+        
+        
+        /// Apply delaunay triangluation to a set of given vectors. Uses the
+        /// incremental build strategy.
+        ///
+        /// @param {coordinates} Array containing 2d vectors
+        /// @param {prepareForVoronoi} Internally record some voronoi details. On 
+        ///         this isn't quite a voronoi yet, but provides enough data to 
+        ///         one. Use Delaunay.Voronoi() to generate a voronoi.
+        /// @return An array containing delaunay triangles.
+        Triangulate: function(coordinates, prepareForVoronoi) {
             if(coordinates.length > 0) {
                 var triangles = [];
             
@@ -86,10 +146,12 @@ define(function(require) {
                 // Insert each coordinate:
                 coordinates.forEach(function(vertex) {
                     
-                    if( ! vertex.neighbours) { 
-                        vertex.neighbours = [];
-                    } else { 
-                        vertex.neighbours.clear(); 
+                    if(prepareForVoronoi === true) {
+                        if( ! vertex.neighbours) { 
+                            vertex.neighbours = [];
+                        } else { 
+                            vertex.neighbours.clear(); 
+                        }
                     }
                    
                     
@@ -148,7 +210,8 @@ define(function(require) {
                             triangle.a == s.b || triangle.b == s.b || triangle.c == s.b ||
                             triangle.a == s.c || triangle.b == s.c || triangle.c == s.c;
                   
-                    if(! r) {
+                    
+                    if(! r && prepareForVoronoi === true) {
                         // Subscribe the triangle to the vertices
                         triangle.a.neighbours.push(triangle.center);
                         triangle.b.neighbours.push(triangle.center);
@@ -164,6 +227,6 @@ define(function(require) {
         }, // End triangulate
     }; // End exposed
     
-    return exposed;
+    return self;
     
 });
