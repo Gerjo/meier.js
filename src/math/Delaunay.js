@@ -85,7 +85,14 @@ define(function(require) {
             
                 // Insert each coordinate:
                 coordinates.forEach(function(vertex) {
-                
+                    
+                    if( ! vertex.neighbours) { 
+                        vertex.neighbours = [];
+                    } else { 
+                        vertex.neighbours.clear(); 
+                    }
+                   
+                    
                     var edges = {};
                 
                     // Find a triangle that contains the given coordinate:
@@ -142,10 +149,6 @@ define(function(require) {
                             triangle.a == s.c || triangle.b == s.c || triangle.c == s.c;
                   
                     if(! r) {
-                        if(!triangle.a.neighbours) { triangle.a.neighbours = []}
-                        if(!triangle.b.neighbours) { triangle.b.neighbours = []}
-                        if(!triangle.c.neighbours) { triangle.c.neighbours = []}
-                        
                         // Subscribe the triangle to the vertices
                         triangle.a.neighbours.push(triangle.center);
                         triangle.b.neighbours.push(triangle.center);
