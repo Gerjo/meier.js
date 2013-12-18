@@ -141,6 +141,17 @@ define(function(require) {
                             triangle.a == s.b || triangle.b == s.b || triangle.c == s.b ||
                             triangle.a == s.c || triangle.b == s.c || triangle.c == s.c;
                   
+                    if(! r) {
+                        if(!triangle.a.neighbours) { triangle.a.neighbours = []}
+                        if(!triangle.b.neighbours) { triangle.b.neighbours = []}
+                        if(!triangle.c.neighbours) { triangle.c.neighbours = []}
+                        
+                        // Subscribe the triangle to the vertices
+                        triangle.a.neighbours.push(triangle.center);
+                        triangle.b.neighbours.push(triangle.center);
+                        triangle.c.neighbours.push(triangle.center);
+                    }
+                  
                     return !r;
                 });
             }
