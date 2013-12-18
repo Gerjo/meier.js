@@ -6,6 +6,7 @@ define(function(require) {
     var Pixel     = require("meier/prefab/Pixel");
     var Vector    = require("meier/math/Vec")(2);
     var dat       = require("meier/contrib/datgui");
+    var Voronoi   = require("meier/math/Delaunay").Voronoi;
 
     Clustering.prototype = new Game();
     function Clustering(container) {
@@ -158,11 +159,18 @@ define(function(require) {
             
         }.bind(this));
 
-        this.voronoi(renderer);
-    };
-    
-    
-    Clustering.prototype.voronoi = function(renderer) {
+        var centers = Voronoi(this.centroids);
+        
+        this.centroids.forEach(function(coordinate, i) {
+         
+            renderer.begin();
+            renderer.polygon(coordinate.neighbours);
+            renderer.opacity(0.4);
+            renderer.fill(["hotpink","blue","green","gray","cyan","yellow","purple"][i%7]);
+            renderer.stroke("rgba(0, 0, 0, 0.4)");
+            renderer.opacity(1);
+            
+        });
         
     };
     
