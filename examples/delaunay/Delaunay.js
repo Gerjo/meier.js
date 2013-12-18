@@ -8,7 +8,8 @@ define(function(require) {
     var dat       = require("meier/contrib/datgui");
     var Hull      = require("meier/math/Hull").GiftWrap;
 
-    var Triangulate  = require("meier/math/Delaunay").Triangulate;
+    var Voronoi   = require("meier/math/Delaunay").Voronoi;
+    
 
     Delaunay.prototype = new Game();
     function Delaunay(container) {
@@ -52,11 +53,11 @@ define(function(require) {
         Game.prototype.draw.call(this, renderer);
 
         var coordinates = this.coordinates.clone();
-        var triangles = Triangulate(coordinates);
+        var triangles = Voronoi(coordinates);
 
         coordinates.forEach(function(coordinate, i) {
             
-            
+            // Sort counter clockwise for polygon drawing
             coordinate.neighbours.sort(function(a, b) {
                 return Math.atan2(a.y - coordinate.y, a.x - coordinate.x) - 
                         Math.atan2(b.y - coordinate.y, b.x - coordinate.x)
@@ -66,6 +67,7 @@ define(function(require) {
             renderer.polygon(coordinate.neighbours);
             renderer.opacity(0.4);
             renderer.fill(["hotpink","blue","green","gray","cyan","yellow","purple"][i%7]);
+            renderer.stroke("rgba(0, 0, 0, 0.4)");
             renderer.opacity(1);
             
         });
@@ -74,10 +76,10 @@ define(function(require) {
 
             renderer.begin();
             triangle.draw(renderer);
-            renderer.stroke("rgba(255,0,0,0.8)", 2);
+            renderer.stroke("olive", 2);
             
             renderer.begin();
-            renderer.circle(triangle.center, 2);
+            renderer.circle(triangle.center, 3);
             renderer.fill("rgba(0, 0, 0, 1)");
         });
     };
