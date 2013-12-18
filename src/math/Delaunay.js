@@ -6,10 +6,11 @@ define(function(require) {
         this.b = a;
         this.c = b;
         
-        this.center = new Vector(0, 0);
-        this.radius = 0;
+        this.center   = new Vector(0, 0);
+        this.radius   = 0;
+        this.radiusSQ = 0;
         
-        this.neighbours = [];
+        //this.neighbours = [];
         
         if(a && b && c) {
             this.updateInternals();
@@ -23,21 +24,12 @@ define(function(require) {
         
         var bPos = this.b.clone().subtract(this.a);
         var cPos = this.c.clone().subtract(this.a);
-        
         var d    = 2 * (bPos.x * cPos.y - bPos.y * cPos.x);
         
         // Vertices are colinear, anything fits in the radius.
         if (Math.abs(d) <= 0.000001) {
-            //this.center = new Vector(0, 0);
-            //this.radius = Number.MAX_VALUE;
-            //console.log("collinear");
-            
-            var minx = Math.min(this.a.x, this.b.x, this.c.x);
-            var miny = Math.min(this.a.y, this.b.y, this.c.y);
-            var maxx = Math.max(this.a.x, this.b.x, this.c.x);
-            var maxy = Math.max(this.a.y, this.b.y, this.c.y);
-
-            this.center = new Vector((minx + maxx) / 2, (miny + maxy) / 2);
+            this.center = new Vector(0, 0);
+            this.radius = Number.MAX_VALUE;
             
         } else {
             this.center = new Vector(
@@ -46,7 +38,8 @@ define(function(require) {
             );
         }
         
-        this.radius = this.a.distance(this.center);    
+        this.radiusSQ = this.a.distanceSQ(this.center)
+        this.radius = Math.sqrt(this.radiusSQ);    
     };
     
     Triangle.prototype.draw = function(renderer) {
@@ -67,8 +60,7 @@ define(function(require) {
     
     // Within bounding circle:
     Triangle.prototype.inCircle = function(vertex) {
-        // TODO: use squared distance once everything works.
-        return this.center.distance(vertex) < this.radius;
+        return this.center.distanceSQ(vertex) < this.radiusSQ;
     };
     
     var exposed = {
@@ -80,7 +72,7 @@ define(function(require) {
                 var triangles = [];
             
                 // I'm guessing this is large enough _lol_
-                var s = 100000;
+                var s = 1000000000;
                 s = new Triangle(
                     new Vector(0, s),   // top center
                     new Vector(-s, -s), // bottom left
@@ -110,28 +102,28 @@ define(function(require) {
                             var hash;
                         
                             hash = Hash(triangle.a, triangle.b);
-                            if( edges[hash] ) {
+                            if(edges[hash]) {
                                 edges[hash] = false;
                             } else {
                                 edges[hash] = [triangle.a, triangle.b];
                             }
                         
                             hash = Hash(triangle.b, triangle.c);
-                            if( edges[hash] ) {
+                            if(edges[hash]) {
                                 edges[hash] = false;
                             } else {
                                 edges[hash] = [triangle.b, triangle.c];
                             }
                         
                             hash = Hash(triangle.c, triangle.a);
-                            if( edges[hash] ) {
+                            if(edges[hash]) {
                                 edges[hash] = false;
                             } else {
                                 edges[hash] = [triangle.c, triangle.a];
                             }
                         
                             // Remove triangle
-                            triangles.splice(i, 1); i--;
+                            triangles.splice(i--, 1);
                         }
                     }
                 
@@ -152,6 +144,9 @@ define(function(require) {
                     return !r;
                 });
             }
+            
+            return [];
+            
         }, // End triangulate
     }; // End exposed
     
