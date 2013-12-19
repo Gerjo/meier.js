@@ -6,15 +6,52 @@
  !*/
 
 
+/// Return random item from array:
+Array.prototype.random = function() {
+    throw new Error("Array::random() function has not been loaded yet.");
+};
+
+/// Array shuffling
+Array.prototype.shuffle = function(){
+    throw new Error("Array::shuffle() function has not been loaded yet.");
+};
+
+define(function(require) {
+    
+    // This might be future-awkward. This whole file is loaded 
+    // before anything else, if this file includes other files
+    // we may end up loading half the engine.
+    var Random = require("meier/math/Random");
+    
+    /// Return random item from array:
+    Array.prototype.random = function() {
+        return this[Random(0, this.length-1)];
+    };
+    
+    /// Array shuffling
+    Array.prototype.shuffle = function(){
+        var counter = this.length, temp, index;
+
+        // While there are elements in the array
+        while (counter-- > 0) {
+            // Pick a random index
+            index = Random(0, this.length-1);
+
+            // And swap the last element with it
+            temp          = this[counter];
+            this[counter] = this[index];
+            this[index]   = temp;
+        }
+    
+        return this;
+    };
+    
+});
+
 Math.QuarterPI     = Math.PI / 4;
 Math.TreeQuarterPI = Math.PI / 4 * 3;
 Math.HalfPI        = Math.PI / 2;
 Math.TwoPI         = Math.PI * 2;
-
-Math.sgn = function(n) {
-    console.log("This is deprecated. Use meier/math/Math.Sgn instead");
-    return n >= 0 ? 1 : -1;
-}
 
 // Internet Explorer 7:
 if(typeof JSON == "undefined") {
@@ -53,30 +90,6 @@ Array.prototype.last = function() {
 /// Retrieve first item an an array:
 Array.prototype.first = function() {
     return this[0];
-};
-
-
-/// Return random item from array:
-Array.prototype.random = function() {
-    return this[Math.floor(Math.random() * this.length)];
-};
-
-/// Array shuffling
-Array.prototype.shuffle = function(){
-    var counter = this.length, temp, index;
-
-    // While there are elements in the array
-    while (counter > 0) {
-        // Pick a random index
-        index = (Math.random() * counter--) | 0;
-
-        // And swap the last element with it
-        temp = this[counter];
-        this[counter] = this[index];
-        this[index] = temp;
-    }
-    
-    return this;
 };
 
 // Create a range.
