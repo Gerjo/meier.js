@@ -31,7 +31,7 @@ define(function(require) {
         this.coordinates = [];
                 
         // Number of clusters / centroids:
-        this.numClusters = 4;
+        this.numCentroids = 4;
         
         // Random initial spawn:
         this.randomClusters = 0;
@@ -49,7 +49,7 @@ define(function(require) {
         
         // Settings GUI:
         this.gui = new dat.GUI();
-        this.gui.add(this, "numClusters", 1, 40).step(1).onChange(this.onClusterChange.bind(this));
+        this.gui.add(this, "numCentroids", 1, 40).step(1).onChange(this.onClusterChange.bind(this));
         this.gui.add(this, "Click_To_Reseed");
         this.gui.add(this, "Add_Cluster");
         
@@ -71,11 +71,11 @@ define(function(require) {
     };
     
     Clustering.prototype.onClusterChange = function() {
-        while(this.centroids.length > this.numClusters) {
+        while(this.centroids.length > this.numCentroids) {
             this.centroids.pop();
         }
         
-        while(this.centroids.length < this.numClusters) {
+        while(this.centroids.length < this.numCentroids) {
             this.centroids.push(
                 new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh))
             );
@@ -117,7 +117,7 @@ define(function(require) {
         //this.clusters.clear();
         //this.centroids.clear();
         
-        //for(var i = 0; i < this.numClusters; ++i) {
+        //for(var i = 0; i < this.numCentroids; ++i) {
         //    this.centroids.push(Random.Vector().scaleScalar(100));
         //}
     };
