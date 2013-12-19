@@ -13,14 +13,25 @@ Structure
 <br> online demo: [Animation and textures](http://gerjo.github.io/meier.js/examples/helloworld/helloworld.html);
 <br> online demo: [The coordinate system](http://gerjo.github.io/meier.js/examples/grid/grid.html);
 <br> online demo: [Audio](http://gerjo.github.io/meier.js/examples/audio/audio.html) [wip];
-<br> online demo: [Entities](http://gerjo.github.io/meier.js/examples/entities/entities.html) [the build-in entity system];
-<br> online demo: [Adriaan's peculiar game](http://gerjo.github.io/meier.js/examples/countermoon/game.html) [wip].
+<br> online demo: [Voronoi diagrams](http://gerardmeier.com/play/cluster-detection/);
+<br> online demo: [Neural networks](http://gerardmeier.com/play/neural-network-classification/);
+<br> online demo: [Polynomials](http://gerardmeier.com/play/curve-fitting/);
+<br>
+many more: [http://gerardmeier.com/lab/](http://gerardmeier.com/lab/).
+
+
 
 **/src/engine/** 
 <br>*An actual engine, of sorts. Ties a few components together.*
 
+**/src/prefab/** 
+<br>*Some useful pre-made entities.*
+
 **/src/math/**
 <br>*Math oriented features.*
+
+**/src/collections/**
+<br>*Several datastructures.*
 
 **/src/aux/**
 <br>*Optional files. You won't need them, I do.*
