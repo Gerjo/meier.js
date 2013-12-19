@@ -69,7 +69,7 @@ define(function(require) {
         this.position.add(this.velocity.clone().scaleScalar(dt));
         
         if(this.deathtimer.expired() && this.spawnothers !== true) {
-            this.delete();
+            this.destroy();
             return;
         }
         

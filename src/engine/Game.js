@@ -76,9 +76,9 @@ define(function(require) {
         return entity;
     };
     
-    Game.prototype.delete = function(entity) {
+    Game.prototype.destroy = function(entity) {
         if(entity instanceof Entity) {
-            entity.delete = true;
+            entity._destroy = true;
         } else {
             throw new Error("Game::delete is only meant of entities.");
         }
@@ -115,7 +115,7 @@ define(function(require) {
         if(this._entities.length > 0) {
             this.log.log("Entities", "#" + this._entities.length);
         } else {
-            this.log.delete("Entities");
+            this.log.remove("Entities");
         }
     
         this.log.log("Listeners", "#" + this.input.countListeners());

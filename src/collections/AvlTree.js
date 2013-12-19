@@ -54,7 +54,7 @@ define(function(require) {
         return null;
     };
     
-    Node.prototype.delete = function(data) {
+    Node.prototype.remove = function(data) {
         var r = this.tree.cmp(this.data, data);
         
         if(r == 0) {
@@ -69,7 +69,7 @@ define(function(require) {
                     } else if(this.parent.right == this) {
                         this.parent.right = null;
                     } else {
-                        console.log("AvlTree[0] -> cannot delete. Parent doesn't know child.");
+                        console.log("AvlTree[0] -> cannot remove. Parent doesn't know child.");
                     }
                 
                     // Root-leaf deletion.
@@ -92,7 +92,7 @@ define(function(require) {
                 } else if(bottom.parent.right == bottom) {
                     bottom.parent.right = null
                 } else {
-                    console.log("AvlTree[1] -> cannot delete. Parent doesn't know child.");
+                    console.log("AvlTree[1] -> cannot remove. Parent doesn't know child.");
                 }
                 
             // Only a right child:
@@ -104,7 +104,7 @@ define(function(require) {
                 } else if(this.parent.right == this) {
                     this.parent.right = this.right;
                 } else{
-                    console.log("AvlTree[2] -> cannot delete. Parent doesn't know child.");
+                    console.log("AvlTree[2] -> cannot remove. Parent doesn't know child.");
                 }
               
             // Only a left child:
@@ -116,18 +116,18 @@ define(function(require) {
                 } else if(this.parent.right == this) {
                     this.parent.right = this.left;
                 } else{
-                    console.log("AvlTree[3] -> cannot delete. Parent doesn't know child.");
+                    console.log("AvlTree[3] -> cannot remove. Parent doesn't know child.");
                 }  
                 
             } else {
-                console.log("AvlTree -> unknown delete routine required. murphy.");
+                console.log("AvlTree -> unknown remove routine required. murphy.");
             }
                         
             return data;
         } else if(r < 0 && this.right != null) {
-            return this.right.delete(data);
+            return this.right.remove(data);
         } else if(r > 0 && this.left != null) {
-            return this.left.delete(data);
+            return this.left.remove(data);
         }
         
         return null;
@@ -402,16 +402,16 @@ define(function(require) {
         }
     };
     
-    /// Delete data from tree. Searches using the earlier
+    /// remove data from tree. Searches using the earlier
     /// provided compare function. Leaves the tree unbalanced.
     ///
-    /// @todo re-balance on delete.
+    /// @todo re-balance on remove.
     ///
-    /// @param {data} the object to delete
-    /// @return the delete data when found, else null.
-    Tree.prototype.delete = function(data) {
+    /// @param {data} the object to remove
+    /// @return the remove data when found, else null.
+    Tree.prototype.remove = function(data) {
         if(this._root != null) {
-            return this._root.delete(data);
+            return this._root.remove(data);
         } else {
             return null;
         }

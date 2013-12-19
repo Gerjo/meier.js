@@ -19,7 +19,7 @@ define(function(require){
         
         if(this.timer.peek() > 500)
         {
-            this.delete();
+            this.destroy();
         }
     
     };

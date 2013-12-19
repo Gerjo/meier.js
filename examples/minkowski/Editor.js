@@ -70,18 +70,18 @@ define(function(require){
             var entities = this._entities.filter(function (entity) {
                 if(entity instanceof Pixel) {
                     if(entity.position.distance(local) < entity.width * 2) {
-                        entity.delete();
+                        entity.destroy();
                         return false;
                     }
                 }
                 return true;
             });
             
-            // Something got deleted:
+            // Something got destroyed:
             if(entities.length != this._entities.length) {
                 this._entities = entities;
             
-            // Nothing deleted, let's add one:
+            // Nothing destroyed, let's add one:
             } else {
                 this.add(new Pixel(local.x, local.y));
             }

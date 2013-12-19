@@ -71,7 +71,7 @@ define(function(require) {
         
         var c = this._entities.length;
         while(c > this.numEntities) {
-            this._entities[--c].delete();
+            this._entities[--c].destroy();
         }
         
         while(c < this.numEntities -1) {

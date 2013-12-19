@@ -8,7 +8,6 @@
 
 define(function(require){
     var Size   = require("meier/math/Size");
-    var Vector = require("meier/math/Vector");
     
     function Logger(width, height) {
         // Tweakable:
@@ -67,7 +66,7 @@ define(function(require){
         this.set(key, value);
         return this;
     };
-
+    
     Logger.prototype.set = function(key, value) {
         key = key + ":";
         
@@ -88,10 +87,10 @@ define(function(require){
         return this;
     };
 
-    Logger.prototype.delete = function(key) {
+    Logger.prototype.remove = function(key) {
         
         if( this.data.hasOwnProperty(key)) {
-            // Excisting entry is removed. Decrement count:
+            // Existing entry is removed. Decrement count:
             --this.numRows;
         }
         

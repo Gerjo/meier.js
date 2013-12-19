@@ -68,11 +68,11 @@ define(function(require) {
         this.min   = new Vector(Infinity, Infinity);    
         this.max   = new Vector(-Infinity, -Infinity);  
         
-        // Find an entity in range, and delete it.
+        // Find an entity in range, and destroy it.
         var entities = this._entities.filter(function(entity) {
             if(entity instanceof Pixel) {
                 if(entity.position.distance(local) < entity.width * 2) {
-                    entity.delete();
+                    entity.destroy();
                     return false;
                 }
                 

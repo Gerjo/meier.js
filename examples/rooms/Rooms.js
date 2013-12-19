@@ -157,7 +157,7 @@ define(function(require) {
         this.hallwayExists  = false;
         
         this._entities.forEach(function(entity) {
-            entity.delete();
+            entity.destroy();
         });
         
         Random.Seed(Config.seed);

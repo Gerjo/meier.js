@@ -74,7 +74,7 @@ define(function(require) {
         return entity;
     };
     
-    Entity.prototype.delete = function() {
+    Entity.prototype.destroy = function() {
         this._delete = true;
     };
     
