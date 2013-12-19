@@ -91,15 +91,17 @@ define(function(require) {
         for(var i = 0; i < Input.Events.COUNT; ++i) {
             this.listeners[i] = [];
         }
-   
+        
         // Tested on ipad 1
         if(this.isTablet) {
             var lastTap   = new Vector(Infinity, Infinity);
             var doubleTapDelay  = 200;
         
             var clickTimeoutID  = 0;
-        
-            container.ontouchstart = function(event) {
+            
+            
+            container.addEventListener('touchstart', function(event) {
+                
                 event.preventDefault();
                 
                 // Trigger a move event. Allows the user to
@@ -112,9 +114,9 @@ define(function(require) {
                 this.trigger(Input.Events.LEFT_DOWN, event);
             
                 return false;
-            }.bind(this);
+            }.bind(this), false);
         
-            container.ontouchmove = function(event) {
+            container.addEventListener('touchmove', function(event) {
                 event.preventDefault();
             
                 if(this.updatePosition(event) === true) {
@@ -124,9 +126,9 @@ define(function(require) {
                 this.trigger(Input.Events.MOUSE_MOVE, event);
             
                 return false;
-            }.bind(this)
+            }.bind(this), false);
         
-            container.ontouchend = function(event) {
+            container.addEventListener('touchend', function(event) {
                 event.preventDefault();
             
                 // Double -ap requires a small sleep. Only sleep when there are
@@ -162,7 +164,7 @@ define(function(require) {
                 }
             
                 return false;
-            }.bind(this);
+            }.bind(this), false);
     
     
             // Don't go to the desktop section.
@@ -254,12 +256,11 @@ define(function(require) {
     Input.prototype.updatePosition = function(event) {
         var x, y;
    
-        // Internet Explorer: (untested!)
+        // Internet Explorer:
         if(event.clientX) {
             x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
             y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
         
-
         // Chrome:
         } else if(event.x) {
             x = event.x - this._container.offsetLeft + window.pageXOffset;
@@ -270,7 +271,17 @@ define(function(require) {
             x = event.pageX - this._container.offsetLeft;
             y = event.pageY - this._container.offsetTop;
     
+        // Android 2.3 browser:
+        } else if(event.changedTouches && event.changedTouches[0] && event.changedTouches[0].pageX) {
+            x = event.changedTouches[0].pageX;
+            y = event.changedTouches[0].pageY;
+    
+        } else {
+            alert("Input::updatePosition Unable to determine X and Y coordinates.");
+            console.error("Input::updatePosition Unable to determine X and Y coordinates.");
+            
         }
+        
     
         // Only count inside world bounds:
         if(x >= 0 && y >= 0 && x <= this._size.w && y <= this._size.h) {
@@ -288,7 +299,6 @@ define(function(require) {
     };
 
     Input.prototype.trigger = function(eventtype, event, location) {
-    
         this.listeners[eventtype].every(function (priorityCallback) {
             return false !== priorityCallback.callback(this);
         }.bind(this));
