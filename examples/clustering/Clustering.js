@@ -51,6 +51,7 @@ define(function(require) {
         this.gui = new dat.GUI();
         this.gui.add(this, "numClusters", 1, 40).step(1).onChange(this.onClusterChange.bind(this));
         this.gui.add(this, "Click_To_Reseed");
+        this.gui.add(this, "Add_Cluster");
         
         // Random number seeding:
         Random.Seed(33);
@@ -65,13 +66,19 @@ define(function(require) {
         this.Click_To_Reseed();
     }
     
+    Clustering.prototype.Add_Cluster = function() {
+        this.addRandomCluster();
+    };
+    
     Clustering.prototype.onClusterChange = function() {
         while(this.centroids.length > this.numClusters) {
             this.centroids.pop();
         }
         
         while(this.centroids.length < this.numClusters) {
-            this.centroids.push(Random.Vector().scaleScalar(100));
+            this.centroids.push(
+                new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh))
+            );
         }
         
     };
@@ -80,22 +87,20 @@ define(function(require) {
         
         this.centroids.clear();
         
-        for(var i = 0; i < this.numClusters; ++i) {
-            this.centroids.push(Random.Vector().scaleScalar(100));
-        }
+        this.onClusterChange();
     };
     
     Clustering.prototype.addRandomCluster = function() {
-        var size   = 20;
-        var radius = 50;
+        var size   = 10;
+        var radius = 40;
         
         var place = new Vector(
-            Random.FloatInRange(-this.hw + 100, this.hw - 100),
-            Random.FloatInRange(-this.hh + 100, this.hh - 100)
+            Random(-this.hw + radius, this.hw - radius),
+            Random(-this.hh + radius, this.hh - radius)
         );
         
         for(var i = 0, p; i < size; ++i) {
-            p = Random.Vector().scaleScalar(Random.FloatInRange(0, radius));
+            p = Random.Vector().scaleScalar(Random(-radius, radius));
 
             p.add(place);
             
