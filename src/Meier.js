@@ -31,6 +31,7 @@ var Meier = (function() {
                 // Load my hacks the old fashioned way:
                 //document.write('<script src="' + path + '/aux/JsExtensions.js"></sc' + 'ript>');
                 
+                
                 // Load requireJS slightly more modern:
                 var script = document.createElement("script");
                 script.src = path + '/contrib/require.js';
@@ -50,7 +51,7 @@ var Meier = (function() {
                     
                     // Firstly load my javascript extentions, then start loading everything else.
                     require(["meier/aux/JsExtensions"], function(Extentions) {
-                        //new Xbox(document.getElementsByTagName("body")[0]);
+                        // Nothing to be done. Including file suffices.
                     });
                                         
                     // Call initializer, if available:
@@ -68,6 +69,7 @@ var Meier = (function() {
                 
                 // Make sure we only add one tag.
                 requireTagAdded = true;
+                
             } else {
                 console.error("Warning: you're setting a path to meier.js twice.");
             }
