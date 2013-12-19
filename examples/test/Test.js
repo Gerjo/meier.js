@@ -1,21 +1,11 @@
 define(function(require){
-    //var Game = require("meier/engine/Game");
-
-    //var Renderer  = require("meier/engine/Renderer");
-    var Logger    = require("meier/engine/Logger");
+    var Game = require("meier/engine/Game");
     
-    //Test.prototype = new Game();
-    //Test.prototype.constructor = Test;
+    Test.prototype = new Game();
+    
     function Test(container) {        
-        //Game.call(this, container);
-        
-        //new Game();
-        
-        
-        alert("done! " + (typeof Logger));
-        
-        //new Logger();
-        
+        Game.call(this, container);
+
     }
     
     Test.prototype.update = function(dt) {
