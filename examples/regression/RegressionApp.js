@@ -25,7 +25,7 @@ define(function(require) {
         this.coordinates = [];
         
         // Initial degree:
-        this.polynomialDegree = 0;
+        this.polynomialDegree = 4;
         
         // Matrix with polynomial coefficients:
         this.coefficients = null;
@@ -48,17 +48,18 @@ define(function(require) {
         
         Random.Seed(1);
         
-        for(var x = -hw; x <= hw; x += Random.Range(20, 165)) {
+        for(var x = -hw; x <= hw; x += Random.Range(20, 50)) {
             var t = (x + hw) / w * Math.PI;
             
             var v = new Vector(x, Math.sin(t) * 100);
-            v.y += Random.Range(-50, 50);
+            v.y += Random.Range(-20, 20);
             this.grid.onLeftDown(v);            
         }
     }
    
     RegressionApp.prototype.recompute = function(coordinates) {
-            
+        //console.log(coordinates);
+        
         if(coordinates instanceof Array) {
             // Create a cached copy:
             this.coordinates = coordinates;
@@ -74,11 +75,9 @@ define(function(require) {
         if(degree > coordinates.length) {
             degree = coordinates.length;
         }
-        
-        //degree += 1;
-        
+                
         // Update the GUI to show the actual used degree:
-        this.polynomialDegree = degree;
+        //this.polynomialDegree = degree;
         
         // Find the coefficients (this call does all the magic)
         this.coefficients  = LeastSquares(degree + 1, coordinates);
