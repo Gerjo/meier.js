@@ -9,15 +9,20 @@ define(function(require) {
     var Hull      = require("meier/math/Hull").GiftWrap;
 
     var Voronoi   = require("meier/math/Delaunay").Voronoi;
+    var Delaunay  = require("meier/math/Delaunay").Triangulate;
     
 
-    Delaunay.prototype = new Game();
-    function Delaunay(container) {
+    DelaunayApp.prototype = new Game();
+    function DelaunayApp(container) {
         Game.call(this, container);
         this.setFps(30);
         
+        this.showCircumscribedCircle = false;
+        this.showDelaunay    = true;
+        this.showVoronoi     = true;
+        
         // Debug log alignment:
-        this.log.top().right();
+        this.log.bottom().right();
         
         // Pretty pointer:
         this.input.cursor(Input.Cursor.FINGER);
@@ -36,53 +41,71 @@ define(function(require) {
         this.grid.onLeftDown(new Vector(100, 100));
         this.grid.onLeftDown(new Vector(0, 100));
         this.grid.onLeftDown(new Vector(-10, 10));
+        
+        this.gui = new dat.GUI();
+        this.gui.add(this, "showCircumscribedCircle");
+        this.gui.add(this, "showDelaunay");
+        this.gui.add(this, "showVoronoi");
+        this.gui.width = 400;
     }
 
 
-    Delaunay.prototype.recompute = function(coordinates) {
+    DelaunayApp.prototype.recompute = function(coordinates) {
         this.coordinates = coordinates;
        
     };
     
-    Delaunay.prototype.update = function(dt) {
+    DelaunayApp.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
 
     };
     
-    Delaunay.prototype.draw = function(renderer) {
+    DelaunayApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 
-        var coordinates = this.coordinates.clone();
-        var triangles = Voronoi(coordinates);
+        if(this.showVoronoi) {
+            var coordinates = this.coordinates.clone();
+            var triangles = Voronoi(coordinates);
 
-        coordinates.forEach(function(coordinate, i) {
-            
-            // Sort counter clockwise for polygon drawing
-            coordinate.neighbours.sort(function(a, b) {
-                return Math.atan2(a.y - coordinate.y, a.x - coordinate.x) - 
-                        Math.atan2(b.y - coordinate.y, b.x - coordinate.x)
-            });
-            
-            renderer.begin();
-            renderer.polygon(coordinate.neighbours);
-            renderer.opacity(0.4);
-            renderer.fill(["hotpink","blue","green","gray","cyan","yellow","purple"][i%7]);
-            renderer.stroke("rgba(0, 0, 0, 0.4)");
-            renderer.opacity(1);
-            
-        });
+            coordinates.forEach(function(coordinate, i) {
+                renderer.begin();
+                renderer.polygon(coordinate.neighbours);
+                renderer.opacity(0.4);
+                renderer.fill(["hotpink","blue","green","magenta","brown","cyan","yellow","purple"][i%7]);
+                renderer.stroke("rgba(0, 0, 0, 0.4)");
+                renderer.opacity(1);
+            }.bind(this));
+        }
 
-        triangles.forEach(function(triangle) {
-
-            renderer.begin();
-            triangle.draw(renderer);
-            renderer.stroke("olive", 2);
+        if(this.showDelaunay || this.showCircumscribedCircle) {
             
-            renderer.begin();
-            renderer.circle(triangle.center, 3);
-            renderer.fill("rgba(0, 0, 0, 1)");
-        });
+            var coordinates = this.coordinates.clone();
+            var triangles = Delaunay(coordinates);
+            
+            triangles.forEach(function(triangle) {
+                
+                if(this.showDelaunay) {
+                    renderer.begin();
+                    triangle.draw(renderer);
+                    renderer.stroke("#393939", 2);
+                }
+            
+                if(this.showCircumscribedCircle) {
+                    renderer.begin();
+                    renderer.circle(triangle.center, triangle.radius);
+                    renderer.fill("rgba(0, 0, 0, 0.1)");
+                    renderer.stroke("rgba(0, 0, 0, 0.2)");
+                    
+                    renderer.begin();
+                    renderer.circle(triangle.center, 3);
+                    renderer.fill("rgba(0, 0, 0, 1)");
+                }
+            
+            }.bind(this));
+        }
+
+        
     };
     
-    return Delaunay;
+    return DelaunayApp;
 });
