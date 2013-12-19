@@ -31,20 +31,20 @@ define(function(require) {
         var cPos = this.c.clone().subtract(this.a);
         var d    = 2 * (bPos.x * cPos.y - bPos.y * cPos.x);
         
-        // Vertices are colinear, anything fits in the radius.
+        // Vertices are collinear, anything fits in the radius.
         if (Math.abs(d) <= 0.000001) {
             this.center = new Vector(0, 0);
             this.radius = Number.MAX_VALUE;
-            
+
         } else {
             this.center = new Vector(
                 this.a.x + (cPos.y * bPos.lengthSQ() - bPos.y * cPos.lengthSQ()) / d,
                 this.a.y + (bPos.x * cPos.lengthSQ() - cPos.x * bPos.lengthSQ()) / d
             );
+            
+            this.radiusSQ = this.a.distanceSQ(this.center)
+            this.radius = Math.sqrt(this.radiusSQ);    
         }
-        
-        this.radiusSQ = this.a.distanceSQ(this.center)
-        this.radius = Math.sqrt(this.radiusSQ);    
     };
     
     Triangle.prototype.draw = function(renderer) {
@@ -81,21 +81,20 @@ define(function(require) {
         
         Triangle: Triangle,
         
-        
+        /// Generate a Voronoi diagram.
+        ///
+        /// TODO: Contemplate winged edge data structure
+        ///
+        /// @param {coordinates} Array containing 2d vectors
+        /// @param {w} Optional maximum diagram width. 
+        /// @param {h} Optional maximum diagram height. 
+        /// @return An array with delaunay triangles. The voronoi edges are
+        ///         added as an array property (coordiate.neighbours) to the input 
+        ///         coordinates.
         Voronoi: function(coordinates, w, h) {
             
             w = w || MAX_CANVAS_DRAW_SIZE * 0.5;
             h = h || MAX_CANVAS_DRAW_SIZE * 0.5;
-            
-            var corners = [
-                new Vector(-w, h),
-                new Vector(w, -h),
-                new Vector(-w, -h),
-                new Vector(w, h)
-            ];
-            
-            var indices   = [0, 0, 0, 0];
-            var scores    = [Infinity, Infinity, Infinity, Infinity];
             
             var triangles = self.Triangulate(coordinates, true);
                         
@@ -110,8 +109,8 @@ define(function(require) {
         ///
         /// @param {coordinates} Array containing 2d vectors
         /// @param {prepareForVoronoi} Internally record some voronoi details. On 
-        ///         this isn't quite a voronoi yet, but provides enough data to 
-        ///         one. Use Delaunay.Voronoi() to generate a voronoi.
+        ///         its own this isn't quite a voronoi yet, but provides enough data
+        ///         to generate one. Use Delaunay.Voronoi() to generate a voronoi.
         /// @return An array containing delaunay triangles.
         Triangulate: function(coordinates, prepareForVoronoi) {
             if(coordinates.length > 0) {
