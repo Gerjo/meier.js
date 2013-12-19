@@ -7,6 +7,7 @@ define(function(require) {
     var Vector    = require("meier/math/Vec")(2);
     var dat       = require("meier/contrib/datgui");
     var Voronoi   = require("meier/math/Delaunay").Voronoi;
+    var Colors    = require("meier/aux/Colors");
 
     Clustering.prototype = new Game();
     function Clustering(container) {
@@ -44,11 +45,12 @@ define(function(require) {
         this.easing = 0.9;
                 
         // Colors per index:
-        this.colors = ["red", "blue", "green", "hotpink", "limegreen", "brown", "purple", "yellow"];
+        this.colors = Colors.Random(40);["red", "blue", "green", "hotpink", "limegreen", "brown", "purple", "yellow"];
         
         // Settings GUI:
         this.gui = new dat.GUI();
-        this.gui.add(this, "numClusters", 1, 20).step(1).onChange(this.recompute.bind(this));
+        this.gui.add(this, "numClusters", 1, 40).step(1).onChange(this.onClusterChange.bind(this));
+        this.gui.add(this, "Click_To_Reseed");
         
         // Random number seeding:
         Random.Seed(33);
@@ -59,7 +61,29 @@ define(function(require) {
      
         // Delta time cache, let's run some physics in the drawloop.
         this.dt = 1 / 60;
+        
+        this.Click_To_Reseed();
     }
+    
+    Clustering.prototype.onClusterChange = function() {
+        while(this.centroids.length > this.numClusters) {
+            this.centroids.pop();
+        }
+        
+        while(this.centroids.length < this.numClusters) {
+            this.centroids.push(Random.Vector().scaleScalar(100));
+        }
+        
+    };
+    
+    Clustering.prototype.Click_To_Reseed = function() {
+        
+        this.centroids.clear();
+        
+        for(var i = 0; i < this.numClusters; ++i) {
+            this.centroids.push(Random.Vector().scaleScalar(100));
+        }
+    };
     
     Clustering.prototype.addRandomCluster = function() {
         var size   = 20;
@@ -85,12 +109,12 @@ define(function(require) {
             this.coordinates = coordinates;
         }
         
-        this.clusters.clear();
-        this.centroids.clear();
+        //this.clusters.clear();
+        //this.centroids.clear();
         
-        for(var i = 0; i < this.numClusters; ++i) {
-            this.centroids.push(Random.Vector().scaleScalar(100));
-        }
+        //for(var i = 0; i < this.numClusters; ++i) {
+        //    this.centroids.push(Random.Vector().scaleScalar(100));
+        //}
     };
     
     Clustering.prototype.update = function(dt) {
@@ -146,11 +170,10 @@ define(function(require) {
                     sum.x += coordinate.x;
                     sum.y += coordinate.y;
                 });
-            } else {
-                //console.log('na');
             }
             
-            renderer.stroke(this.colors[i] || "rgba(0, 0, 0, 0.2)");
+            renderer.fill(this.colors[i]);
+            renderer.stroke("rgba(0, 0, 0, 0.3)");
             
             // Average position:
             sum.scaleScalar(1 / this.clusters[i].length)
@@ -165,12 +188,10 @@ define(function(require) {
          
             renderer.begin();
             renderer.polygon(coordinate.neighbours);
-            renderer.opacity(0.4);
-            renderer.fill(["hotpink","blue","green","gray","cyan","yellow","purple"][i%7]);
+            renderer.fill(Colors.Alpha(this.colors[i], 0.2));
             renderer.stroke("rgba(0, 0, 0, 0.4)");
-            renderer.opacity(1);
             
-        });
+        }.bind(this));
         
     };
     
