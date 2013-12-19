@@ -101,6 +101,12 @@ define(function(require) {
                         renderer.stroke("rgba(255, 0, 0, 0)");
                     }
                 }
+                
+                // These events only fire once! 
+                if(gamepad.once[k]()) {
+                    console.log("This button went down: " + k);
+                }
+                
             }
             
             // Restore the old position again
@@ -131,11 +137,6 @@ define(function(require) {
             
         }.bind(this));
     };
-    
-    RegressionApp.prototype.update = function(dt) {
-        Game.prototype.update.call(this, dt);
-    };
-    
     
     return RegressionApp;
 });
