@@ -1,6 +1,11 @@
 define(function(require) {
     var Vector    = require("meier/math/Vec")(2);
     
+    // Some canvas implementations crash. The standard doesn't mandate
+    // a minimal size. At the time of writing, the following seems
+    // sensible (signed 16 bit range, with some removed).
+    var MAX_CANVAS_DRAW_SIZE = Math.pow(2, 16) * 0.25;
+    
     function Triangle(a, b, c) {
         this.a = c;
         this.b = a;
@@ -79,8 +84,8 @@ define(function(require) {
         
         Voronoi: function(coordinates, w, h) {
             
-            w = w || 32768 * 0.25;
-            h = h || 32768 * 0.25;
+            w = w || MAX_CANVAS_DRAW_SIZE * 0.5;
+            h = h || MAX_CANVAS_DRAW_SIZE * 0.5;
             
             var corners = [
                 new Vector(-w, h),
@@ -94,26 +99,7 @@ define(function(require) {
             
             var triangles = self.Triangulate(coordinates, true);
                         
-            coordinates.forEach(function(site, i) {
-                
-                SortSiteCounterClock(site);
-                
-                for(var j = 0; j < corners.length; ++j) {
-                    var d = corners[j].distanceSQ(site);
-                    
-                    if(d < scores[j]) {
-                        scores[j]  = d;
-                        indices[j] = i;
-                    }
-                }
-            });
-            
-            for(var i = 0; i < corners.length; ++i) {
-                coordinates[indices[i]].neighbours.push(corners[i]);
-                
-                SortSiteCounterClock(coordinates[indices[i]]);
-            }
-                
+            coordinates.forEach(SortSiteCounterClock);
             
             return triangles;
         },
@@ -131,14 +117,24 @@ define(function(require) {
             if(coordinates.length > 0) {
                 var triangles = [];
             
-                // I'm guessing this is large enough _lol_
-                var s = 1000000000;
+                // Limit diagram to the max canvas drawing size, it's a resonable 
+                // assumption we're using voronoi for visual purposes, not scientific.
+                var s = MAX_CANVAS_DRAW_SIZE;
+                
                 s = new Triangle(
                     new Vector(0, s),   // top center
                     new Vector(-s, -s), // bottom left
                     new Vector(s,  -s)  // bottom right
                 );
-
+                
+                // We're not trimming the super triangle with voronoi. The super
+                // triangle acts as "infinity".
+                if(prepareForVoronoi) {
+                    s.a.neighbours = [];
+                    s.b.neighbours = [];
+                    s.c.neighbours = [];
+                }
+                
                 // Omnipotent super triangle, we will add coordinates to this
                 // triangle one-by-one.
                 triangles.push(s);
@@ -172,21 +168,21 @@ define(function(require) {
                         
                             hash = Hash(triangle.a, triangle.b);
                             if(edges[hash]) {
-                                edges[hash] = false;
+                                delete edges[hash];
                             } else {
                                 edges[hash] = [triangle.a, triangle.b];
                             }
                         
                             hash = Hash(triangle.b, triangle.c);
                             if(edges[hash]) {
-                                edges[hash] = false;
+                                delete edges[hash];
                             } else {
                                 edges[hash] = [triangle.b, triangle.c];
                             }
                         
                             hash = Hash(triangle.c, triangle.a);
                             if(edges[hash]) {
-                                edges[hash] = false;
+                                delete edges[hash];
                             } else {
                                 edges[hash] = [triangle.c, triangle.a];
                             }
@@ -211,11 +207,15 @@ define(function(require) {
                             triangle.a == s.c || triangle.b == s.c || triangle.c == s.c;
                   
                     
-                    if(! r && prepareForVoronoi === true) {
+                    if(prepareForVoronoi === true) {
                         // Subscribe the triangle to the vertices
                         triangle.a.neighbours.push(triangle.center);
                         triangle.b.neighbours.push(triangle.center);
                         triangle.c.neighbours.push(triangle.center);
+                        
+                        // Never delete anything connected to the super triangle. Super triangle
+                        // counts as "infinity".
+                        r = false;
                     }
                   
                     return !r;
