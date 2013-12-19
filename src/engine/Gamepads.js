@@ -147,11 +147,11 @@ define(function(require) {
     };
     
     Gamepad.prototype.onConnect = function(controller) {
-        console.log("Unoverloaded method: controller " + controller.index + " connected.");
+        console.log("Unoverloaded method: Gamepad::onConnect controller " + controller.index() + " connected.");
     };
     
     Gamepad.prototype.onDisconnect = function(controller) {
-        console.log("Unoverloaded method: controller " + controller.index + " disconnected.");
+        console.log("Unoverloaded method: Gamepad::onDisconnect controller " + controller.index() + " disconnected.");
     };
     
     Gamepad.prototype.count = function() {
