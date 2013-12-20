@@ -4,10 +4,12 @@ define(function(require) {
     var Grid         = require("meier/prefab/Grid");
     var Vector       = require("meier/math/Vec")(2);
     var Random       = require("meier/math/Random");
+    var Disk         = require("meier/math/Disk");
     var Round        = require("meier/math/Math").Round;
     var M            = require("meier/math/Mat");
     var dat          = require("meier/contrib/datgui");
     var LeastSquares = require("meier/math/Polynomial").LeastSquares;
+    var LeastSquareCircle = require("meier/math/Math").LeastSquareCircle
     
 
     
@@ -30,8 +32,17 @@ define(function(require) {
         // Matrix with polynomial coefficients:
         this.coefficients = null;
         
+        // Least squares circle
+        this.disk = new Disk();
+        
+        this.showPolynomial = true;
+        this.showCircle = true;
+        
         this.gui = new dat.GUI();
+        this.gui.width = 350;
         this.gui.add(this, "polynomialDegree", 0, 50).step(1).onChange(this.recompute.bind(this));
+        this.gui.add(this, "showPolynomial");
+        this.gui.add(this, "showCircle");
         
         
         
@@ -72,8 +83,8 @@ define(function(require) {
         // Parse the integer bit from a number:
         var degree = parseInt(this.polynomialDegree, 10);
         
-        if(degree > coordinates.length) {
-            degree = coordinates.length;
+        if(degree >= coordinates.length) {
+            degree = coordinates.length-1;
         }
                 
         // Update the GUI to show the actual used degree:
@@ -93,8 +104,7 @@ define(function(require) {
             return r;
         }.bind(this);
         
-  
-        
+        this.disk = LeastSquareCircle(coordinates);
     };
     
     RegressionApp.prototype.polynomialName = function(count) {
@@ -107,30 +117,40 @@ define(function(require) {
     RegressionApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        var name = this.polynomialName(this.polynomialDegree);
         
-        if(name) {
-            name = " - " + name;
-        } else {
-            name = "";
+        if(this.showPolynomial && this.coefficients) {
+            var name = this.polynomialName(this.coefficients.numrows-1);
+        
+            if(name) {
+                name = " - " + name;
+            } else {
+                name = "";
+            }
+        
+            renderer.text("Polynomial degree: " + (this.coefficients.numrows-1) + name, -this.hw + 10, this.hh - 10, "black", "left");
+        
+            renderer.text("Coefficients:", -this.hw + 10, this.hh - 30, "black", "left");
+        
+            if(this.coefficients) {
+                this.coefficients.eachRow(0, function(val, i) {
+                
+                    // Pretty alignment:
+                    var prefix = val > 0 ? " " : "";
+                
+                    renderer.text("  " + prefix + val.toFixed(10), -this.hw + 10, this.hh - 50 - i * 20, "black", "left");
+                }.bind(this));
+            }
+
+        
+            this.plot(renderer, this.function, "red", 2);
         }
         
-        renderer.text("Polynomial degree: " + this.polynomialDegree + name, -this.hw + 10, this.hh - 10, "black", "left");
-        
-        renderer.text("Coefficients:", -this.hw + 10, this.hh - 30, "black", "left");
-        
-        if(this.coefficients) {
-            this.coefficients.eachRow(0, function(val, i) {
-                
-                // Pretty alignment:
-                var prefix = val > 0 ? " " : "";
-                
-                renderer.text("  " + prefix + val.toFixed(10), -this.hw + 10, this.hh - 50 - i * 20, "black", "left");
-            }.bind(this));
+        if(this.showCircle) {
+            renderer.begin();
+            renderer.circle(this.disk);
+            renderer.fill("rgba(0, 0, 0, 0.3)");
+            renderer.stroke("rgba(0, 0, 0, 0.7)");
         }
-
-
-        this.plot(renderer, this.function, "red", 2);
 
     };
     
