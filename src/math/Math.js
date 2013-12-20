@@ -7,8 +7,9 @@
 
 define(function(require) {
     var Vector = require("meier/math/Vector");
+    var Disk   = require("meier/math/Disk");
     
-    return {
+    var self = {
         
         /// Determine the sign of a number.
         ///
@@ -285,6 +286,13 @@ define(function(require) {
                 throw new Error("GaussJordanElimination - matrix is not square.");
             }
             
+            if( ! out.numcolumns) {
+                throw new Error(
+                    "GaussJordanElimination - both arguments need to be a matrix."+
+                    "Poorly enough, a vector is not a matrix."
+                );
+            }
+            
             /// A sort of macro to access indices.
             function At(row, column) {
                 return row * input.numcolumns + column;
@@ -460,7 +468,91 @@ define(function(require) {
             }
             
             return best;
-        }
+        },
         
-    };// End return
+        /// Find the least squares circle. Equations taken from:
+        /// http://www.dtcenter.org/met/users/docs/write_ups/circle_fit.pdf
+        ///
+        /// @param {coordinates} An array with 2D vectors.
+        /// @return A disk according to the least squares criteria.
+        /// @see {Polynomial.LeastSquares} For polynomial and linear least squares.
+        LeastSquareCircle: function(coordinates) {
+            
+            // Late loading to avoid circular dependancies.
+            var M  = require("meier/math/Mat");
+            
+            // Avoid all math. Early out.
+            if(coordinates.length === 1) {
+                return new Disk(coordinates[0].clone(), 0);
+            
+            // I'm open for discussion on this one:
+            } else if(coordinates.length === 0) {
+                return new Disk(new Vector(0, 0), 0);
+            }
+        
+            // Length
+            var n = coordinates.length;
+        
+            // Sum coordinates, then average them.
+            var avg = coordinates.reduce(function(p, c) {
+                return p.add(c);
+            }, new Vector(0, 0)).scaleScalar(1 / n);
+        
+            // Some accumulators
+            var uu = 0;
+            var uv = 0;
+            var vv = 0;
+            var vvv = 0;
+            var uuu = 0;
+            var uvv = 0;
+            var uuv = 0;
+        
+            // Collect a bunch of squard distances.
+            coordinates.forEach(function(c) {
+                var u  = c.x - avg.x;
+                var v  = c.y - avg.y;
+            
+                uu += u * u;
+                vv += v * v;
+                uv += u * v;
+                vvv += v * v * v;
+                uuu += u * u * u;
+                uvv += u * v * v;
+                uuv += u * u * v;
+            });
+        
+        
+            // Left side
+            var l = new (M(2, 2))([
+                uu, uv,
+                uv, vv,  
+            ]);
+      
+            // Right side
+            var r = new (M(2, 1))([
+                0.5 * (uuu + uvv), 
+                0.5 * (vvv + uuv)
+            ]);
+        
+            // Solve the augmented matrix. r will contain the solution,
+            // and l should be an identity matrix.
+            self.GaussJordanElimination(l, r);
+        
+            // Find the radius
+            var alpha = Math.sqrt(
+                Math.pow(r.at(0, 0), 2) + Math.pow(r.at(1, 0), 2) + ((uu + vv) / n)
+            );
+        
+            // Move back to x/y coordinate frame
+            var c = new Vector(
+                r.at(0, 0) + avg.x,
+                r.at(1, 0) + avg.y
+            );
+        
+            return new Disk(c, alpha);
+        }, 
+    };
+    
+    return self;
+    
 }); // End define
