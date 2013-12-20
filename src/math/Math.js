@@ -485,9 +485,22 @@ define(function(require) {
             if(coordinates.length === 1) {
                 return new Disk(coordinates[0].clone(), 0);
             
-            // I'm open for discussion on this one:
+            // I'm open for discussion on this one.
             } else if(coordinates.length === 0) {
                 return new Disk(new Vector(0, 0), 0);
+            
+            // Special case for two coordinates.
+            } else if(coordinates.length === 2) {
+                var dx = (coordinates[0].x - coordinates[1].x) * 0.5;
+                var dy = (coordinates[0].y - coordinates[1].y) * 0.5;
+                
+                // Point between two vectors
+                var middle = new Vector(
+                    coordinates[1].x + dx,
+                    coordinates[1].y + dy
+                );
+                
+                return new Disk(middle, Math.sqrt(dx*dx + dy*dy));
             }
         
             // Length
