@@ -277,9 +277,8 @@ define(function(require) {
             y = event.changedTouches[0].pageY;
     
         } else {
-            alert("Input::updatePosition Unable to determine X and Y coordinates.");
-            console.error("Input::updatePosition Unable to determine X and Y coordinates.");
-            
+            //alert("Input::updatePosition Unable to determine X and Y coordinates.");
+            //console.error("Input::updatePosition Unable to determine X and Y coordinates.");
         }
         
     
