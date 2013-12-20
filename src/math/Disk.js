@@ -14,10 +14,10 @@ define(function(require) {
     function Disk(x, y, r) {
     
         if(x && (x.hasOwnProperty('x') || x._)) {
-            this.position = x.clone();
+            this.position = x;
             this.radius   = y;
         } else {
-            this.position = new Vector(x, y);
+            this.position = new Vector(x || 0, y || 0);
             this.radius   = r;
         }
     }
