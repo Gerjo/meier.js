@@ -181,6 +181,16 @@ define(function(require) {
             return this;
         };
         
+        V.prototype.direction = function(v) {
+            var clone = this.clone();
+            
+            for(var i = Math.min(clone.numrows, v.numrows) - 1; i >= 0; --i) {
+                clone._[i] -= v._[i];
+            }
+            
+            return clone;
+        };
+        
         V.prototype.subtractScalar = function(scalar) {
             for(var i = this.numrows - 1; i >= 0; --i) {
                 this._[i] -= scalar;
