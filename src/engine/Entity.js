@@ -18,6 +18,11 @@ define(function(require) {
     
     var UniqueEntityCounter = 0;
     
+    Object.defineProperties(Entity.prototype, {
+        "hw": { get: function () { return this.width * 0.5; }, set: function (v) { this.width = v * 2; } },
+        "hh": { get: function () { return this.height * 0.5; }, set: function (v) { this.height = v * 2; } },
+    });
+    
     function Entity(x, y, w, h) {
         // Transformation properties:
         this.position  = new Vector(x || 0, y || 0);
