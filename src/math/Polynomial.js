@@ -8,6 +8,8 @@
 define(function(require) {
     var Factorial   = require("meier/math/Math").Factorial;
     var GaussJordan = require("meier/math/Math").GaussJordanElimination;
+    var V2          = require("meier/math/Vec")(2);
+    
     
     // Dynamic matrix builder:
     var M          = require("meier/math/Mat");
@@ -61,12 +63,12 @@ define(function(require) {
                 throw new Error("Cannot calculate a bezier curve point without any control points.");
             }
     
-            var result = new Vector(0, 0);
+            var result = new V2(0, 0);
     
             var n = points.length - 1;
             for(var i = 0, b; i <= n; ++i) {
                 // TODO: We can cache the BernsteinBasis result.
-                b = BernsteinBasis(n, i, delta);
+                b = self.BernsteinBasis(n, i, delta);
         
                 result.x += points[i].x * b;
                 result.y += points[i].y * b;
