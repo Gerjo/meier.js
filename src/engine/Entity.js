@@ -348,6 +348,22 @@ define(function(require) {
     };
     
     
+    Entity.prototype.top = function() {
+        return this.position.y + (this.height * 0.5 * this.scale);
+    };
+    
+    Entity.prototype.bottom = function() {
+        return this.position.y - (this.height * 0.5 * this.scale);
+    };
+    
+    Entity.prototype.left = function() {
+        return this.position.x - (this.width * 0.5 * this.scale);
+    };
+    
+    Entity.prototype.right = function() {
+        return this.position.x + (this.width * 0.5 * this.scale);
+    };
+    
     Entity.NaiveIntersection = function(entity, b) {
         var ehw = entity.width  * 0.5;
         var ehh = entity.height * 0.5;        
