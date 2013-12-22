@@ -62,7 +62,9 @@ define(function(require) {
             
             PointInObb: function(point, boxCenter, boxWidth, boxHeight, boxRotation) {
                 return pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation);
-            }
+            },
+            
+            DiskRectangle: diskRectangle,
         },
     
         // Getters, returns data if available, else false.
@@ -127,6 +129,30 @@ define(function(require) {
             LineSegmentBetweenRectangles: NearestLineSegmentBetweenRectangles
         }
     };
+    
+    function diskRectangle(disk, rect) {
+        
+        var hw = rect.width() * 0.5;
+        var hh = rect.height() * 0.5;
+        
+        var distance = new Vector(
+            Math.abs(disk.position.x - (rect.min.x + hw)),
+            Math.abs(disk.position.y - (rect.min.y + hh))
+        );
+        
+        
+        if(distance.x > hw + disk.radius || distance.y > hh + disk.radius) {
+            return false;
+        }
+        
+        if(distance.x <= hw || distance.y <= hh) {
+            return true;
+        }
+        
+        var sq = Math.pow(distance.x - hw, 2) + Math.pow(distance.y - hh, 2);
+        
+        return sq < Math.pow(disk.radius, 2);
+    }
     
     function pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation) {
         // Precompute a few variables:
@@ -217,7 +243,7 @@ define(function(require) {
     
         if(roots.length > 0) {
             // Tangent to count as secant. I doubt floating point
-            // math is accureate enough for this anyway. Additionally
+            // math is accurate enough for this anyway. Additionally
             // always returning two points should make code more 
             // predictable for the end-user.
             if(roots.length === 1) {
