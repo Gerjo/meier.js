@@ -211,10 +211,6 @@ define(function(require) {
                         triangle.a.neighbours.push(triangle.center);
                         triangle.b.neighbours.push(triangle.center);
                         triangle.c.neighbours.push(triangle.center);
-                        
-                        // Never delete anything connected to the super triangle. Super triangle
-                        // counts as "infinity".
-                        r = false;
                     }
                   
                     return !r;
