@@ -94,7 +94,7 @@ define(function(require){
         var farthestColor = Colors.red;
         
         if(this.showLeastSquareCircle) {
-            var disk = LeastSqCircle(this.coordinates);
+            var disk = LeastSqCircle(Hull(this.coordinates));
             renderer.begin();
             renderer.circle(disk);
             renderer.fill("rgba(255, 0, 255, 0.3)");
