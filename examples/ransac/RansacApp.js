@@ -109,18 +109,15 @@ define(function(require){
         var lines    = [];
         var centers  = []; // Centers of circumcircles
         
-        // Outer cells reach infinity, this is less practical for our purposes.
+        // Outer cells reach infinity, this is less practical for 
+        // our purposes. So this limit will make do.
         var inf = 1000;
         
-        var n = 0;
-        
         // Work on a copy of the hull
-        var h = hull.clone();
-        while(h.length >= 3) {
+        for(var h = hull.clone(); h.length >= 3;) {
             
             // Search for the triplet with the largest circumcircle
-            var largest = null;
-            for(var i = 0, c = null; i < h.length; ++i) {
+            for(var i = 0, largest = null; i < h.length; ++i) {
             
                 // Tuple to hold referenced data on circumcircles. Has wrap
                 // around code for vertices.
@@ -143,49 +140,21 @@ define(function(require){
             var center = largest.d.position;
            
             var directions = [
-                largest.c.direction(largest.cw),
-                largest.ccw.direction(largest.c)
+                largest.c.direction(largest.cw).perp(),
+                largest.ccw.direction(largest.c).perp()
             ];
             
             // Special case for |h| == 3
             if(h.length == 3) {
-                directions.push(largest.cw.direction(largest.ccw));
+                directions.push(largest.cw.direction(largest.ccw).perp());
             }
            
             directions.forEach(function(v) {
-                
-                // Get the actual normal
-                var n = v.perp().trim(inf); 
-                
-                var edge = new Line(center, center.clone().add(n));
+                // Edge between two Voronoi cells
+                var edge = new Line(center, center.clone().add(v.trim(inf)));
                 
                 lines.push(edge);
             
-                
-            /*});
-           
-           
-           
-            var edges = [
-                new Line(
-                    largest.d.position,
-                    largest.d.position.clone().add(largest.c.direction(largest.cw).perp().trim(inf))
-                ),
-                new Line(
-                    largest.d.position,
-                    largest.d.position.clone().add(largest.ccw.direction(largest.c).perp().trim(inf))
-                )
-            ];
-            
-            // Special case for |h| == 3
-            if(h.length == 3) {
-                edges.push(new Line(
-                    largest.d.position,
-                    largest.d.position.clone().add(largest.cw.direction(largest.ccw).perp().trim(inf))
-                ));
-            } 
-            
-            edges.forEach(function(edge) {*/
                 // Normal of the direction
                 var n = edge.direction().perp();
                 
@@ -199,18 +168,18 @@ define(function(require){
                 // the distance between a line and a point. If the point
                 // lines on the line, we connect the vertices, otherwise
                 // they extend to "infinity".
-                
                 centers.every(function(p) {
-                    // Distance from line to point.
                     
+                    // Distance from line to point.
                     var d = Math.abs(p.dot(n) - c);
                     
-                    // Floating point precision *sigh*
+                    // Account for floating point precision
                     if(d >= 0 && d <= 0.000001) {
                         
+                        // Extend the edge to reach the next vertex,
+                        // this is for visual purposes only.
                         edge.b = edge.a.clone().add(edge.direction().trim(edge.a.distance(p)));
                         
-                        //console.log(d.toFixed(20));
                         return false;
                     }
                     
@@ -218,44 +187,24 @@ define(function(require){
                 }.bind(this));
             }.bind(this));
             
-            
             // Farthest Voronoi vertices
             centers.push(largest.d.position);
     
-           
-            
-            //renderer.circle(largest.d);
-            renderer.circle(largest.d.position, 2);
-            renderer.fill("rgba(0, 0, 0, 0.1)");
-            renderer.stroke("black");
-            if(c) {
-                renderer.begin();
-                renderer.line(c);
-                renderer.stroke("blue");
-            } 
-            
-            // Special case for |h| == 3; break, no splice.
-            if(h.length == 3) {
-                break;
-            }
             // Remove from all
             h.splice(largest.i, 1);
         }
         
-        // Render logic
+        // Voronoi edges
         renderer.begin();
         lines.forEach(renderer.line.bind(renderer));
         renderer.stroke("red");
         
-        
+        // Circumcircle centers
         renderer.begin();
         centers.forEach(function(v) {
             renderer.circle(v, 2);
         });
         renderer.fill("black");
-        
-        
-        
         
         
         if(this.showVoronoi || this.showDelaunay) {
