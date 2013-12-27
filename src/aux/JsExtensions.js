@@ -16,6 +16,59 @@ Array.prototype.shuffle = function(){
     throw new Error("Array::shuffle() function has not been loaded yet.");
 };
 
+/// Assertion to be used for development only.
+///
+function ASSERT(statement) {
+    if(statement !== true) {
+    
+        try {
+            // Trigger an exception to retrieve a stack trace
+            throw Error();
+        } catch(e) {
+            
+            // Another try/catch clausule, the code is quite dodgy. This should
+            // "solve" that until a better implementation is created.
+            //try {
+                var urlPattern = /(http|ftp|https):\/\/[\w-]+(:\d\d\d\d)*(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/
+                
+                var lines      = e.stack.split("\n");
+                var line       = lines[3]; // "3" is a line offset number.
+                    line       = line.trim(")");  
+                    line       = line.replace(/^(.*)http/, "http");
+                var args       = line.split(":")
+                var lineNumber = args[3];
+                var charNumber = args[4];
+        
+                
+        
+                // Trim trailing char/line numbers
+                var regex = /:(\d)+$/;       
+                var url   = line; 
+                while(url.match(regex)) {
+                    url = url.replace(/:(\d)+$/, "");
+                }
+        
+                // Fetch the source code file
+                var http = new XMLHttpRequest();
+                http.open('GET', url, false); // Synchronized
+                http.send(null);
+        
+                if(http.readyState === 4) {
+                    var split = http.responseText.split("\n");
+                
+                    // Hopefully print the line containing the assertion
+                    console.log(split[lineNumber-1].substring(charNumber-1), "at", line);
+                }
+             //} catch(e) {
+                // The above code failed, quite possibly due to a poor implementation.
+                // this is debug code only, so we should be OK.
+                
+                //console.log(e);
+            //}
+        }
+    }
+}
+
 define(function(require) {
     
     // This might be future-awkward. This whole file is loaded 
