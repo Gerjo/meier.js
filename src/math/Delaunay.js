@@ -1,5 +1,15 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 define(function(require) {
     var Vector    = require("meier/math/Vec")(2);
+    var GiftWrap  = require("meier/math/Hull").GiftWrap;
+    var Disk      = require("meier/math/Disk");
+    var Line      = require("meier/math/Line");
     
     // Some canvas implementations crash. The standard doesn't mandate
     // a minimal size. At the time of writing, the following seems
@@ -220,8 +230,107 @@ define(function(require) {
             return [];
             
         }, // End triangulate
-    }; // End exposed
+        
+        /// Generate the so-called farthest voronoi diagram
+        /// of a given set of coordinates.
+        ///
+        /// @param {coordinates} An array of 2d vectors
+        /// @return An object with the vertices and edges. This is subject to change.
+        FarthestVoronoi: function(coordinates) {
+            var hull     = GiftWrap(coordinates);
+            var lines    = []; // All edges
+            var centers  = []; // Centers of circumcircles
+
+            // Work on a copy of the hull
+            for(var h = hull.clone(); h.length >= 3;) {
+            
+                // Search for the triplet with the largest circumcircle
+                for(var i = 0, largest = null; i < h.length; ++i) {
+            
+                    // Tuple to hold referenced data on circumcircles. Has wrap
+                    // around code for vertices.
+                    var t = {
+                        c:   h[i],
+                        cw:  h[i - 1] || h.last(),
+                        ccw: h[i + 1] || h.first(),
+                        i:   i
+                    };
+            
+                    t.d = Disk.CreateCircumcircle(t.cw, t.c, t.ccw);
+            
+                    // Find the largest
+                    if(largest === null || largest.d.radius < t.d.radius) {
+                        largest = t;
+                    }
+                }
+           
+                // Center of the circumcircle
+                var center = largest.d.position;
+           
+                var directions = [
+                    largest.c.direction(largest.cw).perp(),
+                    largest.ccw.direction(largest.c).perp()
+                ];
+            
+                // Special case for |h| == 3
+                if(h.length == 3) {
+                    directions.push(largest.cw.direction(largest.ccw).perp());
+                }
+           
+                directions.forEach(function(v) {
+                    // Edge between two Voronoi cells
+                    var edge = new Line(center, center.clone().add(v.trim(MAX_CANVAS_DRAW_SIZE)));
+                
+                    lines.push(edge);
+            
+                    // Normal of the direction
+                    var n = edge.direction().perp();
+                
+                    // Some point on the line
+                    var r = edge.a;
+                
+                    // Solve c for a.x + b.y = c
+                    var c = n.dot(r);
+                
+                    // Then using this "Hesse normal form" we can determine
+                    // the distance between a line and a point. If the point
+                    // lines on the line, we connect the vertices, otherwise
+                    // they extend to "infinity".
+                    centers.every(function(p) {
+                    
+                        // Distance from line to point.
+                        var d = Math.abs(p.dot(n) - c);
+                    
+                        // Account for floating point precision
+                        if(d >= 0 && d <= 0.000001) {
+                        
+                            // Extend the edge to reach the next vertex,
+                            // this is for visual purposes only.
+                            edge.b = edge.a.clone().add(edge.direction().trim(edge.a.distance(p)));
+                        
+                            return false;
+                        }
+                    
+                        return true;
+                    }.bind(this));
+                }.bind(this));
+            
+                // Farthest Voronoi vertices
+                centers.push(largest.d.position);
+    
+                // Remove from all
+                h.splice(largest.i, 1);
+            }
+            
+            // TODO: return Voronoi sites instead of two disjoint datasets.
+            return {
+                "edges":    lines,
+                "vertices": centers,
+                "hull":     hull 
+            };
+        },
+        
+    }; // End self
     
     return self;
-    
 });
