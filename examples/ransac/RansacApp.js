@@ -128,7 +128,7 @@ define(function(require){
             
             // This is just here... because we can.
             if(this.showDelaunay) {
-                delaunay.forEach(function(triangle) {
+                voronoi.forEach(function(triangle) {
                     renderer.begin();
                     triangle.draw(renderer);
                     renderer.stroke("#393939", 1);
