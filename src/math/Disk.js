@@ -9,6 +9,33 @@
 define(function(require) {
     var Vector = require("meier/math/Vector");
 
+    /// Create a disk that represents a circumcircle running
+    /// through the 3 given coordinates.
+    ///
+    Disk.CreateCircumcircle = function(a, b, c) {
+        var disk = new Disk(0, 0, 0);
+        
+        var bPos = b.clone().subtract(a);
+        var cPos = c.clone().subtract(a);
+        var d    = 2 * (bPos.x * cPos.y - bPos.y * cPos.x);
+                
+        // Vertices are collinear, anything fits in the radius.
+        if (Math.abs(d) < 0.000001) {
+            disk.radius   = Number.MAX_VALUE;
+            disk.radiusSQ = 0;
+            
+        } else {
+            disk.position.x = a.x + (cPos.y * bPos.lengthSQ() - bPos.y * cPos.lengthSQ()) / d;
+            disk.position.y = a.y + (bPos.x * cPos.lengthSQ() - cPos.x * bPos.lengthSQ()) / d;
+            
+            disk.radiusSQ = a.distanceSQ(disk.position);
+            disk.radius   = Math.sqrt(disk.radiusSQ);    
+        }
+        
+        return disk;
+    };
+
+
     /// center [x, y] and radius [r]
     /// (x - a)^2 + (y - b)^2 = r^2
     function Disk(x, y, r) {
