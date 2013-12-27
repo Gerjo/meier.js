@@ -1,21 +1,18 @@
 define(function(require){
-    var Game   = require("meier/engine/Game");
-    var Grid   = require("meier/prefab/Grid");
-    var LeastSquareCircle = require("meier/math/Math").LeastSquareCircle
-    
-    // LeastSquareCircle
-    var Vector = require("meier/math/Vec")(2);
-    var Disk   = require("meier/math/Disk");
-    var GJ     = require("meier/math/Math").GaussJordanElimination;
-    var Random = require("meier/math/Random");
-    var M      = require("meier/math/Mat");
-    var Line   = require("meier/math/Line");
-    
-    var Voronoi   = require("meier/math/Delaunay").Voronoi;
-    var Colors    = require("meier/aux/Colors");
-    var Farthest  = require("meier/math/Delaunay").FarthestVoronoi;
-    var dat       = require("meier/contrib/datgui");
-    
+    var Game          = require("meier/engine/Game");
+    var Grid          = require("meier/prefab/Grid");
+    var LeastSqCircle = require("meier/math/Math").LeastSquareCircle
+    var Vector        = require("meier/math/Vec")(2);
+    var Disk          = require("meier/math/Disk");
+    var Random        = require("meier/math/Random");
+    var Voronoi       = require("meier/math/Delaunay").Voronoi;
+    var Colors        = require("meier/aux/Colors");
+    var Farthest      = require("meier/math/Delaunay").FarthestVoronoi;
+    var dat           = require("meier/contrib/datgui");
+    var Hull          = require("meier/math/Hull").GiftWrap;
+    var Disk          = require("meier/math/Disk");
+    var ClosestVector = require("meier/math/Math").ClosestVector;
+    var FarthestVector= require("meier/math/Math").FarthestVector;
     
     RansacApp.prototype = new Game();
     
@@ -48,14 +45,22 @@ define(function(require){
         this.showFarthestVoronoi = true;
         this.showDelaunay = false;
         this.showHull = false;
+        this.showVoronoiAnullus = true;
+        this.showFarthestAnullus = true;
+        
         
         this.gui = new dat.GUI();
-        var folder = this.gui.addFolder("Change visibility state");
+        var folder = this.gui.addFolder("Debug visibility state");
         folder.add(this, "showVoronoi").name("Voronoi");
-        folder.add(this, "showLeastSquareCircle").name("Least Squares");
         folder.add(this, "showDelaunay").name("Delaunay");
         folder.add(this, "showFarthestVoronoi").name("Farthest Voronoi");
         folder.add(this, "showHull").name("Convex Hull");
+        
+        var folder = this.gui.addFolder("Annulus visibility state");
+        folder.add(this, "showVoronoiAnullus").name("By Voronoi");
+        folder.add(this, "showFarthestAnullus").name("By Farthest");
+        folder.add(this, "showLeastSquareCircle").name("By Least Squares");
+        
         
         
         this.verbose = true;
@@ -81,31 +86,59 @@ define(function(require){
             return;
         }
         
-        var Hull      = require("meier/math/Hull").GiftWrap;
-        var Disk      = require("meier/math/Disk");
-    
-        
         if(this.showLeastSquareCircle) {
-            var disk = LeastSquareCircle(this.coordinates);
+            var disk = LeastSqCircle(this.coordinates);
             renderer.begin();
             renderer.circle(disk);
-            renderer.fill("rgba(0, 0, 0, 0.3)");
-            renderer.stroke("rgba(0, 0, 0, 0.7)");
+            renderer.fill("rgba(255, 255, 0, 0.3)");
+            renderer.stroke("rgba(255, 255, 0, 0.7)");
         }
         
-        var farthest = Farthest(this.coordinates);
+        if(this.showFarthestAnullus) {
+            var farthest = Farthest(this.coordinates);
+        
+            var best = SmallestAnnulus(farthest.vertices, this.coordinates);
+            renderer.begin();
+            renderer.circle(best.center, best.closest + best.annulus*0.5);
+            renderer.stroke("rgba(0, 0, 0, 0.2)", best.annulus);
+        
+            renderer.begin();
+            renderer.circle(best.center, best.closest);
+            renderer.circle(best.center, best.farthest);
+            renderer.stroke("rgba(0, 0, 0, 1)");
+        }
+        
+        
+        if(this.showVoronoiAnullus) {
+            var vor = Voronoi(this.coordinates);
+        
+            // Reduce the collection of triangles into a large
+            // list with vertices:
+            var n = [];
+            vor.forEach(function(v) {
+                n.merge(v.a.neighbours);
+                n.merge(v.b.neighbours);
+                n.merge(v.c.neighbours);
+            });
+                
+            var best = SmallestAnnulus(n, this.coordinates);
+            renderer.begin();
+            renderer.circle(best.center, best.closest + best.annulus*0.5);
+            renderer.stroke("rgba(0, 0, 255, 0.2)", best.annulus);
+        
+            renderer.begin();
+            renderer.circle(best.center, best.closest);
+            renderer.circle(best.center, best.farthest);
+            renderer.stroke("rgba(0, 0, 255, 1)");
+        }
         
         if(this.showHull) {
-            
             renderer.begin();
             farthest.hull.eachPair(function(a, b) {
                 renderer.line(a, b);
             });        
-            renderer.stroke("black");
+            renderer.stroke("black", 2);
         }
-        
-        
-        var x = this.input.x;
         
         if(this.showFarthestVoronoi) {
             // Voronoi edges
@@ -144,7 +177,30 @@ define(function(require){
         }
     }
     
-    
+    function SmallestAnnulus(centers, coordinates) {
+        var best = null; 
+
+        centers.forEach(function(center) {
+            var closest  = ClosestVector(center, coordinates);
+            var farthest = FarthestVector(center, coordinates);
+            
+            var cd = closest.distance(center);
+            var fd = farthest.distance(center);
+            
+            var annulus = fd - cd;
+            
+            if(best == null || annulus < best.annulus) {
+                best = {
+                    center:     center,
+                    closest:    cd,
+                    farthest:   fd,
+                    annulus:    annulus
+                };
+            }
+        });
+        
+        return best;
+    }
     
     return RansacApp;
 });
