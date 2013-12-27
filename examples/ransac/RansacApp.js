@@ -40,13 +40,13 @@ define(function(require){
         
         this.colors = Colors.Random(50);
         
-        this.showVoronoi = false;
+        this.showVoronoi = true;
         this.showLeastSquareCircle = false;
         this.showFarthestVoronoi = true;
         this.showDelaunay = false;
         this.showHull = false;
-        this.showVoronoiAnullus = true;
-        this.showFarthestAnullus = true;
+        this.showVoronoiAnnulus = true;
+        this.showFarthestAnnulus = true;
         
         
         this.gui = new dat.GUI();
@@ -57,8 +57,8 @@ define(function(require){
         folder.add(this, "showHull").name("Convex Hull");
         
         var folder = this.gui.addFolder("Annulus visibility state");
-        folder.add(this, "showVoronoiAnullus").name("By Voronoi");
-        folder.add(this, "showFarthestAnullus").name("By Farthest");
+        folder.add(this, "showVoronoiAnnulus").name("By Voronoi");
+        folder.add(this, "showFarthestAnnulus").name("By Farthest");
         folder.add(this, "showLeastSquareCircle").name("By Least Squares");
         
         
@@ -82,6 +82,7 @@ define(function(require){
     RansacApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
+        // It takes 3 for a non ambiguous circle.
         if(this.coordinates.length < 3) {
             return;
         }
@@ -89,13 +90,15 @@ define(function(require){
         var farthest = Farthest(this.coordinates);
         var voronoi  = Voronoi(this.coordinates);
         
+        var voronoiColor  = Colors.green;
+        var farthestColor = Colors.red;
         
         if(this.showLeastSquareCircle) {
             var disk = LeastSqCircle(this.coordinates);
             renderer.begin();
             renderer.circle(disk);
-            renderer.fill("rgba(255, 255, 0, 0.3)");
-            renderer.stroke("rgba(255, 255, 0, 0.7)");
+            renderer.fill("rgba(255, 0, 255, 0.3)");
+            renderer.stroke("rgba(255, 0, 255, 0.7)");
         }
         
         
@@ -103,36 +106,37 @@ define(function(require){
             // Voronoi edges
             renderer.begin();
             farthest.edges.forEach(renderer.line.bind(renderer));
-            renderer.stroke("red", 2);
+            renderer.stroke(Colors.Alpha(farthestColor, 0.7), 1);
         
             // Circumcircle centers
-            renderer.begin();
-            farthest.vertices.forEach(function(v) {
-                renderer.circle(v, 4);
-                
-            });
-            renderer.fill("black");
+            //renderer.begin();
+            //farthest.vertices.forEach(function(v) {
+            //    renderer.circle(v, 4);
+            //});
+            //renderer.fill("black");
         }
         
         if(this.showVoronoi || this.showDelaunay) {
             if(this.showVoronoi) {
+                // Each coordinate is also a Voronoi cell
                 this.coordinates.forEach(function(coordinate, i) {
                     renderer.begin();
                     renderer.polygon(coordinate.neighbours);
-                    renderer.stroke(Colors.green);
+                    renderer.stroke(Colors.Alpha(voronoiColor, 0.7), 1);
                 }.bind(this));
             }
             
+            // This is just here... because we can.
             if(this.showDelaunay) {
                 delaunay.forEach(function(triangle) {
                     renderer.begin();
                     triangle.draw(renderer);
-                    renderer.stroke("#393939", 2);
+                    renderer.stroke("#393939", 1);
                 });
             }
         }
       
-        if(this.showVoronoiAnullus) {
+        if(this.showVoronoiAnnulus) {
         
             // Reduce the collection of triangles into a large
             // list with vertices:
@@ -146,13 +150,13 @@ define(function(require){
             var best = SmallestAnnulus(n, this.coordinates);
             renderer.begin();
             renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke("rgba(0, 0, 255, 0.2)", best.annulus);
+            renderer.stroke(Colors.Alpha(Colors.green, 0.2), best.annulus);
         
             renderer.begin();
             renderer.circle(best.center, best.closest);
             renderer.circle(best.center, best.farthest);
             renderer.circle(best.center, 2);
-            renderer.stroke("rgba(0, 0, 255, 1)");
+            renderer.stroke(Colors.green);
         }
         
         if(this.showHull) {
@@ -163,18 +167,17 @@ define(function(require){
             renderer.stroke("black", 2);
         }
                 
-        if(this.showFarthestAnullus) {
-        
+        if(this.showFarthestAnnulus) {
             var best = SmallestAnnulus(farthest.vertices, this.coordinates);
             renderer.begin();
             renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke("rgba(0, 0, 0, 0.2)", best.annulus);
+            renderer.stroke(Colors.Alpha(farthestColor, 0.2), best.annulus);
         
             renderer.begin();
             renderer.circle(best.center, 2);
             renderer.circle(best.center, best.closest);
             renderer.circle(best.center, best.farthest);
-            renderer.stroke("rgba(0, 0, 0, 1)");
+            renderer.stroke(Colors.Alpha(farthestColor, 0.7));
         }
     }
     
