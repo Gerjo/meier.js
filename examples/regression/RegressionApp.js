@@ -9,7 +9,7 @@ define(function(require) {
     var M            = require("meier/math/Mat");
     var dat          = require("meier/contrib/datgui");
     var LeastSquares = require("meier/math/Polynomial").LeastSquares;
-    var LeastSquareCircle = require("meier/math/Math").LeastSquareCircle
+    var LeastSquareCircle = require("meier/math/Math").LeastSquaresCircle
     
 
     

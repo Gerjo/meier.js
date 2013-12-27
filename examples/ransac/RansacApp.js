@@ -1,7 +1,7 @@
 define(function(require){
     var Game          = require("meier/engine/Game");
     var Grid          = require("meier/prefab/Grid");
-    var LeastSqCircle = require("meier/math/Math").LeastSquareCircle
+    var LeastSqCircle = require("meier/math/Math").LeastSquaresCircle
     var Vector        = require("meier/math/Vec")(2);
     var Disk          = require("meier/math/Disk");
     var Random        = require("meier/math/Random");

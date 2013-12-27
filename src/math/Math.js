@@ -476,7 +476,7 @@ define(function(require) {
         /// @param {coordinates} An array with 2D vectors.
         /// @return A disk according to the least squares criteria.
         /// @see {Polynomial.LeastSquares} For polynomial and linear least squares.
-        LeastSquareCircle: function(coordinates) {
+        LeastSquaresCircle: function(coordinates) {
             
             // Late loading to avoid circular dependancies.
             var M  = require("meier/math/Mat");
