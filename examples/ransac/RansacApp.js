@@ -13,13 +13,11 @@ define(function(require){
     
     var Voronoi   = require("meier/math/Delaunay").Voronoi;
     var Colors    = require("meier/aux/Colors");
-    
+    var Farthest  = require("meier/math/Delaunay").FarthestVoronoi;
     var dat       = require("meier/contrib/datgui");
     
     
     RansacApp.prototype = new Game();
-    
-    
     
     function RansacApp(container) {        
         Game.call(this, container);
@@ -86,137 +84,52 @@ define(function(require){
         var Hull      = require("meier/math/Hull").GiftWrap;
         var Disk      = require("meier/math/Disk");
     
-        var hull = Hull(this.coordinates);
         
         if(this.showLeastSquareCircle) {
-            var disk = LeastSquareCircle(hull || this.coordinates);
+            var disk = LeastSquareCircle(this.coordinates);
             renderer.begin();
             renderer.circle(disk);
             renderer.fill("rgba(0, 0, 0, 0.3)");
             renderer.stroke("rgba(0, 0, 0, 0.7)");
         }
         
+        var farthest = Farthest(this.coordinates);
         
         if(this.showHull) {
+            
             renderer.begin();
-            hull.eachPair(function(a, b) {
-                renderer.arrow(a, b);
+            farthest.hull.eachPair(function(a, b) {
+                renderer.line(a, b);
             });        
             renderer.stroke("black");
         }
         
-        var vertices = [];
-        var lines    = [];
-        var centers  = []; // Centers of circumcircles
         
-        // Outer cells reach infinity, this is less practical for 
-        // our purposes. So this limit will make do.
-        var inf = 1000;
+        var x = this.input.x;
         
-        // Work on a copy of the hull
-        for(var h = hull.clone(); h.length >= 3;) {
-            
-            // Search for the triplet with the largest circumcircle
-            for(var i = 0, largest = null; i < h.length; ++i) {
-            
-                // Tuple to hold referenced data on circumcircles. Has wrap
-                // around code for vertices.
-                var t = {
-                    c:   h[i],
-                    cw:  h[i - 1] || h.last(),
-                    ccw: h[i + 1] || h.first(),
-                    i:   i
-                };
-            
-                t.d = Disk.CreateCircumcircle(t.cw, t.c, t.ccw);
-            
-                // Find the largest
-                if(largest === null || largest.d.radius < t.d.radius) {
-                    largest = t;
-                }
-            }
-           
-            // Center of the circumcircle
-            var center = largest.d.position;
-           
-            var directions = [
-                largest.c.direction(largest.cw).perp(),
-                largest.ccw.direction(largest.c).perp()
-            ];
-            
-            // Special case for |h| == 3
-            if(h.length == 3) {
-                directions.push(largest.cw.direction(largest.ccw).perp());
-            }
-           
-            directions.forEach(function(v) {
-                // Edge between two Voronoi cells
-                var edge = new Line(center, center.clone().add(v.trim(inf)));
+        if(this.showFarthestVoronoi) {
+            // Voronoi edges
+            renderer.begin();
+            farthest.edges.forEach(renderer.line.bind(renderer));
+            renderer.stroke("red", 2);
+        
+            // Circumcircle centers
+            renderer.begin();
+            farthest.vertices.forEach(function(v) {
+                renderer.circle(v, 4);
                 
-                lines.push(edge);
-            
-                // Normal of the direction
-                var n = edge.direction().perp();
-                
-                // Some point on the line
-                var r = edge.a;
-                
-                // Solve c for a.x + b.y = c
-                var c = n.dot(r);
-                
-                // Then using this "Hesse normal form" we can determine
-                // the distance between a line and a point. If the point
-                // lines on the line, we connect the vertices, otherwise
-                // they extend to "infinity".
-                centers.every(function(p) {
-                    
-                    // Distance from line to point.
-                    var d = Math.abs(p.dot(n) - c);
-                    
-                    // Account for floating point precision
-                    if(d >= 0 && d <= 0.000001) {
-                        
-                        // Extend the edge to reach the next vertex,
-                        // this is for visual purposes only.
-                        edge.b = edge.a.clone().add(edge.direction().trim(edge.a.distance(p)));
-                        
-                        return false;
-                    }
-                    
-                    return true;
-                }.bind(this));
-            }.bind(this));
-            
-            // Farthest Voronoi vertices
-            centers.push(largest.d.position);
-    
-            // Remove from all
-            h.splice(largest.i, 1);
+            });
+            renderer.fill("black");
         }
         
-        // Voronoi edges
-        renderer.begin();
-        lines.forEach(renderer.line.bind(renderer));
-        renderer.stroke("red");
-        
-        // Circumcircle centers
-        renderer.begin();
-        centers.forEach(function(v) {
-            renderer.circle(v, 2);
-        });
-        renderer.fill("black");
-        
-        
         if(this.showVoronoi || this.showDelaunay) {
-            var delaunay = Voronoi(hull);
+            var delaunay = Voronoi(this.coordinates);
         
             if(this.showVoronoi) {
                 this.coordinates.forEach(function(coordinate, i) {
                     renderer.begin();
                     renderer.polygon(coordinate.neighbours);
-                    renderer.fill(Colors.Alpha(this.colors[i], 0.2));
-                    renderer.stroke("rgba(0, 0, 0, 0.4)");
-            
+                    renderer.stroke(Colors.green);
                 }.bind(this));
             }
             
@@ -229,12 +142,6 @@ define(function(require){
             }
             
         }
-        
-        this.verbose = false;
-        
-        //this.showVoronoi = false;
-        //this.showFarthestVoronoi = true;
-        //this.showDelaunay = false;
     }
     
     
