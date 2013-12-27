@@ -19,7 +19,7 @@ define(function(require){
     function RansacApp(container) {        
         Game.call(this, container);
 
-        this.log.top().right();
+        this.log.top().left();
         this.setFps(15);
                 
         this.grid = new Grid(0, 0, this.width, this.height);
@@ -86,6 +86,10 @@ define(function(require){
             return;
         }
         
+        var farthest = Farthest(this.coordinates);
+        var voronoi  = Voronoi(this.coordinates);
+        
+        
         if(this.showLeastSquareCircle) {
             var disk = LeastSqCircle(this.coordinates);
             renderer.begin();
@@ -94,51 +98,6 @@ define(function(require){
             renderer.stroke("rgba(255, 255, 0, 0.7)");
         }
         
-        if(this.showFarthestAnullus) {
-            var farthest = Farthest(this.coordinates);
-        
-            var best = SmallestAnnulus(farthest.vertices, this.coordinates);
-            renderer.begin();
-            renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke("rgba(0, 0, 0, 0.2)", best.annulus);
-        
-            renderer.begin();
-            renderer.circle(best.center, best.closest);
-            renderer.circle(best.center, best.farthest);
-            renderer.stroke("rgba(0, 0, 0, 1)");
-        }
-        
-        
-        if(this.showVoronoiAnullus) {
-            var vor = Voronoi(this.coordinates);
-        
-            // Reduce the collection of triangles into a large
-            // list with vertices:
-            var n = [];
-            vor.forEach(function(v) {
-                n.merge(v.a.neighbours);
-                n.merge(v.b.neighbours);
-                n.merge(v.c.neighbours);
-            });
-                
-            var best = SmallestAnnulus(n, this.coordinates);
-            renderer.begin();
-            renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke("rgba(0, 0, 255, 0.2)", best.annulus);
-        
-            renderer.begin();
-            renderer.circle(best.center, best.closest);
-            renderer.circle(best.center, best.farthest);
-            renderer.stroke("rgba(0, 0, 255, 1)");
-        }
-        
-        if(this.showHull) {
-            renderer.begin();
-            farthest.hull.eachPair(function(a, b) {
-                renderer.line(a, b);
-            });        
-            renderer.stroke("black", 2);
-        }
         
         if(this.showFarthestVoronoi) {
             // Voronoi edges
@@ -156,8 +115,6 @@ define(function(require){
         }
         
         if(this.showVoronoi || this.showDelaunay) {
-            var delaunay = Voronoi(this.coordinates);
-        
             if(this.showVoronoi) {
                 this.coordinates.forEach(function(coordinate, i) {
                     renderer.begin();
@@ -173,7 +130,51 @@ define(function(require){
                     renderer.stroke("#393939", 2);
                 });
             }
-            
+        }
+      
+        if(this.showVoronoiAnullus) {
+        
+            // Reduce the collection of triangles into a large
+            // list with vertices:
+            var n = [];
+            voronoi.forEach(function(v) {
+                n.merge(v.a.neighbours);
+                n.merge(v.b.neighbours);
+                n.merge(v.c.neighbours);
+            });
+                
+            var best = SmallestAnnulus(n, this.coordinates);
+            renderer.begin();
+            renderer.circle(best.center, best.closest + best.annulus*0.5);
+            renderer.stroke("rgba(0, 0, 255, 0.2)", best.annulus);
+        
+            renderer.begin();
+            renderer.circle(best.center, best.closest);
+            renderer.circle(best.center, best.farthest);
+            renderer.circle(best.center, 2);
+            renderer.stroke("rgba(0, 0, 255, 1)");
+        }
+        
+        if(this.showHull) {
+            renderer.begin();
+            farthest.hull.eachPair(function(a, b) {
+                renderer.line(a, b);
+            });        
+            renderer.stroke("black", 2);
+        }
+                
+        if(this.showFarthestAnullus) {
+        
+            var best = SmallestAnnulus(farthest.vertices, this.coordinates);
+            renderer.begin();
+            renderer.circle(best.center, best.closest + best.annulus*0.5);
+            renderer.stroke("rgba(0, 0, 0, 0.2)", best.annulus);
+        
+            renderer.begin();
+            renderer.circle(best.center, 2);
+            renderer.circle(best.center, best.closest);
+            renderer.circle(best.center, best.farthest);
+            renderer.stroke("rgba(0, 0, 0, 1)");
         }
     }
     
