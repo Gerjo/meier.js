@@ -43,9 +43,9 @@ define(function(require) {
         this.grid.onLeftDown(new Vector(-10, 10));
         
         this.gui = new dat.GUI();
-        this.gui.add(this, "showCircumscribedCircle");
-        this.gui.add(this, "showDelaunay");
-        this.gui.add(this, "showVoronoi");
+        this.gui.add(this, "showCircumscribedCircle").name("Show Circumcircles");
+        this.gui.add(this, "showDelaunay").name("Delaunay Triangulatie");
+        this.gui.add(this, "showVoronoi").name("Voronoi Diagram");
         this.gui.width = 400;
     }
 
@@ -95,10 +95,6 @@ define(function(require) {
                     renderer.circle(triangle.center, triangle.radius);
                     renderer.fill("rgba(0, 0, 0, 0.1)");
                     renderer.stroke("rgba(0, 0, 0, 0.2)");
-                    
-                    renderer.begin();
-                    renderer.circle(triangle.center, 3);
-                    renderer.fill("rgba(0, 0, 0, 1)");
                 }
             
             }.bind(this));
