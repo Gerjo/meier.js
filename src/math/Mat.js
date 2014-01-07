@@ -448,6 +448,20 @@ define(function(require) {
             return r;
         };
         
+        M.prototype.add = function(m) {
+            if(this.numrows !== m.numrows && m.numrows !== this.numcolumns) {
+                throw new Error("Cannot add, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
+                "] and [" + m.numrows + "x" + m.numcolumns + "]");
+            }
+            
+            // Works due to equal length
+            for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
+                this._[i] += m._[i];
+            }
+            
+            return this;
+        };
+        
         M.prototype.product = function(o) {
             //if(this.numrows !== o.numcolumns) {
             if(this.numrows !== o.numrows && o.numrows !== this.numcolumns) {
