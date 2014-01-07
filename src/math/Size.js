@@ -7,6 +7,9 @@
 
 define(function(require) {
     
+    console.log("Warning: using now deprecated class Size. "
+    + "Replace with inline w/h variables.");
+    
     // Semantical helper:
     function Size(w, h) {
         this.w = w;
