@@ -40,14 +40,16 @@ define(function(require) {
     
     /// Depricated.
     Random.Range = function(min, max) {
+        console.log("Warning:using severely deprecated method. Use Random(min, max, true); instead.");
         return mt.nextFloat() * (max - min) + min;
     };
     
-    /// Returns a floating point.
+    /// Depricated. Use Random(min, max, true);
     Random.FloatInRange = function(min, max) {
         return mt.nextFloat() * (max - min) + min;
     };
-    
+
+    /// Depricated. Use Random(min, max);
     Random.IntegerInRange = function(min, max) {
         return Math.round(mt.nextFloat() * (max - min) + min);
     };
