@@ -7,12 +7,12 @@
 
 
 define(function(require){
-    var Size   = require("meier/math/Size");
+    var Vector   = require("meier/math/Vec")(2);
     
     function Logger(width, height) {
         // Tweakable:
-        this.size       = new Size(width, height);
-        this.offset     = new Size(10, (height * 0.5) - 10);
+        this.size       = new Vector(width, height);
+        this.offset     = new Vector(10, (height * 0.5) - 10);
         this.data       = {};
         this.fontSize   = 12;
         this.charWidth  = this.fontSize - 4;
@@ -110,15 +110,15 @@ define(function(require){
         var x, y;
         
         if(this._left) {
-            x = this.size.w * -0.5 + this.offset.w;
+            x = this.size.x * -0.5 + this.offset.x;
         } else {
-            x = (this.size.w * 0.5) - this.estimatedWidth - this.offset.w;
+            x = (this.size.x * 0.5) - this.estimatedWidth - this.offset.x;
         }
         
         if(this._top) {
-            y = this.offset.h;
+            y = this.offset.y;
         } else {
-            y = this.size.h * -0.5 + this.numRows * this.charHeight + 20;
+            y = this.size.y * -0.5 + this.numRows * this.charHeight + 20;
         }
                 
         var font = "bold " + this.fontSize + "px Monospace";
