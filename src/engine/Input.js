@@ -7,7 +7,6 @@
 
 define(function(require) {
     var Vector  = require("meier/math/Vec")(2);
-    var Size    = require("meier/math/Size");
     var Key     = require("meier/engine/Key");
     var Gamepads = require("meier/engine/Gamepads");
 
@@ -74,7 +73,7 @@ define(function(require) {
         
         this.isTablet   = isTablet;
         this._container = container;
-        this._size      = new Size(width, height);
+        this._size      = new Vector(width, height);
         this._keystates = {};
     
         this.gamepads   = new Gamepads(this);
@@ -283,11 +282,11 @@ define(function(require) {
         
     
         // Only count inside world bounds:
-        if(x >= 0 && y >= 0 && x <= this._size.w && y <= this._size.h) {
+        if(x >= 0 && y >= 0 && x <= this._size.x && y <= this._size.y) {
         
             // Transform to screen coordinates:
-            this._[0] = x - this._size.w * 0.5;
-            this._[1] = (this._size.h * 0.5) - y;
+            this._[0] = x - this._size.x * 0.5;
+            this._[1] = (this._size.y * 0.5) - y;
     
             // Trigger MOUSE_MOVE event:
             return true;
