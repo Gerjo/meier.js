@@ -258,6 +258,10 @@ define(function(require) {
             return V;
         };
         
+        V.prototype.at = function(i) {
+            return this._[i];
+        };
+        
         V.prototype.clone = function() {
             var v = new V();
             
