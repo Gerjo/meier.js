@@ -572,6 +572,10 @@ define(function(require) {
             return this._[At(row, column)];
         };
         
+        M.prototype.get = function(row, column) {
+            return this._[At(row, column)];
+        };
+        
         M.prototype.set = function(row, column, value) {
             this._[At(row, column)] = value;
             return this;
