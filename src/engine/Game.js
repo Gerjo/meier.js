@@ -86,6 +86,7 @@ define(function(require) {
     
     Game.prototype.setAutoClear = function(autoClear) {
         this._doClear = autoClear;
+        return this;
     };
     
     Game.prototype.setFps = function(fps) {
@@ -96,6 +97,7 @@ define(function(require) {
     
         // Scedule a new loop:
         this._intervalId = setInterval(this._update.bind(this), 1000 / this._fps);
+        return this;
     };
 
     Game.prototype._update = function() {
