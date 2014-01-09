@@ -8,8 +8,8 @@ define(function(require) {
         this.velocity = Random.Vector().scaleScalar(30);
         this.color = "black";
         
-        this.width  = Random.Range(10, 15);
-        this.height = Random.Range(10, 15);
+        this.width  = Random(10, 15);
+        this.height = Random(10, 15);
     }
     
     Unit.prototype.update = function(dt) {

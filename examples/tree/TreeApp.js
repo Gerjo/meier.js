@@ -39,7 +39,7 @@ define(function(require) {
         }
         
         while(c < this.numEntities -1) {
-            this.add(new Unit(Random.Range(-this.hw, this.hw), Random.Range(-this.hh, this.hh)));
+            this.add(new Unit(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
             ++c;
         }
     
