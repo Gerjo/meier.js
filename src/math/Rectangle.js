@@ -6,8 +6,9 @@
  !*/
 
 define(function(require) {
-    var Vector = require("meier/math/Vector");
-    var Size   = require("meier/math/Size");
+    var Vector      = require("meier/math/Vector");
+    var Size        = require("meier/math/Size");
+    var LineSegment = require("meier/math/Line");
     
     ///
     /// Special note: min should always be less than max. Internal
@@ -49,7 +50,7 @@ define(function(require) {
     };
 
     Rectangle.prototype.center = function() {
-        return new Point(
+        return new Vector(
             this.min.x + (this.max.x - this.min.x) * 0.5,
             this.min.y + (this.max.y - this.min.y) * 0.5
         );
