@@ -88,101 +88,124 @@ define(function(require) {
     
     var self = {
         
+        /// Obtain a linear discriminant model for classification.
+        ///
+        /// @param {data1} An array of vectors describing class 1.
+        /// @param {data2} An array of vectors describing class 2.
+        /// @return a function to classify data.
         Linear: function(data1, data2) {
             return self._InternalAnalysis(data1, data2, true);
         },
         
+        /// Obtain a quadratic discriminant model for classification.
+        /// Internally falls back to linear discriminant analysis when 
+        /// too few data entries (n < 3) are given or the covariances 
+        /// are equal.
+        ///
+        /// @param {data1} An array of vectors describing class 1.
+        /// @param {data2} An array of vectors describing class 2.
+        /// @return a function to classify data.
         Quadratic: function(data1, data2) {
             return self._InternalAnalysis(data1, data2, false);
         },
         
-        ///
-        ///
-        ///
+        /// Helper to handle LDA/QDA. Many internals are shared
+        /// between the two.
         _InternalAnalysis: function(data1, data2, doLinear) {
+            var a = { n: data1.length, data: data1 };
+            var b = { n: data2.length, data: data2 };
             
-            var mean = Mean(data1);
-            var a = {
-                cov:   CovarianceMatrix(data1, mean),
-                n:     data1.length,
-                mean:  mean
-            };
-            
-            mean = Mean(data2);
-            var b = {
-                cov:   CovarianceMatrix(data2, mean),
-                n:     data2.length,
-                mean:  mean
-            };
-            
-            // Precompute some variables
-            var total    = a.n + b.n;
-            a.meanT      = a.mean.transpose();
-            b.meanT      = b.mean.transpose();
-            a.lnRatio    = Math.ln(a.n / total);
-            b.lnRatio    = Math.ln(b.n / total);
-            a.covDet     = a.cov.determinant();
-            b.covDet     = b.cov.determinant();
-            a.covInverse = a.cov.inverse();
-            b.covInverse = b.cov.inverse();
-            
-            if(a.covDet == 0) {
-                console.log("a.covDet == 0");
-                console.log(a.cov.wolfram());
-                console.log(data1);
-            }
-            
-            if(b.covDet == 0) {
-                console.log("b.covDet == 0");
-            }
+            // The eventual classifier method.
+            var classifier = null;
            
-            // Estimate the common group-covariance matrix Σ by the
-            // pooled (within-group) sample covariance matrix. In other 
-            // words, a weighted average of covariance matrices.
-            var pooled  = a.cov.clone().multiply(a.n/total).add(b.cov.clone().multiply(b.n/total));
-            var pooledInverse = pooled.inverse();
+            if(data1.length === 0 || data2.length === 0) {
+                
+                // Special classifier if one or more sets is empty. If
+                // one set is empty, assume the other class is valid. If 
+                // both are empty, it will be a tie.
+                classifier = function(d, m) {
+                    return d.n == 0 ? 0 : 1;
+                }
+                
+            } else {
+            
+                // Total number of training entries
+                var total    = a.n + b.n;
+                
+                // Precompute some variables
+                [a, b].forEach(function(d) {
+                    d.mean     = Mean(d.data);
+                    d.cov      = CovarianceMatrix(d.data, d.mean);
+                    d.meanT    = d.mean.transpose();
+                    d.lnRatio  = Math.ln(d.n / total);
+                    d.covDet   = d.cov.determinant();
+                    d.lnCovDet = Math.ln(d.covDet);
+                });
+            
+                // Equal covariance, rendering quadratic useless, and linear error-stricken.
+                if(a.covDet == b.covDet) {
+                
+                    // Estimate the common group-covariance matrix Σ by the
+                    // pooled (within-group) sample covariance matrix. In other 
+                    // words, a weighted average of covariance matrices.
+                    var pooled  = a.cov.clone().multiply(a.n/total).add(b.cov.clone().multiply(b.n/total));
+                    
+                    // This call may fail when pooled.det == 0
+                    var pooledInverse = pooled.inverse();
             
             
-            // Equal coverances
-            var ldaPooledCov = function(d, m) {
-                // Linear term
-                var linear   = d.mean.product(pooledInverse).product(m).at(0, 0);
+                    // Equal coverances
+                    classifier = function(d, m) {
+                        // Linear term
+                        var linear   = d.mean.product(pooledInverse).product(m).at(0, 0);
                 
-                // Constant term
-                var constant = 0.5 * d.mean.product(pooledInverse).product(d.meanT).at(0, 0);
+                        // Constant term
+                        var constant = 0.5 * d.mean.product(pooledInverse).product(d.meanT).at(0, 0);
                 
-                // Bring it all together, yielding the odds for this class
-                return linear - constant + d.lnRatio;
-            };
+                        // Bring it all together, yielding the odds for this class
+                        return linear - constant + d.lnRatio;
+                    };
+                
+                } else {
+                    // Pre compute inverse
+                    a.covInverse = a.cov.inverse();
+                    b.covInverse = b.cov.inverse();
+                
+                    if(doLinear) {
+                        
+                        classifier = function(d, m) {
+                            // Constant term
+                            var constant = d.lnCovDet - 2 * d.lnRatio + 
+                                d.mean.product(d.covInverse).product(d.meanT).get(0, 0);
+                        
+                            // Linear term
+                            var linear = 2 * d.meanT.product(d.covInverse).product(m).get(0, 0);
+                
+                            return constant - linear;
+                        };
+                    } else {
+                        
+                        
+                        classifier = function(d, m) {
+                            var constant = d.lnCovDet - 2 * d.lnRatio;
+                            var delta    = m.clone().subtract(d.mean);
+                            
+                            // "delta" is used twice, making it quadratic.
+                            var quadratic = delta.transpose().product(d.covInverse).product(delta).get(0, 0);
+                
+                            return constant + quadratic;;
+                        };
+                    }
+                } // End else a.cov == b.cov
+            } // End else a.length === 0 or b.length === 0
             
-            var lda = function(d, m) {
-                var derp = d.mean.product(d.covInverse).product(d.meanT).get(0, 0);
-                
-                derp -= 2 * d.meanT.product(d.covInverse).product(m).get(0, 0);
-                
-                var r = Math.ln(d.covDet) - 2 * d.lnRatio + derp;
-                
-                return r;
-            };
-            
-            
-            var qda = function(d, m) {
-                var delta = m.clone().subtract(d.mean);
-                
-                var derp = delta.transpose().product(d.covInverse).product(delta).get(0, 0);
-                
-                var r = Math.ln(d.covDet) - 2 * d.lnRatio + derp;
-                
-                return r;
-            };
-            
-            var Classifier = function(vector) {
-                
+            return function(vector) {
+                // Vector to a column-filled-matrix
                 var m = ToMatrix(vector);
            
-                // Odds for class "a".
-                var aOdds = ldaPooledCov(a, m);
-                var bOdds = ldaPooledCov(b, m);
+                // Odds for each class
+                var aOdds = classifier(a, m);
+                var bOdds = classifier(b, m);
                 
                 // x > group "b"
                 // x < group "a"
@@ -191,8 +214,6 @@ define(function(require) {
                 //console.log(aOdds, bOdds);
                 return aOdds - bOdds;
             };
-            
-            return Classifier;
         }
     };
     
