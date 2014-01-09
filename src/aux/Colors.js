@@ -224,7 +224,7 @@ define(function(require) {
             throw new Error("Cannot change alpha, unknown color: " + color);
         }
         
-        return rgba.substring(0, color.length - 2) + alpha + ")";
+        return rgba.substring(0, rgba.length - 2) + alpha + ")";
     };
     
     return Colors;
