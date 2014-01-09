@@ -217,7 +217,14 @@ define(function(require) {
             
         // By name
         } else {
-            rgba = Colors[color];
+            // Lookup without case transformation
+            if(Colors[color]) {
+                rgba = Colors[color];
+                
+            // Try with normalized case
+            } else {
+                rgba = Colors[color.toLowerCase()];
+            }
         }
         
         if(!rgba) {
