@@ -8,7 +8,6 @@
 
 define(function(require) {
     
-    var Size        = require("meier/math/Size");
     var Matrix      = require("meier/math/Mat")(3, 3);
     var Vector      = require("meier/math/Vec")(2);
     var Texture     = require("meier/engine/Texture");

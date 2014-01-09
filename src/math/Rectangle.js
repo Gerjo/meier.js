@@ -7,7 +7,6 @@
 
 define(function(require) {
     var Vector      = require("meier/math/Vector");
-    var Size        = require("meier/math/Size");
     var LineSegment = require("meier/math/Line");
     
     ///
