@@ -1,6 +1,13 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 define(function(require) {
-    var Vector = require("meier/math/Vec")(2);
-    var M22    = require("meier/math/Mat")(2, 2);
+    
+    // Include vector and matrix builders
     var M      = require("meier/math/Mat");
     var V      = require("meier/math/Vec");
     
