@@ -495,7 +495,7 @@ define(function(require) {
                         );
                         
                         if(isNaN(m._[row * m.numcolumns + col])) {
-                            console.log("Error: col:",col, "k:",k);
+                            //console.log("Error: col:",col, "k:",k);
                         }
                         
                     }
