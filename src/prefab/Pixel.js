@@ -19,10 +19,13 @@ define(function(require) {
     Pixel.prototype.draw = function(renderer) {
         renderer.begin();
         renderer.circle(0, 0, this.width);    
-        renderer.fill(this.fill); 
         
-        if(this.stroke) {  
+        if(this.stroke !== null) {  
             renderer.stroke(this.stroke);   
+        }
+        
+        if(this.fill !== null) {  
+            renderer.fill(this.fill);   
         }
     };
     
