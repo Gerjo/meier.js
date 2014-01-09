@@ -7,7 +7,7 @@ define(function(require) {
     var CreateArray;
     
     // iPad 1 and IE < 10 support.
-    if(typeof Float64Array === "undefined") {
+    if(true || typeof Float64Array === "undefined") {
         CreateArray = function(size) {
             var arr = new Array(size);
             for(var i = size - 1; i >= 0; --i) {
