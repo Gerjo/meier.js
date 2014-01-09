@@ -140,6 +140,9 @@ define(function(require) {
                     d.lnRatio  = Math.ln(d.n / total);
                     d.covDet   = d.cov.determinant();
                     d.lnCovDet = Math.ln(d.covDet);
+                    
+                    // Will hold the constant term for each method
+                    d.constant = 0;
                 });
             
                 // Equal covariance, rendering quadratic useless, and linear error-stricken.
@@ -152,18 +155,17 @@ define(function(require) {
                     
                     // This call may fail when pooled.det == 0
                     var pooledInverse = pooled.inverse();
-            
-            
+                        
+                    a.constant = 0.5 * a.mean.product(pooledInverse).product(a.meanT).at(0, 0) + a.lnRatio;
+                    b.constant = 0.5 * b.mean.product(pooledInverse).product(b.meanT).at(0, 0) + b.lnRatio;
+                        
                     // Equal coverances
                     classifier = function(d, m) {
                         // Linear term
                         var linear   = d.mean.product(pooledInverse).product(m).at(0, 0);
                 
-                        // Constant term
-                        var constant = 0.5 * d.mean.product(pooledInverse).product(d.meanT).at(0, 0);
-                
                         // Bring it all together, yielding the odds for this class
-                        return linear - constant + d.lnRatio;
+                        return linear - d.constant;
                     };
                 
                 } else {
@@ -171,29 +173,28 @@ define(function(require) {
                     a.covInverse = a.cov.inverse();
                     b.covInverse = b.cov.inverse();
                 
-                    if(doLinear) {
+                    if(doLinear === true) {
+                        
+                        a.constant = a.lnCovDet - 2 * a.lnRatio + a.mean.product(a.covInverse).product(a.meanT).get(0, 0);
+                        b.constant = b.lnCovDet - 2 * b.lnRatio + b.mean.product(b.covInverse).product(b.meanT).get(0, 0);
                         
                         classifier = function(d, m) {
-                            // Constant term
-                            var constant = d.lnCovDet - 2 * d.lnRatio + 
-                                d.mean.product(d.covInverse).product(d.meanT).get(0, 0);
-                        
                             // Linear term
                             var linear = 2 * d.meanT.product(d.covInverse).product(m).get(0, 0);
                 
-                            return constant - linear;
+                            return d.constant - linear;
                         };
                     } else {
-                        
+                        a.constant = a.lnCovDet - 2 * a.lnRatio;
+                        b.constant = b.lnCovDet - 2 * b.lnRatio;
                         
                         classifier = function(d, m) {
-                            var constant = d.lnCovDet - 2 * d.lnRatio;
                             var delta    = m.clone().subtract(d.mean);
                             
                             // "delta" is used twice, making it quadratic.
                             var quadratic = delta.transpose().product(d.covInverse).product(delta).get(0, 0);
                 
-                            return constant + quadratic;;
+                            return d.constant + quadratic;
                         };
                     }
                 } // End else a.cov == b.cov
