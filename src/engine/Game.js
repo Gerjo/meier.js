@@ -56,12 +56,16 @@ define(function(require) {
         // Keyboard, touch and mouse events:
         this.input           = new Input(this._renderer.canvas, this.width, this.height, this.isTablet);
     
-        // Default loop:
-        this._intervalId     = setInterval(this._update.bind(this), 1000 / this._fps);
+        // Cache for the interval id
+        this._intervalId     = null;
+        
+        // Default FPS:
+        this.setFps(this._fps);
         
         // Build-in entity system. Optional usage.
         this._entities       = [];
         
+        // Automatically clear the canvas.
         this._doClear        = true;
     }
     
@@ -93,10 +97,18 @@ define(function(require) {
         this._fps = fps;
     
         // Remove current loop:
-        clearTimeout(this._intervalId);
-    
-        // Scedule a new loop:
-        this._intervalId = setInterval(this._update.bind(this), 1000 / this._fps);
+        if(this._intervalId !== null) {
+            clearTimeout(this._intervalId);
+        }
+        
+        if(fps > 0) {
+            // Schedule a new loop
+            this._intervalId = setInterval(this._update.bind(this), 1000 / this._fps);
+        } else {
+            // There shall be no new loop
+            this._intervalId = null;
+        }
+        
         return this;
     };
 
@@ -129,8 +141,12 @@ define(function(require) {
     
         // User defined update.
         this.update(dt);
-    
-    
+        
+        // Start a draw loop.
+        this._draw();
+    };
+
+    Game.prototype._draw = function() {
         /// Reset the transform to an identity matrix:
         /// We can tweak the letters in:
         /// a b 0
@@ -154,6 +170,7 @@ define(function(require) {
         this.log.draw(this._renderer);
     };
 
+    /// Update the game.
     Game.prototype.update = function(dt) {
         
         this.input.update(dt);
@@ -171,7 +188,13 @@ define(function(require) {
             }
         }
     };
+    
+    /// Trigger a redraw immediately.
+    Game.prototype.redraw = function() {
+        this._draw();
+    };
 
+    /// Draw the entire game.
     Game.prototype.draw = function(renderer) {
         
         // Clear the canvas:
