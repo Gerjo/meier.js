@@ -5,12 +5,11 @@ define(function(require) {
     var V      = require("meier/math/Vec");
     
     
-    ///
+    ///  
     ///  11 21 31 n1
     ///  12 22 32 n2
     ///  13 23 33 n3
     ///  1n 2n 3n nn
-    
     var CovarianceMatrix = function(data, bar) {
         
         var cov = new (M(bar.numcolumns, bar.numcolumns))();
@@ -41,6 +40,7 @@ define(function(require) {
         return cov;
     }
     
+    /// Create a matrix (column vector) of means
     var Mean = function(data) {
         
         // Column vector with averages // [x, y, ...]
@@ -70,11 +70,36 @@ define(function(require) {
         return res;
     };
     
+    
+    var PrecomputeVars = function(data, total) {
+        var mean = Mean(data);
+        var a = {
+            cov:   CovarianceMatrix(data, mean),
+            n:     data1.length,
+            mean:  mean
+        };
+        a.meanT   = a.mean.transpose();
+        a.lnRatio      = Math.ln(a.n / total);
+        a.covDet     = a.cov.determinant();
+        a.covInverse = a.cov.inverse();
+
+        return a;
+    };
+    
     var self = {
-        ///
-        ///
-        ///
+        
         Linear: function(data1, data2) {
+            return self._InternalAnalysis(data1, data2, true);
+        },
+        
+        Quadratic: function(data1, data2) {
+            return self._InternalAnalysis(data1, data2, false);
+        },
+        
+        ///
+        ///
+        ///
+        _InternalAnalysis: function(data1, data2, doLinear) {
             
             var mean = Mean(data1);
             var a = {
@@ -91,32 +116,64 @@ define(function(require) {
             };
             
             // Precompute some variables
-            var total = a.n + b.n;
-            a.meanT   = a.mean.transpose();
-            b.meanT   = b.mean.transpose();
-            a.ln      = Math.ln(a.n / total);
-            b.ln      = Math.ln(b.n / total);
-            a.det     = a.cov.determinant();
-            b.det     = b.cov.determinant();
+            var total    = a.n + b.n;
+            a.meanT      = a.mean.transpose();
+            b.meanT      = b.mean.transpose();
+            a.lnRatio    = Math.ln(a.n / total);
+            b.lnRatio    = Math.ln(b.n / total);
+            a.covDet     = a.cov.determinant();
+            b.covDet     = b.cov.determinant();
+            a.covInverse = a.cov.inverse();
+            b.covInverse = b.cov.inverse();
             
-            // Always holds for linear?
-            ASSERT(a.det == b.det);
+            if(a.covDet == 0) {
+                console.log("a.covDet == 0");
+                console.log(a.cov.wolfram());
+                console.log(data1);
+            }
             
+            if(b.covDet == 0) {
+                console.log("b.covDet == 0");
+            }
+           
             // Estimate the common group-covariance matrix Σ by the
             // pooled (within-group) sample covariance matrix. In other 
             // words, a weighted average of covariance matrices.
             var pooled  = a.cov.clone().multiply(a.n/total).add(b.cov.clone().multiply(b.n/total));
-            var inverse = pooled.inverse();
+            var pooledInverse = pooled.inverse();
             
-            var odds = function(d, m) {
+            
+            // Equal coverances
+            var ldaPooledCov = function(d, m) {
                 // Linear term
-                var linear   = d.mean.product(inverse).product(m).at(0, 0);
+                var linear   = d.mean.product(pooledInverse).product(m).at(0, 0);
                 
                 // Constant term
-                var constant = 0.5 * d.mean.product(inverse).product(d.meanT).at(0, 0);
+                var constant = 0.5 * d.mean.product(pooledInverse).product(d.meanT).at(0, 0);
                 
                 // Bring it all together, yielding the odds for this class
-                return linear - constant + d.ln;
+                return linear - constant + d.lnRatio;
+            };
+            
+            var lda = function(d, m) {
+                var derp = d.mean.product(d.covInverse).product(d.meanT).get(0, 0);
+                
+                derp -= 2 * d.meanT.product(d.covInverse).product(m).get(0, 0);
+                
+                var r = Math.ln(d.covDet) - 2 * d.lnRatio + derp;
+                
+                return r;
+            };
+            
+            
+            var qda = function(d, m) {
+                var delta = m.clone().subtract(d.mean);
+                
+                var derp = delta.transpose().product(d.covInverse).product(delta).get(0, 0);
+                
+                var r = Math.ln(d.covDet) - 2 * d.lnRatio + derp;
+                
+                return r;
             };
             
             var Classifier = function(vector) {
@@ -124,20 +181,19 @@ define(function(require) {
                 var m = ToMatrix(vector);
            
                 // Odds for class "a".
-                var aOdds = odds(a, m);
-                var bOdds = odds(b, m);
+                var aOdds = ldaPooledCov(a, m);
+                var bOdds = ldaPooledCov(b, m);
                 
                 // x > group "b"
                 // x < group "a"
                 // x = 0, your favourite tie breaker.
                 
-                console.log(aOdds, bOdds);
+                //console.log(aOdds, bOdds);
                 return aOdds - bOdds;
             };
             
             return Classifier;
         }
-        
     };
     
     
