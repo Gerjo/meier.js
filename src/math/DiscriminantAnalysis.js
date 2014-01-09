@@ -124,7 +124,7 @@ define(function(require) {
                 // one set is empty, assume the other class is valid. If 
                 // both are empty, it will be a tie.
                 classifier = function(d, m) {
-                    return d.n == 0 ? 0 : 1;
+                    return d.n == 0 ? 0 : -1;
                 }
                 
             } else {
