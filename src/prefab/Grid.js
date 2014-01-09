@@ -102,10 +102,9 @@ define(function(require) {
         this.min   = new Vector(Infinity, Infinity);    
         this.max   = new Vector(-Infinity, -Infinity);  
         
-        
         var addByOption = function(entity) {
             if(this._numOptions > 0) {
-                var key = entity._key || "NULL";
+                var key = entity._key;
                 if( ! byOption[key]) {
                     byOption[key] = [];
                 }
