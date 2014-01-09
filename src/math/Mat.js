@@ -288,16 +288,19 @@ define(function(require) {
             this.num        = rows * columns;
             
             // Hidden, indexing doesn't work as expected.
-            this._ = CreateArray(length);
             
             if(data && data instanceof Array) {
                 if(data.length == this.num) {
-                    for(var i = this.num - 1; i >= 0; --i) {
-                        this._[i] = data[i];
-                    }
+                    this._ = data;
+                    //for(var i = this.num - 1; i >= 0; --i) {
+                    //    this._[i] = data[i];
+                    //}
                 } else {
                     throw new Error("Cannot use initial data. Array size doesn't match matrix size.");
                 }
+            } else {
+                // Zero initialize.
+                this._ = CreateArray(length);
             }
         }
         
