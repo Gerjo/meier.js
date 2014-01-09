@@ -1,6 +1,7 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
     var Color  = require("meier/aux/Colors");
+    var Random = require("meier/math/Random");
     var Grid   = require("meier/prefab/Grid");
     var dat    = require("meier/contrib/datgui");
     var Vector = require("meier/math/Vec")(2);
@@ -44,7 +45,6 @@ define(function(require){
         this.grid.addOption("B", this.colors[1]);
         this.grid.onChange = this.onChange.bind(this);
         
-        
         this.gui = new dat.GUI();
         this.gui.width = 300;
         
@@ -56,8 +56,25 @@ define(function(require){
         this.sampleResolution = 30;
         this.gui.add(this, "sampleResolution", 1, 60).name("Sample density").onChange(this.onChange.bind(this));
         
-        // Schedule a redraw        
-        this.redraw();
+        
+        // Mersenne Twister seeding
+        var s = 2342;//Random(0, 10000);
+        this.log.log("Random seed", s);
+        Random.Seed(s);
+        
+        var margin = 100;
+        for(var i = 0; i < 8; ++i) {
+            this.grid.addCoordinate(new Vector(
+                Random(-this.hw + margin, this.hw - margin),
+                Random(-this.hh + margin, this.hh - margin)
+            ));
+            
+            if(i == 3) {
+                this.grid.selectOption("B");
+            }
+            
+        }
+      
     }
     
     ClassificationApp.prototype.onChange = function(coordinates, byOption) {
@@ -106,7 +123,7 @@ define(function(require){
                 
                 var res = KNN(train, ClassificationApp).classes[0];
                 
-                return res.option.toUpperCase() == "A" ? 1 : -1;
+                return res.option.toUpperCase() == "A" ? -1 : 1;
             };
             
             break;
