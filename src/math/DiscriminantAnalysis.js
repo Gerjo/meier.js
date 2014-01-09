@@ -134,6 +134,9 @@ define(function(require) {
                     
                     // Will hold the constant term for each method
                     d.constant = 0;
+                    
+                    // Will hold a precomputed matrix
+                    d.matrix = null;
                 });
             
                 // Equal covariance, rendering quadratic useless, and linear error-stricken.
@@ -150,10 +153,13 @@ define(function(require) {
                     a.constant = 0.5 * a.mean.product(pooledInverse).product(a.meanT).at(0, 0) + a.lnRatio;
                     b.constant = 0.5 * b.mean.product(pooledInverse).product(b.meanT).at(0, 0) + b.lnRatio;
                         
+                    a.matrix = a.mean.product(pooledInverse);
+                    b.matrix = b.mean.product(pooledInverse);
+                        
                     // Equal coverances
                     classifier = function(d, m) {
                         // Linear term
-                        var linear   = d.mean.product(pooledInverse).product(m).at(0, 0);
+                        var linear   = d.matrix.product(m).at(0, 0);
                 
                         // Bring it all together, yielding the odds for this class
                         return linear - d.constant;
@@ -163,7 +169,10 @@ define(function(require) {
                     // Pre compute inverse
                     a.covInverse = a.cov.inverse();
                     b.covInverse = b.cov.inverse();
-                
+                    
+                    a.matrix = a.meanT.product(a.covInverse);
+                    b.matrix = b.meanT.product(b.covInverse);
+                    
                     if(doLinear === true) {
                         
                         a.constant = a.lnCovDet - 2 * a.lnRatio + a.mean.product(a.covInverse).product(a.meanT).get(0, 0);
@@ -171,7 +180,7 @@ define(function(require) {
                         
                         classifier = function(d, m) {
                             // Linear term
-                            var linear = 2 * d.meanT.product(d.covInverse).product(m).get(0, 0);
+                            var linear = 2 * d.matrix.product(m).get(0, 0);
                 
                             return d.constant - linear;
                         };
