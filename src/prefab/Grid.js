@@ -14,8 +14,8 @@ define(function(require) {
     var PinRect   = require("meier/math/Intersection").Test.PointInRectangle;
     var Rectangle = require("meier/math/Rectangle");
     
-    Frame.prototype = new Entity();
-    function Frame(x, y, w, h) {
+    Grid.prototype = new Entity();
+    function Grid(x, y, w, h) {
         Entity.call(this, x, y, w || 180, h || 180);
         
         this.spacing    = 30;
@@ -41,16 +41,16 @@ define(function(require) {
         this._selected   = null;
     }
     
-    Frame.prototype.onChange = function(coordinates) {
+    Grid.prototype.onChange = function(coordinates) {
         console.log("Unoverridden onChange method in grid.");
     };
     
-    Frame.prototype.showPoints = function(doShow) {
+    Grid.prototype.showPoints = function(doShow) {
         this._showPoints = doShow;
         return this;
     };
     
-    Frame.prototype.addOption = function(name, color) {
+    Grid.prototype.addOption = function(name, color) {
         this._options[name] = color;
         ++this._numOptions;
         
@@ -60,7 +60,7 @@ define(function(require) {
         }
     };
     
-    Frame.prototype.removeOption = function(name) {
+    Grid.prototype.removeOption = function(name) {
         if(this._options[name]) {
             
             if(this._selected == name) {
@@ -72,11 +72,11 @@ define(function(require) {
         };
     };
     
-    Frame.prototype.numOptions = function() {
+    Grid.prototype.numOptions = function() {
         return this._numOptions;
     };
     
-    Frame.prototype.add = function(entity) {
+    Grid.prototype.add = function(entity) {
         if(entity instanceof Pixel) {
             this.min.x = Math.min(this.min.x, entity.position.x);
             this.min.y = Math.min(this.min.y, entity.position.y);
@@ -92,7 +92,7 @@ define(function(require) {
         return Entity.prototype.add.call(this, entity);
     };
     
-    Frame.prototype.addCoordinate = function(input) {
+    Grid.prototype.addCoordinate = function(input) {
         var local = this.toLocal(input);
         
         var coordinates = [];
@@ -161,7 +161,7 @@ define(function(require) {
         this.onChange(coordinates, (this._numOptions > 0) ? byOption : null);
     };
     
-    Frame.prototype.onLeftDown = function(input) {
+    Grid.prototype.onLeftDown = function(input) {
         var local = this.toLocal(input);
         
         var i = 0;                      
@@ -183,12 +183,12 @@ define(function(require) {
         this.addCoordinate(input);
     };
     
-    Frame.prototype.setRealLabels = function(showRealLabels) {
+    Grid.prototype.setRealLabels = function(showRealLabels) {
         this._showRealLabels = showRealLabels;
         return this;
     };
     
-    Frame.prototype.setEditable = function(isEditable) {
+    Grid.prototype.setEditable = function(isEditable) {
         this._isEditable = isEditable;
                 
         if(isEditable) {
@@ -199,12 +199,12 @@ define(function(require) {
         return this;
     };
     
-    Frame.prototype.showNum = function(isVisible) {
+    Grid.prototype.showNum = function(isVisible) {
         this._showNum = isVisible;
         return this;
     };
     
-    Frame.prototype._createOptionRectangle = function(index) {
+    Grid.prototype._createOptionRectangle = function(index) {
         var width   = 30;
         var hw      = width * 0.5;
         var spacing = 5;
@@ -217,7 +217,7 @@ define(function(require) {
         return new Rectangle(x, y, x + width, y + width);
     };
         
-    Frame.prototype.draw = function(r) {
+    Grid.prototype.draw = function(r) {
         
         if(this._showPoints) {
             Entity.prototype.draw.call(this, r);
@@ -311,6 +311,6 @@ define(function(require) {
         }     
     };
         
-    return Frame;
+    return Grid;
     
 });
