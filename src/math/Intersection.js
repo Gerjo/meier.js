@@ -64,6 +64,11 @@ define(function(require) {
                 return pointInObb(point, boxCenter, boxWidth, boxHeight, boxRotation);
             },
             
+            PointInRectangle: function(point, rectangle) {
+                // Uncertain about "rectangle.min".
+                return pointInObb(point, rectangle.min, rectangle.width(), rectangle.height(), 0);
+            },
+            
             DiskRectangle: diskRectangle,
         },
     
@@ -117,7 +122,16 @@ define(function(require) {
                 }
                 
                 return false;
-            }
+            },
+            
+            PointInRectangle: function(point, rectangle) {
+                // Uncertain about "rectangle.min".
+                if(true == pointInObb(point, rectangle.min, rectangle.width(), rectangle.height(), 0)) {
+                    return point.clone();
+                }
+                
+                return false;
+            },
         },
     
         // Nearest location between object and object.
