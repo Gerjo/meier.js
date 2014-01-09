@@ -60,6 +60,14 @@ define(function(require) {
         }
     };
     
+    Grid.prototype.selectOption = function(name) {
+        if(this._options[name]) {
+            this._selected = name;
+        } else {
+            throw new Error("Grid::selectOption Cannot select " + name + " it's not an option.");
+        }
+    };
+    
     Grid.prototype.removeOption = function(name) {
         if(this._options[name]) {
             
