@@ -77,22 +77,6 @@ define(function(require) {
         return res;
     };
     
-    
-    var PrecomputeVars = function(data, total) {
-        var mean = Mean(data);
-        var a = {
-            cov:   CovarianceMatrix(data, mean),
-            n:     data1.length,
-            mean:  mean
-        };
-        a.meanT   = a.mean.transpose();
-        a.lnRatio      = Math.ln(a.n / total);
-        a.covDet     = a.cov.determinant();
-        a.covInverse = a.cov.inverse();
-
-        return a;
-    };
-    
     var self = {
         
         /// Obtain a linear discriminant model for classification.
