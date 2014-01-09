@@ -2,7 +2,6 @@ define(function(require) {
     var Input     = require("meier/engine/Input");
     var Entity    = require("meier/engine/Entity");
     var Rectangle = require("meier/math/Rectangle");
-    var Contains  = require("meier/math/Intersection").PointInRectangle;
     var Letter    = require("meier/math/Math").ToUpperLetter;
 
 
