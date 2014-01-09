@@ -96,10 +96,23 @@ define(function(require) {
         var local = this.toLocal(input);
         
         var coordinates = [];
+        var byOption    = {};
 
         // Reset the extremes:
         this.min   = new Vector(Infinity, Infinity);    
         this.max   = new Vector(-Infinity, -Infinity);  
+        
+        
+        var addByOption = function(entity) {
+            if(this._numOptions > 0) {
+                var key = entity._key || "NULL";
+                if( ! byOption[key]) {
+                    byOption[key] = [];
+                }
+                
+                byOption[key].push(entity.position);
+            }
+        }.bind(this);
         
         // Find an entity in range, and destroy it.
         var entities = this._entities.filter(function(entity) {
@@ -116,6 +129,8 @@ define(function(require) {
                 this.max.y = Math.max(this.max.y, entity.position.y);
                 
                 coordinates.push(entity.position);
+                
+                addByOption(entity);
             }
             
             return true;
@@ -133,15 +148,18 @@ define(function(require) {
             if(this._selected !== null) {
                 pixel.stroke = this._options[this._selected];
                 pixel.fill   = Color.Alpha(this._options[this._selected], 0.6);
+                pixel._key   = this._selected;
             }
 
             this.add(pixel);
 
             coordinates.push(pixel.position);
+            
+            addByOption(pixel);
         }
         
         // Trigger event.
-        this.onChange(coordinates);
+        this.onChange(coordinates, (this._numOptions > 0) ? byOption : null);
     };
     
     Frame.prototype.onLeftDown = function(input) {
