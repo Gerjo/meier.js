@@ -16,20 +16,10 @@ Array.prototype.shuffle = function(){
     throw new Error("Array::shuffle() function has not been loaded yet.");
 };
 
-(function() {
-    // Capture the original log function before overriding it
-    var log = Math.log;
-    
-    /// More expressive than Math.log()
-    Math.ln = function(r) {
-        return log(r);
-    };
-    
-    Math.log = function(r) {
-        throw new Error("This is not base10. Use Math.ln or implement a base 10 / base n");
-    };
-    
-})();
+/// More expressive than Math.log()
+Math.ln = function(r) {
+    return Math.log(r);
+};
 
 
 /// Assertion to be used for development only.
