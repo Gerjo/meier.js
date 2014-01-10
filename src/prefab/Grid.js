@@ -58,6 +58,8 @@ define(function(require) {
         if(this._selected === null) {
             this._selected = name;
         }
+        
+        return this;
     };
     
     Grid.prototype.selectOption = function(name) {
@@ -66,6 +68,8 @@ define(function(require) {
         } else {
             throw new Error("Grid::selectOption Cannot select " + name + " it's not an option.");
         }
+        
+        return this;
     };
     
     Grid.prototype.removeOption = function(name) {
@@ -78,6 +82,8 @@ define(function(require) {
             delete this._options[name];
             --this._numOptions;
         };
+        
+        return this;
     };
     
     Grid.prototype.numOptions = function() {
