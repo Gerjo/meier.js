@@ -2,7 +2,6 @@
  !* Part of meier.js - a game and math prototype library.
  !*  Copyright (C) 2013 Gerard J. Meier <gerjoo@gmail.com>
  !*
- !* TODO: rename to Voronoi.js
  !*/
 
 define(function(require) {

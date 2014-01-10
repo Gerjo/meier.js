@@ -6,7 +6,7 @@ define(function(require) {
     var Pixel     = require("meier/prefab/Pixel");
     var Vector    = require("meier/math/Vec")(2);
     var dat       = require("meier/contrib/datgui");
-    var Voronoi   = require("meier/math/Delaunay").Voronoi;
+    var Voronoi   = require("meier/math/Voronoi").Voronoi;
     var Colors    = require("meier/aux/Colors");
 
     Clustering.prototype = new Game();

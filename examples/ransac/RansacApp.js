@@ -5,9 +5,9 @@ define(function(require){
     var Vector        = require("meier/math/Vec")(2);
     var Disk          = require("meier/math/Disk");
     var Random        = require("meier/math/Random");
-    var Voronoi       = require("meier/math/Delaunay").Voronoi;
+    var Voronoi       = require("meier/math/Voronoi").Voronoi;
     var Colors        = require("meier/aux/Colors");
-    var Farthest      = require("meier/math/Delaunay").FarthestVoronoi;
+    var Farthest      = require("meier/math/Voronoi").FarthestVoronoi;
     var dat           = require("meier/contrib/datgui");
     var Hull          = require("meier/math/Hull").GiftWrap;
     var Disk          = require("meier/math/Disk");

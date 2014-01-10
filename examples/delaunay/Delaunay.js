@@ -8,8 +8,8 @@ define(function(require) {
     var dat       = require("meier/contrib/datgui");
     var Hull      = require("meier/math/Hull").GiftWrap;
 
-    var Voronoi   = require("meier/math/Delaunay").Voronoi;
-    var Delaunay  = require("meier/math/Delaunay").Triangulate;
+    var Voronoi   = require("meier/math/Voronoi").Voronoi;
+    var Delaunay  = require("meier/math/Voronoi").Triangulate;
     
 
     DelaunayApp.prototype = new Game();
