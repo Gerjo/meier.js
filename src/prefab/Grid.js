@@ -41,6 +41,25 @@ define(function(require) {
         this._selected   = null;
     }
     
+    Frame.prototype.clear = function() {
+        
+        // Remove only pixels
+        this._entities = this._entities.filter(function(entity) {
+            if(entity instanceof Pixel) {
+                return false;
+            }
+        });
+        
+        // Reset extremes
+        this.min   = new Vector(Infinity, Infinity);  
+        this.max   = new Vector(-Infinity, -Infinity);
+        
+        // Trigger change event (with empty datasets)
+        this.onChange([], (this._numOptions > 0) ? [] : null);
+        
+        return this;
+    };
+    
     Frame.prototype.onChange = function(coordinates) {
         console.log("Unoverridden onChange method in grid.");
     };
