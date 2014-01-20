@@ -97,6 +97,15 @@ define(function(require) {
     
     Frame.prototype.add = function(entity) {
         if(entity instanceof Pixel) {
+            
+            // Explicit infinity testing. Infinity is drawn at "0", which
+            // makes tracking bugs harder.
+            if(Math.abs(entity.position.x) == Infinity || Math.abs(entity.position.y) == Infinity) {
+                console.log("Grid::add(",entity,") Rejected entity, it's placed at infinity.");
+                
+                return this;
+            }
+            
             this.min.x = Math.min(this.min.x, entity.position.x);
             this.min.y = Math.min(this.min.y, entity.position.y);
 
