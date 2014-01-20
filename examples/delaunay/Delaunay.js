@@ -44,7 +44,7 @@ define(function(require) {
         
         this.gui = new dat.GUI();
         this.gui.add(this, "showCircumscribedCircle").name("Show Circumcircles");
-        this.gui.add(this, "showDelaunay").name("Delaunay Triangulatie");
+        this.gui.add(this, "showDelaunay").name("Delaunay Triangulate");
         this.gui.add(this, "showVoronoi").name("Voronoi Diagram");
         this.gui.width = 400;
     }
@@ -53,11 +53,6 @@ define(function(require) {
     DelaunayApp.prototype.recompute = function(coordinates) {
         this.coordinates = coordinates;
        
-    };
-    
-    DelaunayApp.prototype.update = function(dt) {
-        Game.prototype.update.call(this, dt);
-
     };
     
     DelaunayApp.prototype.draw = function(renderer) {
