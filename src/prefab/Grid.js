@@ -41,6 +41,25 @@ define(function(require) {
         this._selected   = null;
     }
     
+    Frame.prototype.clear = function() {
+        
+        // Remove only pixels
+        this._entities = this._entities.filter(function(entity) {
+            if(entity instanceof Pixel) {
+                return false;
+            }
+        });
+        
+        // Reset extremes
+        this.min   = new Vector(Infinity, Infinity);  
+        this.max   = new Vector(-Infinity, -Infinity);
+        
+        // Trigger change event (with empty datasets)
+        this.onChange([], (this._numOptions > 0) ? [] : null);
+        
+        return this;
+    };
+    
     Grid.prototype.onChange = function(coordinates) {
         console.log("Unoverridden onChange method in grid.");
     };
@@ -92,18 +111,43 @@ define(function(require) {
     
     Grid.prototype.add = function(entity) {
         if(entity instanceof Pixel) {
+            
+            // Explicit infinity testing. Infinity is drawn at "0", which
+            // makes tracking bugs harder.
+            if(Math.abs(entity.position.x) == Infinity || Math.abs(entity.position.y) == Infinity) {
+                console.log("Grid::add(",entity,") Rejected entity, it's placed at infinity.");
+                
+                return this;
+            }
+            
             this.min.x = Math.min(this.min.x, entity.position.x);
             this.min.y = Math.min(this.min.y, entity.position.y);
 
             this.max.x = Math.max(this.max.x, entity.position.x);
             this.max.y = Math.max(this.max.y, entity.position.y);
             
-        // It's probably a vector of sorts:
+        // It's probably a vector of sorts, create a pixel
+        // then recursively insert again.
         } else if( ! isNaN(entity.x)) {
-            return this.add(new Pixel(entity.x, entity.y));
+            return this.add(this._makePixel(entity.x, entity.y));
         }
         
         return Entity.prototype.add.call(this, entity);
+    };
+    
+
+    /// Factory method to generate pixels
+    Grid.prototype._makePixel = function(x, y) {
+        var pixel = new Pixel(x, y);
+        pixel.width = 2;
+
+        if(this._selected !== null) {
+            pixel.stroke = this._options[this._selected];
+            pixel.fill   = Color.Alpha(this._options[this._selected], 0.6);
+            pixel._key   = this._selected;
+        }
+        
+        return pixel;
     };
     
     Grid.prototype.addCoordinate = function(input) {
@@ -155,14 +199,7 @@ define(function(require) {
             
         // Nothing was removed, let's add a pixel:
         } else {
-            var pixel = new Pixel(input.x, input.y);
-            pixel.width = 4;
-
-            if(this._selected !== null) {
-                pixel.stroke = this._options[this._selected];
-                pixel.fill   = Color.Alpha(this._options[this._selected], 0.6);
-                pixel._key   = this._selected;
-            }
+            var pixel = this._makePixel(local.x, local.y);
 
             this.add(pixel);
 

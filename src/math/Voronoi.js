@@ -87,7 +87,7 @@ define(function(require) {
     }
     
     var self = {
-        
+        //test
         Triangle: Triangle,
         
         /// Generate a Voronoi diagram.

@@ -254,16 +254,16 @@ define(function(require) {
 
     Input.prototype.updatePosition = function(event) {
         var x, y;
-   
-        // Internet Explorer:
-        if(event.clientX) {
-            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
-            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
         
         // Chrome:
-        } else if(event.x) {
+        if(event.x) {
             x = event.x - this._container.offsetLeft + window.pageXOffset;
             y = event.y - this._container.offsetTop  + window.pageYOffset;
+    
+        // Internet Explorer:
+        } else if(event.clientX) {
+            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
+            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
     
         // Firefox:
         } else if(event.pageX) {
@@ -275,6 +275,7 @@ define(function(require) {
             x = event.changedTouches[0].pageX;
             y = event.changedTouches[0].pageY;
     
+        // Either an error, or a coordinate was 0, which evaluates to false.
         } else {
             //alert("Input::updatePosition Unable to determine X and Y coordinates.");
             //console.error("Input::updatePosition Unable to determine X and Y coordinates.");
@@ -288,11 +289,11 @@ define(function(require) {
             this._[0] = x - this._size.x * 0.5;
             this._[1] = (this._size.y * 0.5) - y;
     
-            // Trigger MOUSE_MOVE event:
+            // Trigger MOUSE_MOVE event, click is onscreen.
             return true;
         }
         
-        // Don't trigger MOUSE_MOVE event:
+        // Don't trigger MOUSE_MOVE event, click coordinate is off screen.
         return false;
     };
 
