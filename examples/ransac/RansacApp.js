@@ -90,7 +90,7 @@ define(function(require){
             // Introduce a sign {-1, 1}... imaginary logarithm?
             y = Math.ln(y) * x * RandomSign();
             
-            if(x == y && x == 0) {
+            if( ! this.grid.hasCoordinate(x, y)) {
                 --i;
                 continue;
             }
