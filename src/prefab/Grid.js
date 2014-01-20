@@ -120,6 +120,12 @@ define(function(require) {
                 return this;
             }
             
+            if(isNaN(entity.position.x) || isNaN(entity.position.y)) {
+                console.log("Grid::add(",entity,") Rejected entity, it's placed at NaN.");
+                
+                return this;
+            }
+            
             this.min.x = Math.min(this.min.x, entity.position.x);
             this.min.y = Math.min(this.min.y, entity.position.y);
 
