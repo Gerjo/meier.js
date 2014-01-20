@@ -255,15 +255,17 @@ define(function(require) {
     Input.prototype.updatePosition = function(event) {
         var x, y;
    
-        // Internet Explorer:
-        if(event.clientX) {
-            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
-            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
+   
         
         // Chrome:
-        } else if(event.x) {
+        if(event.x) {
             x = event.x - this._container.offsetLeft + window.pageXOffset;
             y = event.y - this._container.offsetTop  + window.pageYOffset;
+    
+        // Internet Explorer:
+        } else if(event.clientX) {
+            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
+            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
     
         // Firefox:
         } else if(event.pageX) {
