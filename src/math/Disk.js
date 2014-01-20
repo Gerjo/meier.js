@@ -52,6 +52,14 @@ define(function(require) {
     Disk.prototype.clone = function() {
         return new Disk(this.position.x, this.position.y, this.radius);
     };
+    
+    Disk.prototype.signedDistance = function(other) {
+        return Math.sqrt(Math.pow((other.x - this.position.x), 2) + Math.pow((other.y - this.position.y), 2)) - this.radius;
+    };
+    
+    Disk.prototype.distance = function(other) {
+        return Math.abs(Math.sqrt(Math.pow((other.x - this.position.x), 2) + Math.pow((other.y - this.position.y), 2)) - this.radius);
+    };
 
 
     return Disk;
