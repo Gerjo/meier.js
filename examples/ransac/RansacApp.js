@@ -70,7 +70,7 @@ define(function(require){
     RansacApp.prototype.generateLogarithmic = function() {
         this.grid.clear();
         
-        // Number of coordiates to add
+        // Number of coordinates to add
         var n = 50;
         
         // Scaling factor
@@ -88,8 +88,13 @@ define(function(require){
             x = Math.ln(x) * y;
             
             // Introduce a sign {-1, 1}... imaginary logarithm?
-            y = Math.ln(y) * x;// * RandomSign();
+            y = Math.ln(y) * x * RandomSign();
             
+            if(x == y && x == 0) {
+                --i;
+                continue;
+            }
+                        
             // Trigger a click on the last add. This forces a 
             // recomputation of internals.
             if(i == n - 1) {
