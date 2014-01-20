@@ -103,12 +103,27 @@ define(function(require) {
             this.max.x = Math.max(this.max.x, entity.position.x);
             this.max.y = Math.max(this.max.y, entity.position.y);
             
-        // It's probably a vector of sorts:
+        // It's probably a vector of sorts, create a pixel
+        // then recursively insert again.
         } else if( ! isNaN(entity.x)) {
-            return this.add(new Pixel(entity.x, entity.y));
+            return this.add(this._makePixel(entity.x, entity.y));
         }
         
         return Entity.prototype.add.call(this, entity);
+    };
+    
+    /// Factory method to generate pixels
+    Frame.prototype._makePixel = function(x, y) {
+        var pixel = new Pixel(x, y);
+        pixel.width = 4;
+
+        if(this._selected !== null) {
+            pixel.stroke = this._options[this._selected];
+            pixel.fill   = Color.Alpha(this._options[this._selected], 0.6);
+            pixel._key   = this._selected;
+        }
+        
+        return pixel;
     };
     
     Frame.prototype.addCoordinate = function(input) {
@@ -160,14 +175,7 @@ define(function(require) {
             
         // Nothing was removed, let's add a pixel:
         } else {
-            var pixel = new Pixel(input.x, input.y);
-            pixel.width = 4;
-
-            if(this._selected !== null) {
-                pixel.stroke = this._options[this._selected];
-                pixel.fill   = Color.Alpha(this._options[this._selected], 0.6);
-                pixel._key   = this._selected;
-            }
+            var pixel = this._makePixel(local.x, local.y);
 
             this.add(pixel);
 
