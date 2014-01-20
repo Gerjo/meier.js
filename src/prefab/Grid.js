@@ -124,7 +124,7 @@ define(function(require) {
     /// Factory method to generate pixels
     Frame.prototype._makePixel = function(x, y) {
         var pixel = new Pixel(x, y);
-        pixel.width = 4;
+        pixel.width = 2;
 
         if(this._selected !== null) {
             pixel.stroke = this._options[this._selected];

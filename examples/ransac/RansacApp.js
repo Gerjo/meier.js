@@ -37,10 +37,10 @@ define(function(require){
         
         this.showVoronoi = true;
         this.showLeastSquareCircle = false;
-        this.showFarthestVoronoi = true;
+        this.showFarthestVoronoi = false;true;
         this.showDelaunay = false;
         this.showHull = false;
-        this.showVoronoiAnnulus = true;
+        this.showVoronoiAnnulus = false;true;
         this.showFarthestAnnulus = true;
         
         
@@ -88,7 +88,7 @@ define(function(require){
             x = Math.ln(x) * y;
             
             // Introduce a sign {-1, 1}... imaginary logarithm?
-            y = Math.ln(y) * x * RandomSign();
+            y = Math.ln(y) * x;// * RandomSign();
             
             // Trigger a click on the last add. This forces a 
             // recomputation of internals.
