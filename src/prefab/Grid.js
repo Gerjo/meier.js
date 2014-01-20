@@ -41,7 +41,7 @@ define(function(require) {
         this._selected   = null;
     }
     
-    Frame.prototype.clear = function() {
+    Grid.prototype.clear = function() {
         
         // Remove only pixels
         this._entities = this._entities.filter(function(entity) {
