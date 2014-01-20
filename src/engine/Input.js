@@ -254,8 +254,6 @@ define(function(require) {
 
     Input.prototype.updatePosition = function(event) {
         var x, y;
-   
-   
         
         // Chrome:
         if(event.x) {
@@ -277,6 +275,7 @@ define(function(require) {
             x = event.changedTouches[0].pageX;
             y = event.changedTouches[0].pageY;
     
+        // Either an error, or a coordinate was 0, which evaluates to false.
         } else {
             //alert("Input::updatePosition Unable to determine X and Y coordinates.");
             //console.error("Input::updatePosition Unable to determine X and Y coordinates.");
@@ -290,11 +289,11 @@ define(function(require) {
             this._[0] = x - this._size.x * 0.5;
             this._[1] = (this._size.y * 0.5) - y;
     
-            // Trigger MOUSE_MOVE event:
+            // Trigger MOUSE_MOVE event, click is onscreen.
             return true;
         }
         
-        // Don't trigger MOUSE_MOVE event:
+        // Don't trigger MOUSE_MOVE event, click coordinate is off screen.
         return false;
     };
 
