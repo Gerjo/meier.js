@@ -253,20 +253,25 @@ define(function(require){
     function SmallestAnnulus(centers, coordinates) {
         var best = null; 
 
+        // Test all posible centers i.e., voronoi vertices to find
+        // the smallest annulus.
         centers.forEach(function(center) {
-            var closest  = ClosestVector(center, coordinates);
-            var farthest = FarthestVector(center, coordinates);
             
-            var cd = closest.distance(center);
-            var fd = farthest.distance(center);
+            // Closest to center (inner radius).
+            var closestDistance  = ClosestVector(center, coordinates).distance(center);
             
-            var annulus = fd - cd;
+            // Farthest removed from center (outer radius).
+            var farthestDistance = FarthestVector(center, coordinates).distance(center);
             
+            // Difference gives the annulus width.
+            var annulus = farthestDistance - closestDistance;
+            
+            // Accept only the smallest annulus
             if(best == null || annulus < best.annulus) {
                 best = {
                     center:     center,
-                    closest:    cd,
-                    farthest:   fd,
+                    closest:    closestDistance,
+                    farthest:   farthestDistance,
                     annulus:    annulus
                 };
             }
