@@ -28,21 +28,18 @@ define(function(require){
         this.grid.onChange = this.onChange.bind(this);
         
         this.coordinates = [];
-        
-        var r = 200;
-        Random.Seed(11);
- 
-        
-        this.colors = Colors.Random(50);
-        
-        this.showVoronoi = true;
+                
+        this.showVoronoi = false;true;
         this.showLeastSquareCircle = false;
         this.showFarthestVoronoi = false;true;
         this.showDelaunay = false;
         this.showHull = false;
         this.showVoronoiAnnulus = false;true;
-        this.showFarthestAnnulus = true;
+        this.showFarthestAnnulus = false;true;
+        this.showRansac = true;
         
+        this.ransacDisk = null;
+        this.ransacConsensus = null;
         
         this.gui = new dat.GUI();
         var folder = this.gui.addFolder("Debug visibility state");
@@ -55,16 +52,14 @@ define(function(require){
         folder.add(this, "showVoronoiAnnulus").name("By Voronoi");
         folder.add(this, "showFarthestAnnulus").name("By Farthest");
         folder.add(this, "showLeastSquareCircle").name("By Least Squares");
+        folder.add(this, "showRansac").name("By RANSAC");
         
         folder = this.gui.addFolder("Randomness");
         folder.add(this.grid, "clear").name("Clear");
         folder.add(this, "generateLogarithmic").name("Logarithmic Curve");
         folder.add(this, "generateNoisyCircle").name("Noisy Circle");
-        
-        this.verbose = true;
-        
+                
         this.generateLogarithmic();
-        //this.grid.onLeftDown(new Vector(0, 0));
     }
     
     RansacApp.prototype.generateLogarithmic = function() {
@@ -90,6 +85,7 @@ define(function(require){
             // Introduce a sign {-1, 1}... imaginary logarithm?
             y = Math.ln(y) * x * RandomSign();
             
+            // Voronoi crashes with non unique coordinates
             if( ! this.grid.hasCoordinate(x, y)) {
                 --i;
                 continue;
@@ -144,22 +140,74 @@ define(function(require){
         if(coordinates instanceof Array) {
             this.coordinates = coordinates;
         }
-        
-        this.verbose = true;
+
+        // Restart ransac guessing
+        this.ransacDisk = null;
     };
     
     RansacApp.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
         
+        // Don't bother computing if it's hidden.
+        if(this.showRansac) {
+            this.ransac(this.coordinates);
+        }
+    };
+    
+    RansacApp.prototype.ransac = function(coordinates) {
+        var k = 1; // Repetitions
+        var t = 5; // Maximal error
+        
+        if(coordinates.length < 3) {
+            return;
+        }
+        
+        var bestConsensus = this.ransacConsensus || [];
+        var bestModel = this.ransacDisk || null;
+
+        while(k-- > 0) {
+            // Randomly shuffle all candidates
+            var candidates = coordinates.clone().shuffle();
+            
+            // Pick initial coordinates
+            var consensus  = candidates.splice(0, 3);
+    
+            // Our model is a circle that runs through the initial 3 coordinates
+            var model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
+    
+            // Find candidates with an error < t
+            for(var i = 0; i < candidates.length; ++i) {
+                if(model.distance(candidates[i]) <= t) {
+                    consensus.push(candidates.splice(i, 1));
+                }
+            }
+            
+            // Compare previously best model
+            if( ! bestModel || consensus.length > bestConsensus.length) {
+                bestModel     = model;
+                bestConsensus = consensus   
+            }
+        }
+        
+        this.ransacDisk = bestModel;
+        this.ransacConsensus = bestConsensus;
     };
     
     RansacApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
+        
         // It takes 3 for a non ambiguous circle.
         if(this.coordinates.length < 3) {
             return;
         }
+        
+        if(this.showRansac && this.ransacDisk) {
+            renderer.begin();
+            renderer.circle(this.ransacDisk);
+            renderer.stroke("purple", 4);
+        }
+        
         
         var farthest = Farthest(this.coordinates);
         var voronoi  = Voronoi(this.coordinates);
@@ -168,7 +216,7 @@ define(function(require){
         var farthestColor = Colors.red;
         
         if(this.showLeastSquareCircle) {
-            var disk = LeastSqCircle(Hull(this.coordinates));
+            var disk = LeastSqCircle(this.coordinates);
             renderer.begin();
             renderer.circle(disk);
             renderer.fill("rgba(255, 0, 255, 0.3)");
@@ -287,38 +335,3 @@ define(function(require){
     
     return RansacApp;
 });
-
-
-
-
-
-
-
-/**
-
-var k = 10; // Repetitions
-var n = 2;  // Initial coordiates
-var t = 20; // Maximal error
-
-
-while(--k > 0) {
-    var coordinates = this.coordinates.clone().shuffle();
-    var maybe_inliers = [];
-    
-    // Gather baseline
-    for(var i = 0; i < n; ++i) {
-        maybe_inliers.push(maybe_inliers.pop());
-    }
-    
-    var consensus_set = maybe_inliers.clone();
-    
-    // Find those who fall in error < t
-    for(var i = 0; i < coordinates.length; ++i) {
-        if() {
-            
-        }
-    }
-    
-        }
-
-**/
