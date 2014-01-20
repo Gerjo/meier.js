@@ -60,6 +60,14 @@ define(function(require) {
         return this;
     };
     
+    Grid.prototype.hasCoordinate = function(x, y) {
+        return this._entities.every(function(entity) {
+            if(entity instanceof Pixel) {
+                return entity.position.x != x && entity.position.y != y;
+            }
+        });
+    };
+    
     Grid.prototype.onChange = function(coordinates) {
         console.log("Unoverridden onChange method in grid.");
     };
@@ -145,7 +153,7 @@ define(function(require) {
     /// Factory method to generate pixels
     Grid.prototype._makePixel = function(x, y) {
         var pixel = new Pixel(x, y);
-        pixel.width = 2;
+        pixel.width = 4;
 
         if(this._selected !== null) {
             pixel.stroke = this._options[this._selected];
