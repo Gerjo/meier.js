@@ -30,13 +30,8 @@ define(function(require){
         this.coordinates = [];
         
         var r = 200;
-        Random.Seed(10);
-        
-        for(var i = 0; i < Math.TwoPI; i += Math.TwoPI/4) {
-            var n = Random(-10, 10);
-            this.grid.onLeftDown(new Vector(Math.cos(i) * r + n, Math.sin(i) * r + n));
-        }
-        
+        Random.Seed(11);
+ 
         
         this.colors = Colors.Random(50);
         
@@ -56,21 +51,95 @@ define(function(require){
         folder.add(this, "showFarthestVoronoi").name("Farthest Voronoi");
         folder.add(this, "showHull").name("Convex Hull");
         
-        var folder = this.gui.addFolder("Annulus visibility state");
+        folder = this.gui.addFolder("Annulus visibility state");
         folder.add(this, "showVoronoiAnnulus").name("By Voronoi");
         folder.add(this, "showFarthestAnnulus").name("By Farthest");
         folder.add(this, "showLeastSquareCircle").name("By Least Squares");
         
-        
+        folder = this.gui.addFolder("Randomness");
+        folder.add(this.grid, "clear").name("Clear");
+        folder.add(this, "generateLogarithmic").name("Logarithmic Curve");
+        folder.add(this, "generateNoisyCircle").name("Noisy Circle");
         
         this.verbose = true;
+        
+        this.generateLogarithmic();
+        //this.grid.onLeftDown(new Vector(0, 0));
     }
+    
+    RansacApp.prototype.generateLogarithmic = function() {
+        this.grid.clear();
+        
+        // Number of coordiates to add
+        var n = 50;
+        
+        // Scaling factor
+        var d = 20;
+        
+        // Function to generate a random sign
+        var RandomSign = function() {
+            return Random(0, 1) == 0 ? -1 : 1;
+        };
+        
+        for(var i = 0, x, y; i < n; ++i) {
+            x = Random(1, d);
+            y = Random(1, d);
+            
+            x = Math.ln(x) * y;
+            
+            // Introduce a sign {-1, 1}... imaginary logarithm?
+            y = Math.ln(y) * x * RandomSign();
+            
+            // Trigger a click on the last add. This forces a 
+            // recomputation of internals.
+            if(i == n - 1) {
+                this.grid.onLeftDown(new Vector(x, y));
+            } else {
+                this.grid.add(new Vector(x, y));
+            }
+        }
+    };
+    
+    RansacApp.prototype.generateNoisyCircle = function(noise) {
+        this.grid.clear();
+        
+        
+        // The radius
+        var radius = Random(100, 200);
+        
+        // Center of the circle
+        var center = new Vector(Random(-30, 30), Random(-30, 30));
+        
+        // Number of points to generate
+        var n      = 50;
+        
+        // Noise margin [-e, e]
+        var e      = isNaN(noise) ? 10 : noise; 
+        
+        for(var i = 0, x, y, angle = 0, error; i < n; ++i) {
+            angle += Math.TwoPI / n;
+            
+            error = Random(-e, e);
+            
+            x = Math.cos(angle) * radius + center.x + error;
+            y = Math.sin(angle) * radius + center.y + error;
+            
+            
+            // Trigger a click on the last add. This forces a 
+            // recomputation of internals.
+            if(i == n - 1) {
+                this.grid.onLeftDown(new Vector(x, y));
+            } else {
+                this.grid.add(new Vector(x, y));
+            }
+        }
+    };
     
     RansacApp.prototype.onChange = function(coordinates) {
         if(coordinates instanceof Array) {
             this.coordinates = coordinates;
         }
-                
+        
         this.verbose = true;
     };
     
