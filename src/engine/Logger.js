@@ -53,7 +53,12 @@ define(function(require){
     };
 
     Logger.prototype.show = function(doShow) {
-        this.showLogger = doShow;
+        this.showLogger = doShow === false ? false : true;
+        return this;
+    };
+    
+    Logger.prototype.hide = function() {
+        this.show(false);
         return this;
     };
 
