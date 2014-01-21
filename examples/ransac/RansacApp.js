@@ -38,8 +38,11 @@ define(function(require){
         this.showFarthestAnnulus = false;true;
         this.showRansac = true;
         
-        this.ransacDisk = null;
+        this.ransacDisk      = null;
         this.ransacConsensus = null;
+        this.ransacAnnulus   = Infinity;
+        this.ransacNearest   = Infinity;
+        this.ransacFarthest  = -Infinity;
         
         this.gui = new dat.GUI();
         var folder = this.gui.addFolder("Debug visibility state");
@@ -143,6 +146,9 @@ define(function(require){
 
         // Restart ransac guessing
         this.ransacDisk = null;
+        this.ransacAnnulus = Infinity;
+        this.ransacNearest   = Infinity;
+        this.ransacFarthest  = -Infinity;
     };
     
     RansacApp.prototype.update = function(dt) {
@@ -163,8 +169,11 @@ define(function(require){
         }
         
         var bestConsensus = this.ransacConsensus || [];
-        var bestModel = this.ransacDisk || null;
-
+        var bestModel     = this.ransacDisk || null;
+        var bestAnnulus   = this.ransacAnnulus;
+        var bestNearest   = this.ransacNearest;
+        var bestFarthest  = this.ransacFarthest;
+        
         while(k-- > 0) {
             // Randomly shuffle all candidates
             var candidates = coordinates.clone().shuffle();
@@ -175,8 +184,36 @@ define(function(require){
             // Our model is a circle that runs through the initial 3 coordinates
             var model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
     
-            // Find candidates with an error < t
+            // Extrema
+            var farthestDistance = -Infinity;
+            var nearestDistance  = Infinity;
+    
+            // See how well the points fit the model
             for(var i = 0; i < candidates.length; ++i) {
+                var distance = candidates[i].distance(model.position);
+                
+                if(distance > farthestDistance) {
+                    farthestDistance = distance;
+                }
+                
+                if(distance < nearestDistance) {
+                    nearestDistance = distance;
+                }
+            }
+            
+            // Resulting annulus width
+            var annulus = farthestDistance - nearestDistance;
+            
+            if(annulus < bestAnnulus) {
+                bestAnnulus  = annulus;
+                bestModel    = model;
+                bestFarthest = farthestDistance;
+                bestNearest  = nearestDistance;
+            }
+            
+    
+            // Find candidates with an error < t
+            /*for(var i = 0; i < candidates.length; ++i) {
                 if(model.distance(candidates[i]) <= t) {
                     consensus.push(candidates.splice(i, 1));
                 }
@@ -186,11 +223,14 @@ define(function(require){
             if( ! bestModel || consensus.length > bestConsensus.length) {
                 bestModel     = model;
                 bestConsensus = consensus   
-            }
+            }*/
         }
         
-        this.ransacDisk = bestModel;
         this.ransacConsensus = bestConsensus;
+        this.ransacAnnulus   = bestAnnulus;
+        this.ransacDisk      = bestModel;
+        this.ransacNearest   = bestNearest;
+        this.ransacFarthest  = bestFarthest;
     };
     
     RansacApp.prototype.draw = function(renderer) {
@@ -204,10 +244,16 @@ define(function(require){
         
         if(this.showRansac && this.ransacDisk) {
             renderer.begin();
-            renderer.circle(this.ransacDisk);
-            renderer.stroke("purple", 4);
+            renderer.circle(this.ransacDisk.position, this.ransacNearest + this.ransacAnnulus*0.5);
+            renderer.stroke(Colors.Alpha("purple", 0.3), this.ransacAnnulus);
+            
+            renderer.begin();
+            renderer.circle(this.ransacDisk.position, this.ransacNearest);
+            renderer.circle(this.ransacDisk.position, this.ransacFarthest);
+            renderer.stroke("purple");
         }
         
+
         
         var farthest = Farthest(this.coordinates);
         var voronoi  = Voronoi(this.coordinates);
