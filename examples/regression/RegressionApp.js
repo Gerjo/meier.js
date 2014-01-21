@@ -59,11 +59,11 @@ define(function(require) {
         
         Random.Seed(1);
         
-        for(var x = -hw; x <= hw; x += Random.Range(20, 50)) {
+        for(var x = -hw; x <= hw; x += Random(20, 50)) {
             var t = (x + hw) / w * Math.PI;
             
             var v = new Vector(x, Math.sin(t) * 100);
-            v.y += Random.Range(-20, 20);
+            v.y += Random(-20, 20);
             this.grid.onLeftDown(v);            
         }
     }
