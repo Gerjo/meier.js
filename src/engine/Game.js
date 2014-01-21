@@ -33,8 +33,9 @@ define(function(require) {
             return;
         }        
 
-        this.isTablet = ('ontouchstart' in document.documentElement);
-        this.isSlow   = false;
+        // This is mostly a TODO thing
+        this.isTablet        = ('ontouchstart' in document.documentElement);
+        this.isSlow          = false;
     
         // Update loop related matter:
         this._frameCounter   = 0;               // frame counter.
@@ -69,8 +70,8 @@ define(function(require) {
         this._doClear        = true;
     }
     
-    Game.prototype.log = function(key, value) {
-        this.logger.log(key, value);
+    Game.prototype.log = function(key, value, color) {
+        this.logger.log(key, value, color);
     };
     
     Game.prototype.add = function(entity) {
