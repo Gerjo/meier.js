@@ -1,18 +1,18 @@
 define(function(require){
-    var Game          = require("meier/engine/Game");
-    var Grid          = require("meier/prefab/Grid");
-    var LeastSqCircle = require("meier/math/Math").LeastSquaresCircle
-    var Vector        = require("meier/math/Vec")(2);
-    var Disk          = require("meier/math/Disk");
-    var Random        = require("meier/math/Random");
-    var Voronoi       = require("meier/math/Voronoi").Voronoi;
-    var Colors        = require("meier/aux/Colors");
-    var Farthest      = require("meier/math/Voronoi").FarthestVoronoi;
-    var dat           = require("meier/contrib/datgui");
-    var Hull          = require("meier/math/Hull").GiftWrap;
-    var Disk          = require("meier/math/Disk");
-    var ClosestVector = require("meier/math/Math").ClosestVector;
-    var FarthestVector= require("meier/math/Math").FarthestVector;
+    var Game            = require("meier/engine/Game");
+    var Grid            = require("meier/prefab/Grid");
+    var LeastSqCircle   = require("meier/math/Math").LeastSquaresCircle
+    var Vector          = require("meier/math/Vec")(2);
+    var Disk            = require("meier/math/Disk");
+    var Random          = require("meier/math/Random");
+    var NearestVoronoi  = require("meier/math/Voronoi").Voronoi;
+    var Colors          = require("meier/aux/Colors");
+    var FarthestVoronoi = require("meier/math/Voronoi").FarthestVoronoi;
+    var dat             = require("meier/contrib/datgui");
+    var Hull            = require("meier/math/Hull").GiftWrap;
+    var Disk            = require("meier/math/Disk");
+    var ClosestVector   = require("meier/math/Math").ClosestVector;
+    var FarthestVector  = require("meier/math/Math").FarthestVector;
     
     RansacApp.prototype = new Game();
     
@@ -20,50 +20,74 @@ define(function(require){
         Game.call(this, container);
 
         // Debug logger alignment and visiblity
-        this.logger.top().left()//.hide();
+        this.logger.top().left().hideInternals().setFontSize(15);
         
+        // Run at interactive speed
         this.setFps(15);
                 
+        // Setup an interactive convas
         this.grid = new Grid(0, 0, this.width, this.height);
         this.add(this.grid);
         this.grid.setEditable(true);
         this.grid.onChange = this.onChange.bind(this);
         
+        // Will hold the canvas coordinates
         this.coordinates = [];
+        
+        // Will hold all generated annuli
+        this.annuli = {
+            farthest: null,
+            nearest:  null,
+            ransac:   null
+        };
                 
-        this.showVoronoi = false;true;
+        // Visibility states
+        this.showVoronoi           = false;
         this.showLeastSquareCircle = false;
-        this.showFarthestVoronoi = false;true;
-        this.showDelaunay = false;
-        this.showHull = false;
-        this.showVoronoiAnnulus = false;true;
-        this.showFarthestAnnulus = false;true;
-        this.showRansac = true;
+        this.showFarthestVoronoi   = false;
+        this.showDelaunay          = false;
+        this.showHull              = false;
+        this.showVoronoiAnnulus    = true;
+        this.showFarthestAnnulus   = true;
+        this.showRansacAnnulus     = true;
         
-        this.ransacDisk      = null;
-        this.ransacConsensus = null;
-        this.ransacAnnulus   = Infinity;
-        this.ransacNearest   = Infinity;
-        this.ransacFarthest  = -Infinity;
+        // Ransac options 
+        this.ransacK      = 200;
+        this.ransacModels = ["Circumcircle", "Mean Position"];
+        this.ransacModel  = this.ransacModels.first();
         
+        // We use "dat.GUI" project for the interface.
         this.gui = new dat.GUI();
+        
+        // Debug visibility
         var folder = this.gui.addFolder("Debug visibility state");
         folder.add(this, "showVoronoi").name("Voronoi");
         folder.add(this, "showDelaunay").name("Delaunay");
         folder.add(this, "showFarthestVoronoi").name("Farthest Voronoi");
         folder.add(this, "showHull").name("Convex Hull");
+        folder.add(this, "showLeastSquareCircle").name("Least Squares");
         
+        // Annulus visibility
         folder = this.gui.addFolder("Annulus visibility state");
         folder.add(this, "showVoronoiAnnulus").name("By Voronoi");
         folder.add(this, "showFarthestAnnulus").name("By Farthest");
-        folder.add(this, "showLeastSquareCircle").name("By Least Squares");
-        folder.add(this, "showRansac").name("By RANSAC");
+        folder.add(this, "showRansacAnnulus").name("By RANSAC");
         
+        // Canvas editing options
         folder = this.gui.addFolder("Randomness");
         folder.add(this.grid, "clear").name("Clear");
         folder.add(this, "generateLogarithmic").name("Logarithmic Curve");
         folder.add(this, "generateNoisyCircle").name("Noisy Circle");
-                
+        
+        // RANSAC options
+        folder = this.gui.addFolder("RANSAC");
+        folder.add(this, "ransacK", 1, 10000).name("K (repetitions)").onChange(this.onChange.bind(this));
+        folder.add(this, "ransacModel", this.ransacModels).name("Model").onChange(this.onChange.bind(this));
+        folder.add(this, "ransacIterate").name("Run K more iterations");
+        folder.add(this, "onChange").name("Restart");
+        
+        
+        // Show some default data
         this.generateLogarithmic();
     }
     
@@ -109,7 +133,6 @@ define(function(require){
     RansacApp.prototype.generateNoisyCircle = function(noise) {
         this.grid.clear();
         
-        
         // The radius
         var radius = Random(100, 200);
         
@@ -125,11 +148,12 @@ define(function(require){
         for(var i = 0, x, y, angle = 0, error; i < n; ++i) {
             angle += Math.TwoPI / n;
             
+            // Positional error
             error = Random(-e, e);
             
+            // Parametric circle
             x = Math.cos(angle) * radius + center.x + error;
             y = Math.sin(angle) * radius + center.y + error;
-            
             
             // Trigger a click on the last add. This forces a 
             // recomputation of internals.
@@ -141,219 +165,202 @@ define(function(require){
         }
     };
     
+    RansacApp.prototype.ransacIterate = function() {
+        
+        if(this.coordinates.length < 3) {
+            return;
+        }
+        
+        var estimationModel = this.ransacModels.indexOf(this.ransacModel);
+        this.annuli.ransac = this.ransac(this.coordinates, this.ransacK, estimationModel, this.annuli.ransac);        
+        this.annuli.ransac.name  = "RANSAC";
+        this.annuli.ransac.color = Colors.purple;
+    };
+    
     RansacApp.prototype.onChange = function(coordinates) {
         if(coordinates instanceof Array) {
             this.coordinates = coordinates;
         }
 
-        // Restart ransac guessing
-        this.ransacDisk = null;
-        this.ransacAnnulus = Infinity;
-        this.ransacNearest   = Infinity;
-        this.ransacFarthest  = -Infinity;
-    };
-    
-    RansacApp.prototype.update = function(dt) {
-        Game.prototype.update.call(this, dt);
-        
-        // Don't bother computing if it's hidden.
-        if(this.showRansac) {
-            this.ransac(this.coordinates);
-        }
-    };
-    
-    RansacApp.prototype.ransac = function(coordinates) {
-        var k = 1; // Repetitions
-        var t = 5; // Maximal error
-        
-        if(coordinates.length < 3) {
+        if(this.coordinates.length < 3) {
             return;
         }
+
+        // TODO: bundle code for each access
+        this.leastSquaresDisk = LeastSqCircle(this.coordinates);        
+        this.farthestVoronoi  = FarthestVoronoi(this.coordinates);
+        this.nearestVoronoi   = NearestVoronoi(this.coordinates);
         
-        var bestConsensus = this.ransacConsensus || [];
-        var bestModel     = this.ransacDisk || null;
-        var bestAnnulus   = this.ransacAnnulus;
-        var bestNearest   = this.ransacNearest;
-        var bestFarthest  = this.ransacFarthest;
+        // Reduce the collection of delaunay triangles into a large list with
+        // all their circumcircles, i.e., voronoi vertices.
+        var vertices = this.nearestVoronoi.reduce(function(previous, current) {
+            previous.merge(current.a.neighbours);
+            previous.merge(current.b.neighbours);
+            previous.merge(current.c.neighbours);
+            
+            return previous;
+        }, []);
+        
+        this.annuli.nearest = SmallestAnnulus(vertices, this.coordinates);        
+        this.annuli.nearest.name  = "Nearest Voronoi";
+        this.annuli.nearest.color = Colors.green;
+        
+        this.annuli.farthest = SmallestAnnulus(this.farthestVoronoi.vertices, this.coordinates);        
+        this.annuli.farthest.name  = "Farthest Voronoi";
+        this.annuli.farthest.color = Colors.red;
+        
+        var estimationModel = this.ransacModels.indexOf(this.ransacModel);
+        this.annuli.ransac = this.ransac(this.coordinates, this.ransacK, estimationModel);        
+        this.annuli.ransac.name  = "RANSAC";
+        this.annuli.ransac.color = Colors.purple;
+    };
+    
+    RansacApp.prototype.ransac = function(coordinates, k, estimationModel, bestAnnulus) {  
+        
+        k = Math.max(1, k);
+              
+        // Initial annulus
+        var bestAnnulus = bestAnnulus || null;
+        var bestModel   = null;
         
         while(k-- > 0) {
             // Randomly shuffle all candidates
             var candidates = coordinates.clone().shuffle();
             
             // Pick initial coordinates
-            var consensus  = candidates.splice(0, 3);
+            var consensus = [candidates[0], candidates[1], candidates[2]];
     
             // Our model is a circle that runs through the initial 3 coordinates
-            var model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
-    
-            // Extrema
-            var farthestDistance = -Infinity;
-            var nearestDistance  = Infinity;
-    
+            var model;
+            
+            if(estimationModel == 0) {
+                 model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
+            } else if(estimationModel == 1) {
+                var center = consensus.reduce(function(c, v) {
+                    return c.add(v);
+                }, new Vector(0, 0)).scaleScalar(1 / consensus.length);
+                
+                model = new Disk(center, 0);
+            } else {
+                throw new Error("Not a valid estimation model. Try '0' or '1'.");
+            }
+            
+            
+            // Initial annulus
+            var annulus = new Annulus(model.position);
+        
             // See how well the points fit the model
             for(var i = 0; i < candidates.length; ++i) {
                 var distance = candidates[i].distance(model.position);
                 
-                if(distance > farthestDistance) {
-                    farthestDistance = distance;
+                // Test for a better outer radius
+                if(distance > annulus.max) {
+                    annulus.max = distance;
                 }
                 
-                if(distance < nearestDistance) {
-                    nearestDistance = distance;
+                // Test for a better inner radius
+                if(distance < annulus.min) {
+                    annulus.min = distance;
                 }
             }
             
-            // Resulting annulus width
-            var annulus = farthestDistance - nearestDistance;
-            
-            if(annulus < bestAnnulus) {
+            // Is the new better than the previous?
+            if(bestAnnulus == null || annulus.width < bestAnnulus.width) {
                 bestAnnulus  = annulus;
                 bestModel    = model;
-                bestFarthest = farthestDistance;
-                bestNearest  = nearestDistance;
             }
-            
-    
-            // Find candidates with an error < t
-            /*for(var i = 0; i < candidates.length; ++i) {
-                if(model.distance(candidates[i]) <= t) {
-                    consensus.push(candidates.splice(i, 1));
-                }
-            }
-            
-            // Compare previously best model
-            if( ! bestModel || consensus.length > bestConsensus.length) {
-                bestModel     = model;
-                bestConsensus = consensus   
-            }*/
         }
-        
-        this.ransacConsensus = bestConsensus;
-        this.ransacAnnulus   = bestAnnulus;
-        this.ransacDisk      = bestModel;
-        this.ransacNearest   = bestNearest;
-        this.ransacFarthest  = bestFarthest;
+                
+        // And the winner is...
+        return bestAnnulus;
     };
     
     RansacApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
+        for(var k in this.annuli) {
+            if(this.annuli.hasOwnProperty(k)) {
+                if(this.annuli[k] != null) {
+                    this.log(this.annuli[k].name, "" + this.annuli[k].width.toFixed(6) + "px wide", this.annuli[k].color);
+                }
+            }
+        }
         
         // It takes 3 for a non ambiguous circle.
         if(this.coordinates.length < 3) {
             return;
         }
         
-        if(this.showRansac && this.ransacDisk) {
-            renderer.begin();
-            renderer.circle(this.ransacDisk.position, this.ransacNearest + this.ransacAnnulus*0.5);
-            renderer.stroke(Colors.Alpha("purple", 0.3), this.ransacAnnulus);
-            
-            renderer.begin();
-            renderer.circle(this.ransacDisk.position, this.ransacNearest);
-            renderer.circle(this.ransacDisk.position, this.ransacFarthest);
-            renderer.stroke("purple");
+        if(this.showRansacAnnulus) {
+            this.annuli.ransac.draw(renderer);
         }
         
-
+        if(this.showVoronoiAnnulus) {
+            this.annuli.nearest.draw(renderer);
+        }
         
-        var farthest = Farthest(this.coordinates);
-        var voronoi  = Voronoi(this.coordinates);
-        
-        var voronoiColor  = Colors.green;
-        var farthestColor = Colors.red;
+        if(this.showFarthestAnnulus) {
+            this.annuli.farthest.draw(renderer);
+        }
         
         if(this.showLeastSquareCircle) {
-            var disk = LeastSqCircle(this.coordinates);
             renderer.begin();
-            renderer.circle(disk);
+            renderer.circle(this.leastSquaresDisk);
             renderer.fill("rgba(255, 0, 255, 0.3)");
             renderer.stroke("rgba(255, 0, 255, 0.7)");
         }
         
-        
         if(this.showFarthestVoronoi) {
-            // Voronoi edges
+            // The edges are drawn as line segments
             renderer.begin();
-            farthest.edges.forEach(renderer.line.bind(renderer));
-            renderer.stroke(Colors.Alpha(farthestColor, 0.7), 1);
-        
-            // Circumcircle centers
-            //renderer.begin();
-            //farthest.vertices.forEach(function(v) {
-            //    renderer.circle(v, 4);
-            //});
-            //renderer.fill("black");
+            this.farthestVoronoi.edges.forEach(renderer.line.bind(renderer));
+            renderer.stroke(Colors.Alpha(this.annuli.farthest.color , 0.7), 1);
         }
         
-        if(this.showVoronoi || this.showDelaunay) {
-            if(this.showVoronoi) {
-                // Each coordinate is also a Voronoi cell
-                this.coordinates.forEach(function(coordinate, i) {
-                    renderer.begin();
-                    renderer.polygon(coordinate.neighbours);
-                    renderer.stroke(Colors.Alpha(voronoiColor, 0.7), 1);
-                }.bind(this));
-            }
-            
-            // This is just here... because we can.
-            if(this.showDelaunay) {
-                voronoi.forEach(function(triangle) {
-                    renderer.begin();
-                    triangle.draw(renderer);
-                    renderer.stroke("#393939", 1);
-                });
-            }
+        if(this.showVoronoi) {
+            this.coordinates.forEach(function(coordinate, i) {
+                // Draw each voronoi cell as a polygon
+                renderer.begin();
+                renderer.polygon(coordinate.neighbours);
+                renderer.stroke(Colors.Alpha(this.annuli.nearest.color, 0.7), 1);
+            }.bind(this));
+        }
+        
+        // Cannot show a voronoi without showing a delaunay
+        if(this.showDelaunay) {
+            this.nearestVoronoi.forEach(function(triangle) {
+                renderer.begin();
+                triangle.draw(renderer);
+                renderer.stroke("#393939", 1);
+            });
         }
       
-        if(this.showVoronoiAnnulus) {
-        
-            // Reduce the collection of triangles into a large
-            // list with vertices:
-            var n = [];
-            voronoi.forEach(function(v) {
-                n.merge(v.a.neighbours);
-                n.merge(v.b.neighbours);
-                n.merge(v.c.neighbours);
-            });
-                
-            var best = SmallestAnnulus(n, this.coordinates);
-            renderer.begin();
-            renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke(Colors.Alpha(Colors.green, 0.2), best.annulus);
-        
-            renderer.begin();
-            renderer.circle(best.center, best.closest);
-            renderer.circle(best.center, best.farthest);
-            renderer.circle(best.center, 2);
-            renderer.stroke(Colors.green);
-        }
-        
+        // The convex hull (as used by farthest vorono)
         if(this.showHull) {
             renderer.begin();
-            farthest.hull.eachPair(function(a, b) {
-                renderer.line(a, b);
-            });        
-            renderer.stroke("black", 2);
-        }
-                
-        if(this.showFarthestAnnulus) {
-            var best = SmallestAnnulus(farthest.vertices, this.coordinates);
-            renderer.begin();
-            renderer.circle(best.center, best.closest + best.annulus*0.5);
-            renderer.stroke(Colors.Alpha(farthestColor, 0.2), best.annulus);
-        
-            renderer.begin();
-            renderer.circle(best.center, 2);
-            renderer.circle(best.center, best.closest);
-            renderer.circle(best.center, best.farthest);
-            renderer.stroke(Colors.Alpha(farthestColor, 0.7));
+            this.farthestVoronoi.hull.eachPair(renderer.line.bind(renderer));        
+            renderer.stroke("#393939", 2);
         }
     }
     
+    /// Helper function to find the minima and maxima, indicating
+    /// the annules.
     function SmallestAnnulus(centers, coordinates) {
-        var best = null; 
+        
+        // Accept an array or single value. A single value is
+        // normalized into a 1 item array.
+        if( ! (centers instanceof Array)) {
+            centers = [centers];
+            
+        }
+        
+        if(centers.length == 0) {
+            //debugger;
+        }
 
+        // To hold the best match
+        var best = null; 
+        
         // Test all posible centers i.e., voronoi vertices to find
         // the smallest annulus.
         centers.forEach(function(center) {
@@ -365,21 +372,60 @@ define(function(require){
             var farthestDistance = FarthestVector(center, coordinates).distance(center);
             
             // Difference gives the annulus width.
-            var annulus = farthestDistance - closestDistance;
+            var width = farthestDistance - closestDistance;
             
             // Accept only the smallest annulus
-            if(best == null || annulus < best.annulus) {
+            if(best == null || width < best.width) {
                 best = {
                     center:     center,
                     closest:    closestDistance,
                     farthest:   farthestDistance,
-                    annulus:    annulus
+                    width:      width
                 };
             }
         });
         
-        return best;
+        return new Annulus(best.center, best.closest, best.farthest);
     }
+    
+    /// Class that represents an annulus.
+    function Annulus(position, min, max) {
+        
+        // Center position
+        this.position = position || new Vector(0, 0);
+        
+        // Inner radius
+        this.min      = min || Infinity;
+        
+        // Outer radius
+        this.max      = max || -Infinity;
+        
+        // Associate a visualisation color
+        this.color    = Colors.black;
+        
+        // A identifier name
+        this.name     = "Arbitrary Annulus";
+        
+        // Draw onto a canvas
+        this.draw = function(renderer) {
+            renderer.begin();
+            renderer.circle(this.position, this.min + this.width * 0.5);
+            renderer.stroke(Colors.Alpha(this.color, 0.3), this.width);
+            
+            renderer.begin();
+            renderer.circle(this.position, this.min);
+            renderer.circle(this.position, this.max);
+            renderer.stroke(this.color);
+        };
+        
+        this.log = function(logger) {
+            logger.log(this.name, "foooo");
+        };
+    }
+    
+    Object.defineProperty(Annulus.prototype, "width", {
+        get: function() { return this.max - this.min; },
+    });
     
     return RansacApp;
 });
