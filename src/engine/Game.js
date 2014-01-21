@@ -50,7 +50,7 @@ define(function(require) {
         this._renderer       = new Renderer(container, this.width, this.height);
         
         // Debug information:
-        this.log             = new Logger(this.width, this.height);
+        this.log             = new Logger(this, this.width, this.height);
         this.stats           = this.log; // Legacy support.
     
         // Keyboard, touch and mouse events:
@@ -121,24 +121,8 @@ define(function(require) {
             dt = 0.2;
         }
     
-        this.log.log("FPS", Math.ceil(1 / dt) + "/" + this._fps);
-        this.log.log("Clock", Math.floor(this.clock.peek() * 0.001));
-    
-        // Show or hide entity count depending on whether there
-        // are any to begin with.
-        if(this._entities.length > 0) {
-            this.log.log("Entities", "#" + this._entities.length);
-        } else {
-            this.log.remove("Entities");
-        }
-    
-        this.log.log("Listeners", "#" + this.input.countListeners());
-    
-        // This probably only works in Chrome
-        if(window.performance && window.performance.memory) {
-            this.stats.set("Memory", Math.round(window.performance.memory.totalJSHeapSize * 10e-7) + "mb");
-        }
-    
+        this.log.update(dt);
+       
         // User defined update.
         this.update(dt);
         
