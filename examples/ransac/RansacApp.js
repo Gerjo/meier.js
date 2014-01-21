@@ -81,11 +81,10 @@ define(function(require){
         
         // RANSAC options
         folder = this.gui.addFolder("RANSAC");
-        folder.add(this, "ransacK", 1, 10000).name("K (repetitions)").onChange(this.onChange.bind(this));
+        folder.add(this, "ransacK", 1, 10000).name("Repetitions (K)").onChange(this.onChange.bind(this));
         folder.add(this, "ransacModel", this.ransacModels).name("Model").onChange(this.onChange.bind(this));
-        folder.add(this, "ransacIterate").name("Run K more iterations");
+        folder.add(this, "ransacIterate").name("Run K iterations");
         folder.add(this, "onChange").name("Restart");
-        
         
         // Show some default data
         this.generateLogarithmic();
@@ -172,7 +171,7 @@ define(function(require){
         }
         
         var estimationModel = this.ransacModels.indexOf(this.ransacModel);
-        this.annuli.ransac = this.ransac(this.coordinates, this.ransacK, estimationModel, this.annuli.ransac);        
+        this.annuli.ransac  = this.ransac(this.coordinates, this.ransacK, estimationModel, this.annuli.ransac);        
         this.annuli.ransac.name  = "RANSAC";
         this.annuli.ransac.color = Colors.purple;
     };
@@ -210,7 +209,7 @@ define(function(require){
         this.annuli.farthest.color = Colors.red;
         
         var estimationModel = this.ransacModels.indexOf(this.ransacModel);
-        this.annuli.ransac = this.ransac(this.coordinates, this.ransacK, estimationModel);        
+        this.annuli.ransac  = this.ransac(this.coordinates, this.ransacK, estimationModel, null);        
         this.annuli.ransac.name  = "RANSAC";
         this.annuli.ransac.color = Colors.purple;
     };
@@ -224,6 +223,7 @@ define(function(require){
         var bestModel   = null;
         
         while(k-- > 0) {
+
             // Randomly shuffle all candidates
             var candidates = coordinates.clone().shuffle();
             
@@ -233,8 +233,11 @@ define(function(require){
             // Our model is a circle that runs through the initial 3 coordinates
             var model;
             
+            // Find a circle that runs through the 3 coordinates, and use that as center
             if(estimationModel == 0) {
                  model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
+                 
+            // Take the average position as the center
             } else if(estimationModel == 1) {
                 var center = consensus.reduce(function(c, v) {
                     return c.add(v);
