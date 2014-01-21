@@ -35,6 +35,19 @@ define(function(require){
         this._top  = true;
     }
     
+    Logger.prototype.setFontSize = function(size) {
+        if(this._fontSize != size) {
+            this._fontSize = size;
+
+            this._charWidth  = this._fontSize - 4;
+            this._charHeight = this._fontSize;
+        }
+        
+        // TODO: recompute all estimated widths
+        
+        return this;
+    };
+    
     Logger.prototype.left = function() {
         this._left = true;
         return this;
@@ -57,10 +70,12 @@ define(function(require){
     
     Logger.prototype.showInternals = function(doShow) {
         this._showInternals = doShow === false ? false : true;
+        return this;
     };
     
     Logger.prototype.hideInternals = function(doShow) {
-        this.showInternals(false);
+        this._showInternals = false;
+        return this;
     };
 
     Logger.prototype.show = function(doShow) {
@@ -78,12 +93,12 @@ define(function(require){
         return this;
     };
 
-    Logger.prototype.log = function(key, value) {
-        this.set(key, value);
+    Logger.prototype.log = function(key, value, color) {
+        this.set(key, value, color);
         return this;
     };
     
-    Logger.prototype.set = function(key, value) {
+    Logger.prototype.set = function(key, value, color) {
         key = key + ":";
         
         if( ! this._data.hasOwnProperty(key)) {
@@ -91,7 +106,10 @@ define(function(require){
             ++this._numRows;
         }
         
-        this._data[key] = value;
+        this._data[key] = {
+                value: value, 
+                color: color || this._color 
+        };
     
         // Estimate the column width. Works due to monospaced font.
         this._columnWidth = Math.max(this._columnWidth, (key.length + 1) * this._charWidth);
@@ -115,7 +133,7 @@ define(function(require){
     };
 
     Logger.prototype.update = function(dt) {
-        if(this._showInternals) {
+        if(this._showInternals === true) {
             this.log("FPS", Math.ceil(1 / dt) + "/" + this._game._fps);
             this.log("Clock", Math.floor(this._game.clock.peek() * 0.001));
             this.log("Listeners", "#" + this._game.input.countListeners());
@@ -152,7 +170,7 @@ define(function(require){
             if(this._data.hasOwnProperty(k)) {
             
                 context.text(k, x, y, this._color, "left", "top", font)
-                context.text(this._data[k], x + this._columnWidth, y, this._color, "left", "top", font)
+                context.text(this._data[k].value, x + this._columnWidth, y, this._data[k].color, "left", "top", font)
             
                 y -= this._fontSize;
             }
