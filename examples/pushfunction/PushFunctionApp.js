@@ -18,8 +18,8 @@ define(function(require) {
         // Call super class' constructor:
         Game.apply(this, arguments);
     
-        this.stats.show(true);
-        this.stats.setColor("black");
+        this.log.show(true);
+        this.log.setColor("black");
         this.setFps(30);
     
         // To contain all polygon coordinates:

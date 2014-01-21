@@ -20,8 +20,8 @@ define(function(require) {
         
         this.log.right();
     
-        this.stats.show(true);
-        this.stats.setColor("black");
+        this.log.show(true);
+        this.log.setColor("black");
         this.setFps(30);
     
         // To contain all polygon coordinates:

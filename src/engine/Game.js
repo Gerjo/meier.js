@@ -51,7 +51,7 @@ define(function(require) {
         
         // Debug information:
         this.log             = new Logger(this, this.width, this.height);
-        this.stats           = this.log; // Legacy support.
+        
     
         // Keyboard, touch and mouse events:
         this.input           = new Input(this._renderer.canvas, this.width, this.height, this.isTablet);

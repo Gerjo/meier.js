@@ -73,7 +73,7 @@ define(function(require){
         return this;
     };
 
-    Logger.prototype.set_color = function(_color) {
+    Logger.prototype.setColor = function(_color) {
         this._color = _color;
         return this;
     };
