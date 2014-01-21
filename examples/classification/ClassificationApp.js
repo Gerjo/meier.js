@@ -15,7 +15,7 @@ define(function(require){
         Game.call(this, container);
 
         // Change log alignment
-        this.log.right().bottom();
+        this.logger.right().bottom();
         
         // We'll clear the canvas ourselves
         this.setAutoClear(false).setFps(5);
@@ -59,7 +59,7 @@ define(function(require){
         
         // Mersenne Twister seeding
         var s = 2342;//Random(0, 10000);
-        this.log.log("Random seed", s);
+        this.log("Random seed", s);
         Random.Seed(s);
         
         var margin = 100;

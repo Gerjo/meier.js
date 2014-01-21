@@ -22,7 +22,7 @@ define(function(require) {
         this.showVoronoi     = true;
         
         // Debug log alignment:
-        this.log.bottom().right();
+        this.logger.bottom().right();
         
         // Pretty pointer:
         this.input.cursor(Input.Cursor.FINGER);

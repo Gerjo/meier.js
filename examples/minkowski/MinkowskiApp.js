@@ -9,7 +9,7 @@ define(function(require) {
     function MinkowskiApp(container) {
         Game.call(this, container);
         
-        this.log.right();
+        this.logger.right();
         
         // Polygon editor width, height and spacing. The world properties are inferred.
         var spacing = 20;

@@ -134,7 +134,7 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(30);
         this.setAutoClear(false);
-        this.log.top().left();
+        this.logger.top().left();
         
         this.gui = new dat.GUI();
 

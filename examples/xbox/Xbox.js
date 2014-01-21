@@ -7,7 +7,7 @@ define(function(require) {
     RegressionApp.prototype = new Game();
     function RegressionApp(container) {
         Game.call(this, container);
-        this.log.right().top();
+        this.logger.right().top();
         
         this.images   = [];
         this.gamepads = [];

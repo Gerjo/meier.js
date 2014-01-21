@@ -17,7 +17,7 @@ define(function(require) {
     function RegressionApp(container) {
         Game.call(this, container);
         
-        this.log.right().bottom();
+        this.logger.right().bottom();
         
         // Will eventually hold the polynomial function of x:
         this.function = null;

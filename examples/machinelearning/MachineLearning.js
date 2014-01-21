@@ -15,7 +15,7 @@ define(function(require) {
         this.setFps(30);
         
         // Debug log alignment:
-        this.log.top().right();
+        this.logger.top().right();
         
         this.numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         
@@ -53,7 +53,7 @@ define(function(require) {
         var seed = 22; // For initial random values.
         this.nnet = new Nnet([2, 3, 3, 1], NaN);
         
-        this.log.log("seed", this.nnet.seed);
+        this.log("seed", this.nnet.seed);
         
         this.train = [
             [0, 1],

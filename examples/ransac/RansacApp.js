@@ -19,7 +19,9 @@ define(function(require){
     function RansacApp(container) {        
         Game.call(this, container);
 
-        this.log.top().left();
+        // Debug logger alignment and visiblity
+        this.logger.top().left()//.hide();
+        
         this.setFps(15);
                 
         this.grid = new Grid(0, 0, this.width, this.height);

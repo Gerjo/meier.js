@@ -50,8 +50,8 @@ define(function(require) {
         this._renderer       = new Renderer(container, this.width, this.height);
         
         // Debug information:
-        this.log             = new Logger(this, this.width, this.height);
-        
+        this.logger          = new Logger(this, this.width, this.height);
+       
     
         // Keyboard, touch and mouse events:
         this.input           = new Input(this._renderer.canvas, this.width, this.height, this.isTablet);
@@ -68,6 +68,10 @@ define(function(require) {
         // Automatically clear the canvas.
         this._doClear        = true;
     }
+    
+    Game.prototype.log = function(key, value) {
+        this.logger.log(key, value);
+    };
     
     Game.prototype.add = function(entity) {
         if(entity instanceof Entity) {
@@ -121,7 +125,7 @@ define(function(require) {
             dt = 0.2;
         }
     
-        this.log.update(dt);
+        this.logger.update(dt);
        
         // User defined update.
         this.update(dt);
@@ -148,10 +152,7 @@ define(function(require) {
         // User defined draw loop:
         this.draw(this._renderer);
     
-        // Update statistics (TODO: rework some things)
-        this.log.update();
-    
-        this.log.draw(this._renderer);
+        this.logger.draw(this._renderer);
     };
 
     /// Update the game.

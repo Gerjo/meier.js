@@ -15,7 +15,7 @@ define(function(require) {
         this.setFps(60);
         
         // Debug log alignment:
-        this.log.right().bottom();
+        this.logger.right().bottom();
         
         // Pretty pointer:
         this.input.cursor(Input.Cursor.FINGER);

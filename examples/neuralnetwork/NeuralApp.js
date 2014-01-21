@@ -28,7 +28,7 @@ define(function(require) {
         this.setAutoClear(false);
         
         // Debug log alignment:
-        this.log.top().right();
+        this.logger.top().right();
         
         var w = 400;
         var h = 50;

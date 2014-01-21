@@ -25,7 +25,7 @@ define(function(require) {
     function CurveFitting(container) {
         Game.call(this, container);
         
-        this.log.right();
+        this.logger.right();
         
         this.grid = new Grid(0, 0, this.width, this.height);
         this.grid.setRealLabels(true);
