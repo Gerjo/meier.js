@@ -73,7 +73,7 @@ define(function(require){
         
         // Annulus visibility
         folder = this.gui.addFolder("Annulus visibility state");
-        folder.add(this, "showVoronoiAnnulus").name("By Voronoi");
+        folder.add(this, "showVoronoiAnnulus").name("By Nearest");
         folder.add(this, "showFarthestAnnulus").name("By Farthest");
         folder.add(this, "showRansacAnnulus").name("By RANSAC");
         
