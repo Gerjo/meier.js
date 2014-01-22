@@ -1,5 +1,6 @@
 define(function(require) {
     var Disk    = require("meier/math/Disk");
+    var Vector  = require("meier/math/Vec")(2);
     var Annulus = require("./Annulus");
     
     /// Find an annulus using RANSAC.
