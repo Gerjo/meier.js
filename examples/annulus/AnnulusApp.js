@@ -56,7 +56,7 @@ define(function(require){
         this.showRansacAnnulus     = true;
         
         // Ransac options 
-        this.ransacK      = 200;
+        this.ransacK      = 5000;
         this.ransacModels = ["Circumcircle", "Mean Position"];
         this.ransacModel  = this.ransacModels.first();
         
