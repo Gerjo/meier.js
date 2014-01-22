@@ -4,9 +4,8 @@ define(function(require){
     var LeastSqCircle   = require("meier/math/Math").LeastSquaresCircle
     var Vector          = require("meier/math/Vec")(2);
     var Disk            = require("meier/math/Disk");
-    var Random          = require("meier/math/Random");
-    var NearestVoronoi  = require("meier/math/Voronoi").Voronoi;
     var Colors          = require("meier/aux/Colors");
+    var NearestVoronoi  = require("meier/math/Voronoi").Voronoi;
     var FarthestVoronoi = require("meier/math/Voronoi").FarthestVoronoi;
     var dat             = require("meier/contrib/datgui");
     var Hull            = require("meier/math/Hull").GiftWrap;
@@ -14,9 +13,14 @@ define(function(require){
     var ClosestVector   = require("meier/math/Math").ClosestVector;
     var FarthestVector  = require("meier/math/Math").FarthestVector;
     
-    RansacApp.prototype = new Game();
     
-    function RansacApp(container) {        
+    var Annulus    = require("./Annulus");
+    var Ransac     = require("./Ransac");
+    var Randomness = require("./Randomness");
+    
+    Application.prototype = new Game();
+    
+    function Application(container) {        
         Game.call(this, container);
 
         // Debug logger alignment and visiblity
@@ -76,8 +80,9 @@ define(function(require){
         // Canvas editing options
         folder = this.gui.addFolder("Randomness");
         folder.add(this.grid, "clear").name("Clear");
-        folder.add(this, "generateLogarithmic").name("Logarithmic Curve");
-        folder.add(this, "generateNoisyCircle").name("Noisy Circle");
+        folder.add(this, "logarithmic").name("Logarithmic");
+        folder.add(this, "noise").name("Noise");
+        folder.add(this, "noisyCircle").name("Noisy Circle");
         
         // RANSAC options
         folder = this.gui.addFolder("RANSAC");
@@ -87,96 +92,37 @@ define(function(require){
         folder.add(this, "onChange").name("Restart");
         
         // Show some default data
-        this.generateLogarithmic();
+        this.noisyCircle();
     }
     
-    RansacApp.prototype.generateLogarithmic = function() {
-        this.grid.clear();
-        
-        // Number of coordinates to add
-        var n = 50;
-        
-        // Scaling factor
-        var d = 20;
-        
-        // Function to generate a random sign
-        var RandomSign = function() {
-            return Random(0, 1) == 0 ? -1 : 1;
-        };
-        
-        for(var i = 0, x, y; i < n; ++i) {
-            x = Random(1, d);
-            y = Random(1, d);
-            
-            x = Math.ln(x) * y;
-            
-            // Introduce a sign {-1, 1}... imaginary logarithm?
-            y = Math.ln(y) * x * RandomSign();
-            
-            // Voronoi crashes with non unique coordinates
-            if( ! this.grid.hasCoordinate(x, y)) {
-                --i;
-                continue;
-            }
-                        
-            // Trigger a click on the last add. This forces a 
-            // recomputation of internals.
-            if(i == n - 1) {
-                this.grid.onLeftDown(new Vector(x, y));
-            } else {
-                this.grid.add(new Vector(x, y));
-            }
-        }
+    /// Facade method to generate a noise circle.
+    Application.prototype.noisyCircle = function() {
+        Randomness.NoisyCircle(this.grid);
     };
     
-    RansacApp.prototype.generateNoisyCircle = function(noise) {
-        this.grid.clear();
-        
-        // The radius
-        var radius = Random(100, 200);
-        
-        // Center of the circle
-        var center = new Vector(Random(-30, 30), Random(-30, 30));
-        
-        // Number of points to generate
-        var n      = 50;
-        
-        // Noise margin [-e, e]
-        var e      = isNaN(noise) ? 10 : noise; 
-        
-        for(var i = 0, x, y, angle = 0, error; i < n; ++i) {
-            angle += Math.TwoPI / n;
-            
-            // Positional error
-            error = Random(-e, e);
-            
-            // Parametric circle
-            x = Math.cos(angle) * radius + center.x + error;
-            y = Math.sin(angle) * radius + center.y + error;
-            
-            // Trigger a click on the last add. This forces a 
-            // recomputation of internals.
-            if(i == n - 1) {
-                this.grid.onLeftDown(new Vector(x, y));
-            } else {
-                this.grid.add(new Vector(x, y));
-            }
-        }
+    /// Facade method to generate a logarithmic curve
+    Application.prototype.logarithmic = function() {
+        Randomness.Logarithmic(this.grid);
     };
     
-    RansacApp.prototype.ransacIterate = function() {
+    /// Facade method to generate random noise
+    Application.prototype.noise = function() {
+        Randomness.Noise(this.grid);
+    };
+    
+    Application.prototype.ransacIterate = function() {
         
         if(this.coordinates.length < 3) {
             return;
         }
         
         var estimationModel = this.ransacModels.indexOf(this.ransacModel);
-        this.annuli.ransac  = this.ransac(this.coordinates, this.ransacK, estimationModel, this.annuli.ransac);        
+        this.annuli.ransac  = Ransac(this.coordinates, this.ransacK, estimationModel, this.annuli.ransac);        
         this.annuli.ransac.name  = "RANSAC";
         this.annuli.ransac.color = Colors.purple;
     };
     
-    RansacApp.prototype.onChange = function(coordinates) {
+    Application.prototype.onChange = function(coordinates) {
         if(coordinates instanceof Array) {
             this.coordinates = coordinates;
         }
@@ -209,76 +155,12 @@ define(function(require){
         this.annuli.farthest.color = Colors.red;
         
         var estimationModel = this.ransacModels.indexOf(this.ransacModel);
-        this.annuli.ransac  = this.ransac(this.coordinates, this.ransacK, estimationModel, null);        
+        this.annuli.ransac  = Ransac(this.coordinates, this.ransacK, estimationModel, null);        
         this.annuli.ransac.name  = "RANSAC";
         this.annuli.ransac.color = Colors.purple;
     };
     
-    RansacApp.prototype.ransac = function(coordinates, k, estimationModel, bestAnnulus) {  
-        
-        k = Math.max(1, k);
-              
-        // Initial annulus
-        var bestAnnulus = bestAnnulus || null;
-        var bestModel   = null;
-        
-        while(k-- > 0) {
-
-            // Randomly shuffle all candidates
-            var candidates = coordinates.clone().shuffle();
-            
-            // Pick initial coordinates
-            var consensus = [candidates[0], candidates[1], candidates[2]];
-    
-            // Our model is a circle that runs through the initial 3 coordinates
-            var model;
-            
-            // Find a circle that runs through the 3 coordinates, and use that as center
-            if(estimationModel == 0) {
-                 model = Disk.CreateCircumcircle(consensus[0], consensus[1], consensus[2]);
-                 
-            // Take the average position as the center
-            } else if(estimationModel == 1) {
-                var center = consensus.reduce(function(c, v) {
-                    return c.add(v);
-                }, new Vector(0, 0)).scaleScalar(1 / consensus.length);
-                
-                model = new Disk(center, 0);
-            } else {
-                throw new Error("Not a valid estimation model. Try '0' or '1'.");
-            }
-            
-            
-            // Initial annulus
-            var annulus = new Annulus(model.position);
-        
-            // See how well the points fit the model
-            for(var i = 0; i < candidates.length; ++i) {
-                var distance = candidates[i].distance(model.position);
-                
-                // Test for a better outer radius
-                if(distance > annulus.max) {
-                    annulus.max = distance;
-                }
-                
-                // Test for a better inner radius
-                if(distance < annulus.min) {
-                    annulus.min = distance;
-                }
-            }
-            
-            // Is the new better than the previous?
-            if(bestAnnulus == null || annulus.width < bestAnnulus.width) {
-                bestAnnulus  = annulus;
-                bestModel    = model;
-            }
-        }
-                
-        // And the winner is...
-        return bestAnnulus;
-    };
-    
-    RansacApp.prototype.draw = function(renderer) {
+    Application.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
         for(var k in this.annuli) {
@@ -391,44 +273,7 @@ define(function(require){
         return new Annulus(best.center, best.closest, best.farthest);
     }
     
-    /// Class that represents an annulus.
-    function Annulus(position, min, max) {
-        
-        // Center position
-        this.position = position || new Vector(0, 0);
-        
-        // Inner radius
-        this.min      = min || Infinity;
-        
-        // Outer radius
-        this.max      = max || -Infinity;
-        
-        // Associate a visualisation color
-        this.color    = Colors.black;
-        
-        // A identifier name
-        this.name     = "Arbitrary Annulus";
-        
-        // Draw onto a canvas
-        this.draw = function(renderer) {
-            renderer.begin();
-            renderer.circle(this.position, this.min + this.width * 0.5);
-            renderer.stroke(Colors.Alpha(this.color, 0.3), this.width);
-            
-            renderer.begin();
-            renderer.circle(this.position, this.min);
-            renderer.circle(this.position, this.max);
-            renderer.stroke(this.color);
-        };
-        
-        this.log = function(logger) {
-            logger.log(this.name, "foooo");
-        };
-    }
     
-    Object.defineProperty(Annulus.prototype, "width", {
-        get: function() { return this.max - this.min; },
-    });
     
-    return RansacApp;
+    return Application;
 });
