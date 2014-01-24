@@ -10,8 +10,9 @@ define(function(require) {
     canvas.width  = 0;
     canvas.height = 0;
     
+    /// Common convolution kernels, as found on the internet
     RawTexture.Matrices = {
-        // Taken from wikipedia: http://en.wikipedia.org/wiki/Kernel_(image_processing)
+        // The following ae from wikipedia: http://en.wikipedia.org/wiki/Kernel_(image_processing)
         Original:    new (M(3,3))([0, 0, 0, 0, 1, 0, 0, 0, 0]),
         EdgeDetect1: new (M(3,3))([1, 0, -1, 0, 0, 0, -1, 0, 1]),
         EdgeDetect2: new (M(3,3))([0, 1, 0, 1, -4, 1, 0, 1, 0]),
@@ -20,16 +21,13 @@ define(function(require) {
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
         Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
         
+        // The following are gradient based operators
         SobelX: new (M(3,3))([1, 0, -1, 2, 0, -2, 1, 0, -1]),
-        SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),
-        
+        SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),        
         PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
         PrewittY: new (M(3,3))([1, 1, 1, 0, 0, 0, -1, -1, -1]),
-        
         RobertsCrossX: new (M(2,2))([1, 0, 0, -1]),
         RobertsCrossY: new (M(2,2))([0, 1, -1, 0]),
-        
-        // Unsure there terminalogy is correct.
         ScharrX: new (M(3,3))([3, 10, 3, 0, 0, 0, -3, -10, -3]),
         ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3])
     };
@@ -116,28 +114,33 @@ define(function(require) {
     };
     
     RawTexture.prototype.prewitt = function() {
-        return this.convolutionPair(RawTexture.Matrices.PrewittX, RawTexture.Matrices.PrewittY);
+        return this.gradientMagnitude(RawTexture.Matrices.PrewittX, RawTexture.Matrices.PrewittY);
     };
     
     RawTexture.prototype.sobel = function() {
-        return this.convolutionPair(RawTexture.Matrices.SobelX, RawTexture.Matrices.SobelY);
+        return this.gradientMagnitude(RawTexture.Matrices.SobelX, RawTexture.Matrices.SobelY);
     };
     
     RawTexture.prototype.robertsCross = function() {
-        return this.convolutionPair(RawTexture.Matrices.RobertsCrossX, RawTexture.Matrices.RobertsCrossY);
+        return this.gradientMagnitude(RawTexture.Matrices.RobertsCrossX, RawTexture.Matrices.RobertsCrossY);
     };
     
     RawTexture.prototype.scharr = function() {
-        return this.convolutionPair(RawTexture.Matrices.ScharrX, RawTexture.Matrices.ScharrY);
+        return this.gradientMagnitude(RawTexture.Matrices.ScharrX, RawTexture.Matrices.ScharrY);
     };
     
-    RawTexture.prototype.convolutionPair = function(x, y) {
+    RawTexture.prototype.gradientMagnitude = function(x, y) {
+        
+        // Apply the kernel to each texture
         var x = this.convolute(x);
         var y = this.convolute(y);
         
+        // A new copy
         var newRaw    = context.getImageData(0, 0, this._raw.width, this._raw.height);
         var target    = newRaw.data;
-        
+
+        // We take the magnatude of the gradent, we can find the angle by
+        // using Math.atan(y, x) which is used in HOG.
         for(var i = 0; i < target.length; i += this._channels) {
             target[i + 0] = Math.sqrt(Math.pow(x._raw.data[i + 0], 2) + Math.pow(y._raw.data[i + 0], 2));
             target[i + 1] = Math.sqrt(Math.pow(x._raw.data[i + 1], 2) + Math.pow(y._raw.data[i + 1], 2));

@@ -83,6 +83,7 @@ define(function(require){
     Filters.prototype.onChange = function() {
         this.texture  = new RawTexture(this.image, function(texture) {
             
+            // Apply each filter to the texture, in order.
             texture = this.filters[this.filter1](texture);
             texture = this.filters[this.filter2](texture);
             texture = this.filters[this.filter3](texture);
@@ -90,6 +91,7 @@ define(function(require){
             texture = this.filters[this.filter5](texture);
             texture = this.filters[this.filter6](texture);
             
+            // Store internally
             this.texture = texture;
         }.bind(this));
     };
