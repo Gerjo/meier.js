@@ -73,6 +73,7 @@ define(function(require) {
         texture._raw = data;
         texture._isLoaded = true;
         
+        
         return texture;
     };
     
@@ -112,14 +113,14 @@ define(function(require) {
     /// @param {doNormalize} Whether or not to normalize the result.
     /// @return A new RawTexture instance with the convolution matrix applied.
     RawTexture.prototype.convolute = function(matrix, doNormalize) {
-        var newRaw    = context.getImageData(0, 0, this._raw.height, this._raw.width);
+        var newRaw    = context.getImageData(0, 0, this._raw.width, this._raw.height);
         var target    = newRaw.data;
         var source    = this._raw.data;
         var width     = this._raw.width;
         var height    = this._raw.height;
         var channels  = this._channels;
         var normalize = (doNormalize === true) ? (1 / matrix.num) : 1;
-        
+                
         var hc = parseInt(matrix.numcolumns * 0.5, 10);
         var hr = parseInt(matrix.numrows * 0.5, 10);
 
@@ -141,7 +142,7 @@ define(function(require) {
                 y = height - 1;
             }
             
-            return y * channels * height + x * channels;
+            return y * channels * width + x * channels;
         }
         
         // For each pixel
@@ -179,7 +180,7 @@ define(function(require) {
                 x = 0;
                 ++y;
             }
-        }
+        }        
         
         // We already have a copy, so may as well return the copy.
         return new RawTexture(newRaw, null);
@@ -200,7 +201,7 @@ define(function(require) {
             context.drawImage(texture._image, 0, 0);
         
             // Retrieve the binary data
-            var data = context.getImageData(0, 0, canvas.height, canvas.width);
+            var data = context.getImageData(0, 0, canvas.width, canvas.height);
                 
             // Update internals
             this._raw      = data;
