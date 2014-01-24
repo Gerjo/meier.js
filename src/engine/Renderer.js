@@ -155,6 +155,14 @@ define(function(require) {
     		x = x.x;
     	}
 	
+        if(isNaN(x)) {
+            x = 0;
+        }
+    
+        if(isNaN(y)) {
+            y = 0;
+        }
+    
         // No width given, draw as-is:
         if(isNaN(width)) {
             width = texture.width;
@@ -165,21 +173,42 @@ define(function(require) {
             height = texture.height;
         }
  
-        if( ! texture.isLoaded) {
+        if( ! texture._isLoaded) {
             return this;
         }
+        
+        // Render an "img" tag onto the canvas.
+        if(texture._image !== null) {
+            this.context.drawImage(
+                    texture._image,    // The image
+                    0,                 // Source X
+                    0,                 // Source Y
+                    texture.width,     // Source width
+                    texture.height,    // Source height
+                    x - width * 0.5,   // Target X
+                    -y - height * 0.5, // Target Y
+                    width,             // Target width
+                    height             // Target height
+            );
+        } else if(texture._raw !== null) {
+            // TODO: this is free from transformations. Simulate them here?
+            //   - scaling
+            //   - rotation (ugh!)
+            this.context.putImageData(
+                texture._raw, 
+                x - width * 0.5 + this.hw,
+                -y - height * 0.5 + this.hh, 
+                0, 
+                0, 
+                width, 
+                height
+            );
+            
+        } else {
+            throw new Error("Renderer::texture(), unable to draw texture. It's not a texture?");
+        }
     
-        this.context.drawImage(
-                texture.image,     // The image
-                0,                 // Source X
-                0,                 // Source Y
-                texture.width,     // Source width
-                texture.height,    // Source height
-                x - width * 0.5,   // Target X
-                -y - height * 0.5, // Target Y
-                width,             // Target width
-                height             // Target height
-        );
+     
         return this;
     };
 
