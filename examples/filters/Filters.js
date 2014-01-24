@@ -25,6 +25,9 @@ define(function(require){
             "Luminance": function(texture) {
                 return texture.luminance();
             },
+            "Sepia": function(texture) {
+                return texture.sepia();
+            },
             "Invert": function(texture) {
                 return texture.invert();
             },

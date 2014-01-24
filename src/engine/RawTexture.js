@@ -143,6 +143,28 @@ define(function(require) {
         return this;
     };
     
+    RawTexture.prototype.sepia = function(intensity, depth) {
+        // Assume sensible default values
+        intensity  = isNaN(intensity) ? 2 : intensity;
+        depth      = isNaN(depth) ? 20 : depth;
+        
+        var source    = this._raw.data;
+        var target    = this._raw.data;
+    
+        // Precompute normalisation term
+        var oneOverTree = 1 / 3;
+    
+        for(var i = 0; i < target.length; i += this._channels) {
+            var grey = (source[i + 0] + source[i + 1] + source[i + 2]) * oneOverTree;
+            
+            target[i + 0] = Math.min(grey + depth * 2, 255);
+            target[i + 1] = Math.min(grey + depth, 255);
+            target[i + 2] = Math.min(grey - intensity, 255);
+        }
+        
+        return this;
+    };
+    
     RawTexture.prototype.gaussian = function(x, y, sigma) {
         
         // Create a kernel matrix
