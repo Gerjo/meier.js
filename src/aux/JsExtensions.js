@@ -21,7 +21,6 @@ Math.ln = function(r) {
     return Math.log(r);
 };
 
-
 /// Assertion to be used for development only.
 ///
 function ASSERT(statement) {
@@ -111,6 +110,12 @@ Math.QuarterPI     = Math.PI / 4;
 Math.TreeQuarterPI = Math.PI / 4 * 3;
 Math.HalfPI        = Math.PI / 2;
 Math.TwoPI         = Math.PI * 2;
+
+Math.InverseQuarterPI     = 1 / Math.QuarterPI;
+Math.InverseTreeQuarterPI = 1 / Math.TreeQuarterPI;
+Math.InverseHalfPI        = 1 / Math.HalfPI;
+Math.InverseTwoPI         = 1 / Math.TwoPI;
+Math.InversePI            = 1 / Math.PI;
 
 // Internet Explorer 7:
 if(typeof JSON == "undefined") {
