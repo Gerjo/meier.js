@@ -18,7 +18,13 @@ define(function(require) {
         EdgeDetect3: new (M(3,3))([-1, -1, -1, -1, 8, -1, -1, -1, -1]),
         Sharpen:     new (M(3,3))([0, -1, 0, -1, 5, -1, 0, -1, 0]),
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
-        Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1])
+        Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
+        
+        SobelX: new (M(3,3))([1, 0, -1, 2, 0, -2, 1, 0, -1]),
+        SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),
+        
+        PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
+        PrewittY: new (M(3,3))([1, 1, 1, 0, 0, 0, -1, -1, -1])
     };
     
     RawTexture.prototype = new Texture(null);
@@ -102,8 +108,28 @@ define(function(require) {
         return this;
     };
     
+    RawTexture.prototype.prewitt = function() {
+        return this.convolutionPair(RawTexture.Matrices.PrewittX, RawTexture.Matrices.PrewittY);
+    };
+    
     RawTexture.prototype.sobel = function() {
+        return this.convolutionPair(RawTexture.Matrices.SobelX, RawTexture.Matrices.SobelY);
+    };
+    
+    RawTexture.prototype.convolutionPair = function(x, y) {
+        var x = this.convolute(x);
+        var y = this.convolute(y);
         
+        var newRaw    = context.getImageData(0, 0, this._raw.width, this._raw.height);
+        var target    = newRaw.data;
+        
+        for(var i = 0; i < target.length; i += this._channels) {
+            target[i + 0] = Math.sqrt(Math.pow(x._raw.data[i + 0], 2) + Math.pow(y._raw.data[i + 0], 2));
+            target[i + 1] = Math.sqrt(Math.pow(x._raw.data[i + 1], 2) + Math.pow(y._raw.data[i + 1], 2));
+            target[i + 2] = Math.sqrt(Math.pow(x._raw.data[i + 2], 2) + Math.pow(y._raw.data[i + 2], 2));
+        }
+        
+        return new RawTexture(newRaw, null);
     };
     
     /// Apply a convolution matrix to the image. The alpha channel is
