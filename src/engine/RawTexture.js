@@ -24,7 +24,14 @@ define(function(require) {
         SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),
         
         PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
-        PrewittY: new (M(3,3))([1, 1, 1, 0, 0, 0, -1, -1, -1])
+        PrewittY: new (M(3,3))([1, 1, 1, 0, 0, 0, -1, -1, -1]),
+        
+        RobertsCrossX: new (M(2,2))([1, 0, 0, -1]),
+        RobertsCrossY: new (M(2,2))([0, 1, -1, 0]),
+        
+        // Unsure there terminalogy is correct.
+        ScharrX: new (M(3,3))([3, 10, 3, 0, 0, 0, -3, -10, -3]),
+        ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3])
     };
     
     RawTexture.prototype = new Texture(null);
@@ -114,6 +121,14 @@ define(function(require) {
     
     RawTexture.prototype.sobel = function() {
         return this.convolutionPair(RawTexture.Matrices.SobelX, RawTexture.Matrices.SobelY);
+    };
+    
+    RawTexture.prototype.robertsCross = function() {
+        return this.convolutionPair(RawTexture.Matrices.RobertsCrossX, RawTexture.Matrices.RobertsCrossY);
+    };
+    
+    RawTexture.prototype.scharr = function() {
+        return this.convolutionPair(RawTexture.Matrices.ScharrX, RawTexture.Matrices.ScharrY);
     };
     
     RawTexture.prototype.convolutionPair = function(x, y) {

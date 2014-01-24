@@ -20,7 +20,7 @@ define(function(require){
         
         this.filters = {
             "None": function(texture) {
-                return texture; //texture.convolute(RawTexture.Matrices.Original, false);
+                return texture;
             },
             "Luminance": function(texture) {
                 return texture.luminance();
@@ -30,6 +30,12 @@ define(function(require){
             },
             "Prewitt": function(texture) {
                 return texture.prewitt();
+            },
+            "RobertsCross": function(texture) {
+                return texture.robertsCross();
+            },
+            "Scharr": function(texture) {
+                return texture.scharr();
             },
             "EdgeDetect1": function(texture) {
                 return texture.convolute(RawTexture.Matrices.EdgeDetect1, false);
