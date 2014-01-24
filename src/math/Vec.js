@@ -286,6 +286,20 @@ define(function(require) {
             return Math.sqrt(this.lengthSQ());
         };
         
+        V.prototype.magnitudeSQ = function() {
+            var r = 0;
+            
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r += Math.pow(this._[i], 2);
+            }
+            
+            return r;
+        };
+        
+        V.prototype.magnitude = function() {
+            return Math.sqrt(this.lengthSQ());
+        };
+        
         V.prototype.normalize = function() {
             var l = this.length();
             
