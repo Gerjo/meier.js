@@ -25,6 +25,9 @@ define(function(require){
             "Luminance": function(texture) {
                 return texture.luminance();
             },
+            "Invert": function(texture) {
+                return texture.invert();
+            },
             "Sobel": function(texture) {
                 return texture.sobel();
             },
@@ -54,11 +57,17 @@ define(function(require){
             },
             "Blur2": function(texture) {
                 return texture.convolute(RawTexture.Matrices.Blur2, true);
+            },
+            "Gaussian 5x5 s:2": function(texture) {
+                return texture.gaussian(5, 5, 2);
+            },
+            "Gaussian 10x1 s:20": function(texture) {
+                return texture.gaussian(10, 1, 20);
             }
         };
         
         // Defaults
-        this.filter1 = Object.keys(this.filters).first();
+        this.filter1 = Object.keys(this.filters).last();
         this.filter2 = Object.keys(this.filters).first();
         this.filter3 = Object.keys(this.filters).first();
         this.filter4 = Object.keys(this.filters).first();
