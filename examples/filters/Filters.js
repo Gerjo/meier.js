@@ -8,34 +8,84 @@ define(function(require){
     function Filters(container) {        
         Game.call(this, container);
 
-        this.original = new RawTexture("./lenna.png");
-        this.texture  = this.original;
+        this.texture  = null;
+
+        this.images = [
+            "lenna.png",
+            "testbeeld.png",
+            "niko.png",
+            "bikesgray.jpg"
+        ];
 
         
         this.filters = {
-            "Original":    [false, RawTexture.Matrices.Original],
-            "EdgeDetect1": [false, RawTexture.Matrices.EdgeDetect1],
-            "EdgeDetect2": [false, RawTexture.Matrices.EdgeDetect2],
-            "EdgeDetect3": [false, RawTexture.Matrices.EdgeDetect3],
-            "Sharpen":     [false, RawTexture.Matrices.Sharpen],
-            "Blur1":       [true, RawTexture.Matrices.Blur1],
-            "Blur2":       [true, RawTexture.Matrices.Blur2]
+            "None": function(texture) {
+                return texture; //texture.convolute(RawTexture.Matrices.Original, false);
+            },
+            "Luminance": function(texture) {
+                return texture.luminance();
+            },
+            "Sobel": function(texture) {
+                return texture.sobel();
+            },
+            "Prewitt": function(texture) {
+                return texture.prewitt();
+            },
+            "EdgeDetect1": function(texture) {
+                return texture.convolute(RawTexture.Matrices.EdgeDetect1, false);
+            },
+            "EdgeDetect2": function(texture) {
+                return texture.convolute(RawTexture.Matrices.EdgeDetect2, false);
+            },
+            "EdgeDetect3": function(texture) {
+                return texture.convolute(RawTexture.Matrices.EdgeDetect3, false);
+            },
+            "Sharpen": function(texture) {
+                return texture.convolute(RawTexture.Matrices.Sharpen, false);
+            },
+            "Blur1": function(texture) {
+                return texture.convolute(RawTexture.Matrices.Blur1, true);
+            },
+            "Blur2": function(texture) {
+                return texture.convolute(RawTexture.Matrices.Blur2, true);
+            }
         };
         
-        var names = Object.keys(this.filters);
+        // Defaults
+        this.filter1 = Object.keys(this.filters).first();
+        this.filter2 = Object.keys(this.filters).first();
+        this.filter3 = Object.keys(this.filters).first();
+        this.filter4 = Object.keys(this.filters).first();
+        this.filter5 = Object.keys(this.filters).first();
+        this.filter6 = Object.keys(this.filters).first();
+        this.image   = this.images.first();
         
-        this.currentFilter = names.first();
-        
+        // Interface
         this.gui = new dat.GUI();
-        this.gui.add(this, "currentFilter", names).name("Filter").onChange(this.onChange.bind(this));
+        this.gui.add(this, "image", this.images).name("Image").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter1", Object.keys(this.filters)).name("Filter 1").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter2", Object.keys(this.filters)).name("Filter 2").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter3", Object.keys(this.filters)).name("Filter 3").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter4", Object.keys(this.filters)).name("Filter 4").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter5", Object.keys(this.filters)).name("Filter 5").onChange(this.onChange.bind(this));
+        this.gui.add(this, "filter6", Object.keys(this.filters)).name("Filter 6").onChange(this.onChange.bind(this));
+    
+        // Apply initial filters
+        this.onChange();
     }
     
-    Filters.prototype.onChange = function(key) {
-        var doNormalize = this.filters[key][0];
-        var matrix      = this.filters[key][1];
-        
-        this.texture    = this.original.convolute(matrix, doNormalize);
-        
+    Filters.prototype.onChange = function() {
+        this.texture  = new RawTexture(this.image, function(texture) {
+            
+            texture = this.filters[this.filter1](texture);
+            texture = this.filters[this.filter2](texture);
+            texture = this.filters[this.filter3](texture);
+            texture = this.filters[this.filter4](texture);
+            texture = this.filters[this.filter5](texture);
+            texture = this.filters[this.filter6](texture);
+            
+            this.texture = texture;
+        }.bind(this));
     };
     
     Filters.prototype.draw = function(renderer) {
