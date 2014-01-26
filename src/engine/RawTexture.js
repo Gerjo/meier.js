@@ -1,6 +1,8 @@
 define(function(require) {
     var Texture = require("meier/engine/Texture");
+    var Angle   = require("meier/math/Angle");
     var M       = require("meier/math/Mat");
+    var Vector2 = require("meier/math/Vec")(2);
     
     // Some operations require a canvas to create a so-called "ImageData"
     // object. Rather than introducing a dependancy on Renderer, a private
@@ -59,6 +61,106 @@ define(function(require) {
         }
     }
     
+    RawTexture.prototype.canny = function(xKernel, yKernel) {
+        xKernel = xKernel || RawTexture.Matrices.SobelX;
+        yKernel = yKernel || RawTexture.Matrices.SobelY;
+        
+        var gradients = this._gradient(xKernel, yKernel, 0);
+        var width     = this.width;
+        var height    = this.height;
+        
+        // The pixel range is clamped to an edge        
+        function Index(x, y) {
+            if(x < 0) {
+                x = 0;
+            }
+            
+            if(y < 0) {
+                y = 0;
+            }
+            
+            if(x > width - 1) {
+                x = width - 1;
+            }
+            
+            if(y > height - 1) {
+                y = height - 1;
+            }
+            
+            return y * width + x;
+        }
+        //     n
+        //  nw   ne
+        // w        e
+        //  sw   se
+        //     s
+        
+        
+        var newData  = context.createImageData(width, height);
+        
+        for(var j = 0, y = 0, x = 0, i = 0; j < gradients.length; ++j, i += this._channels) {
+            var directions = [
+                Index(x - 1, y),     // e
+                Index(x + 1, y + 1), // ne
+                Index(x,     y + 1), // n
+                Index(x - 1, y + 1), // nw
+                Index(x + 1, y - 1), // w
+                Index(x,     y - 1), // sw
+                Index(x - 1, y - 1), // s
+                Index(x + 1, y)      // se
+            ];
+            
+            var colors = [
+            [255, 0, 0],
+            [255, 255, 0],
+            [0, 255, 0],
+            [0, 255, 255],
+            [0, 0, 255],
+            [255, 0, 255],
+            [255, 255, 255],
+            [0, 0, 0]
+            ];
+            
+            var gradient  = gradients[j];
+            var angle     = gradient.angle();
+            var n         = parseInt(Angle.ToAbsoluteRadians(angle) / (Math.PI/8));
+            var neighbour = gradients[directions[n]];
+            
+            newData.data[i + 0] = colors[n][0];
+            newData.data[i + 1] = colors[n][1];
+            newData.data[i + 2] = colors[n][2];
+            newData.data[i + 3] = 255;
+            
+            if(neighbour.magnitudeSQ() > gradient.magnitudeSQ()) {
+                //newData.data[i+ 0] = 0;
+                //newData.data[i + 1] = 0;
+                //newData.data[i + 2] = 0;
+                //newData.data[i + 3] = 255;
+                
+            } else {
+                //newData.data[i + 0] = 255;
+                //newData.data[i + 1] = 255;
+                //newData.data[i + 2] = 255;
+                //newData.data[i + 3] = 255;
+
+                //newData.data[n + 0] = 0;
+                //newData.data[n + 1] = 255;
+                //newData.data[n + 2] = 0;
+                //newData.data[n + 3] = 255;
+            }
+            
+            // Counters to keep track of x / y pixel coordinates
+            if(++x === width) {
+                x = 0;
+                ++y;
+            }
+        }
+        
+        console.log(newData);
+        
+        return new RawTexture(newData);
+    };
+    
     /// Create a copy of this canvas.
     ///
     RawTexture.prototype.clone = function() {
@@ -83,7 +185,6 @@ define(function(require) {
         texture.width  = this.width;
         texture._raw = data;
         texture._isLoaded = true;
-        
         
         return texture;
     };
@@ -201,6 +302,31 @@ define(function(require) {
         return this.convolute(matrix, false);
     };
     
+    RawTexture.prototype._gradient = function(xKernel, yKernel, channel) {
+        channel    = isNaN(channel) ? 0 : channel;
+        
+        // Convolution computions
+        var xImage = this.convolute(xKernel);
+        var yImage = this.convolute(yKernel);
+        
+        // Shorthand access
+        var xData  = xImage._raw.data;
+        var yData  = yImage._raw.data;
+        var width  = xImage._raw.width;
+        var height = xImage._raw.height;
+        
+        // Output array
+        var gradients  = new Array(width * height);
+        
+        // Calculate gradient origentation
+        for(var i = channel, j = 0; i < xData.length; i += this._channels, ++j) {
+            // Encode the gradient as a vector.
+            gradients[j] = new Vector2(xData[i], yData[i]);
+        };
+        
+        return gradients;
+    };
+    
     RawTexture.prototype.gradientMagnitude = function(x, y) {
         
         // Apply the kernel to each texture
@@ -211,8 +337,7 @@ define(function(require) {
         var newRaw    = context.getImageData(0, 0, this._raw.width, this._raw.height);
         var target    = newRaw.data;
 
-        // We take the magnatude of the gradent, we can find the angle by
-        // using Math.atan(y, x) which is used in HOG.
+        // We take the magnatude of the gradent
         for(var i = 0; i < target.length; i += this._channels) {
             target[i + 0] = Math.sqrt(Math.pow(x._raw.data[i + 0], 2) + Math.pow(y._raw.data[i + 0], 2));
             target[i + 1] = Math.sqrt(Math.pow(x._raw.data[i + 1], 2) + Math.pow(y._raw.data[i + 1], 2));
