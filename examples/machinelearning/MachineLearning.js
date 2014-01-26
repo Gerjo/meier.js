@@ -49,7 +49,7 @@ define(function(require) {
         this.previous = this.current;
         
         this.lastGuess = null;
-        
+        /*
         var seed = 22; // For initial random values.
         this.nnet = new Nnet([2, 3, 3, 1], NaN);
         
@@ -68,7 +68,7 @@ define(function(require) {
             [0],
             [1]
         ];
-        
+        */
         
         //for(var i = 0; i < 10; ++i) {
             //this.nnet.train(this.train, this.expected);
@@ -76,9 +76,9 @@ define(function(require) {
     }
     
     MachineLearning.prototype.onKeyDown = function(input, key) {
-        //this.renew();
+        this.renew();
         
-        if(key == Key.SPACE) {
+        /*if(key == Key.SPACE) {
             this.nnet.train(this.train, this.expected);
         } else if(key == Key.LEFT_ENTER) {
             for(var i = 0; i < this.train.length; ++i) {
@@ -102,7 +102,7 @@ define(function(require) {
             var r = this.nnet.classify(this.train[3]);
             
             console.log("[" + this.train[3].join() + "] Expected: " + this.expected[3] + ", received: " + r[0].toFixed(6));
-        }
+        }*/
     };
     
     MachineLearning.prototype.renew = function() {
@@ -140,7 +140,7 @@ define(function(require) {
     MachineLearning.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        this.nnet.draw(renderer, 0, 0, 300, 300);
+        //this.nnet.draw(renderer, 0, 0, 300, 300);
         
         if(this.isLearning) {
             renderer.text("Draw digit: " + this.current, 0, 210, "black", "center", "middle", "bold 40px monospace ");
