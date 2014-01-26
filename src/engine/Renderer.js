@@ -422,7 +422,7 @@ define(function(require) {
     /// Fill all draw calls since begin() with a given color.
     Renderer.prototype.fill = function(color) {
 		if(color instanceof Texture) {
-			var pattern = this.context.createPattern(color.image, 'repeat');
+			var pattern = this.context.createPattern(color._image, 'repeat');
 	        this.context.fillStyle = pattern;
 		} else {
 	        this.context.fillStyle = color;
