@@ -2,15 +2,17 @@
 <html>
 <head>
 
-<script src="../../src/Meier.js"></script>
+<script src="./meier/Meier.js"></script>
 
 <script>
 
+// Engine file location
+Meier("./meier");
 
-Meier("../../src");
+// Main entry point
 Meier(function() {
-    require(["./TreeApp"], function(TreeApp) {
-        new TreeApp(document.getElementsByTagName("body")[0]);
+    require(["./AnnulusApp"], function(AnnulusApp) {
+        new AnnulusApp(document.getElementsByTagName("body")[0]);
     });
 });
 
@@ -25,7 +27,6 @@ body, html {
     margin: 0px;
     padding: 0px;
 }
-
 </style>
 
 </head>
