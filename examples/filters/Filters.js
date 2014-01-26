@@ -64,8 +64,14 @@ define(function(require){
             "Gaussian 5x5 s:2": function(texture) {
                 return texture.gaussian(5, 5, 2);
             },
+            "Gaussian 15x15 s:20": function(texture) {
+                return texture.gaussian(15, 15, 20);
+            },
             "Gaussian 10x1 s:20": function(texture) {
                 return texture.gaussian(10, 1, 20);
+            },
+            "Canny": function(texture) {
+                return texture.canny();
             }
         };
         
@@ -80,6 +86,7 @@ define(function(require){
         
         // Interface
         this.gui = new dat.GUI();
+        this.gui.width = 300;
         this.gui.add(this, "image", this.images).name("Image").onChange(this.onChange.bind(this));
         this.gui.add(this, "filter1", Object.keys(this.filters)).name("Filter 1").onChange(this.onChange.bind(this));
         this.gui.add(this, "filter2", Object.keys(this.filters)).name("Filter 2").onChange(this.onChange.bind(this));
