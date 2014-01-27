@@ -12,7 +12,8 @@ define(function(require){
     var Disk            = require("meier/math/Disk");
     var ClosestVector   = require("meier/math/Math").ClosestVector;
     var FarthestVector  = require("meier/math/Math").FarthestVector;
-    
+    var Intersection    = require("meier/math/Intersection").Get;            
+    var Segment         = require("meier/math/Line");
     
     var Annulus    = require("./Annulus");
     var Ransac     = require("./Ransac");
@@ -38,22 +39,28 @@ define(function(require){
         // Will hold the canvas coordinates
         this.coordinates = [];
         
+        // Will hold the nearest/farthest voronoi intersections
+        this.intersections = [];
+        
         // Will hold all generated annuli
         this.annuli = {
-            farthest: null,
-            nearest:  null,
-            ransac:   null
+            nearest:      null,
+            farthest:     null,
+            intersection: null,
+            ransac:       null
         };
                 
         // Visibility states
-        this.showVoronoi           = false;
-        this.showLeastSquareCircle = false;
-        this.showFarthestVoronoi   = false;
-        this.showDelaunay          = false;
-        this.showHull              = false;
-        this.showVoronoiAnnulus    = true;
-        this.showFarthestAnnulus   = true;
-        this.showRansacAnnulus     = true;
+        this.showVoronoi             = false;
+        this.showLeastSquareCircle   = false;
+        this.showFarthestVoronoi     = false;
+        this.showDelaunay            = false;
+        this.showHull                = false;
+        this.showVoronoiAnnulus      = true;
+        this.showFarthestAnnulus     = true;
+        this.showRansacAnnulus       = true;
+        this.showIntersectionAnnulus = true;
+        this.showVoronoiIntersection = false;
         
         // Ransac options 
         this.ransacK      = 5000;
@@ -62,12 +69,14 @@ define(function(require){
         
         // We use "dat.GUI" project for the interface.
         this.gui = new dat.GUI();
+        this.gui.width = 340;
         
         // Debug visibility
         var folder = this.gui.addFolder("Debug visibility state");
         folder.add(this, "showVoronoi").name("Voronoi");
-        folder.add(this, "showDelaunay").name("Delaunay");
         folder.add(this, "showFarthestVoronoi").name("Farthest Voronoi");
+        folder.add(this, "showVoronoiIntersection").name("Voronoi Intersections");
+        folder.add(this, "showDelaunay").name("Delaunay");
         folder.add(this, "showHull").name("Convex Hull");
         folder.add(this, "showLeastSquareCircle").name("Least Squares");
         
@@ -75,6 +84,7 @@ define(function(require){
         folder = this.gui.addFolder("Annulus visibility state");
         folder.add(this, "showVoronoiAnnulus").name("By Nearest");
         folder.add(this, "showFarthestAnnulus").name("By Farthest");
+        folder.add(this, "showIntersectionAnnulus").name("By Intersection");
         folder.add(this, "showRansacAnnulus").name("By RANSAC");
         
         // Canvas editing options
@@ -146,6 +156,37 @@ define(function(require){
             return previous;
         }, []);
         
+        // Clear previous voronoi intersections
+        this.intersections.clear();
+        
+        // Find farthest and nearest voronoi intersections
+        this.coordinates.forEach(function (v) {
+            for(var i = 0; i < v.neighbours.length; ++i) {
+                
+                // Edges have wrap-around code.
+                var nearestEdge = new Segment(
+                    v.neighbours[i - 1] || v.neighbours.last(),
+                    v.neighbours[i] || v.neighbours.first()
+                );
+                
+                this.farthestVoronoi.edges.forEach(function(fathestEdge) {
+                    
+                    // Run intersection test of edges
+                    var p = Intersection.Segments(nearestEdge, fathestEdge);
+                    
+                    if(p !== false) {
+                        // There was an intersection. This is a potential annulus
+                        // center. (case 3 in the slides).
+                        this.intersections.push(p);
+                    }
+                }.bind(this));   
+            }
+        }.bind(this));
+      
+        this.annuli.intersection = SmallestAnnulus(this.intersections, this.coordinates);
+        this.annuli.intersection.name = "Voronoi Intersection";
+        this.annuli.intersection.color = Colors.blue;
+        
         this.annuli.nearest = SmallestAnnulus(vertices, this.coordinates);        
         this.annuli.nearest.name  = "Nearest Voronoi";
         this.annuli.nearest.color = Colors.green;
@@ -188,6 +229,11 @@ define(function(require){
             this.annuli.farthest.draw(renderer);
         }
         
+        if(this.showIntersectionAnnulus) {
+            this.annuli.intersection.draw(renderer);
+        }
+        
+        
         if(this.showLeastSquareCircle) {
             renderer.begin();
             renderer.circle(this.leastSquaresDisk);
@@ -226,6 +272,16 @@ define(function(require){
             this.farthestVoronoi.hull.eachPair(renderer.line.bind(renderer));        
             renderer.stroke("#393939", 2);
         }
+        
+        if(this.showVoronoiIntersection) {
+            renderer.begin();
+            
+            this.intersections.forEach(function(p) {
+                renderer.circle(p, 2);
+            });
+            renderer.fill("blue");
+        }
+        
     }
     
     /// Helper function to find the minima and maxima, indicating
@@ -272,8 +328,6 @@ define(function(require){
         
         return new Annulus(best.center, best.closest, best.farthest);
     }
-    
-    
     
     return Application;
 });
