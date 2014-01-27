@@ -307,8 +307,8 @@ define(function(require) {
         // Get the fake 2D cross product
         var rs = r.cross(s);
     
-        if(rs === 0) {
-            return false;   // TODO: Introduce some tolerance
+        if(Math.abs(rs) <= 0.0001) {
+            return false;
         }
     
         // Get the params
