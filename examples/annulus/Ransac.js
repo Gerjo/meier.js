@@ -1,5 +1,6 @@
 define(function(require) {
     var Disk    = require("meier/math/Disk");
+    var Lerp    = require("meier/math/Lerp").Vector;
     var Vector  = require("meier/math/Vec")(2);
     var Annulus = require("./Annulus");
     
@@ -46,6 +47,11 @@ define(function(require) {
                 }, new Vector(0, 0)).scaleScalar(1 / consensus.length);
                 
                 model = new Disk(center, 0);
+                
+            } else if(estimationModel == 2) {
+                var center = Lerp(candidates[0], candidates[1], 0.5);
+                model = new Disk(center, candidates[1].distance(candidates[0]) * 0.5);
+            
             } else {
                 throw new Error("Not a valid estimation model. Try '0' or '1'.");
             }

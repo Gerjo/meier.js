@@ -57,7 +57,7 @@ define(function(require){
         
         // Ransac options 
         this.ransacK      = 5000;
-        this.ransacModels = ["Circumcircle", "Mean Position"];
+        this.ransacModels = ["Circumcircle", "3 Mean Position", "2 Points"];
         this.ransacModel  = this.ransacModels.first();
         
         // We use "dat.GUI" project for the interface.
