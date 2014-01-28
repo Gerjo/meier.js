@@ -48,7 +48,7 @@ define(function(require) {
         this.colors = Colors.Random(40);
         
         this.methods = ["k-means", "k-medoids"];
-        this.method  = this.methods.last();
+        this.method  = this.methods.first();
         
         // Settings GUI:
         this.gui = new dat.GUI();
