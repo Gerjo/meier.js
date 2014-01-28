@@ -79,14 +79,35 @@ define(function(require) {
     };
     
     Clustering.prototype.onClusterChange = function() {
+        // Remove too many (i.e., the slider quantity went down)
         while(this.centroids.length > this.numCentroids) {
             this.centroids.pop();
         }
         
+        // Add new (i.e., the slider quantity went up)
         while(this.centroids.length < this.numCentroids) {
-            this.centroids.push(
-                new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh))
-            );
+            var centroid;
+            
+            if(this.method == "k-means") {
+                // Random position on the canvas. This works for our demo implementation,
+                // however for mission critical applications, "k-means++" might be 
+                // worth a study.
+                centroid = new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh));
+                
+            // k-mediods, pick a random coordinate as centroid
+            } else {
+                var timeout  = 10;
+                var contains = false;
+                
+                // Find a random centroid, (we could/should pick a unique...)
+                centroid = this.coordinates.random();
+            }
+            
+            if(centroid) {
+                this.centroids.push(
+                    centroid
+                );
+            }
         }
         
     };
@@ -144,6 +165,9 @@ define(function(require) {
             return [];
         });
         
+        
+        //console.log(this.clusters.length, this.centroids.length);
+        
         // Map coordiates to a cluster
         this.coordinates.forEach(function(coordinate) {
             
@@ -161,14 +185,17 @@ define(function(require) {
                 }
             }
             
-            // Coordinate join the cluster:
-            this.clusters[nearest].push(coordinate);
+            if(nearest != -1) {
+                // Coordinate join the cluster:
+                this.clusters[nearest].push(coordinate);
+            }
         }.bind(this));
     };
     
     Clustering.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 
+       // console.log(this.centroids);
 
         // Find the first order voronoi. Note that the voronoi sites
         // are attached to "this.centroids" as a "neighbours" property.
@@ -191,35 +218,39 @@ define(function(require) {
             
         }.bind(this));
 
-        this.centroids = this.centroids.map(function(centroid, i) {           
-            // Sum all coordinates, and draw them while we're at it.
-            var sum = this.clusters[i].reduce(function(accumulator, coordinate) {
-                renderer.circle(coordinate, 4);
+        if(this.coordinates.length > 0) {
+            
+            // Compute new centroids based on detected clusters.
+            this.centroids = this.centroids.map(function(centroid, i) {           
+                // Sum all coordinates, and draw them while we're at it.
+                var sum = this.clusters[i].reduce(function(accumulator, coordinate) {
+                    renderer.circle(coordinate, 4);
                 
-                accumulator.x += coordinate.x;
-                accumulator.y += coordinate.y;
+                    accumulator.x += coordinate.x;
+                    accumulator.y += coordinate.y;
                 
-                return accumulator;
-            }, new Vector(0, 0));
+                    return accumulator;
+                }, new Vector(0, 0));
         
-            renderer.fill(this.colors[i]);
-            renderer.stroke("rgba(0, 0, 0, 0.3)");
+                renderer.fill(this.colors[i]);
+                renderer.stroke("rgba(0, 0, 0, 0.3)");
             
-            // Average position of this cluster to become the new centroid.
-            sum.scaleScalar(1 / this.clusters[i].length);
+                // Average position of this cluster to become the new centroid.
+                sum.scaleScalar(1 / this.clusters[i].length);
             
-            if(this.method == "k-means") {
-                // Normal k-means does not Lerp between previous centroid and 
-                // the new centroid. We do this just for animation purposes.
-                return Lerp(centroid, sum, this.easing * this.dt);
+                if(this.method == "k-means") {
+                    // Normal k-means does not Lerp between previous centroid and 
+                    // the new centroid. We do this just for animation purposes.
+                    return Lerp(centroid, sum, this.easing * this.dt);
                 
-            } else {
-                // The nearest coordinate to the average position is promoted to
-                // centroid. No animations here!
-                return ClosestVector(sum, this.coordinates);
-            }
-            
-        }.bind(this));
+                // Default to k-mediods
+                } else {
+                    // The nearest coordinate to the average position is promoted to
+                    // centroid. No animations here!
+                    return ClosestVector(sum, this.coordinates);
+                }
+            }.bind(this));
+        }
     };
     
     
