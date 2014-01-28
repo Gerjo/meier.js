@@ -94,7 +94,7 @@ define(function(require) {
                 // worth a study.
                 centroid = new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh));
                 
-            // k-mediods, pick a random coordinate as centroid
+            // k-medoids, pick a random coordinate as centroid
             } else {
                 var timeout  = 10;
                 var contains = false;
@@ -113,14 +113,6 @@ define(function(require) {
                 break;
             }
         }
-        
-    };
-    
-    Clustering.prototype.updateKmeans = function() {
-        
-    };
-    
-    Clustering.prototype.updateKmediods = function() {
         
     };
     
@@ -252,7 +244,7 @@ define(function(require) {
                     // the new centroid. We do this just for animation purposes.
                     return Lerp(centroid, sum, this.easing * this.dt);
                 
-                // Default to k-mediods
+                // Default to k-medoids
                 } else {
                     // The nearest coordinate to the average position is promoted to
                     // centroid. No animations here!
