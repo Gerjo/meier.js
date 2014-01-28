@@ -40,8 +40,6 @@ define(function(require) {
         this.centroids   = [];
         this.clusters    = []; // coordinates per cluster.
         
-
-        
         this.easing = 0.9;
                 
         // Colors per index:
@@ -55,7 +53,7 @@ define(function(require) {
         this.gui.add(this.grid, "clear").name("Clear");
         
         // Random number seeding:
-        Random.Seed(33);
+        Random.Seed(34);
         this.addRandomCluster();
         this.addRandomCluster();
         this.addRandomCluster();
