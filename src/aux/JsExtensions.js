@@ -83,6 +83,9 @@ define(function(require) {
     
     /// Return random item from array:
     Array.prototype.random = function() {
+        if(this.length == 0) {
+            return undefined;
+        }
         return this[Random(0, this.length-1)];
     };
     
