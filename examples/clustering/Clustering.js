@@ -45,7 +45,7 @@ define(function(require) {
         this.easing = 0.9;
                 
         // Colors per index:
-        this.colors = Colors.Random(40);["red", "blue", "green", "hotpink", "limegreen", "brown", "purple", "yellow"];
+        this.colors = Colors.Random(40);
         
         this.methods = ["k-means", "k-medoids"];
         this.method  = this.methods.last();
@@ -107,6 +107,10 @@ define(function(require) {
                 this.centroids.push(
                     centroid
                 );
+                
+            // No new centroid, break the loop.
+            } else {
+                break;
             }
         }
         
@@ -158,6 +162,10 @@ define(function(require) {
         
         this.dt = dt;
         
+        if(this.clusters.length != this.numClusters) {
+            this.onClusterChange();
+        }
+        
         // Create new lookup for each cluster. Mapping
         // each coordinate to its nearest cluster.
         this.clusters = this.centroids.map(function() {
@@ -165,9 +173,7 @@ define(function(require) {
             return [];
         });
         
-        
-        //console.log(this.clusters.length, this.centroids.length);
-        
+                
         // Map coordiates to a cluster
         this.coordinates.forEach(function(coordinate) {
             
@@ -222,6 +228,9 @@ define(function(require) {
             
             // Compute new centroids based on detected clusters.
             this.centroids = this.centroids.map(function(centroid, i) {           
+                
+                renderer.begin();
+                
                 // Sum all coordinates, and draw them while we're at it.
                 var sum = this.clusters[i].reduce(function(accumulator, coordinate) {
                     renderer.circle(coordinate, 4);
