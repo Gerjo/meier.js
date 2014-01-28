@@ -8,6 +8,8 @@ define(function(require) {
     var dat       = require("meier/contrib/datgui");
     var Voronoi   = require("meier/math/Voronoi").Voronoi;
     var Colors    = require("meier/aux/Colors");
+    var Lerp      = require("meier/math/Lerp").Vector;
+    var ClosestVector = require("meier/math/Math").ClosestVector;
 
     Clustering.prototype = new Game();
     function Clustering(container) {
@@ -45,12 +47,17 @@ define(function(require) {
         // Colors per index:
         this.colors = Colors.Random(40);["red", "blue", "green", "hotpink", "limegreen", "brown", "purple", "yellow"];
         
+        this.methods = ["k-means", "k-medoids"];
+        this.method  = this.methods.last();
+        
         // Settings GUI:
         this.gui = new dat.GUI();
+        this.gui.add(this, "method", this.methods).name("Method");
         this.gui.add(this, "numCentroids", 1, 40).name("Centroids").step(1).onChange(this.onClusterChange.bind(this));
-        this.gui.add(this, "Click_To_Reseed").name("Reseed");
-        this.gui.add(this, "Add_Cluster").name("Add Random");
+        this.gui.add(this, "reseedCentroid").name("reseedCentroid");
+        this.gui.add(this, "addRandomCluster").name("Add Random");
         this.gui.add(this.grid, "clear").name("Clear");
+        
         
         // Random number seeding:
         Random.Seed(34);
@@ -59,13 +66,15 @@ define(function(require) {
         this.addRandomCluster();
         this.addRandomCluster();
      
-        // Delta time cache, let's run some physics in the drawloop.
+        // Time cache, we're running some physics in the drawloop
+        // which has no access to a delta time, so we cache it in
+        // the update loop.
         this.dt = 1 / 60;
         
-        this.Click_To_Reseed();
+        this.reseedCentroid();
     }
     
-    Clustering.prototype.Add_Cluster = function() {
+    Clustering.prototype.addRandomCluster = function() {
         this.addRandomCluster();
     };
     
@@ -82,7 +91,15 @@ define(function(require) {
         
     };
     
-    Clustering.prototype.Click_To_Reseed = function() {
+    Clustering.prototype.updateKmeans = function() {
+        
+    };
+    
+    Clustering.prototype.updateKmediods = function() {
+        
+    };
+    
+    Clustering.prototype.reseedCentroid = function() {
         
         this.centroids.clear();
         
@@ -108,17 +125,11 @@ define(function(require) {
     };
 
     Clustering.prototype.recompute = function(coordinates) {
-        
         if(coordinates instanceof Array) {
+            // No computations are done here, everything is set in
+            // update loop.
             this.coordinates = coordinates;
         }
-        
-        //this.clusters.clear();
-        //this.centroids.clear();
-        
-        //for(var i = 0; i < this.numCentroids; ++i) {
-        //    this.centroids.push(Random.Vector().scaleScalar(100));
-        //}
     };
     
     Clustering.prototype.update = function(dt) {
@@ -126,12 +137,14 @@ define(function(require) {
         
         this.dt = dt;
         
-        this.clusters.clear();
+        // Create new lookup for each cluster. Mapping
+        // each coordinate to its nearest cluster.
+        this.clusters = this.centroids.map(function() {
+            // Initially empty.
+            return [];
+        });
         
-        for(var i = 0; i < this.centroids.length; ++i) {
-            this.clusters.push([]);
-        }
-        
+        // Map coordiates to a cluster
         this.coordinates.forEach(function(coordinate) {
             
             var nearest  = -1;          // Some invalid index. 
@@ -150,53 +163,63 @@ define(function(require) {
             
             // Coordinate join the cluster:
             this.clusters[nearest].push(coordinate);
-            
         }.bind(this));
-        
-        
     };
     
     Clustering.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 
-        this.centroids = this.centroids.map(function(centroid, i) {
 
-            renderer.begin();
-            renderer.circle(centroid, 10);
-            renderer.rectangle(centroid, 10, 10);
-            
-            var sum = new Vector(0, 0);
-            
-            if(this.clusters[i]) {
-                this.clusters[i].forEach(function(coordinate) {
-                    renderer.circle(coordinate, 4);
-                    
-                    sum.x += coordinate.x;
-                    sum.y += coordinate.y;
-                });
-            }
-            
-            renderer.fill(this.colors[i]);
-            renderer.stroke("rgba(0, 0, 0, 0.3)");
-            
-            // Average position:
-            sum.scaleScalar(1 / this.clusters[i].length)
-            
-            return centroid.add(new Vector(sum.x - centroid.x, sum.y - centroid.y).scaleScalar(this.easing * this.dt));
-            
-        }.bind(this));
+        // Find the first order voronoi. Note that the voronoi sites
+        // are attached to "this.centroids" as a "neighbours" property.
+        Voronoi(this.centroids);
 
-        var centers = Voronoi(this.centroids);
-        
-        this.centroids.forEach(function(coordinate, i) {
-         
+        // Draw the voronoi sites and entroids
+        this.centroids.forEach(function(centroid, i) {
+            // Voronoi site
             renderer.begin();
-            renderer.polygon(coordinate.neighbours);
+            renderer.polygon(centroid.neighbours);
             renderer.fill(Colors.Alpha(this.colors[i], 0.2));
             renderer.stroke("rgba(0, 0, 0, 0.4)");
             
+            // Centroid
+            renderer.begin();
+            renderer.circle(centroid, 10);
+            renderer.rectangle(centroid, 10, 10);
+            renderer.fill(this.colors[i]);
+            renderer.stroke("rgba(0, 0, 0, 0.3)");
+            
         }.bind(this));
+
+        this.centroids = this.centroids.map(function(centroid, i) {           
+            // Sum all coordinates, and draw them while we're at it.
+            var sum = this.clusters[i].reduce(function(accumulator, coordinate) {
+                renderer.circle(coordinate, 4);
+                
+                accumulator.x += coordinate.x;
+                accumulator.y += coordinate.y;
+                
+                return accumulator;
+            }, new Vector(0, 0));
         
+            renderer.fill(this.colors[i]);
+            renderer.stroke("rgba(0, 0, 0, 0.3)");
+            
+            // Average position of this cluster to become the new centroid.
+            sum.scaleScalar(1 / this.clusters[i].length);
+            
+            if(this.method == "k-means") {
+                // Normal k-means does not Lerp between previous centroid and 
+                // the new centroid. We do this just for animation purposes.
+                return Lerp(centroid, sum, this.easing * this.dt);
+                
+            } else {
+                // The nearest coordinate to the average position is promoted to
+                // centroid. No animations here!
+                return ClosestVector(sum, this.coordinates);
+            }
+            
+        }.bind(this));
     };
     
     
