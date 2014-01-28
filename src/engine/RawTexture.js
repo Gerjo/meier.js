@@ -12,6 +12,11 @@ define(function(require) {
     canvas.width  = 0;
     canvas.height = 0;
     
+    
+    function ClampByte(b) {
+        return Math.min(Math.max(0, b), 255);
+    }
+    
     /// Common convolution kernels, as found on the internet
     RawTexture.Matrices = {
         // The following ae from wikipedia: http://en.wikipedia.org/wiki/Kernel_(image_processing)
@@ -60,6 +65,33 @@ define(function(require) {
             this._isLoaded = true;
         }
     }
+    
+    RawTexture.prototype.differenceOfGaussian = function() {
+        
+        // Selected these arbitrary, just to test what works.
+        var a = this.gaussian(2, 2, 1);
+        var b = this.gaussian(7, 7, 9);
+        
+        var source   = a._raw.data;
+        var target   = b._raw.data;
+        var channels = this._channels;
+        
+        // If the difference drops below zero, we can offset it. Probably best to normalize
+        // the colors after the first DOG process?
+        var offset   = 0;
+        
+        for(var i = 0; i < source.length; i += channels) {
+            target[i + 0] = ClampByte(Math.abs(target[i + 0] - source[i + 0] + offset));
+            target[i + 1] = ClampByte(Math.abs(target[i + 1] - source[i + 1] + offset));
+            target[i + 2] = ClampByte(Math.abs(target[i + 2] - source[i + 2] + offset));
+            
+            target[i + 3] = 255;
+        }
+        
+        //console.log(i);
+        
+        return b;
+    };
     
     RawTexture.prototype.canny = function(xKernel, yKernel) {
         xKernel = xKernel || RawTexture.Matrices.SobelX;
