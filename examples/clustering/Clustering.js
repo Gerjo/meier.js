@@ -49,9 +49,10 @@ define(function(require) {
         
         // Settings GUI:
         this.gui = new dat.GUI();
-        this.gui.add(this, "numCentroids", 1, 40).step(1).onChange(this.onClusterChange.bind(this));
-        this.gui.add(this, "Click_To_Reseed");
-        this.gui.add(this, "Add_Cluster");
+        this.gui.add(this, "numCentroids", 1, 40).name("Centroids").step(1).onChange(this.onClusterChange.bind(this));
+        this.gui.add(this, "Click_To_Reseed").name("Reseed");
+        this.gui.add(this, "Add_Cluster").name("Add Random");
+        this.gui.add(this.grid, "clear").name("Clear");
         
         // Random number seeding:
         Random.Seed(33);
