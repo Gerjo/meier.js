@@ -71,6 +71,7 @@ define(function(require) {
         
         // The pixel range is clamped to an edge        
         function Index(x, y) {
+
             if(x < 0) {
                 x = 0;
             }
@@ -98,8 +99,13 @@ define(function(require) {
         
         var newData  = context.createImageData(width, height);
         
-        for(var j = 0, y = 0, x = 0, i = 0; j < gradients.length; ++j, i += this._channels) {
-            var directions = [
+        var channels = this._channels;
+        for(var j = 0, y = 0, x = 0, i = 0; j < gradients.length; ++j, i += channels) {
+            
+            // Correct alpha channel. (set visible)
+            newData.data[i + 3] = 255;
+            
+            var directionsAll = [
                 Index(x - 1, y),     // e
                 Index(x + 1, y + 1), // ne
                 Index(x,     y + 1), // n
@@ -109,44 +115,51 @@ define(function(require) {
                 Index(x - 1, y - 1), // s
                 Index(x + 1, y)      // se
             ];
-            
+          
             var colors = [
-            [255, 0, 0],
-            [255, 255, 0],
-            [0, 255, 0],
-            [0, 255, 255],
-            [0, 0, 255],
-            [255, 0, 255],
-            [255, 255, 255],
-            [0, 0, 0]
+                [255, 0, 0],
+                [255, 255, 0],
+                [0, 255, 0],
+                [0, 255, 255],
+                [0, 0, 255],
+                [255, 0, 255],
+                [255, 255, 255],
+                [0, 0, 0]
             ];
             
             var gradient  = gradients[j];
             var angle     = gradient.angle();
-            var n         = parseInt(Angle.ToAbsoluteRadians(angle) / (Math.PI/8));
-            var neighbour = gradients[directions[n]];
+            var n         = directionsAll[parseInt(Angle.ToAbsoluteRadians(angle) / (Math.PI/8))];
+            var magnitude = gradient.magnitudeSQ();
             
-            newData.data[i + 0] = colors[n][0];
-            newData.data[i + 1] = colors[n][1];
-            newData.data[i + 2] = colors[n][2];
-            newData.data[i + 3] = 255;
-            
-            if(neighbour.magnitudeSQ() > gradient.magnitudeSQ()) {
-                //newData.data[i+ 0] = 0;
-                //newData.data[i + 1] = 0;
-                //newData.data[i + 2] = 0;
-                //newData.data[i + 3] = 255;
+            // TODO: Work on a copy of the image, otherwise hysteresis doesn't work anymore.
+            if(gradients[n].magnitudeSQ() > magnitude) {
+                // Current off.
+                newData.data[i + 0] = 0;
+                newData.data[i + 1] = 0;
+                newData.data[i + 2] = 0;
+                
+                gradient.off = true;
                 
             } else {
-                //newData.data[i + 0] = 255;
-                //newData.data[i + 1] = 255;
-                //newData.data[i + 2] = 255;
-                //newData.data[i + 3] = 255;
+                // Current on
+                
+                if(gradient.off !== true) {
+                    newData.data[i + 0] = 255;
+                    newData.data[i + 1] = 0;
+                    newData.data[i + 2] = 0;
+                    gradient.off = false;
+                } else {
+                    newData.data[i + 0] = 0;
+                    newData.data[i + 1] = 0;
+                    newData.data[i + 2] = 0;
+                }
 
-                //newData.data[n + 0] = 0;
-                //newData.data[n + 1] = 255;
-                //newData.data[n + 2] = 0;
-                //newData.data[n + 3] = 255;
+                // Perps off
+                gradients[n].off = true;
+                newData.data[n * channels + 0] = 0;
+                newData.data[n * channels + 1] = 0;
+                newData.data[n * channels + 2] = 0;
             }
             
             // Counters to keep track of x / y pixel coordinates
@@ -155,6 +168,8 @@ define(function(require) {
                 ++y;
             }
         }
+        
+        ASSERT(newData.data.length == width * height * channels);
         
         console.log(newData);
         

@@ -70,8 +70,11 @@ define(function(require){
             "Gaussian 10x1 s:20": function(texture) {
                 return texture.gaussian(10, 1, 20);
             },
-            "Canny": function(texture) {
+            "Canny [WIP]": function(texture) {
                 return texture.canny();
+            },
+            "Diff Of Gaussian": function(texture) {
+                return texture.differenceOfGaussian();
             }
         };
         
