@@ -8,8 +8,11 @@ define(function(require) {
     var dat       = require("meier/contrib/datgui");
     var Voronoi   = require("meier/math/Voronoi").Voronoi;
     var Colors    = require("meier/aux/Colors");
-    var Lerp      = require("meier/math/Lerp").Vector;
-    var ClosestVector = require("meier/math/Math").ClosestVector;
+    var Lerp      = require("meier/math/Lerp");
+    var Noise     = require("meier/aux/Noise");
+    var Circle    = require("meier/math/Disk");
+    var ClosestVector      = require("meier/math/Math").ClosestVector;
+    var LeastSquaresCircle = require("meier/math/Math").LeastSquaresCircle;
 
     Clustering.prototype = new Game();
     function Clustering(container) {
@@ -40,65 +43,71 @@ define(function(require) {
         
         // Will eventually hold the centroids:
         this.centroids   = [];
+        this.radii       = []; // Radii of each centroid, for k-circles.
         this.clusters    = []; // coordinates per cluster.
         
-        this.easing = 0.9;
+        this.easing = 0.96;
                 
         // Colors per index:
         this.colors = Colors.Random(40);
         
-        this.methods = ["k-means", "k-medoids"];
+        this.methods = ["k-means", "k-medoids", "k-circles"/*, "k-polynomial"*/];
         this.method  = this.methods.first();
         
         // Settings GUI:
         this.gui = new dat.GUI();
         this.gui.add(this, "method", this.methods).name("Method");
         this.gui.add(this, "numCentroids", 1, 40).name("Centroids").step(1).onChange(this.onClusterChange.bind(this));
-        this.gui.add(this, "reseedCentroid").name("reseedCentroid");
-        this.gui.add(this, "addRandomCluster").name("Add Random");
-        this.gui.add(this.grid, "clear").name("Clear");
+        this.gui.add(this, "easing").name("Easing").step(0.01).min(0).max(1);
+        this.gui.add(this, "reseedCentroid").name("ReseedCentroids");
+        
+        var folder = this.gui.addFolder("Randomness");
+        folder.add(this, "addRandomCluster").name("Add Cluster");
+        folder.add(this, "addRandomCircle").name("Add Circle");
+        folder.add(this.grid, "clear").name("Clear");
         
         
         // Random number seeding:
-        Random.Seed(34);
+        Random.Seed(49);
         this.addRandomCluster();
         this.addRandomCluster();
         this.addRandomCluster();
         this.addRandomCluster();
         
+        //this.addRandomCircle();
+        
         this.reseedCentroid();
     }
-    
-    Clustering.prototype.addRandomCluster = function() {
-        this.addRandomCluster();
-    };
     
     Clustering.prototype.onClusterChange = function() {
         // Remove too many (i.e., the slider quantity went down)
         while(this.centroids.length > this.numCentroids) {
             this.centroids.pop();
+            this.radii.length = this.centroids.length;
         }
         
         // Add new (i.e., the slider quantity went up)
         while(this.centroids.length < this.numCentroids) {
             var centroid;
             
-            if(this.method == "k-means") {
+            
+            // k-medoids, pick a random coordinate as centroid
+            if(this.method == "k-medoids") {
+                // Find a random centroid, (we could/should pick a unique...)
+                centroid = this.coordinates.random();
+                
+            // Any other algorithm
+            } else {
                 // Random position on the canvas. This works for our demo implementation,
                 // however for mission critical applications, "k-means++" might be 
                 // worth a study.
                 centroid = new Vector(Random(-this.hw, this.hw), Random(-this.hh, this.hh));
-                
-            // k-medoids, pick a random coordinate as centroid
-            } else {
-                var timeout  = 10;
-                var contains = false;
-                
-                // Find a random centroid, (we could/should pick a unique...)
-                centroid = this.coordinates.random();
             }
             
             if(centroid) {
+                // Make sure there is a random radius. (not used by k-means and k-medoids)
+                this.radii[this.centroids.length] = Random(100, 200);
+                
                 this.centroids.push(
                     centroid
                 );
@@ -112,15 +121,24 @@ define(function(require) {
     };
     
     Clustering.prototype.reseedCentroid = function() {
-        
+        // Remove them all.
         this.centroids.clear();
         
+        // This method will add fresh new ones.
         this.onClusterChange();
+    };
+    
+    Clustering.prototype.addRandomCircle = function() {
+        var ring = Noise.Circle();
+        
+        this.grid.addCoordinate(ring);
     };
     
     Clustering.prototype.addRandomCluster = function() {
         var size   = 10;
         var radius = 40;
+        
+        var cluster = [];
         
         var place = new Vector(
             Random(-this.hw + radius, this.hw - radius),
@@ -129,13 +147,14 @@ define(function(require) {
         
         for(var i = 0, p; i < size; ++i) {
             p = Random.Vector().scaleScalar(Random(-radius, radius));
-
-            p.add(place);
-            
-            this.grid.onLeftDown(p);
+            cluster.push(p.add(place));
         }
+        
+        this.grid.addCoordinate(cluster);
     };
 
+    /// Method called when the interactive grid received
+    /// new coordinates, or coordinates were deleted.
     Clustering.prototype.recompute = function(coordinates) {
         if(coordinates instanceof Array) {
             // No computations are done here, everything is set in
@@ -147,6 +166,7 @@ define(function(require) {
     Clustering.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
         
+        // The user changed the quantity
         if(this.clusters.length != this.numClusters) {
             this.onClusterChange();
         }
@@ -157,7 +177,7 @@ define(function(require) {
         var accumulators = new Array(this.centroids.length);
         for(var j = 0; j < this.centroids.length; ++j) {
             this.clusters[j] = [];
-            accumulators[j] = new Vector(0, 0);;
+            accumulators[j] = new Vector(0, 0);
         }
 
         // Map coordiates to a cluster
@@ -168,7 +188,15 @@ define(function(require) {
             
             // Find clusest centroid i.e. cluster.
             for(var i = 0, d; i < this.centroids.length; ++i) {
-                d = this.centroids[i].distanceSQ(coordinate);
+                
+                if(this.method == "k-circles") {
+                    var translate = coordinate.clone().subtract(this.centroids[i]).length();
+                    d = Math.abs(translate - this.radii[i]);
+                    
+                } else {
+                    // Euclidian squared distance
+                    d = this.centroids[i].distanceSQ(coordinate);
+                }
                 
                 // Compare distances for a closter match:
                 if(d < distance) {
@@ -194,11 +222,18 @@ define(function(require) {
                 if(this.method == "k-means") {
                     // Normal k-means does not Lerp between previous centroid and 
                     // the new centroid. We do this just for animation purposes.
-                    this.centroids[i] = Lerp(this.centroids[i], mean, this.easing * dt);
+                    this.centroids[i] = Lerp(this.centroids[i], mean, 1-this.easing);
+                
+                } else if(this.method == "k-circles") {
+                    var fittedCircle  = LeastSquaresCircle(this.clusters[i]);
+                    
+                    this.centroids[i] = Lerp(this.centroids[i], fittedCircle.position, 1-this.easing);
+                    this.radii[i]     = Lerp(this.radii[i], fittedCircle.radius, 1-this.easing);
+                    
                 } else {
                     // The nearest coordinate to the average position is promoted to
                     // centroid. No animations here!
-                    return ClosestVector(sum, this.coordinates);
+                    this.centroids[i] = ClosestVector(mean, this.coordinates).clone();
                 }
             } else {
                 // Cluster is empty! (local minima)
@@ -215,11 +250,22 @@ define(function(require) {
 
         // Draw the voronoi sites and entroids
         this.centroids.forEach(function(centroid, i) {
-            // Voronoi site
-            renderer.begin();
-            renderer.polygon(centroid.neighbours);
-            renderer.fill(Colors.Alpha(this.colors[i], 0.2));
-            renderer.stroke("rgba(0, 0, 0, 0.4)");
+            
+            
+            
+            if(this.method == "k-circles") {
+                renderer.begin();
+                renderer.circle(centroid, this.radii[i]);
+                renderer.fill(Colors.Alpha(this.colors[i], 0.2));
+                renderer.stroke("rgba(0, 0, 0, 0.4)");  
+            } else {
+                // Voronoi site
+                renderer.begin();
+                renderer.polygon(centroid.neighbours);
+                renderer.fill(Colors.Alpha(this.colors[i], 0.2));
+                renderer.stroke("rgba(0, 0, 0, 0.4)");    
+            }
+            
             
             // Centroid
             renderer.begin();
