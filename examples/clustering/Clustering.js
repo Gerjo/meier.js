@@ -41,6 +41,15 @@ define(function(require) {
         // Random initial spawn:
         this.randomClusters = 0;
         
+        // Criteria for autotune
+        this.auto = {
+            enable: false,
+            seedSingle: true,
+            maxDisplacement: 5,  // pixels
+            minDistance: 40,     // pixels
+            minCoordinates: 1
+        };
+        
         // Will eventually hold the centroids:
         this.centroids   = [];
         this.radii       = []; // Radii of each centroid, for k-circles.
@@ -59,9 +68,16 @@ define(function(require) {
         this.gui.add(this, "method", this.methods).name("Method");
         this.gui.add(this, "numCentroids", 1, 40).name("Centroids").step(1).onChange(this.onClusterChange.bind(this));
         this.gui.add(this, "easing").name("Easing").step(0.01).min(0).max(1);
-        this.gui.add(this, "reseedCentroid").name("ReseedCentroids");
+        this.gui.add(this, "reseedAllCentroid").name("Reseed Centroids");
         
-        var folder = this.gui.addFolder("Randomness");
+        var folder = this.gui.addFolder("Automatic Find");
+        folder.add(this.auto, "enable").name("Enable");
+        folder.add(this.auto, "seedSingle").name("Seed Single");
+        folder.add(this.auto, "maxDisplacement", 0, 50).step(1).name("Displacement");
+        folder.add(this.auto, "minCoordinates", 0, 100).step(1).name("Min Coordinates");
+        folder.add(this.auto, "minDistance", 0, 100).step(1).name("Min Distance");
+        
+        folder = this.gui.addFolder("Randomness");
         folder.add(this, "addRandomCluster").name("Add Cluster");
         folder.add(this, "addRandomCircle").name("Add Circle");
         folder.add(this.grid, "clear").name("Clear");
@@ -76,20 +92,20 @@ define(function(require) {
         
         //this.addRandomCircle();
         
-        this.reseedCentroid();
+        this.reseedAllCentroid();
     }
     
     Clustering.prototype.onClusterChange = function() {
         // Remove too many (i.e., the slider quantity went down)
         while(this.centroids.length > this.numCentroids) {
             this.centroids.pop();
-            this.radii.length = this.centroids.length;
+            this.radii.length    = this.centroids.length;
+            this.clusters.length = this.centroids.length;
         }
         
         // Add new (i.e., the slider quantity went up)
         while(this.centroids.length < this.numCentroids) {
             var centroid;
-            
             
             // k-medoids, pick a random coordinate as centroid
             if(this.method == "k-medoids") {
@@ -120,7 +136,7 @@ define(function(require) {
         
     };
     
-    Clustering.prototype.reseedCentroid = function() {
+    Clustering.prototype.reseedAllCentroid = function() {
         // Remove them all.
         this.centroids.clear();
         
@@ -129,7 +145,7 @@ define(function(require) {
     };
     
     Clustering.prototype.addRandomCircle = function() {
-        var ring = Noise.Circle();
+        var ring = Noise.Circle(new Vector(Random(-200, 200)));
         
         this.grid.addCoordinate(ring);
     };
@@ -167,7 +183,7 @@ define(function(require) {
         Game.prototype.update.call(this, dt);
         
         // The user changed the quantity
-        if(this.clusters.length != this.numClusters) {
+        if(this.centroids.length != this.numClusters) {
             this.onClusterChange();
         }
         
@@ -213,32 +229,79 @@ define(function(require) {
             }
         }.bind(this));
         
+        
+        var displacementSQ = 0;
+        
         // Update centroid positions
         for(var i = 0; i < accumulators.length; ++i) {
             
             if(this.clusters[i].length > 0) {
                 var mean = accumulators[i].scaleScalar(1 / this.clusters[i].length)
-            
+                var newCentroid;
+                
                 if(this.method == "k-means") {
                     // Normal k-means does not Lerp between previous centroid and 
                     // the new centroid. We do this just for animation purposes.
-                    this.centroids[i] = Lerp(this.centroids[i], mean, 1-this.easing);
+                    newCentroid = Lerp(this.centroids[i], mean, 1-this.easing);
                 
                 } else if(this.method == "k-circles") {
                     var fittedCircle  = LeastSquaresCircle(this.clusters[i]);
                     
-                    this.centroids[i] = Lerp(this.centroids[i], fittedCircle.position, 1-this.easing);
-                    this.radii[i]     = Lerp(this.radii[i], fittedCircle.radius, 1-this.easing);
+                    newCentroid   = Lerp(this.centroids[i], fittedCircle.position, 1-this.easing);
+                    this.radii[i] = Lerp(this.radii[i], fittedCircle.radius, 1-this.easing);
                     
                 } else {
                     // The nearest coordinate to the average position is promoted to
                     // centroid. No animations here!
-                    this.centroids[i] = ClosestVector(mean, this.coordinates).clone();
+                    newCentroid = ClosestVector(mean, this.coordinates).clone();
                 }
+                
+                // Accumulate displacement
+                displacementSQ += this.centroids[i].distanceSQ(newCentroid);
+                
+                this.centroids[i] = newCentroid;
+                
             } else {
                 // Cluster is empty! (local minima)
             }
         }
+        
+        // Automatically test if clusters are "good"
+        if(this.auto.enable === true && this.coordinates.length > 0) {
+            
+            // Only  test when displacement is minimal
+            if(displacementSQ < Math.pow(this.auto.maxDisplacement, 2)) {
+                var requireReseed = false;
+                
+                for(var i = 0; i < this.clusters.length && !requireReseed; ++i) {
+                    // Empty clusters
+                    if(this.clusters[i].length <= this.auto.minCoordinates) {
+                        requireReseed = true;
+                        
+                    }
+                    
+                    // Distance between centroids
+                    for(var j = i + 1; j < this.centroids.length; ++j) {
+                        if(this.centroids[i].distanceSQ(this.centroids[j]) < Math.pow(this.auto.minDistance, 2)) {
+                            requireReseed = true;
+                        }
+                    }
+                    
+                    if(this.auto.seedSingle && requireReseed) {
+                        this.centroids[i].x = Random(-this.hw, this.hw);
+                        this.centroids[i].y = Random(-this.hh, this.hh);
+                        this.radii[i] = Random(100, 200);
+                        requireReseed = false;
+                    }
+                    
+                }
+                
+                if(requireReseed) {
+                    this.reseedAllCentroid();
+                }
+            }
+        }
+        
     };
     
     Clustering.prototype.draw = function(renderer) {
