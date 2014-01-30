@@ -70,7 +70,7 @@ define(function(require) {
         this.gui.add(this, "easing").name("Easing").step(0.01).min(0).max(1);
         this.gui.add(this, "reseedAllCentroid").name("Reseed Centroids");
         
-        var folder = this.gui.addFolder("Automatic Find");
+        var folder = this.gui.addFolder("Automatic Reseed");
         folder.add(this.auto, "enable").name("Enable");
         folder.add(this.auto, "seedSingle").name("Seed Single");
         folder.add(this.auto, "maxDisplacement", 0, 50).step(1).name("Displacement");
