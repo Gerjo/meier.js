@@ -118,6 +118,17 @@ define(function(require) {
     };
     
     Grid.prototype.add = function(entity) {
+        
+        if(entity instanceof Array) {
+            
+            // Recursively insert.
+            entity.forEach(function(entity) {
+                this.insert(entity);
+            }.bind(this));
+            
+            return this;
+        }
+        
         if(entity instanceof Pixel) {
             
             // Explicit infinity testing. Infinity is drawn at "0", which
@@ -164,66 +175,78 @@ define(function(require) {
         return pixel;
     };
     
-    Grid.prototype.addCoordinate = function(input) {
-        var local = this.toLocal(input);
+    Grid.prototype.addCoordinate = function(inputs) {
         
-        var coordinates = [];
-        var byOption    = {};
-
-        // Reset the extremes:
-        this.min   = new Vector(Infinity, Infinity);    
-        this.max   = new Vector(-Infinity, -Infinity);  
-        
-        var addByOption = function(entity) {
-            if(this._numOptions > 0) {
-                var key = entity._key;
-                if( ! byOption[key]) {
-                    byOption[key] = [];
-                }
-                
-                byOption[key].push(entity.position);
-            }
-        }.bind(this);
-        
-        // Find an entity in range, and destroy it.
-        var entities = this._entities.filter(function(entity) {
-            if(entity instanceof Pixel) {
-                if(entity.position.distance(local) < entity.width * 2) {
-                    entity.destroy();
-                    return false;
-                }
-                
-                // Update the new extremes:
-                this.min.x = Math.min(this.min.x, entity.position.x);
-                this.max.x = Math.max(this.max.x, entity.position.x);
-                this.min.y = Math.min(this.min.y, entity.position.y);
-                this.max.y = Math.max(this.max.y, entity.position.y);
-                
-                coordinates.push(entity.position);
-                
-                addByOption(entity);
-            }
-            
-            return true;
-        }.bind(this));
-        
-        // Something was removed.
-        if(entities.length != this._entities.length) {
-            this._entities = entities;
-            
-        // Nothing was removed, let's add a pixel:
-        } else {
-            var pixel = this._makePixel(local.x, local.y);
-
-            this.add(pixel);
-
-            coordinates.push(pixel.position);
-            
-            addByOption(pixel);
+        // This is a bit of a WIP. Optimize code in due time.
+        if( ! (inputs instanceof Array) ) {
+            inputs = [inputs];
         }
         
-        // Trigger event.
-        this.onChange(coordinates, (this._numOptions > 0) ? byOption : null);
+        for(var i = 0; i < inputs.length; ++i) {
+            var input = inputs[i];
+        
+            var local = this.toLocal(input);
+        
+            var coordinates = [];
+            var byOption    = {};
+
+            // Reset the extremes:
+            this.min   = new Vector(Infinity, Infinity);    
+            this.max   = new Vector(-Infinity, -Infinity);  
+        
+            var addByOption = function(entity) {
+                if(this._numOptions > 0) {
+                    var key = entity._key;
+                    if( ! byOption[key]) {
+                        byOption[key] = [];
+                    }
+                
+                    byOption[key].push(entity.position);
+                }
+            }.bind(this);
+        
+            // Find an entity in range, and destroy it.
+            var entities = this._entities.filter(function(entity) {
+                if(entity instanceof Pixel) {
+                    if(entity.position.distance(local) < entity.width * 2) {
+                        entity.destroy();
+                        return false;
+                    }
+                
+                    // Update the new extremes:
+                    this.min.x = Math.min(this.min.x, entity.position.x);
+                    this.max.x = Math.max(this.max.x, entity.position.x);
+                    this.min.y = Math.min(this.min.y, entity.position.y);
+                    this.max.y = Math.max(this.max.y, entity.position.y);
+                
+                    coordinates.push(entity.position);
+                
+                    addByOption(entity);
+                }
+            
+                return true;
+            }.bind(this));
+        
+            // Something was removed.
+            if(entities.length != this._entities.length) {
+                this._entities = entities;
+            
+            // Nothing was removed, let's add a pixel:
+            } else {
+                var pixel = this._makePixel(local.x, local.y);
+
+                this.add(pixel);
+
+                coordinates.push(pixel.position);
+            
+                addByOption(pixel);
+            }
+        
+            // Trigger event only on the last input coordinate.
+            if(i == inputs.length - 1) {
+                this.onChange(coordinates, (this._numOptions > 0) ? byOption : null);
+            }
+        }
     };
     
     Grid.prototype.onLeftDown = function(input) {
