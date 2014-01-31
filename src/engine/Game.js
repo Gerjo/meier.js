@@ -103,7 +103,7 @@ define(function(require) {
     
         // Remove current loop:
         if(this._intervalId !== null) {
-            clearTimeout(this._intervalId);
+            clearInterval(this._intervalId);
         }
         
         if(fps > 0) {
