@@ -4,6 +4,7 @@ define(function(require){
     var Line   = require("meier/math/Line");
     var Vector = require("meier/math/Vec")(2);
     var Colors = require("meier/aux/Colors");
+    var Noise  = require("meier/aux/Noise");
     var Intersection = require("meier/math/Intersection");
     
     HoughApp.prototype = new Game();
@@ -18,13 +19,24 @@ define(function(require){
         this.grid.onChange = this.onChange.bind(this);
         this.add(this.grid);
         
+        
         this.coordinates = [];
         this.polar       = [];
         this.minDistance = 0;
         this.maxDistance = 0;
         
+        
+        var p = Noise.Line().map(function(p) {
+            return p.add(this.grid.position);            
+        }.bind(this));
+       
+        this.grid.addCoordinates(p);
+        
+        
         this.setFps(0);
         this.redraw();
+        
+        
     }
     
     HoughApp.prototype.onChange = function(coordinates) {
@@ -58,7 +70,7 @@ define(function(require){
                 }
                 
                 this.polar.push({
-                    angle: angle,
+                    angle: Math.abs(angle),
                     distance: distance,
                     line: line,
                     normal: normal,
@@ -80,18 +92,26 @@ define(function(require){
     HoughApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-        var normalize = 1;//(this.maxDistance - this.minDistance) / this.hw;
+        var dNormalize = this.grid.height / Math.sqrt(Math.pow(this.grid.width, 2) + Math.pow(this.grid.height, 2));
+        var aNormalize = this.hw / Math.PI;
         
+        //console.clear();
         this.polar.forEach(function(polar) {
-            renderer.begin();
-            renderer.circle(polar.angle * 100, polar.distance * normalize, 4);
-            renderer.fill(Colors.Alpha(Colors.blue, 0.1));
+            polar.distance *= dNormalize;
+            //polar.distance -= this.hh;
+            polar.angle    *= aNormalize;
             
             renderer.begin();
-            renderer.line(polar.line);
-            renderer.vector(polar.normal);
+            renderer.circle(polar.angle, polar.distance, 5);
+            renderer.fill(Colors.Alpha(Colors.blue, 0.3));
+            
+            renderer.begin();
+            //renderer.line(polar.line);
+            //renderer.arrow(polar.normal);
             renderer.stroke(Colors.Alpha(Colors.red, 0.1));
-        });
+        }.bind(this));
+                
+        //console.log("Normalization terms:", aNormalize, dNormalize);
                 
     }
     
