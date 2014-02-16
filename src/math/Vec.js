@@ -164,8 +164,8 @@ define(function(require) {
             
             // Copy a whole vector into this vector.
             } else if(key.numrows) {
-                for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
-                    this._[i] = v._[i];
+                for(var i = Math.min(this.numrows, key.numrows) - 1; i >= 0; --i) {
+                    this._[i] = key._[i];
                 }
             } else {
                 throw new Error("Incorrect usage of vec::set");
