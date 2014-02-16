@@ -29,13 +29,13 @@ define(function(require) {
             "y": { get: function () { return this._[1]; }, set: function (v) { this._[1] = v; } },
         });
         
-        if(rows == 3) {
+        if(rows >= 3) {
             Object.defineProperties(V.prototype, {
                 "z": { get: function () { return this._[2]; }, set: function (v) { this._[2] = v; } },
             });
         }
         
-        if(rows == 4) {
+        if(rows >= 4) {
             Object.defineProperties(V.prototype, {
                 "w": { get: function () { return this._[3]; }, set: function (v) { this._[3] = v; } },
             });
