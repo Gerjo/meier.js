@@ -3,7 +3,7 @@ define(function(require) {
     var Game    = require("meier/engine/Game");
     var Vector  = require("meier/math/Vec")(2);
     var dat     = require("meier/contrib/datgui");
-    var Random    = require("meier/math/Random");
+    var Random  = require("meier/math/Random");
     
     var Boid    = require("./Boid");
     
