@@ -175,6 +175,11 @@ define(function(require) {
         return pixel;
     };
     
+    /// Plural synonym
+    Grid.prototype.addCoordinates = function(inputs) {
+        return this.addCoordinate(inputs);
+    };
+    
     Grid.prototype.addCoordinate = function(inputs) {
         
         // This is a bit of a WIP. Optimize code in due time.
