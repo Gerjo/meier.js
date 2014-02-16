@@ -12,6 +12,7 @@ define(function(require) {
     
     /// Based on mersenne twister
     var Random = require("meier/math/Random");
+    var Lerp   = require("meier/math/Lerp");
     var Vector = require("meier/math/Vec")(2);
 
     var self = {
@@ -92,7 +93,29 @@ define(function(require) {
             }
             
             return noise;
-        }/*,
+        },
+        
+        Line: function(from, to) {
+            
+            from = from || new Vector(-100, -100);
+            to   = to   || new Vector(100, 100);
+            
+            var n     = parseInt(to.distance(from) / 10);
+            var noise = new Array(n);
+            var e     = 5;
+            
+            for(var i = 0; i < n; ++i) {
+                var base = Lerp(from, to, i / n);
+                
+                base.add(base.clone().perp().normalize().scaleScalar(Random(-e, e)));
+                
+                noise[i] = base;
+            }
+            
+            
+            return noise;
+        },
+        /*,
         
         /// Generate uniformly distributed noise.
         ///
