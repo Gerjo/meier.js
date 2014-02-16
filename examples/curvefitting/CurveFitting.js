@@ -71,14 +71,26 @@ define(function(require) {
         this.taylorOrder = 2;
         
         // Some initial coordinates:
-        this.grid.addCoordinates([new Vector(-260, -50), new Vector(-100, 50), new Vector(100, 60), new Vector(200, -50)]);
+        this.grid.addCoordinates([
+            new Vector(-310, -70), 
+            new Vector(-260, -50), 
+            new Vector(-50, -60), 
+            new Vector(-130, -80), 
+            new Vector(10, 50), 
+            new Vector(100, 60), 
+            new Vector(200, -50),
+            new Vector(360, -85),
+            new Vector(300, 85)
+            
+        ]);
      
         // Indicate interactivity with a pointy-finger.
         this.input.cursor(Input.Cursor.FINGER);   
         
         this.gui = new dat.GUI();
         this.gui.width = 300;   
-        this.gui.add(this, "taylorOrder", 0, 20).step(1).name("Taylor series Order");
+        this.gui.add(this, "taylorOrder", 0, 20).step(1).name("Taylor Series Order");
+        this.gui.add(this.grid, "clear").name("Clear Canvas");
     }
     
     
