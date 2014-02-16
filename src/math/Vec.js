@@ -15,7 +15,7 @@ define(function(require) {
 
     
     return function(rows) {
-        
+  
         if(isNaN(rows) || typeof rows !== "number") {
             throw new Error("Cannot import vector. Invalid row size.");
         }
@@ -44,6 +44,7 @@ define(function(require) {
         var CreateArray;
     
         // iPad 1 and IE < 10 support.
+        // NB: enabled because it gives better overall performance.
         if(true || typeof Float64Array === "undefined") {
             
             // Loop unrolling experiment:
@@ -69,13 +70,13 @@ define(function(require) {
             this._[0] = x || 0;
             this._[1] = y || 0;
             
-            if(this.numrows == 3) {
-                this._[2] = z || 0;
+            // Fancy copy incase of more components
+            if(arguments.length > 2) {
+                for(var i = 2, max = Math.min(arguments.length, rows); i < max; ++i) {
+                    this._[i] = arguments[i];
+                }
             }
             
-            if(this.numrows == 4) {
-                this._[3] = w || 0;
-            }
         }
         
         V.prototype.distance = function(o) {
@@ -153,10 +154,24 @@ define(function(require) {
             return this;
         }; 
         
-        V.prototype.set = function(v) {
-            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
-                this._[i] = v._[i];
+        /// Set a single component, or copy a vector into this vector.
+        ///
+        V.prototype.set = function(key, value) {
+            
+            // Set a single component at a given index
+            if( ! isNaN(key)  ) {
+                this._[key] = value;
+            
+            // Copy a whole vector into this vector.
+            } else if(key.numrows) {
+                for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                    this._[i] = v._[i];
+                }
+            } else {
+                throw new Error("Incorrect usage of vec::set");
             }
+            
+           
             return this;
         }; 
         
