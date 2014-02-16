@@ -114,7 +114,10 @@ define(function(require) {
             fn = fn.trim(" + ") + ";";
         
             try{
-                return new Function("x", fn);
+                return {
+                    "f": new Function("x", fn),
+                    "c": r
+                };  
             } catch(e) {
                 console.error("Unable to create PolynomialPath. Code:");
                 console.error(fn);
