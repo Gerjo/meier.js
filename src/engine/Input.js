@@ -281,13 +281,15 @@ define(function(require) {
             //console.error("Input::updatePosition Unable to determine X and Y coordinates.");
         }
         
+        x -= 2;
+        y -= 2;
     
         // Only count inside world bounds:
         if(x >= 0 && y >= 0 && x <= this._size.x && y <= this._size.y) {
         
             // Transform to screen coordinates:
-            this._[0] = x - this._size.x * 0.5;
-            this._[1] = (this._size.y * 0.5) - y;
+            this._[0] = Math.round(x - this._size.x * 0.5);
+            this._[1] = Math.round((this._size.y * 0.5) - y);
     
             // Trigger MOUSE_MOVE event, click is onscreen.
             return true;
