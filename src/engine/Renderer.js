@@ -223,17 +223,19 @@ define(function(require) {
     /// [Vector, number]
     /// [Disk]
     Renderer.prototype.circle = function(a, b, c) {
+        var defaultRadius = 5;
+        
         if(IsVector(a)) {
-            this.context.moveTo(a.x + b, -a.y);
-            this.context.arc(a.x, -a.y, b, 0, 2 * Math.PI);
+            this.context.moveTo(a.x + (isNaN(b) ? defaultRadius : b), -a.y);
+            this.context.arc(a.x, -a.y, isNaN(b) ? defaultRadius : b, 0, 2 * Math.PI);
         
         } else if(a instanceof Disk) {
             this.context.moveTo(a.position.x + a.radius, -a.position.y);
             this.context.arc(a.position.x, -a.position.y, a.radius, 0, 2 * Math.PI);
         
         } else {
-            this.context.moveTo(a + c, -b);
-            this.context.arc(a, -b, c, 0, 2 * Math.PI);
+            this.context.moveTo(a + (isNaN(c) ? defaultRadius : c), -b);
+            this.context.arc(a, -b, isNaN(c) ? defaultRadius : c, 0, 2 * Math.PI);
         }
         return this;
     };
