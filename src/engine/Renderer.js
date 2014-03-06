@@ -121,8 +121,15 @@ define(function(require) {
             w = a.width();
             h = a.height();
             
-            x = a.min.x;// - w * 0.5;
-            y = -a.min.y;// - h * 0.5; 
+            x = a.min.x + w * 0.5;
+            y = -a.min.y - h * 0.5; 
+    
+        } else if(IsVector(a) && IsVector(b)) {
+            w = b.x - a.x;
+            h = b.y - a.y;
+            
+            x = a.x + w * 0.5;
+            y = -a.y - h * 0.5; 
     
         } else if(IsVector(a)) {
             x = a.x;
@@ -298,7 +305,7 @@ define(function(require) {
         
         return this;
     };
-
+    
     /// Draw a dashed line.
     ///
     /// @todo optimize internal workings.
