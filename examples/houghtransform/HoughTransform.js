@@ -188,6 +188,13 @@ define(function(require){
                 if(input.x > rectX - hSize && input.x <= rectX + hSize) {
                     if(input.y > rectY - hSize && input.y <= rectY + hSize) {
                         
+                        var text = (coordinates.length/2) + " vote";
+                        if(coordinates.length != 2) {
+                            text += "s";
+                        }
+                        
+                        renderer.text(text, input.x + 20, input.y, "black", "left", "top");
+                        
                         // The lines
                         renderer.begin();
                         lines[x][y].forEach(renderer.line.bind(renderer));
