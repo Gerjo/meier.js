@@ -23,9 +23,19 @@ define(function(require) {
     /// +----------+
     ///
     function Rectangle(a, b, c, d) {
-        this.min = new Vector(a, b);
-        this.max = new Vector(c, d);
+        
+        if(a._ && a.x && b._ && b.x) {
+            this.min = a;
+            this.max = b;
+        } else {
+            this.min = new Vector(a, b);
+            this.max = new Vector(c, d);
+        }
     }
+    
+    Rectangle.prototype.area = function() {
+        return (this.max.x - this.min.x) * (this.max.y - this.min.y);
+    };
 
     Rectangle.prototype.clone = function() {
         return new Rectangle(this.min.x, this.min.y, this.max.x, this.max.y);
