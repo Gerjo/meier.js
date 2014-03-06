@@ -5,9 +5,38 @@
  !*
  !*/
 
-define(function() {
+define(function(require) {
+    
+    var Vector2   = require("meier/math/Vec")(2);
+    var Rectangle = require("meier/math/Rectangle");
     
     return {
+        
+        AxisAlignedBox: function(hull) {
+            var min = new Vector2(Infinity, Infinity);
+            var max = new Vector2(-Infinity, -Infinity);
+            
+            hull.forEach(function(coordinate) {
+                if(coordinate.x > max.x) {
+                    max.x = coordinate.x;
+                }
+                
+                if(coordinate.x < min.x) {
+                    min.x = coordinate.x;
+                }
+                
+                if(coordinate.y > max.y) {
+                    max.y = coordinate.y;
+                }
+                
+                if(coordinate.y < min.y) {
+                    min.y = coordinate.y;
+                }
+            });
+            
+            return new Rectangle(min, max);
+        },
+        
         /// Calculate the convex hull that wraps a bunch of coordinates. Used
         /// to find the convex bounding hull of a concave polygon. This 
         /// implementation isn't efficient, but easy to implement.
