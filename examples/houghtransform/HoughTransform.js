@@ -1,5 +1,6 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
+    var Input  = require("meier/engine/Input");
     var Grid   = require("meier/prefab/Grid");
     var Line   = require("meier/math/Line");
     var Lerp   = require("meier/math/Lerp");
@@ -157,6 +158,10 @@ define(function(require){
     
     HoughApp.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
+        
+        if(this.input.x > 0) {
+            this.input.cursor(Input.Cursor.POINTER);
+        }
         
     };
     
