@@ -257,6 +257,10 @@ define(function(require) {
     Input.prototype.update = function(dt) {
         // The gamepad does some polling.
         this.gamepads.update(dt);
+        
+        // Restore default cursor, it's up to the application
+        // to repeatedly set a different state.
+        this.cursor(Input.Cursor.DEFAULT);
     };
 
     Input.prototype.cursor = function(cursortype) {
