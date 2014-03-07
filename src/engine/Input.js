@@ -82,8 +82,9 @@ define(function(require) {
         
         
         // The "body" element cannot capture keystrokes. Use "document" instead.
-        var eventContainer = document;//(container == body) ? document : container;
+        var eventContainer = (container.parentNode == body) ? document : container;
         
+        //console.log(container.parentNode, body, container.parentNode == body);
         
         // Intialize empty listeners:
         this.listeners = [];
@@ -225,6 +226,11 @@ define(function(require) {
         eventContainer.onkeydown = function(event) {
             event = event || window.event;
             
+            // GUI components take priority.
+            if(event.srcElement.nodeName.toLowerCase() == "input") {
+                return true;
+            }
+            
             this._keystates[event.keyCode] = true;
             this.triggerKeyboard(Input.Events.KEY_DOWN, event);
             
@@ -234,6 +240,11 @@ define(function(require) {
     
         eventContainer.onkeyup = function(event) {
             event = event || window.event;
+           
+            // GUI components take priority.
+            if(event.srcElement.nodeName.toLowerCase() == "input") {
+                return true;
+            }
            
             this._keystates[event.keyCode] = false;
             this.triggerKeyboard(Input.Events.KEY_UP, event);
