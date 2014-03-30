@@ -80,10 +80,21 @@ define(function(require) {
         }
         
         V.prototype.distance = function(o) {
-            return Math.sqrt(this.distanceSQ(o));
+            return Math.sqrt(this.distanceSq(o));
         };
 
+        // Depricated use 'distanceSq'.
         V.prototype.distanceSQ = function(o) {
+            var r = 0;
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r += Math.pow(this._[i] - o._[i], 2);
+            }
+            
+            return r;
+        };
+        
+        // Better naming convention.
+        V.prototype.distanceSq = function(o) {
             var r = 0;
             for(var i = this.numrows - 1; i >= 0; --i) {
                 r += Math.pow(this._[i] - o._[i], 2);
@@ -419,7 +430,13 @@ define(function(require) {
             var r = "{";
         
             for(var i = 0; i < this.numrows; ++i) {
-                r += this._[i] + ", ";
+                var padding = "";
+                
+                if(this._[i] >= 0) {
+                    padding = " ";
+                }
+                
+                r += padding + this._[i].toFixed(6) + ", ";
             }
         
             r = r.trim(", ") + "}";

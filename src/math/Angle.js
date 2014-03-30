@@ -25,11 +25,17 @@ define(function(require) {
 
         /// Map a [0..PI, -PI..0] range to [0...2PI]
         ToAbsoluteRadians:function(a) {
-            if(a < 0) {
-                return Math.PI + (Math.PI + a);
+            var r = a;
+            
+            if(r < 0) {
+                r = Math.PI + (Math.PI + r);
             }
+            
+            //while(a >= Math.TwoPI) {
+            //    a -= Math.TwoPI;
+            //}
     
-            return a;
+            return r;
         },
 
         DeltaRelativeRadians: function(a, b) {

@@ -10,7 +10,13 @@ define(function(require) {
     var Vector2   = require("meier/math/Vec")(2);
     var Rectangle = require("meier/math/Rectangle");
     
-    return {
+    var self = {
+        
+        /// Compute a convex hull of the given coordinates. This method is future proof as
+        /// it will always use the fastest implementations.
+        Convex: function(coordinates) {
+            return self.GiftWrap(coordinates);
+        },
         
         AxisAlignedBox: function(hull) {
             var min = new Vector2(Infinity, Infinity);
@@ -93,5 +99,7 @@ define(function(require) {
             return r;
         }
         
-    }; // End return.
+    }; // End self.
+    
+    return self;
 });
