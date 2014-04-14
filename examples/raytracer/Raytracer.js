@@ -20,15 +20,16 @@ define(function(require){
     
     
     function Raytracer(container) {        
-        this.width       = 200;
-        this.height      = 200;
+        this.width       = 500;
+        this.height      = 500;
         this.hw          = this.width * 0.5;
         this.hh          = this.height * 0.5;
         this.mouse       = new V2(0, 0);
         this.rotation    = M44.CreateIdentity();
         this.orientation = new V3(0, 0, 0);
         this.translation = new V3(0, 0, 0);
-        this.speed       = new V2(0.1, 0.004); // Move, rotate
+        this.speed       = new V2(1, 0.008); // Move, rotate
+        this.sleep       = 200;
         
         container.appendChild(this._canvas = document.createElement("canvas"));
         this._canvas.width  = this.width;
@@ -81,6 +82,14 @@ define(function(require){
         // Detach VBO from global state.
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         
+        window.onblur = function() {
+             this.sleep = 5000;
+        }.bind(this);
+        
+        window.onfocus = function() {
+             this.sleep = 5000;
+        }.bind(this);
+        
         container.onmousemove = function(event) {
             var x = event.x - this._canvas.offsetLeft + window.pageXOffset;
             var y = event.y - this._canvas.offsetTop  + window.pageYOffset;
@@ -101,7 +110,7 @@ define(function(require){
             
             
             this.mouse    = mouse;
-            this.rotation = M44.CreateYoZ(this.orientation.y).
+            this.rotation = M44.CreateYoZ(-this.orientation.y).
                                 product(M44.CreateXoZ(this.orientation.x)).
                                 product(M44.CreateXoY(this.orientation.z));
             
@@ -131,6 +140,8 @@ define(function(require){
             }
             
             this.translation.add(this.rotation.transform(direction));
+            
+            console.log(this.translation.wolfram());
             
         }.bind(this);
         
@@ -180,7 +191,7 @@ define(function(require){
         
         //console.log("draws");
         
-        setTimeout(this.render.bind(this), 100);
+        setTimeout(this.render.bind(this), this.sleep);
     }
     
     return Raytracer;
