@@ -90,6 +90,30 @@ define(function(require) {
         
             }
 
+            vec3 barycentric3(in vec3 f, in vec3 v1, in vec3 v2, in vec3 v3, in vec3 uv1, in vec3 uv2, in vec3 uv3) {
+                //Linear System Solver Strategy
+                vec3 m0 = v2 - v1;
+                vec3 m1 = v3 - v1;
+    
+    
+                float d00 = dot(m0, m0);
+                float d01 = dot(m0, m1);
+                float d11 = dot(m1, m1);
+                float denom = 1.0 / (d00 * d11 - d01 * d01);
+    
+                vec3 m2   = f - v1;
+                float d20 = dot(m2, m0);
+                float d21 = dot(m2, m1);
+    
+                float a = (d11 * d20 - d01 * d21) * denom;
+                float b = (d00 * d21 - d01 * d20) * denom;
+                float c = 1.0 - a - b;
+    
+                vec3 uv = uv1 * c + uv2 * a + uv3 * b;
+    
+                return uv;
+            }
+
             /// Shader entry point
             void main(void) {
         
@@ -105,7 +129,7 @@ define(function(require) {
                 colors[4] = vec4(0.07, 0.70, 0.57, 1.0);
                 colors[5] = vec4(0.26, 0.74, 0.26, 1.0);
                 colors[6] = vec4(0.45, 0.06, 0.03, 1.0);
-                colors[7] = vec4(0.76, 0.78, 0.63, 1.0);
+                colors[7] = vec4(0.76, 0.08, 0.63, 1.0);
                 colors[8] = vec4(0.33, 0.87, 0.87, 1.0);
                 //colors[9] = vec4(0.42, 0.30, 0.12, 1.0);
                 
@@ -143,23 +167,13 @@ define(function(require) {
         
         
                     // In nearest neighour we trust.
-                    //vec3 m  = texture2D(sceneTexture, vec2(o + 0.0, 0) * sceneTextureUnit).xyz;
+                    vec3 m  = texture2D(sceneTexture, indexWrap(i + 0, sceneTextureSize.x) * sceneTextureUnit).xyz;
             
                     //if(int(m) == 1) {
                     if(true) {
-                        //vec3 a  = texture2D(sceneTexture, vec2(o + 1.0, 0) * sceneTextureUnit).xyz;
-                        //vec3 b  = texture2D(sceneTexture, vec2(o + 2.0, 0) * sceneTextureUnit).xyz;
-                        //vec3 c  = texture2D(sceneTexture, vec2(o + 3.0, 0) * sceneTextureUnit).xyz;
-        
-                        vec3 a  = texture2D(sceneTexture, 
-                                    indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit
-                        ).xyz;
-                        vec3 b  = texture2D(sceneTexture, 
-                                    indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit
-                        ).xyz;
-                        vec3 c  = texture2D(sceneTexture, 
-                                    indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit
-                        ).xyz;
+                        vec3 a  = texture2D(sceneTexture, indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                        vec3 b  = texture2D(sceneTexture, indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                        vec3 c  = texture2D(sceneTexture, indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit).xyz;
         
         
                         vec3 where;
@@ -167,16 +181,22 @@ define(function(require) {
              
                         // Ray intersection trial
                         if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
-            
+                            vec3 n1 = texture2D(sceneTexture, indexWrap(i + 4, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                            vec3 n2 = texture2D(sceneTexture, indexWrap(i + 5, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                            vec3 n3 = texture2D(sceneTexture, indexWrap(i + 6, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                            //vec2 u  = texture2D(sceneTexture, indexWrap(i + 7, sceneTextureSize.x) * sceneTextureUnit).xy;
+                            //vec2 v  = texture2D(sceneTexture, indexWrap(i + 8, sceneTextureSize.x) * sceneTextureUnit).xy;
+                            //vec2 w  = texture2D(sceneTexture, indexWrap(i + 9, sceneTextureSize.x) * sceneTextureUnit).xy;
+        
                             // Only keep the nearest object
                             if(nearestDepth > depth) {
                                 nearestDepth    = depth;
                                 nearestPosition = where;
-                                nearestNormal   = cross(b - a, c - a);
+                                //nearestNormal   = cross(c - a, b - a);
+                                nearestNormal   = barycentric3(where, a, b, c, n1, n2, n3);
                                 hasNearest      = true;
-                                nearestColor    = colors[mod(i, 9)];
+                                nearestColor    = colors[mod(i, 9)] * 2.0;
                             }
-        
                         }
                     } else {
                         finalColor = vec4(0.0, 0.0, 0.0, 0.0);
@@ -192,7 +212,7 @@ define(function(require) {
                     float lambert = max(dot(lightDir, nearestNormal), 0.0);
         
                     finalColor = nearestColor;
-                    finalColor += lambert;
+                    finalColor += min(0.4, lambert);//min(0.4, lambert);
                 }
         
                 gl_FragColor = finalColor;

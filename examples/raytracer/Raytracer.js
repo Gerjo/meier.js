@@ -165,7 +165,6 @@ define(function(require){
         
         gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.rotation.transpose()._);
         
-
         // Sample the data from VBO on the GPU, not CPU.
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
         gl.vertexAttribPointer(
