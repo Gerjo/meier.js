@@ -142,7 +142,7 @@ define(function(require) {
             var sin = Math.sin(angle);
             var cos = Math.cos(angle);
             
-            var m = new M();
+            var m = M.CreateIdentity();
             
             m._[At(0,0)] =  cos;
             m._[At(0,2)] =  sin;
@@ -159,7 +159,7 @@ define(function(require) {
             var sin = Math.sin(angle);
             var cos = Math.cos(angle);
             
-            var m = new M();
+            var m = M.CreateIdentity();
             
             m._[At(0,0)] =  cos;
             m._[At(0,1)] = -sin;
@@ -174,7 +174,7 @@ define(function(require) {
             var sin = Math.sin(angle);
             var cos = Math.cos(angle);
             
-            var m = new M();
+            var m = M.CreateIdentity();
             
             ///
             ///    cos -sin
