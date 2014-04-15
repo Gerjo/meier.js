@@ -9,6 +9,9 @@ define(function(require) {
     var Vector = require("meier/math/Vector");
     var Disk   = require("meier/math/Disk");
     
+    // Lookup table for the first 1000 primes.
+    var primes = { 2: true, 3: true, 5: true, 7: true, 11: true, 13: true, 17: true, 19: true, 23: true, 29: true, 31: true, 37: true, 41: true, 43: true, 47: true, 53: true, 59: true, 61: true, 67: true, 71: true, 73: true, 79: true, 83: true, 89: true, 97: true, 101: true, 103: true, 107: true, 109: true, 113: true, 127: true, 131: true, 137: true, 139: true, 149: true, 151: true, 157: true, 163: true, 167: true, 173: true, 179: true, 181: true, 191: true, 193: true, 197: true, 199: true, 211: true, 223: true, 227: true, 229: true, 233: true, 239: true, 241: true, 251: true, 257: true, 263: true, 269: true, 271: true, 277: true, 281: true, 283: true, 293: true, 307: true, 311: true, 313: true, 317: true, 331: true, 337: true, 347: true, 349: true, 353: true, 359: true, 367: true, 373: true, 379: true, 383: true, 389: true, 397: true, 401: true, 409: true, 419: true, 421: true, 431: true, 433: true, 439: true, 443: true, 449: true, 457: true, 461: true, 463: true, 467: true, 479: true, 487: true, 491: true, 499: true, 503: true, 509: true, 521: true, 523: true, 541: true, 547: true, 557: true, 563: true, 569: true, 571: true, 577: true, 587: true, 593: true, 599: true, 601: true, 607: true, 613: true, 617: true, 619: true, 631: true, 641: true, 643: true, 647: true, 653: true, 659: true, 661: true, 673: true, 677: true, 683: true, 691: true, 701: true, 709: true, 719: true, 727: true, 733: true, 739: true, 743: true, 751: true, 757: true, 761: true, 769: true, 773: true, 787: true, 797: true, 809: true, 811: true, 821: true, 823: true, 827: true, 829: true, 839: true, 853: true, 857: true, 859: true, 863: true, 877: true, 881: true, 883: true, 887: true, 907: true, 911: true, 919: true, 929: true, 937: true, 941: true, 947: true, 953: true, 967: true, 971: true, 977: true, 983: true, 991: true, 997: true };
+    
     var self = {
         
         /// Determine the sign of a number.
@@ -564,7 +567,97 @@ define(function(require) {
         
             return new Disk(c, alpha);
         }, 
-    };
+        
+        /// Determine if the given number is a prime number. Constant time lookup 
+        /// for num <= 1000, otherwise trial division with some early-outs. 
+        ///
+        /// @param {num} A number of sorts.
+        /// @return A boolean indicating if argument is a prime.
+        IsPrime: function(num) {
+            
+            // Floats are never prime.
+            if( ! self.IsInteger(num)) {
+                return false;
+            }
+            
+            // Lookup table for the first few primes
+            if(num <= 1000) {
+                return primes[num] === true;
+            }
+            
+            if(num <= 1) {
+               return false;
+              
+            } else if(num == 2) {     
+               return true;
+              
+            // Even number are not prime.
+            } else if(num % 2 == 0) {
+               return false;
+            
+            // Trial division
+            } else {
+
+                // Adopted from:  http://www.cplusplus.com/forum/general/1125/
+                var upper = parseInt(Math.sqrt(num) + 1);
+
+                for(var divisor = 3; divisor <= upper; divisor += 2) {
+                    if(num % divisor == 0) {
+                        return false;
+                    }
+                }
+               
+                return true;
+            }
+        },
+        
+        /// Break the presented number into primes. If the given number is 
+        /// a prime, an array containing said number is returned.
+        ///
+        /// @param {num} An integer to decomposite into primes.
+        /// @return An array containing the smallest primes.
+        PrimeFactors: function(num) {
+            
+            // Uncertain what the math rules are on this one.
+            if( ! self.IsInteger(num)) {
+                throw new Error("Factorize is only expected to work with integers.");
+            }
+            
+            var result = [];
+            var root = Math.sqrt(num);
+            
+            // Mostly from: http://www.coderenaissance.com/2011/06/find
+            // ing-prime-factors-in-javascript.html
+            var recurse = function(num) {
+                var x = 2;
+        
+                // if not divisible by 2
+                if(num % x) {
+                     x = 3; // assign first odd
+            
+                     // iterate odds
+                     while((num % x) && ((x = x + 2) < root)) {
+                        ; // nop
+                     }
+                }
+        
+                //if no factor found then num is prime
+                x = (x <= root) ? x : num;
+        
+                if(x != num && num > 0) {
+                    recurse(num / x);
+                }
+       
+                result.push(x);//push latest prime factor
+            };
+
+            recurse(num);
+            
+            return result;
+        },
+        
+        
+    }; // End var self = {}
     
     return self;
     
