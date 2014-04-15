@@ -29,7 +29,7 @@ define(function(require){
         this.orientation = new V3(0, 0, 0);
         this.translation = new V3(0, 0, 0);
         this.speed       = new V2(1, 0.008); // Move, rotate
-        this.sleep       = 200;
+        this.sleep       = 100;
         
         container.appendChild(this._canvas = document.createElement("canvas"));
         this._canvas.width  = this.width;
@@ -87,7 +87,7 @@ define(function(require){
         }.bind(this);
         
         window.onfocus = function() {
-             this.sleep = 5000;
+             this.sleep = 100;
         }.bind(this);
         
         container.onmousemove = function(event) {
@@ -96,23 +96,18 @@ define(function(require){
             
             var mouse = new V2(
                 x, y
-                //Math.max(0, Math.min(this.width, event.x)),
-                //Math.max(0, Math.min(this.height, event.y))
             );
-            
-            //console.log(x, y);
             
             var delta = this.mouse.clone().subtract(mouse);
             
             this.orientation.add(delta.scaleScalar(this.speed.y));
             
-            //console.log(delta.wolfram());
-            
             
             this.mouse    = mouse;
-            this.rotation = M44.CreateYoZ(-this.orientation.y).
-                                product(M44.CreateXoZ(this.orientation.x)).
+            this.rotation = M44.CreateXoZ(this.orientation.x).
+                            product(M44.CreateYoZ(-this.orientation.y)).
                                 product(M44.CreateXoY(this.orientation.z));
+            
             
         }.bind(this);
         
@@ -141,7 +136,7 @@ define(function(require){
             
             this.translation.add(this.rotation.transform(direction));
             
-            console.log(this.translation.wolfram());
+            //console.log(this.rotation.pretty(), this.translation.wolfram());
             
         }.bind(this);
         
@@ -160,7 +155,7 @@ define(function(require){
         gl.uniform3fv(shader.uniform("cameraTranslation"), this.translation._);
         gl.uniform2f(shader.uniform("mouse"), this.mouse.x, this.mouse.y);
         
-        gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.rotation._);
+        gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.rotation.transpose()._);
         
 
         // Sample the data from VBO on the GPU, not CPU.
