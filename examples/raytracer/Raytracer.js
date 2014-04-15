@@ -32,28 +32,32 @@ define(function(require){
     
         this.setHighFps(15);
         this.setLowFps(1);
-              
+        this.logger.setColor("red");
+        
         this.width        = 800;
         this.height       = 500;
         this.hw           = this.width * 0.5;
         this.hh           = this.height * 0.5;
         this.mouse        = new V2(0, 0);
         this.rotation     = M44.CreateIdentity();
-        this.orientation  = new V3(0, 0, 0);
-        this.translation  = new V3(3, 0, 19);
+        this.orientation  = new V3(-1.71, 0.07, 0);
+        this.translation  = new V3(26, -0.5, -2.1);
         this.speed        = new V2(1, 0.008); // Move, rotate
         this.sceneTexture = null;
         this.frameCounter = 0;
+        this.lock         = true;
+        this.rotation     = M44.CreateXoZ(-this.orientation.x).product(M44.CreateYoZ(this.orientation.y)).product(M44.CreateXoY(this.orientation.z));
         
         // Add a second canvas, only one context can be created per canvas.
         container.appendChild(this._canvas = document.createElement("canvas"));
-        this._canvas.width  = this.width;
-        this._canvas.height = this.height;
-        this._canvas.style.marginTop = "-" + this.hh + "px";
+        this._canvas.width            = this.width;
+        this._canvas.height           = this.height;
+        this._canvas.style.marginTop  = "-" + this.hh + "px";
         this._canvas.style.marginLeft = "-" + this.hw + "px";
-        this._canvas.style.top = "50%";
-        this._canvas.style.left = "50%";
-        this._canvas.style.position = "absolute";
+        this._canvas.style.top        = "50%";
+        this._canvas.style.left       = "50%";
+        this._canvas.style.position   = "absolute";
+        this._canvas.style.zIndex     = -2;
         
         // Intentionally setting a global state.
         gl = this._canvas.getContext("experimental-webgl");
@@ -97,6 +101,15 @@ define(function(require){
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         
         this.input.subscribe(Input.MOUSE_MOVE, this.onMouseMove.bind(this));
+        
+        this.input.subscribe(Input.KEY_DOWN, function(input, key) {
+            if(key == Keys.L) {
+                this.lock = ! this.lock;
+                
+                // Copy the mouse location
+                this.mouse = input.clone();
+            }
+        }.bind(this));
 
         this.uploadScene();
     }
@@ -188,14 +201,18 @@ define(function(require){
         // Force execution of gl calls. (note sure if required?)
         //gl.flush();
         
-        //console.log("draws");        
+        //console.log("draws");  
+        
+        this.log("Orientation", this.orientation.x.toFixed(2) + ", " + this.orientation.y.toFixed(2) + ", " + this.orientation.z.toFixed(2));      
+        this.log("Translation", this.translation.x.toFixed(2) + ", " + this.translation.y.toFixed(2) + ", " + this.translation.z.toFixed(2));      
     }
 
     
     /// Camera code
     Raytracer.prototype.handleMovement = function() {
-        var direction = new V3(0, 0, 0);
         
+        var direction = new V3(0, 0, 0);
+    
         if(this.input.isKeyDown(Keys.A)) {
             direction.x += this.speed.x;
         }
@@ -208,31 +225,28 @@ define(function(require){
         if(this.input.isKeyDown(Keys.S)) {
             direction.z += this.speed.x;
         }
-        
+    
         this.translation.add(this.rotation.transform(direction));
     };
     
     /// Camera code
     Raytracer.prototype.onMouseMove = function(mouse) {
-        /*var mouse = new V2(
-            event.x - this._canvas.offsetLeft + window.pageXOffset, 
-            event.y - this._canvas.offsetTop  + window.pageYOffset
-        );*/
+        if( ! this.lock) {
+            var delta = this.mouse.clone().subtract(mouse);
         
-        var delta = this.mouse.clone().subtract(mouse);
+            //delta.clamp(-5, 5);
         
-        //delta.clamp(-5, 5);
+            //console.log(delta.pretty());
         
-        //console.log(delta.pretty());
+            if(this.mouse.x != 0 && this.mouse.x != 0) {
+                this.orientation.add(delta.scaleScalar(this.speed.y));
+            }
         
-        if(this.mouse.x != 0 && this.mouse.x != 0) {
-            this.orientation.add(delta.scaleScalar(this.speed.y));
+            this.mouse    = mouse.clone();
+            this.rotation = M44.CreateXoZ(-this.orientation.x).
+                            product(M44.CreateYoZ(this.orientation.y)).
+                                product(M44.CreateXoY(this.orientation.z));
         }
-        
-        this.mouse    = mouse.clone();
-        this.rotation = M44.CreateXoZ(this.orientation.x).
-                        product(M44.CreateYoZ(this.orientation.y)).
-                            product(M44.CreateXoY(this.orientation.z));
     };
     
     return Raytracer;
