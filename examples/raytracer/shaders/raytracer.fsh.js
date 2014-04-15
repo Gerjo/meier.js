@@ -9,10 +9,14 @@ define(function(require) {
             precision highp float;
 
             // Per program uniforms:
-            uniform vec2 windowSize;
-            uniform vec3 cameraTranslation;
-            uniform mat4 cameraRotation;
-            uniform vec2 mouse;
+            uniform vec2 windowSize;            // The viewport size.
+            uniform vec3 cameraTranslation;     // Translation vector.
+            uniform mat4 cameraRotation;        // Rotation matrix.
+            uniform vec2 mouse;                 // For debug purposes.
+            uniform sampler2D sceneTexture;     // Sampler width scene data.
+            uniform vec2 sceneTextureSize;      // Dimensions in scene texture.
+            uniform vec2 sceneTextureUnit;      // Scale pixel positions to UV scale.
+            uniform int numObjects;             // Amount of objects in scene texture.
 
             // Received from fragment shader:
             varying vec2 inPosition;
@@ -31,8 +35,8 @@ define(function(require) {
             int round(in float f) {
                 return int(floor(f + 0.5));
             }
-        
 
+            /// Hit testing        
             bool rayIntersetsTriangle(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out vec3 where, out float depth) {
                 vec3 e1 = v1 - v0;
                 vec3 e2 = v2 - v0;
@@ -77,11 +81,13 @@ define(function(require) {
         
             }
 
-
+            /// Shader entry point
             void main(void) {
         
+                // Default pixel color
                 vec4 finalColor = vec4(0.5, 0.5, 0.5, 1);
-        
+                
+                // List of debug colors
                 vec4 colors[10];
                 colors[0] = vec4(0.33, 0.48, 0.96, 1.0);
                 colors[1] = vec4(0.03, 0.05, 0.85, 1.0);
@@ -244,8 +250,6 @@ define(function(require) {
         
                     vec3 where;
                     float depth;
-        
-             
              
                     //for(int j = 0; j < 3; ++j) {
                     //    float d = length(vec3(inPosition, 0.0) - data[j]);
@@ -257,6 +261,7 @@ define(function(require) {
                     // Ray intersection trial
                     if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
             
+                        // Only keep the nearest object
                         if(nearestDepth > depth) {
                             nearestDepth    = depth;
                             nearestPosition = where;
@@ -268,10 +273,11 @@ define(function(require) {
                         //finalColor.r += 1.0;
                     }        
                 }
-        
+
                 // Hardcoded light source
-                vec3 light = vec3(0.0, 0.0, 0.0);
+                vec3 light = vec3(-2.22, -2.444, 0.75);
         
+                // If the ray hit something, apply lighting.
                 if(hasNearest) {
                     vec3 lightDir = normalize(light - nearestPosition);
                     float lambert = max(dot(lightDir, nearestNormal), 0.0);
@@ -279,10 +285,6 @@ define(function(require) {
                     finalColor = nearestColor;
                     finalColor += lambert;
                 }
-        
-                //float d = length(inPosition - ((mouse-100.0)/100.0));
-                
-                //finalColor.r += d;
         
                 gl_FragColor = finalColor;
             }

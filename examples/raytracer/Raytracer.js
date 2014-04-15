@@ -18,18 +18,20 @@ define(function(require){
     var V3     = require("meier/math/Vec")(3);
     var M44    = require("meier/math/Mat")(4, 4);
     
+    var Primitives = require("./Primitives");
     
     function Raytracer(container) {        
-        this.width       = 500;
-        this.height      = 500;
-        this.hw          = this.width * 0.5;
-        this.hh          = this.height * 0.5;
-        this.mouse       = new V2(0, 0);
-        this.rotation    = M44.CreateIdentity();
-        this.orientation = new V3(0, 0, 0);
-        this.translation = new V3(0, 0, 0);
-        this.speed       = new V2(1, 0.008); // Move, rotate
-        this.sleep       = 100;
+        this.width        = 500;
+        this.height       = 500;
+        this.hw           = this.width * 0.5;
+        this.hh           = this.height * 0.5;
+        this.mouse        = new V2(0, 0);
+        this.rotation     = M44.CreateIdentity();
+        this.orientation  = new V3(0, 0, 0);
+        this.translation  = new V3(3, 0, 19);
+        this.speed        = new V2(1, 0.008); // Move, rotate
+        this.sleep        = 100;
+        this.sceneTexture = null;
         
         container.appendChild(this._canvas = document.createElement("canvas"));
         this._canvas.width  = this.width;
@@ -75,80 +77,75 @@ define(function(require){
         
         this._vbo.itemSize = 2;        // Stride: two floats
         this._vbo.numItems = 4;        // Four in total, a pair at each corner.
-        this._vbo.type     = gl.FLOAT; // Data type.
         this._vbo.length   = this._vbo.itemSize * this._vbo.numItems;
         
         
         // Detach VBO from global state.
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         
+        // Cut the GPU some slack.
         window.onblur = function() {
              this.sleep = 5000;
         }.bind(this);
         
+        // Uncut the GPU some slack.
         window.onfocus = function() {
              this.sleep = 100;
         }.bind(this);
         
-        container.onmousemove = function(event) {
-            var x = event.x - this._canvas.offsetLeft + window.pageXOffset;
-            var y = event.y - this._canvas.offsetTop  + window.pageYOffset;
-            
-            var mouse = new V2(
-                x, y
-            );
-            
-            var delta = this.mouse.clone().subtract(mouse);
-            
-            this.orientation.add(delta.scaleScalar(this.speed.y));
-            
-            
-            this.mouse    = mouse;
-            this.rotation = M44.CreateXoZ(this.orientation.x).
-                            product(M44.CreateYoZ(-this.orientation.y)).
-                                product(M44.CreateXoY(this.orientation.z));
-            
-            
-        }.bind(this);
-        
-        container.onkeydown = function(event) {
-            
-            var direction = new V3(0, 0, 0);
-            
-            // A
-            if(event.keyCode == 65) {
-                //this.rotation = this.rotation.product( M44.CreateEulerAngles(0.1, 0.0, 0.0) );
-                
-                direction.x += this.speed.x;
-                
-            // D
-            } else if(event.keyCode == 68) {
-                
-                direction.x -= this.speed.x;
-                
-            // W
-            } else if(event.keyCode == 87) {
-                direction.z -= this.speed.x;
-            // S  
-            } else if(event.keyCode == 83) {
-                direction.z += this.speed.x;
-            }
-            
-            this.translation.add(this.rotation.transform(direction));
-            
-            //console.log(this.rotation.pretty(), this.translation.wolfram());
-            
-        }.bind(this);
+        // Ad-hoc event capture. TODO: tie this to meier.js which
+        // is actually portable.
+        container.onmousemove = this.onMouseMove.bind(this);
+        container.onkeydown   = this.onKeyDown.bind(this);
+
+        this.uploadScene();
         
         // Commence render loop!
         this.render();
     }
     
-    Raytracer.prototype.render = function() {
+    Raytracer.prototype.uploadScene = function(event) {
         
+        
+        if( ! gl.getExtension('OES_texture_float')) {
+            throw new Error("OES_texture_float not available.");
+        } 
+        
+        var scene  = require("./Scene");
+        var texmax = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+        var height = 1; // Extend width that prime number routine
+        var width  = scene.length / 3; // Scale to float RGB triplets
+        
+        ASSERT(width < texmax && height < texmax);
+        
+        console.log("Scene floats:");
+        console.log(scene);
+        
+        // Upload to the GPU.
+        var texture = this.sceneTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, scene);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        
+        this.shader.use();
+        gl.uniform2f(this.shader.uniform("sceneTextureSize"), width, height);
+        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1/width, 1/height);
+    };
+    
+    
+    Raytracer.prototype.render = function() {
+        //console.log(this.orientation.wolfram(), this.translation.wolfram());
         //console.log("Rendering... [" + (this.mouse.x) + ", " + (this.mouse.y) + "]");
         
         var shader = this.shader.use();
+        
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
+        gl.uniform1i(shader.uniform("sceneTexture"), 0);
         
         // Upload uniforms
         gl.uniform2f(shader.uniform("windowSize"), this._width, this._height);
@@ -161,9 +158,9 @@ define(function(require){
         // Sample the data from VBO on the GPU, not CPU.
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
         gl.vertexAttribPointer(
-            shader.attribute("attribPosition"),    // Attribute location
+            shader.attribute("attribPosition"),     // Attribute location
             this._vbo.itemSize,                     // Number of items
-            this._vbo.type,                         // Numeric type
+            gl.FLOAT,                               // Numeric type
             false,                                  // Normalize?
             0,                                      // Stride
             0                                       // Offset (for non VBO purposes)
@@ -182,12 +179,56 @@ define(function(require){
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         
         // Force execution of gl calls. (note sure if required?)
-        gl.flush();
+        //gl.flush();
         
         //console.log("draws");
         
         setTimeout(this.render.bind(this), this.sleep);
     }
+
+    
+    /// Camera code
+    Raytracer.prototype.onKeyDown = function(event) {
+        var direction = new V3(0, 0, 0);
+        
+        // A
+        if(event.keyCode == 65) {
+            direction.x += this.speed.x;
+        // D
+        } else if(event.keyCode == 68) {
+            direction.x -= this.speed.x;
+        // W
+        } else if(event.keyCode == 87) {
+            direction.z -= this.speed.x;
+        // S  
+        } else if(event.keyCode == 83) {
+            direction.z += this.speed.x;
+        }
+        
+        this.translation.add(this.rotation.transform(direction));
+    };
+    
+    /// Camera code
+    Raytracer.prototype.onMouseMove = function(event) {
+        var mouse = new V2(
+            event.x - this._canvas.offsetLeft + window.pageXOffset, 
+            event.y - this._canvas.offsetTop  + window.pageYOffset
+        );
+        
+        var delta = this.mouse.clone().subtract(mouse);
+        
+        //delta.clamp(-5, 5);
+        
+        //console.log(delta.pretty());
+        
+        this.orientation.add(delta.scaleScalar(this.speed.y));
+        
+        
+        this.mouse    = mouse;
+        this.rotation = M44.CreateXoZ(this.orientation.x).
+                        product(M44.CreateYoZ(-this.orientation.y)).
+                            product(M44.CreateXoY(this.orientation.z));
+    };
     
     return Raytracer;
 });
