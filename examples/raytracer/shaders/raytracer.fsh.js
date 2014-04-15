@@ -35,6 +35,15 @@ define(function(require) {
             int round(in float f) {
                 return int(floor(f + 0.5));
             }
+        
+            vec2 indexWrap(in int index, in float width) {
+                float fIndex = float(index);
+        
+                vec2 texIndex = vec2(0.0, int(fIndex / width));
+                texIndex.x = fIndex - texIndex.y * width;
+    
+                return texIndex;
+            }
 
             /// Hit testing        
             bool rayIntersetsTriangle(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out vec3 where, out float depth) {
@@ -98,7 +107,7 @@ define(function(require) {
                 colors[6] = vec4(0.45, 0.06, 0.03, 1.0);
                 colors[7] = vec4(0.76, 0.78, 0.63, 1.0);
                 colors[8] = vec4(0.33, 0.87, 0.87, 1.0);
-                colors[9] = vec4(0.42, 0.30, 0.12, 1.0);
+                //colors[9] = vec4(0.42, 0.30, 0.12, 1.0);
                 
                 // View frustrum distance
                 float perspective = 4.0;
@@ -124,42 +133,54 @@ define(function(require) {
                 vec4 nearestColor;
                 float nearestDepth = 999999999.0;
         
-                const int triangleStride = 4;
+                // One stride to rule them all.
+                const int objectStride = 10;
                 
                 // Test against the whole world.
-                for(int i = 0; i < 152; i += triangleStride) {
+                for(int i = 0; i < 380; i += objectStride) {
             
                     float o = float(i);
         
+        
                     // In nearest neighour we trust.
-                    vec3 a  = texture2D(sceneTexture, vec2(o + 1.0, 0) * sceneTextureUnit).xyz;
-                    vec3 b  = texture2D(sceneTexture, vec2(o + 2.0, 0) * sceneTextureUnit).xyz;
-                    vec3 c  = texture2D(sceneTexture, vec2(o + 3.0, 0) * sceneTextureUnit).xyz;
-        
-                    vec3 where;
-                    float depth;
-             
-                    //for(int j = 0; j < 3; ++j) {
-                    //    float d = length(vec3(inPosition, 0.0) - data[j]);
-                    //    if(d < 0.2) {
-                    //        finalColor.r += 0.1;        
-                    //    }
-                    //}
-        
-                    // Ray intersection trial
-                    if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+                    //vec3 m  = texture2D(sceneTexture, vec2(o + 0.0, 0) * sceneTextureUnit).xyz;
             
-                        // Only keep the nearest object
-                        if(nearestDepth > depth) {
-                            nearestDepth    = depth;
-                            nearestPosition = where;
-                            nearestNormal   = cross(b - a, c - a);
-                            hasNearest      = true;
-                            nearestColor    = colors[mod(i, 10)];
-                        }
+                    //if(int(m) == 1) {
+                    if(true) {
+                        //vec3 a  = texture2D(sceneTexture, vec2(o + 1.0, 0) * sceneTextureUnit).xyz;
+                        //vec3 b  = texture2D(sceneTexture, vec2(o + 2.0, 0) * sceneTextureUnit).xyz;
+                        //vec3 c  = texture2D(sceneTexture, vec2(o + 3.0, 0) * sceneTextureUnit).xyz;
         
-                        //finalColor.r += 1.0;
-                    }        
+                        vec3 a  = texture2D(sceneTexture, 
+                                    indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit
+                        ).xyz;
+                        vec3 b  = texture2D(sceneTexture, 
+                                    indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit
+                        ).xyz;
+                        vec3 c  = texture2D(sceneTexture, 
+                                    indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit
+                        ).xyz;
+        
+        
+                        vec3 where;
+                        float depth;
+             
+                        // Ray intersection trial
+                        if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+            
+                            // Only keep the nearest object
+                            if(nearestDepth > depth) {
+                                nearestDepth    = depth;
+                                nearestPosition = where;
+                                nearestNormal   = cross(b - a, c - a);
+                                hasNearest      = true;
+                                nearestColor    = colors[mod(i, 9)];
+                            }
+        
+                        }
+                    } else {
+                        finalColor = vec4(0.0, 0.0, 0.0, 0.0);
+                    }
                 }
 
                 // Hardcoded light source

@@ -20,6 +20,9 @@ define(function(require){
     
     var Primitives = require("./Primitives");
     
+    var M      = require("meier/math/Math");
+    
+    
     function Raytracer(container) {        
         this.width        = 500;
         this.height       = 500;
@@ -85,12 +88,12 @@ define(function(require){
         
         // Cut the GPU some slack.
         window.onblur = function() {
-             this.sleep = 5000;
+             this.sleep = 5000000;
         }.bind(this);
         
         // Uncut the GPU some slack.
         window.onfocus = function() {
-             this.sleep = 100;
+             //this.sleep = 100;
         }.bind(this);
         
         // Ad-hoc event capture. TODO: tie this to meier.js which
@@ -111,15 +114,23 @@ define(function(require){
             throw new Error("OES_texture_float not available.");
         } 
         
-        var scene  = require("./Scene");
+        var scene  = require("./Scene"); //.slice(0, 3);
         var texmax = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-        var height = 1; // Extend width that prime number routine
-        var width  = scene.length / 3; // Scale to float RGB triplets
+        var pixels = scene.length / 3; // Scale to float RGB triplets
         
-        ASSERT(width < texmax && height < texmax);
         
-        console.log("Scene [" + width + "x" + height + "] floats:");
+        var primes = M.PrimeFactors(pixels);
+        
+        var size = new V2(1, 1);
+        for(var i = 0; primes.length > 0; i = 1 - i) {
+            size._[i] *= primes.pop();
+        }
+        
+        console.log("Scene [" + size.x + "x" + size.y + " = " + pixels + "] pixels. Maximum: " + texmax + "x" + texmax + ".");
         console.log(scene);
+        
+        ASSERT(size.x < texmax && size.y < texmax);
+        ASSERT(size.x * size.y == pixels);
         
         // Upload to the GPU.
         var texture = this.sceneTexture = gl.createTexture();
@@ -128,12 +139,12 @@ define(function(require){
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, scene);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, size.x, size.y, 0, gl.RGB, gl.FLOAT, scene);
         gl.bindTexture(gl.TEXTURE_2D, null);
         
         this.shader.use();
-        gl.uniform2f(this.shader.uniform("sceneTextureSize"), width, height);
-        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1/width, 1/height);
+        gl.uniform2f(this.shader.uniform("sceneTextureSize"), size.x, size.y);
+        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1/size.x, 1/size.y);
     };
     
     
