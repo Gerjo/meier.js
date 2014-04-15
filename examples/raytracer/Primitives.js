@@ -11,8 +11,8 @@ define(function(require) {
     // Suggested meta formatting: type / front-face-direction / sampler?
     
     
-    function Triangle(a, b, c, n1, n2, n3, u, v, w) {
-        this.meta = new V3(Types.Triangle);
+    function Triangle(a, b, c, n1, n2, n3, u, v, w, meta) {
+        this.meta = meta || new V3(Types.Triangle, 0, 0);
         this.a    = a || new V3(0, 0, 0);
         this.b    = b || new V3(0, 0, 0);
         this.c    = c || new V3(0, 0, 0);

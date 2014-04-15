@@ -231,6 +231,7 @@ define(function(require) {
         // If the ray hit something, apply lighting.
         if(hasNearest) {
             int i   = nearestOffset;
+            vec3 m  = texture2D(sceneTexture, indexWrap(i + 0, sceneTextureSize.x) * sceneTextureUnit).xyz;
             vec3 a  = texture2D(sceneTexture, indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit).xyz;
             vec3 b  = texture2D(sceneTexture, indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit).xyz;
             vec3 c  = texture2D(sceneTexture, indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit).xyz;
@@ -242,7 +243,7 @@ define(function(require) {
             //vec2 w  = texture2D(sceneTexture, indexWrap(i + 9, sceneTextureSize.x) * sceneTextureUnit).xy;
 
             vec3 normal       = barycentric3(nearestPosition, a, b, c, n1, n2, n3);
-            vec4 textureColor = colors[0];
+            vec4 textureColor = int(m.y) != 1 ? colors[0] : colors[2];
 
             // Flip the normal based on the camera direction. Are we inside or
             // outside of objects.
@@ -264,9 +265,9 @@ define(function(require) {
                 blend.b = 0.0;
             }
 
-            blend.r = max(0.12, blend.r);
-            blend.g = max(0.12, blend.g);
-            blend.b = max(0.12, blend.b);
+            blend.r = max(0.22, blend.r);
+            blend.g = max(0.22, blend.g);
+            blend.b = max(0.22, blend.b);
         
             // Mix light and the texture color
             finalColor = textureColor * blend;
