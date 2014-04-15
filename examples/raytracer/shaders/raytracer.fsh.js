@@ -22,7 +22,6 @@ define(function(require) {
     // Received from fragment shader:
     varying vec2 inPosition;
 
-
     // One stride to rule them all.
     const int objectStride = 10;
     const int sceneTextureCount = 380;
@@ -42,6 +41,7 @@ define(function(require) {
         return int(floor(f + 0.5));
     }
 
+    /// Wrap index.
     vec2 indexWrap(in int index, in float width) {
         float fIndex = float(index);
 
@@ -155,8 +155,13 @@ define(function(require) {
     /// Shader entry point
     void main(void) {
 
+        //if(mod(int((inPosition.x + 1.0) * 0.5 * windowSize.x), 10) != mod(frameCounter, 10)) {
+        //    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+        //    return;
+        //}
+
         // Default pixel color
-        vec4 finalColor = vec4(0.5, 0.5, 0.5, 1);
+        vec4 finalColor = vec4(0.5, 0.5, 0.5, 1.0);
         
         // List of debug colors
         vec4 colors[9];
@@ -193,7 +198,6 @@ define(function(require) {
         int nearestOffset;
         float nearestDepth = 999999999.0;
 
-        
         // Test against the whole world.
         for(int i = 0; i < sceneTextureCount; i += objectStride) {
 
@@ -225,7 +229,8 @@ define(function(require) {
         }
 
         // Hardcoded light source
-        vec3 light = vec3(-2.22, -2.444, 0.75);
+        vec3 light = vec3(-2.22, -2.444 + sin(float(frameCounter) * 0.05) * 0.5, 0.75);
+        
         vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 
         // If the ray hit something, apply lighting.
@@ -265,9 +270,9 @@ define(function(require) {
                 blend.b = 0.0;
             }
 
-            blend.r = max(0.22, blend.r);
-            blend.g = max(0.22, blend.g);
-            blend.b = max(0.22, blend.b);
+            blend.r = max(0.17, blend.r);
+            blend.g = max(0.17, blend.g);
+            blend.b = max(0.17, blend.b);
         
             // Mix light and the texture color
             finalColor = textureColor * blend;
