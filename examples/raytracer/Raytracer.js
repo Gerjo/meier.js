@@ -20,11 +20,20 @@ define(function(require){
     
     var Primitives = require("./Primitives");
     
-    var M      = require("meier/math/Math");
+    var M    = require("meier/math/Math");
     
+    var Game  = require("meier/engine/Game");
+    var Input = require("meier/engine/Input");
+    var Keys  = require("meier/engine/Key");
     
-    function Raytracer(container) {        
-        this.width        = 500;
+    Raytracer.prototype = new Game();
+    function Raytracer(container) {  
+        Game.call(this, container);
+    
+        this.setHighFps(15);
+        this.setLowFps(1);
+              
+        this.width        = 800;
         this.height       = 500;
         this.hw           = this.width * 0.5;
         this.hh           = this.height * 0.5;
@@ -33,10 +42,10 @@ define(function(require){
         this.orientation  = new V3(0, 0, 0);
         this.translation  = new V3(3, 0, 19);
         this.speed        = new V2(1, 0.008); // Move, rotate
-        this.sleep        = 100;
         this.sceneTexture = null;
         this.frameCounter = 0;
         
+        // Add a second canvas, only one context can be created per canvas.
         container.appendChild(this._canvas = document.createElement("canvas"));
         this._canvas.width  = this.width;
         this._canvas.height = this.height;
@@ -87,25 +96,9 @@ define(function(require){
         // Detach VBO from global state.
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         
-        // Cut the GPU some slack.
-        window.onblur = function() {
-             this.sleep = 5000000;
-        }.bind(this);
-        
-        // Uncut the GPU some slack.
-        window.onfocus = function() {
-             //this.sleep = 100;
-        }.bind(this);
-        
-        // Ad-hoc event capture. TODO: tie this to meier.js which
-        // is actually portable.
-        container.onmousemove = this.onMouseMove.bind(this);
-        container.onkeydown   = this.onKeyDown.bind(this);
+        this.input.subscribe(Input.MOUSE_MOVE, this.onMouseMove.bind(this));
 
         this.uploadScene();
-        
-        // Commence render loop!
-        this.render();
     }
     
     Raytracer.prototype.uploadScene = function(event) {
@@ -145,13 +138,14 @@ define(function(require){
         
         this.shader.use();
         gl.uniform2f(this.shader.uniform("sceneTextureSize"), size.x, size.y);
-        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1/size.x, 1/size.y);
+        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1.0 / size.x, 1.0 / size.y);
     };
     
     
-    Raytracer.prototype.render = function() {
-        //console.log(this.orientation.wolfram(), this.translation.wolfram());
-        //console.log("Rendering... [" + (this.mouse.x) + ", " + (this.mouse.y) + "]");
+    Raytracer.prototype.draw = function(renderer2d) {
+        Game.prototype.draw.call(this, renderer2d);
+        
+        this.handleMovement();
         
         var shader = this.shader.use();
         
@@ -162,7 +156,7 @@ define(function(require){
         
         
         // Upload uniforms
-        gl.uniform2f(shader.uniform("windowSize"), this._width, this._height);
+        gl.uniform2f(shader.uniform("windowSize"), this.width, this.height);
         gl.uniform3fv(shader.uniform("cameraTranslation"), this.translation._);
         gl.uniform2f(shader.uniform("mouse"), this.mouse.x, this.mouse.y);
         
@@ -194,27 +188,24 @@ define(function(require){
         // Force execution of gl calls. (note sure if required?)
         //gl.flush();
         
-        //console.log("draws");
-        
-        setTimeout(this.render.bind(this), this.sleep);
+        //console.log("draws");        
     }
 
     
     /// Camera code
-    Raytracer.prototype.onKeyDown = function(event) {
+    Raytracer.prototype.handleMovement = function() {
         var direction = new V3(0, 0, 0);
         
-        // A
-        if(event.keyCode == 65) {
+        if(this.input.isKeyDown(Keys.A)) {
             direction.x += this.speed.x;
-        // D
-        } else if(event.keyCode == 68) {
+        }
+        if(this.input.isKeyDown(Keys.D)) {
             direction.x -= this.speed.x;
-        // W
-        } else if(event.keyCode == 87) {
+        } 
+        if(this.input.isKeyDown(Keys.W)) {
             direction.z -= this.speed.x;
-        // S  
-        } else if(event.keyCode == 83) {
+        } 
+        if(this.input.isKeyDown(Keys.S)) {
             direction.z += this.speed.x;
         }
         
@@ -222,11 +213,11 @@ define(function(require){
     };
     
     /// Camera code
-    Raytracer.prototype.onMouseMove = function(event) {
-        var mouse = new V2(
+    Raytracer.prototype.onMouseMove = function(mouse) {
+        /*var mouse = new V2(
             event.x - this._canvas.offsetLeft + window.pageXOffset, 
             event.y - this._canvas.offsetTop  + window.pageYOffset
-        );
+        );*/
         
         var delta = this.mouse.clone().subtract(mouse);
         
@@ -234,12 +225,13 @@ define(function(require){
         
         //console.log(delta.pretty());
         
-        this.orientation.add(delta.scaleScalar(this.speed.y));
+        if(this.mouse.x != 0 && this.mouse.x != 0) {
+            this.orientation.add(delta.scaleScalar(this.speed.y));
+        }
         
-        
-        this.mouse    = mouse;
+        this.mouse    = mouse.clone();
         this.rotation = M44.CreateXoZ(this.orientation.x).
-                        product(M44.CreateYoZ(-this.orientation.y)).
+                        product(M44.CreateYoZ(this.orientation.y)).
                             product(M44.CreateXoY(this.orientation.z));
     };
     

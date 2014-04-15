@@ -22,6 +22,11 @@ define(function(require) {
     // Received from fragment shader:
     varying vec2 inPosition;
 
+
+    // One stride to rule them all.
+    const int objectStride = 10;
+    const int sceneTextureCount = 380;
+
     struct Ray {
         vec3 place;
         vec3 direction;
@@ -114,6 +119,38 @@ define(function(require) {
 
         return uv;
     }
+        
+    bool canSeePoint(in vec3 point, in vec3 where) {
+        
+        bool hasCollision = false;
+        
+        Ray ray;
+        ray.place     = where;
+        ray.direction = point - where;
+        
+        for(int i = 0; i < sceneTextureCount; i += objectStride) {
+        
+            // There is no early out. This is the best we can do, i.e.,
+            // a for loop that does nothing.
+            if( ! hasCollision) {
+                vec3 a  = texture2D(sceneTexture, indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                vec3 b  = texture2D(sceneTexture, indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                vec3 c  = texture2D(sceneTexture, indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit).xyz;
+
+                vec3 where;
+                float depth;
+ 
+                // Ray intersection trial
+                if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+                    if( depth >= -0.0000001 && depth <= 1.0000001 ) {
+                        hasCollision = true;
+                    }
+                }
+            }
+        }
+        
+        return ! hasCollision;
+    }
 
     /// Shader entry point
     void main(void) {
@@ -156,11 +193,9 @@ define(function(require) {
         int nearestOffset;
         float nearestDepth = 999999999.0;
 
-        // One stride to rule them all.
-        const int objectStride = 10;
         
         // Test against the whole world.
-        for(int i = 0; i < 380; i += objectStride) {
+        for(int i = 0; i < sceneTextureCount; i += objectStride) {
 
             // In nearest neighour we trust.
             vec3 m  = texture2D(sceneTexture, indexWrap(i + 0, sceneTextureSize.x) * sceneTextureUnit).xyz;
@@ -215,7 +250,7 @@ define(function(require) {
 
             vec3 lightDir = normalize(light - nearestPosition);
 
-            float lambert = max(dot(lightDir, normal * flip), 0.0);
+            float lambert = max(dot(lightDir, normal * flip), 0.0) * 2.0;
 
             // Weight the diffuse color with the cosine
             vec4 blend = diffuse * lambert;
@@ -223,6 +258,16 @@ define(function(require) {
             // Light has no "alpha".
             blend.a    = 1.0;
 
+            if(!canSeePoint(light, nearestPosition)) {
+                blend.r = 0.0;
+                blend.g = 0.0;
+                blend.b = 0.0;
+            }
+
+            blend.r = max(0.12, blend.r);
+            blend.g = max(0.12, blend.g);
+            blend.b = max(0.12, blend.b);
+        
             // Mix light and the texture color
             finalColor = textureColor * blend;
         }

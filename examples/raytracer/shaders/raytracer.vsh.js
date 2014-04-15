@@ -24,7 +24,7 @@ define(function(require) {
                 inPosition = attribPosition;
         
                 // Adjust for screen aspect ratio
-                //inPosition.y /= aspect;
+                inPosition.y /= aspect;
         
                 gl_Position = vec4(
                     attribPosition, 
