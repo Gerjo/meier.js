@@ -118,7 +118,7 @@ define(function(require){
         
         ASSERT(width < texmax && height < texmax);
         
-        console.log("Scene floats:");
+        console.log("Scene [" + width + "x" + height + "] floats:");
         console.log(scene);
         
         // Upload to the GPU.
