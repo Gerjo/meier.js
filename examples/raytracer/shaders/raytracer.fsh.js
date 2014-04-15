@@ -161,19 +161,14 @@ define(function(require) {
                 
                 // Test against the whole world.
                 for(int i = 0; i < 380; i += objectStride) {
-            
-                    float o = float(i);
-        
         
                     // In nearest neighour we trust.
                     vec3 m  = texture2D(sceneTexture, indexWrap(i + 0, sceneTextureSize.x) * sceneTextureUnit).xyz;
             
-                    //if(int(m) == 1) {
-                    if(true) {
+                    if(int(m) == 1) {
                         vec3 a  = texture2D(sceneTexture, indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit).xyz;
                         vec3 b  = texture2D(sceneTexture, indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit).xyz;
                         vec3 c  = texture2D(sceneTexture, indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit).xyz;
-        
         
                         vec3 where;
                         float depth;
@@ -183,7 +178,7 @@ define(function(require) {
 
                             // Only keep the nearest object
                             if(nearestDepth > depth) {
-                                nearestOffset = i;
+                                nearestOffset   = i;
                                 nearestDepth    = depth;
                                 nearestPosition = where;
                                 hasNearest      = true;
@@ -216,18 +211,19 @@ define(function(require) {
         
                     // Flip the normal based on the camera direction. Are we inside or
                     // outside of objects.
-                    float flip = sign(dot(normal, -ray.direction;));
+                    float flip = sign(dot(normal, -ray.direction));
         
                     vec3 lightDir = normalize(light - nearestPosition);
+        
                     float lambert = max(dot(lightDir, normal * flip), 0.0);
         
+                    // Weight the diffuse color with the cosine
                     vec4 blend = diffuse * lambert;
+        
+                    // Light has no "alpha".
                     blend.a    = 1.0;
 
-                    blend.r = max(0.1, blend.r);
-                    blend.g = max(0.1, blend.g);
-                    blend.b = max(0.1, blend.b);
-        
+                    // Mix light and the texture color
                     finalColor = textureColor * blend;
                 }
         
