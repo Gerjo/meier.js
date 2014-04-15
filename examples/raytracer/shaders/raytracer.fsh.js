@@ -17,7 +17,8 @@ define(function(require) {
             uniform vec2 sceneTextureSize;      // Dimensions in scene texture.
             uniform vec2 sceneTextureUnit;      // Scale pixel positions to UV scale.
             uniform int numObjects;             // Amount of objects in scene texture.
-
+            uniform int frameCounter;           // Frame counter.
+        
             // Received from fragment shader:
             varying vec2 inPosition;
 
@@ -121,7 +122,7 @@ define(function(require) {
                 vec4 finalColor = vec4(0.5, 0.5, 0.5, 1);
                 
                 // List of debug colors
-                vec4 colors[10];
+                vec4 colors[9];
                 colors[0] = vec4(0.33, 0.48, 0.96, 1.0);
                 colors[1] = vec4(0.03, 0.05, 0.85, 1.0);
                 colors[2] = vec4(0.34, 0.71, 0.64, 1.0);
@@ -131,7 +132,6 @@ define(function(require) {
                 colors[6] = vec4(0.45, 0.06, 0.03, 1.0);
                 colors[7] = vec4(0.76, 0.08, 0.63, 1.0);
                 colors[8] = vec4(0.33, 0.87, 0.87, 1.0);
-                //colors[9] = vec4(0.42, 0.30, 0.12, 1.0);
                 
                 // View frustrum distance
                 float perspective = 4.0;
@@ -153,8 +153,7 @@ define(function(require) {
                 // Properties of the nearest intersection.
                 bool hasNearest = false;
                 vec3 nearestPosition;
-                vec3 nearestNormal;
-                vec4 nearestColor;
+                int nearestOffset;
                 float nearestDepth = 999999999.0;
         
                 // One stride to rule them all.
@@ -181,21 +180,13 @@ define(function(require) {
              
                         // Ray intersection trial
                         if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
-                            vec3 n1 = texture2D(sceneTexture, indexWrap(i + 4, sceneTextureSize.x) * sceneTextureUnit).xyz;
-                            vec3 n2 = texture2D(sceneTexture, indexWrap(i + 5, sceneTextureSize.x) * sceneTextureUnit).xyz;
-                            vec3 n3 = texture2D(sceneTexture, indexWrap(i + 6, sceneTextureSize.x) * sceneTextureUnit).xyz;
-                            //vec2 u  = texture2D(sceneTexture, indexWrap(i + 7, sceneTextureSize.x) * sceneTextureUnit).xy;
-                            //vec2 v  = texture2D(sceneTexture, indexWrap(i + 8, sceneTextureSize.x) * sceneTextureUnit).xy;
-                            //vec2 w  = texture2D(sceneTexture, indexWrap(i + 9, sceneTextureSize.x) * sceneTextureUnit).xy;
-        
+
                             // Only keep the nearest object
                             if(nearestDepth > depth) {
+                                nearestOffset = i;
                                 nearestDepth    = depth;
                                 nearestPosition = where;
-                                //nearestNormal   = cross(c - a, b - a);
-                                nearestNormal   = barycentric3(where, a, b, c, n1, n2, n3);
                                 hasNearest      = true;
-                                nearestColor    = colors[mod(i, 9)] * 2.0;
                             }
                         }
                     } else {
@@ -205,14 +196,39 @@ define(function(require) {
 
                 // Hardcoded light source
                 vec3 light = vec3(-2.22, -2.444, 0.75);
+                vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);
         
                 // If the ray hit something, apply lighting.
                 if(hasNearest) {
-                    vec3 lightDir = normalize(light - nearestPosition);
-                    float lambert = max(dot(lightDir, nearestNormal), 0.0);
+                    int i   = nearestOffset;
+                    vec3 a  = texture2D(sceneTexture, indexWrap(i + 1, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    vec3 b  = texture2D(sceneTexture, indexWrap(i + 2, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    vec3 c  = texture2D(sceneTexture, indexWrap(i + 3, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    vec3 n1 = texture2D(sceneTexture, indexWrap(i + 4, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    vec3 n2 = texture2D(sceneTexture, indexWrap(i + 5, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    vec3 n3 = texture2D(sceneTexture, indexWrap(i + 6, sceneTextureSize.x) * sceneTextureUnit).xyz;
+                    //vec2 u  = texture2D(sceneTexture, indexWrap(i + 7, sceneTextureSize.x) * sceneTextureUnit).xy;
+                    //vec2 v  = texture2D(sceneTexture, indexWrap(i + 8, sceneTextureSize.x) * sceneTextureUnit).xy;
+                    //vec2 w  = texture2D(sceneTexture, indexWrap(i + 9, sceneTextureSize.x) * sceneTextureUnit).xy;
+
+                    vec3 normal       = barycentric3(nearestPosition, a, b, c, n1, n2, n3);
+                    vec4 textureColor = colors[0];
         
-                    finalColor = nearestColor;
-                    finalColor += min(0.4, lambert);//min(0.4, lambert);
+                    // Flip the normal based on the camera direction. Are we inside or
+                    // outside of objects.
+                    float flip = sign(dot(normal, -ray.direction;));
+        
+                    vec3 lightDir = normalize(light - nearestPosition);
+                    float lambert = max(dot(lightDir, normal * flip), 0.0);
+        
+                    vec4 blend = diffuse * lambert;
+                    blend.a    = 1.0;
+
+                    blend.r = max(0.1, blend.r);
+                    blend.g = max(0.1, blend.g);
+                    blend.b = max(0.1, blend.b);
+        
+                    finalColor = textureColor * blend;
                 }
         
                 gl_FragColor = finalColor;

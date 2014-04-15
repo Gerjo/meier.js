@@ -35,6 +35,7 @@ define(function(require){
         this.speed        = new V2(1, 0.008); // Move, rotate
         this.sleep        = 100;
         this.sceneTexture = null;
+        this.frameCounter = 0;
         
         container.appendChild(this._canvas = document.createElement("canvas"));
         this._canvas.width  = this.width;
@@ -157,6 +158,8 @@ define(function(require){
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
         gl.uniform1i(shader.uniform("sceneTexture"), 0);
+        gl.uniform1i(shader.uniform("frameCounter"), ++this.frameCounter);
+        
         
         // Upload uniforms
         gl.uniform2f(shader.uniform("windowSize"), this._width, this._height);
