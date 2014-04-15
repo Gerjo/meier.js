@@ -74,8 +74,8 @@ define(function(require) {
         this._doClear        = true;
         
         // TODO: contemplate on which DOM node to capture blur event.
-        container.onblur     = this._onBlur.bind(this);
-        container.onfocus    = this._onFocus.bind(this);
+        window.onblur     = this._onBlur.bind(this);
+        window.onfocus    = this._onFocus.bind(this);
     }
     
     Game.prototype._onBlur = function() {
