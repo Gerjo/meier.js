@@ -16,10 +16,8 @@ define(function(require){
     var Shader = require("meier/webgl/Shader");
     var V2     = require("meier/math/Vec")(2);
     var V3     = require("meier/math/Vec")(3);
-    var M44    = require("meier/math/Mat")(4, 4);
     var Camera = require("./Camera");
     var Tools  = require("./Tools");
-    var Primitives = require("./Primitives");
     
     var M     = require("meier/math/Math");
     var Game  = require("meier/engine/Game");
@@ -34,11 +32,8 @@ define(function(require){
         this.setLowFps(1);
         this.logger.setColor("red");
         
-        this.width        = 800;
-        this.height       = 500;
-        this.hw           = this.width * 0.5;
-        this.hh           = this.height * 0.5;
         this.sceneTexture = null;
+        this.scene        = require("./Scene");
         this.frameCounter = 0;
         
         this.add(this.camera = new Camera());
@@ -46,19 +41,22 @@ define(function(require){
         
         // Add a second canvas, only one context can be created per canvas.
         container.appendChild(this._canvas = document.createElement("canvas"));
-        this._canvas.width            = this.width;
-        this._canvas.height           = this.height;
-        this._canvas.style.marginTop  = "-" + this.hh + "px";
-        this._canvas.style.marginLeft = "-" + this.hw + "px";
+        // Intentionally setting a global state.
+        gl = this._canvas.getContext("experimental-webgl");
+        
+        // Match the window size.
+        gl.viewportWidth  = this.width;
+        gl.viewportHeight = this.height;
+        
+        // Center GL view on screen.
+        this._canvas.width            = gl.viewportWidth;
+        this._canvas.height           = gl.viewportHeight;
+        this._canvas.style.marginLeft = "-" + (gl.viewportWidth * 0.5) + "px";
+        this._canvas.style.marginTop  = "-" + (gl.viewportHeight * 0.5) + "px";
         this._canvas.style.top        = "50%";
         this._canvas.style.left       = "50%";
         this._canvas.style.position   = "absolute";
         this._canvas.style.zIndex     = -2;
-        
-        // Intentionally setting a global state.
-        gl = this._canvas.getContext("experimental-webgl");
-        gl.viewportWidth  = this.width;
-        gl.viewportHeight = this.height;
         
         // We run our own stuff, inform GL to not even bother.
         gl.disable(gl.DEPTH_TEST);
@@ -68,12 +66,16 @@ define(function(require){
         gl.clearColor(0.0, 0.0, 0.5, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
-        // Raytracer shader, the only shader for now.
-        var shader = this.tracerProgram = new Shader(
-            require("./shaders/raytracer.vsh"),
-            require("./shaders/raytracer.fsh")
-        );
+        // Raytracer program
+        this.tracerProgram = new Shader(require("./shaders/raytracer.vsh"), require("./shaders/raytracer.fsh"));
         
+        // GL specifics
+        this.uploadUnitFrame();
+        this.uploadScene();
+    }
+    
+    /// Upload a generic frame that matches the unit screen size.
+    Raytracer.prototype.uploadUnitFrame = function() {
         var vertices = new Float32Array([
                -1, -1,
                 1, -1,
@@ -95,9 +97,7 @@ define(function(require){
         
         // Detach VBO from global state.
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        this.uploadScene();
-    }
+    };
     
     Raytracer.prototype.uploadScene = function(event) {
         
@@ -106,9 +106,8 @@ define(function(require){
             throw new Error("OES_texture_float not available.");
         } 
         
-        var scene  = require("./Scene"); //.slice(0, 3);
         var texmax = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-        var pixels = scene.length / 3; // Scale to float RGB triplets
+        var pixels = this.scene.length / 3; // Scale to float RGB triplets
         var size   = Tools.BalanceDimensions(pixels);
         
         
@@ -124,7 +123,7 @@ define(function(require){
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, size.x, size.y, 0, gl.RGB, gl.FLOAT, scene);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, size.x, size.y, 0, gl.RGB, gl.FLOAT, this.scene);
         gl.bindTexture(gl.TEXTURE_2D, null);
         
         // Update shader uniforms
@@ -134,23 +133,22 @@ define(function(require){
     };
     
     
-    Raytracer.prototype.draw = function(renderer2d) {
+    Raytracer.prototype.draw = function(renderer2d) {        
         Game.prototype.draw.call(this, renderer2d);
         
-        
+        // Enable program and retrieve a shorthand varible.
         var shader = this.tracerProgram.use();
         
+        // Enable scene data texture. (Always on sampler slot #0)
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
         gl.uniform1i(shader.uniform("sceneTexture"), 0);
-        gl.uniform1i(shader.uniform("frameCounter"), ++this.frameCounter);
-        
         
         // Upload uniforms
         gl.uniform2f(shader.uniform("windowSize"), this.width, this.height);
         gl.uniform3fv(shader.uniform("cameraTranslation"), this.camera.translation._);
         gl.uniform2f(shader.uniform("mouse"), this.input.x, this.input.y);
-        
+        gl.uniform1i(shader.uniform("frameCounter"), ++this.frameCounter);
         gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.camera.rotation.transpose()._);
         
         // Sample the data from VBO on the GPU, not CPU.
