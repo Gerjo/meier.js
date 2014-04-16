@@ -144,7 +144,7 @@ define(function(require) {
     
     // Depricated call. Use "setHighFps" instead.
     Game.prototype.setFps = function(fps) {
-        return this.setHighFps(setFps);
+        return this.setHighFps(fps);
     };
     
     Game.prototype.setHighFps = function(fps) {
