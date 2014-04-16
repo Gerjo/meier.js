@@ -13,6 +13,7 @@ uniform vec2 sceneTextureSize;      // Dimensions in scene texture.
 uniform vec2 sceneTextureUnit;      // Scale pixel positions to UV scale.
 uniform int numObjects;             // Amount of objects in scene texture.
 uniform int frameCounter;           // Frame counter.
+uniform int interlacing;            // Interlacing constant
 
 // Received from fragment shader:
 varying vec2 inPosition;
@@ -57,11 +58,9 @@ bool canSeePoint(in vec3 point, in vec3 where) {
 
 /// Shader entry point
 void main(void) {
-    
-    const int jump = 10;
-        
-    if(mod(int((inPosition.x + 1.0) * 0.5 * windowSize.x), jump) != mod(frameCounter, jump)) {
-        if(mod(int((inPosition.y + 1.0) * 0.5 * windowSize.y), jump) != mod(frameCounter, jump)) {
+            
+    if(mod(int((inPosition.x + 1.0) * 0.5 * windowSize.x), interlacing) != mod(frameCounter, interlacing)) {
+        if(mod(int((inPosition.y + 1.0) * 0.5 * windowSize.y), interlacing) != mod(frameCounter, interlacing)) {
             discard;
         }
         // Possibly a hack. I assume the previous frame is still on the buffer.

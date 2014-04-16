@@ -35,6 +35,7 @@ define(function(require){
         this.sceneTexture = null;
         this.scene        = require("./Scene");
         this.frameCounter = 0;
+        this.interlacing  = 6; // Interlacing constant
         this.viewport     = new V2(this.width, this.height);
         this.add(this.camera = new Camera());
 
@@ -187,10 +188,16 @@ define(function(require){
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
         gl.disableVertexAttribArray(shader.attribute("attribPosition"));
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        
+        
+        gl.flush();
     }
     
     /// Run the raytracer program
     Raytracer.prototype.runRaytracer = function(renderer2d) {
+        
+        this.log("Interlacing", "level " + this.interlacing);
+        
         // Enable program and retrieve a shorthand varible.
         var shader = this.tracerProgram.use();
         
@@ -204,6 +211,7 @@ define(function(require){
         gl.uniform3fv(shader.uniform("cameraTranslation"), this.camera.translation._);
         gl.uniform2f(shader.uniform("mouse"), this.input.x, this.input.y);
         gl.uniform1i(shader.uniform("frameCounter"), ++this.frameCounter);
+        gl.uniform1i(shader.uniform("interlacing"), this.interlacing);
         gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.camera.rotation.transpose()._);
         
         // Sample the data from VBO on the GPU, not CPU.
