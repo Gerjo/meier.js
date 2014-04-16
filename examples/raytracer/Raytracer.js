@@ -35,7 +35,6 @@ define(function(require){
         this.sceneTexture = null;
         this.scene        = require("./Scene");
         this.frameCounter = 0;
-        
         this.add(this.camera = new Camera());
 
         
@@ -63,8 +62,6 @@ define(function(require){
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.BLEND);
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clearColor(0.0, 0.0, 0.5, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         // Raytracer program
         this.tracerProgram = new Shader(require("./shaders/raytracer.vsh"), require("./shaders/raytracer.fsh"));
@@ -132,10 +129,22 @@ define(function(require){
         gl.uniform2f(this.tracerProgram.uniform("sceneTextureUnit"), 1.0 / size.x, 1.0 / size.y);
     };
     
-    
+    /// Draw anything that requires drawing.
     Raytracer.prototype.draw = function(renderer2d) {        
         Game.prototype.draw.call(this, renderer2d);
         
+        // Clean buffers.
+        gl.clearColor(0.0, 0.0, 0.5, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        this.runRaytracer();
+        
+        // Force execution of gl calls. (note sure if required?)
+        gl.flush();
+    }
+    
+    /// Run the raytracer program
+    Raytracer.prototype.runRaytracer = function(renderer2d) {
         // Enable program and retrieve a shorthand varible.
         var shader = this.tracerProgram.use();
         
@@ -173,10 +182,7 @@ define(function(require){
         // Remove from global state
         gl.disableVertexAttribArray(shader.attribute("attribPosition"));
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        
-        // Force execution of gl calls. (note sure if required?)
-        gl.flush();
-   }
+    };
 
     return Raytracer;
 });
