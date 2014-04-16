@@ -12,17 +12,17 @@ var gl = null;
 /// raytracer. (major bad idea right there)
 ///
 define(function(require){
-    
-    var Shader = require("meier/webgl/Shader");
-    var V2     = require("meier/math/Vec")(2);
-    var V3     = require("meier/math/Vec")(3);
-    var Camera = require("./Camera");
-    var Tools  = require("./Tools");
-    
-    var M     = require("meier/math/Math");
     var Game  = require("meier/engine/Game");
     var Input = require("meier/engine/Input");
     var Keys  = require("meier/engine/Key");
+    var Shader = require("meier/webgl/Shader");
+    var V2     = require("meier/math/Vec")(2);
+    var V3     = require("meier/math/Vec")(3);
+
+    var Camera = require("./Camera");
+    var Tools  = require("./Tools");
+    
+    //var M     = require("meier/math/Math");
     
     Raytracer.prototype = new Game();
     function Raytracer(container) {  
