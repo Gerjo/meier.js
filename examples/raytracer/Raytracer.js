@@ -173,22 +173,8 @@ define(function(require){
         this.runRaytracer();        
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         
-        var shader = this.imageProgram.use();
-        
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this._interlacingTexture);
-        gl.uniform1i(shader.uniform("sampler"), 0);
-        
-        
-        // Sample the data from VBO on the GPU, not CPU.
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
-        gl.vertexAttribPointer(shader.attribute("attribPosition"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(shader.attribute("attribPosition"));
-        this.imageProgram.validate();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
-        gl.disableVertexAttribArray(shader.attribute("attribPosition"));
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        
+  
+        this.renderTexture(this._interlacingTexture);
         
         gl.flush();
     }
@@ -227,6 +213,26 @@ define(function(require){
         // Remove from global state
         gl.disableVertexAttribArray(shader.attribute("attribPosition"));
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    
+    /// Generic program to draw any given texture fullscreen
+    Raytracer.prototype.renderTexture = function(texture) {
+        var shader = this.imageProgram.use();
+        
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(shader.uniform("sampler"), 0);
+        
+        
+        // Sample the data from VBO on the GPU, not CPU.
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
+        gl.vertexAttribPointer(shader.attribute("attribPosition"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader.attribute("attribPosition"));
+        this.imageProgram.validate();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
+        gl.disableVertexAttribArray(shader.attribute("attribPosition"));
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        
     };
 
     return Raytracer;
