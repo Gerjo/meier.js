@@ -101,6 +101,7 @@ define(function(require) {
     };
     
     Game.prototype.add = function(entity) {
+        
         if(entity instanceof Entity) {
             this._entities.push(entity);
             entity._onAdd(this);
