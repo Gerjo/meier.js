@@ -35,6 +35,7 @@ define(function(require){
         this.sceneTexture = null;
         this.scene        = require("./Scene");
         this.frameCounter = 0;
+        this.viewport     = new V2(this.width, this.height);
         this.add(this.camera = new Camera());
 
         
@@ -48,10 +49,10 @@ define(function(require){
         gl.viewportHeight = this.height;
         
         // Center GL view on screen.
-        this._canvas.width            = gl.viewportWidth;
-        this._canvas.height           = gl.viewportHeight;
-        this._canvas.style.marginLeft = "-" + (gl.viewportWidth * 0.5) + "px";
-        this._canvas.style.marginTop  = "-" + (gl.viewportHeight * 0.5) + "px";
+        this._canvas.width            = this.viewport.x;
+        this._canvas.height           = this.viewport.y;
+        this._canvas.style.marginLeft = "-" + (this.viewport.x * 0.5) + "px";
+        this._canvas.style.marginTop  = "-" + (this.viewport.y * 0.5) + "px";
         this._canvas.style.top        = "50%";
         this._canvas.style.left       = "50%";
         this._canvas.style.position   = "absolute";
@@ -64,12 +65,41 @@ define(function(require){
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         
         // Raytracer program
-        this.tracerProgram = new Shader(require("./shaders/raytracer.vsh"), require("./shaders/raytracer.fsh"));
+        this.tracerProgram = new Shader("./shaders/raytracer.vsh.glsl", "./shaders/raytracer.fsh.glsl");
         
-        // GL specifics
+        // OpenGL preperations
+        this.prepareInterlacing();
         this.uploadUnitFrame();
         this.uploadScene();
     }
+    
+    Raytracer.prototype.prepareInterlacing = function() {
+        var fbo    = this._interlacingFbo = gl.createFramebuffer();
+        fbo.width  = this.viewport.x;
+        fbo.height = this.viewport.y;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+        // Prepare target texture
+        var texture = this._interlacingTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.width, fbo.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    
+        // Render buffer object, storage stuff.
+        var rbo = this._interlacingRbo = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, rbo);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, fbo.width, fbo.height);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo);
+        
+        // Unbind from global state.
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    };
     
     /// Upload a generic frame that matches the unit screen size.
     Raytracer.prototype.uploadUnitFrame = function() {
@@ -134,10 +164,14 @@ define(function(require){
         Game.prototype.draw.call(this, renderer2d);
         
         // Clean buffers.
-        gl.clearColor(0.0, 0.0, 0.5, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        //gl.clearColor(0.0, 0.0, 0.5, 1.0);
+        //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
+        //gl.bindFramebuffer(gl.FRAMEBUFFER, this._interlacingFbo);
+
         this.runRaytracer();
+        
+        //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         
         // Force execution of gl calls. (note sure if required?)
         gl.flush();

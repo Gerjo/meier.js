@@ -1,6 +1,40 @@
 define(function(require) {
     
-    function Shader(vertexSrc, fragmentSrc) {
+    function ReadFile(url) {
+    
+        var http = new XMLHttpRequest();
+        http.open('GET', url, false); // Synchronized
+        http.send(null);
+
+        if(http.status != 200) {
+            return null;
+        }
+
+        if(http.readyState === 4) {
+            return http.responseText;
+        }
+  
+        return null;
+    }
+    
+    function PreProcess(url) {
+        var source = ReadFile(url);
+        
+        if(source == null) {
+            throw new Error("Shader preprocessor error. Cannot read file: " + url);
+        }
+        
+        var regex = "";
+        
+        return source.replace(/#include \"(.+)\"/, function(wholematch, file) {
+            return PreProcess(file);
+        });
+        
+    }
+    
+    function Shader(vertexUrl, fragmentUrl) {
+        
+        
         
         // Uniform lookup table.
         this._uniforms = {};
@@ -8,21 +42,19 @@ define(function(require) {
         // Attribute lookup table.
         this._attributes = {};
 
-        // TODO: this is clearly not how things work.
-        function hereDoc(f) {
-            return f.toString().replace(/^[^\/]+\/\*!?/, '').replace(/\*\/[^\/]+$/, '');
-        }
-        
+
         // Shader program container
         var program = this._program = gl.createProgram();
      
         var shaders = [
-            { type: gl.VERTEX_SHADER,   src: hereDoc(vertexSrc),   handle: null },
-            { type: gl.FRAGMENT_SHADER, src: hereDoc(fragmentSrc), handle: null }
+            { type: gl.VERTEX_SHADER,   url: vertexUrl,   handle: null, src: null },
+            { type: gl.FRAGMENT_SHADER, url: fragmentUrl, handle: null, src: null }
         ];
      
         shaders.forEach(function(details) {
-            console.log("Attemping to compile: ", details.type);
+            console.log("Attemping to compile: ", details.url);
+            
+            details.src = PreProcess(details.url);
             
             // Create a shader handle to work with
             details.handle = gl.createShader(details.type);
