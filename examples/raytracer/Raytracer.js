@@ -66,6 +66,7 @@ define(function(require){
         
         // Raytracer program
         this.tracerProgram = new Shader("./shaders/raytracer.vsh.glsl", "./shaders/raytracer.fsh.glsl");
+        this.imageProgram  = new Shader("./shaders/image.vsh.glsl", "./shaders/image.fsh.glsl");
         
         // OpenGL preperations
         this.prepareInterlacing();
@@ -167,14 +168,25 @@ define(function(require){
         //gl.clearColor(0.0, 0.0, 0.5, 1.0);
         //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
-        //gl.bindFramebuffer(gl.FRAMEBUFFER, this._interlacingFbo);
-
-        this.runRaytracer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._interlacingFbo);
+        this.runRaytracer();        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         
-        //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        var shader = this.imageProgram.use();
         
-        // Force execution of gl calls. (note sure if required?)
-        gl.flush();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this._interlacingTexture);
+        gl.uniform1i(shader.uniform("sampler"), 0);
+        
+        
+        // Sample the data from VBO on the GPU, not CPU.
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
+        gl.vertexAttribPointer(shader.attribute("attribPosition"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader.attribute("attribPosition"));
+        this.imageProgram.validate();
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
+        gl.disableVertexAttribArray(shader.attribute("attribPosition"));
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
     
     /// Run the raytracer program
@@ -196,16 +208,7 @@ define(function(require){
         
         // Sample the data from VBO on the GPU, not CPU.
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
-        gl.vertexAttribPointer(
-            shader.attribute("attribPosition"),     // Attribute location
-            this._vboUnitFrame.itemSize,                     // Number of items
-            gl.FLOAT,                               // Numeric type
-            false,                                  // Normalize?
-            0,                                      // Stride
-            0                                       // Offset (for non VBO purposes)
-        );
-        
-        // Enable global attribute state
+        gl.vertexAttribPointer(shader.attribute("attribPosition"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(shader.attribute("attribPosition"));
         
         this.tracerProgram.validate();
