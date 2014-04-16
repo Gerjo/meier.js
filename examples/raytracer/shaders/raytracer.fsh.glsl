@@ -57,11 +57,17 @@ bool canSeePoint(in vec3 point, in vec3 where) {
 
 /// Shader entry point
 void main(void) {
-
-    //if(mod(int((inPosition.x + 1.0) * 0.5 * windowSize.x), 10) != mod(frameCounter, 10)) {
-    //    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-    //    return;
-    //}
+    
+    const int jump = 10;
+        
+    if(mod(int((inPosition.x + 1.0) * 0.5 * windowSize.x), jump) != mod(frameCounter, jump)) {
+        if(mod(int((inPosition.y + 1.0) * 0.5 * windowSize.y), jump) != mod(frameCounter, jump)) {
+            discard;
+        }
+        // Possibly a hack. I assume the previous frame is still on the buffer.
+        
+        //return;
+    }
 
     // Default pixel color
     vec4 finalColor = vec4(0.5, 0.5, 0.5, 1.0);
