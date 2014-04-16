@@ -18,11 +18,10 @@ define(function(require){
     var V3     = require("meier/math/Vec")(3);
     var M44    = require("meier/math/Mat")(4, 4);
     var Camera = require("./Camera");
-    
+    var Tools  = require("./Tools");
     var Primitives = require("./Primitives");
     
-    var M    = require("meier/math/Math");
-    
+    var M     = require("meier/math/Math");
     var Game  = require("meier/engine/Game");
     var Input = require("meier/engine/Input");
     var Keys  = require("meier/engine/Key");
@@ -70,7 +69,7 @@ define(function(require){
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         // Raytracer shader, the only shader for now.
-        var shader = this.shader = new Shader(
+        var shader = this.tracerProgram = new Shader(
             require("./shaders/raytracer.vsh"),
             require("./shaders/raytracer.fsh")
         );
@@ -83,15 +82,15 @@ define(function(require){
         ]);
 
         // Vertex buffer object to contain the unit rectangle coordinates
-        this._vbo = gl.createBuffer();
+        this._vboUnitFrame = gl.createBuffer();
         
         // Bind global state and upload vertices to the GPU
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         
-        this._vbo.itemSize = 2;        // Stride: two floats
-        this._vbo.numItems = 4;        // Four in total, a pair at each corner.
-        this._vbo.length   = this._vbo.itemSize * this._vbo.numItems;
+        this._vboUnitFrame.itemSize = 2;        // Stride: two floats
+        this._vboUnitFrame.numItems = 4;        // Four in total, a pair at each corner.
+        this._vboUnitFrame.length   = this._vboUnitFrame.itemSize * this._vboUnitFrame.numItems;
         
         
         // Detach VBO from global state.
@@ -110,17 +109,10 @@ define(function(require){
         var scene  = require("./Scene"); //.slice(0, 3);
         var texmax = gl.getParameter(gl.MAX_TEXTURE_SIZE);
         var pixels = scene.length / 3; // Scale to float RGB triplets
+        var size   = Tools.BalanceDimensions(pixels);
         
         
-        var primes = M.PrimeFactors(pixels);
-        
-        var size = new V2(1, 1);
-        for(var i = 0; primes.length > 0; i = 1 - i) {
-            size._[i] *= primes.pop();
-        }
-        
-        console.log("Scene [" + size.x + "x" + size.y + " = " + pixels + "] pixels. Maximum: " + texmax + "x" + texmax + ".");
-        console.log(scene);
+        console.log("Uploading scene [" + size.x + "x" + size.y + " = " + pixels + "] pixels. Maximum: " + texmax + "x" + texmax + ".");
         
         ASSERT(size.x < texmax && size.y < texmax);
         ASSERT(size.x * size.y == pixels);
@@ -135,9 +127,10 @@ define(function(require){
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, size.x, size.y, 0, gl.RGB, gl.FLOAT, scene);
         gl.bindTexture(gl.TEXTURE_2D, null);
         
-        this.shader.use();
-        gl.uniform2f(this.shader.uniform("sceneTextureSize"), size.x, size.y);
-        gl.uniform2f(this.shader.uniform("sceneTextureUnit"), 1.0 / size.x, 1.0 / size.y);
+        // Update shader uniforms
+        this.tracerProgram.use();
+        gl.uniform2f(this.tracerProgram.uniform("sceneTextureSize"), size.x, size.y);
+        gl.uniform2f(this.tracerProgram.uniform("sceneTextureUnit"), 1.0 / size.x, 1.0 / size.y);
     };
     
     
@@ -145,7 +138,7 @@ define(function(require){
         Game.prototype.draw.call(this, renderer2d);
         
         
-        var shader = this.shader.use();
+        var shader = this.tracerProgram.use();
         
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
@@ -161,10 +154,10 @@ define(function(require){
         gl.uniformMatrix4fv(shader.uniform("cameraRotation"), false, this.camera.rotation.transpose()._);
         
         // Sample the data from VBO on the GPU, not CPU.
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
         gl.vertexAttribPointer(
             shader.attribute("attribPosition"),     // Attribute location
-            this._vbo.itemSize,                     // Number of items
+            this._vboUnitFrame.itemSize,                     // Number of items
             gl.FLOAT,                               // Numeric type
             false,                                  // Normalize?
             0,                                      // Stride
@@ -174,10 +167,10 @@ define(function(require){
         // Enable global attribute state
         gl.enableVertexAttribArray(shader.attribute("attribPosition"));
         
-        this.shader.validate();
+        this.tracerProgram.validate();
         
         // Draw
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vbo.numItems);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
         
         // Remove from global state
         gl.disableVertexAttribArray(shader.attribute("attribPosition"));
@@ -185,9 +178,6 @@ define(function(require){
         
         // Force execution of gl calls. (note sure if required?)
         gl.flush();
-        
-        //console.log("draws");  
-        
    }
 
     return Raytracer;
