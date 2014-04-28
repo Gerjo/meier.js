@@ -137,7 +137,8 @@ void main(void) {
     }
 
     // Hardcoded light source
-    vec3 light = vec3(-2.22, -2.444 + sin(float(frameCounter) * 0.05) * 0.5, 0.75);
+    //vec3 light = vec3(-2.22, -2.444 + sin(float(frameCounter) * 0.05) * 0.5, 0.75);
+    vec3 light = vec3(-2.22, -2.444, 0.75);
     
     vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 

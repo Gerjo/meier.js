@@ -91,3 +91,44 @@ vec3 barycentric3(in vec3 f, in vec3 v1, in vec3 v2, in vec3 v3, in vec3 uv1, in
 
     return uv;
 }
+
+// http://stackoverflow.com/questions/17981163/webgl-read-pixels-from-floating-point-render-target
+float shift_right (in float v, in float amt) { 
+    v = floor(v) + 0.5; 
+    return floor(v / exp2(amt)); 
+}
+float shift_left (in float v, in float amt) { 
+    return floor(v * exp2(amt) + 0.5); 
+}
+float mask_last (in float v, in float bits) { 
+    return mod(v, shift_left(1.0, bits)); 
+}
+float extract_bits (in float num, in float from, in float to) { 
+    from = floor(from + 0.5); to = floor(to + 0.5); 
+    return mask_last(shift_right(num, from), to - from); 
+}
+vec4 encode_float (in float val) { 
+    if (val == 0.0) {
+        return vec4(0, 0, 0, 0); 
+    }
+    
+    float sign = val > 0.0 ? 0.0 : 1.0; 
+    val = abs(val); 
+    float exponent = floor(log2(val)); 
+    float biased_exponent = exponent + 127.0; 
+    float fraction = ((val / exp2(exponent)) - 1.0) * 8388608.0; 
+    float t = biased_exponent / 2.0; 
+    float last_bit_of_biased_exponent = fract(t) * 2.0; 
+    float remaining_bits_of_biased_exponent = floor(t); 
+    float byte4 = extract_bits(fraction, 0.0, 8.0) / 255.0; 
+    float byte3 = extract_bits(fraction, 8.0, 16.0) / 255.0; 
+    float byte2 = (last_bit_of_biased_exponent * 128.0 + extract_bits(fraction, 16.0, 23.0)) / 255.0; 
+    float byte1 = (sign * 128.0 + remaining_bits_of_biased_exponent) / 255.0; 
+    return vec4(byte4, byte3, byte2, byte1); 
+}
+
+// NB: not tested
+float decode_float(in vec4 value) {
+   const vec4 bitSh = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+   return(dot(value, bitSh));
+}

@@ -22,6 +22,10 @@ define(function(require){
     var Camera = require("./Camera");
     var Tools  = require("./Tools");
     
+    var PhotonBase  = require("./PhotonBase");
+    var Light       = require("./Light");
+    
+    
     //var M     = require("meier/math/Math");
     
     Raytracer.prototype = new Game();
@@ -45,10 +49,6 @@ define(function(require){
         // Intentionally setting a global state.
         gl = this._canvas.getContext("experimental-webgl");
         
-        // Match the window size.
-        gl.viewportWidth  = this.width;
-        gl.viewportHeight = this.height;
-        
         // Center GL view on screen.
         this._canvas.width            = this.viewport.x;
         this._canvas.height           = this.viewport.y;
@@ -63,7 +63,6 @@ define(function(require){
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.BLEND);
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         
         // Raytracer program
         this.tracerProgram = new Shader("./shaders/raytracer.vsh.glsl", "./shaders/raytracer.fsh.glsl");
@@ -73,12 +72,23 @@ define(function(require){
         this.prepareInterlacing();
         this.uploadUnitFrame();
         this.uploadScene();
+        
+        var lights = [
+        new Light(new V3(2.22, -2.444, 0.75)),
+        // new Light(),
+        // new Light(),
+        // new Light(),
+        ];
+        
+        this.photonBase = new PhotonBase(this);
+        
+        this.photonBase.prepare(lights);
+        
+        this.photonBase.iterate();
     }
     
     Raytracer.prototype.prepareInterlacing = function() {
-        var fbo    = this._interlacingFbo = gl.createFramebuffer();
-        fbo.width  = this.viewport.x;
-        fbo.height = this.viewport.y;
+        var fbo = this._interlacingFbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
         // Prepare target texture
@@ -88,17 +98,17 @@ define(function(require){
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.width, fbo.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.viewport.x, this.viewport.y, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
     
         // Render buffer object, storage stuff.
         var rbo = this._interlacingRbo = gl.createRenderbuffer();
         gl.bindRenderbuffer(gl.RENDERBUFFER, rbo);
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, fbo.width, fbo.height);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.viewport.x, this.viewport.y);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo);
         
         // Unbind from global state.
-        gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     };
@@ -165,6 +175,9 @@ define(function(require){
     Raytracer.prototype.draw = function(renderer2d) {        
         Game.prototype.draw.call(this, renderer2d);
         
+        
+        return;
+        
         // Clean buffers.
         //gl.clearColor(0.0, 0.0, 0.5, 1.0);
         //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -186,6 +199,8 @@ define(function(require){
         
         // Enable program and retrieve a shorthand varible.
         var shader = this.tracerProgram.use();
+
+        gl.viewport(0, 0, this.viewport.x, this.viewport.y);
         
         // Enable scene data texture. (Always on sampler slot #0)
         gl.activeTexture(gl.TEXTURE0);

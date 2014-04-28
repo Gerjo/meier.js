@@ -74,15 +74,17 @@ define(function(require) {
      
         gl.linkProgram(program);
         
+
+        
+        if( ! gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.log("Could not initialize shaders.");
+        }   
+        
         // Detach the shaders. OpenGL does internal reference counting and won't 
         // dispose the shaders until the program is deleted, too.
         shaders.forEach(function(details) {
             gl.deleteShader(details.handle);
         });
-        
-        if( ! gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.log("Could not initialize shaders");
-        }   
     }
     
     Shader.prototype.validate = function() {
