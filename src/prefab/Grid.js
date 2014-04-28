@@ -373,9 +373,10 @@ define(function(require) {
         
         
         if(this._numOptions > 0) {
-            var local   = this.toLocal(this.input); 
-                          
-            var i = 0;                      
+            var local = this.toLocal(this.input); 
+            var hw    = 30 * 0.5;
+            var i     = 0;     
+                             
             for(var k in this._options) {
                 if(this._options.hasOwnProperty(k)) {
                     ++i;
@@ -383,8 +384,16 @@ define(function(require) {
                     var rect  = this._createOptionRectangle(i);
                     var color = this._options[k];
                     
+                    // *sigh*
+                    var fixme = new Rectangle(
+                        rect.min.x - hw,
+                        rect.min.y - hw,
+                        rect.max.x - hw,
+                        rect.max.y - hw
+                    );
+                    
                     r.begin();
-                    r.rectangle(rect);
+                    r.rectangle(fixme);
                     
                     if(this._isEditable && PinRect(local, rect) || k == this._selected) {
                         r.fill(Color.Alpha(color, 0.7));

@@ -18,7 +18,11 @@ define(function(require){
         this.logger.right().bottom();
         
         // We'll clear the canvas ourselves
-        this.setAutoClear(false).setFps(5);
+        this.setAutoClear(false);
+
+        
+        this.setLowFps(10);
+        this.setLowFps(1);
         
         // Function that shall be used
         this.classifier = null;

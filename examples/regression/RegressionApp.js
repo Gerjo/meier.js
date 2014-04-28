@@ -19,6 +19,7 @@ define(function(require) {
         
         this.logger.right().bottom();
         
+        
         // Will eventually hold the polynomial function of x:
         this.function = null;
         
