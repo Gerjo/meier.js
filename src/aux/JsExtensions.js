@@ -43,8 +43,7 @@ function ASSERT(statement) {
                 var args       = line.split(":")
                 var lineNumber = args[3];
                 var charNumber = args[4];
-        
-                
+                        
         
                 // Trim trailing char/line numbers
                 var regex = /:(\d)+$/;       
@@ -61,8 +60,10 @@ function ASSERT(statement) {
                 if(http.readyState === 4) {
                     var split = http.responseText.split("\n");
                 
-                    // Hopefully print the line containing the assertion
-                    console.log(split[lineNumber-1].substring(charNumber-1), "at", line);
+                    // NB: charNumber seems incorrect.
+                
+                    console.log("Assertion: " + line);
+                    throw new Error(split[lineNumber-1].trim(" "));
                 }
              //} catch(e) {
                 // The above code failed, quite possibly due to a poor implementation.
