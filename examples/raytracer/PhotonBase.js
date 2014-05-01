@@ -17,7 +17,7 @@ define(function(require) {
     // Not so portable? (http://jbuckley.ca/~jon/WebGL/extensions/proposals/WEBGL_fbo_color_attachments/)    
     function PhotonBase(game, photonCount) {
         this.game         = game || null;
-        this.photonCount  = photonCount || (4 * 4 * 4 * 4 * 4);//(512 * 512);
+        this.photonCount  = photonCount || (4 * 4 * 4);//(512 * 512);
         this.outTextures  = [];
         this.inTextures   = [];
         this.photons      = [];
@@ -229,6 +229,10 @@ define(function(require) {
     
     PhotonBase.prototype.toArray = function() {
         return this.grid.toArray();
+    };
+    
+    PhotonBase.prototype.toGrid = function() {
+        return this.grid.toGrid();
     };
     
     PhotonBase.prototype.exportToGrid = function(dims) {

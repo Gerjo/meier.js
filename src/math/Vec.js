@@ -224,6 +224,29 @@ define(function(require) {
             return this;
         }; 
         
+        V.prototype.volume = function() {
+            var volume = this._[0];
+            
+            for(var i = 1; i < this.numrows; ++i) {
+                volume *= this._[i];
+            }
+            
+            return volume;
+        };
+        
+        // Synonym for 2D spaces.
+        V.prototype.area = function() {
+            return this.volume();
+        };
+        
+        
+        V.prototype.divide = function(v) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] /= v._[i];
+            }             
+            return this;
+        };
+        
         V.prototype.scale = function(v) {
             for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
                 this._[i] *= v._[i];

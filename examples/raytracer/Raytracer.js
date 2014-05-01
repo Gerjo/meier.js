@@ -42,7 +42,7 @@ define(function(require){
         this.sceneDimensions  = null;
         this.scene            = require("./Scene");
         this.frameCounter     = 0;
-        this.interlacing      = 16; // Interlacing constant
+        this.interlacing      = 6; // Interlacing constant
         this.viewport         = new V2(this.width, this.height);
         this.add(this.camera  = new Camera());
 
@@ -88,6 +88,11 @@ define(function(require){
         this.photonBase.prepare(lights, this.sceneTexture, this.sceneDimensions);
         
         this.photonBase.iterate();
+        
+        var grid = this.photonBase.toGrid();
+        
+        console.log(grid);
+        
         
         var floats = this.photonBase.toArray();
         var texture = this.photonTexture = gl.createTexture();

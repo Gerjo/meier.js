@@ -32,9 +32,9 @@ define(function(require) {
         
     }
     
-    function Shader(vertexUrl, fragmentUrl) {
+    function Shader(vertexUrl, fragmentUrl, wildcards) {
         
-        
+        this._wildcards = wildcards || {};
         
         // Uniform lookup table.
         this._uniforms = {};
@@ -54,7 +54,14 @@ define(function(require) {
         shaders.forEach(function(details) {
             console.log("Attemping to compile: ", details.url);
             
+            // Preprocessing all #include directives.
             details.src = PreProcess(details.url);
+            
+            for(var k in wildcards) {
+                if(wildcards.hasOwnProperty(k)) {
+                    details.src = details.src.replace(k, wildcards[k]);
+                }
+            }
             
             // Create a shader handle to work with
             details.handle = gl.createShader(details.type);
@@ -96,6 +103,10 @@ define(function(require) {
             gl.deleteShader(details.handle);
         });
     }
+    
+    Shader.prototype.compile = function(vertex, fragment) {
+        
+    };
     
     Shader.prototype.validate = function() {
         gl.validateProgram(this._program);
