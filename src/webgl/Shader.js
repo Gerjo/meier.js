@@ -26,7 +26,7 @@ define(function(require) {
         
         var regex = "";
         
-        return source.replace(/#include \"(.+)\"/, function(wholematch, file) {
+        return source.replace(/#include \"(.+)\"/g, function(wholematch, file) {
             return PreProcess(file);
         });
         
@@ -65,7 +65,17 @@ define(function(require) {
             if( ! gl.getShaderParameter(details.handle, gl.COMPILE_STATUS)) {
                 var error = gl.getShaderInfoLog(details.handle);
                 
-                console.log(error);
+                details.src.split("\n").forEach(function(line, i) {
+                    console.log(i + " " + line);
+                });
+                
+                //console.log(details.src);
+                
+                error.split("\n").forEach(function(line) {
+                    console.log(" " + line);
+                });
+                
+                //console.log(error);
             }
             
             // Attach to the program

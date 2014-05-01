@@ -3,6 +3,16 @@ struct Ray {
     vec3 direction;
 };
 
+struct Photon {
+    vec3 direction;
+    vec3 position;
+    vec2 meta;
+};
+
+float lengthSq(in vec3 a) {
+    return dot(a, a);
+}
+
 /// Integer modulo.
 int mod(in int i, in int n) {
     return i - i / n * n;
@@ -32,7 +42,7 @@ bool rayIntersetsTriangle(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out ve
 	float a = dot(e1, h);
 
 	if (a > -0.00001 && a < 0.00001) {
-		return true;
+		return false;
     }
 
 	float f = 1.0 / a;
@@ -40,14 +50,14 @@ bool rayIntersetsTriangle(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out ve
 	float u = f * dot(s, h);
 
 	if (u < 0.0 || u > 1.0) {
-		return true;
+		return false;
     }
 
     vec3 q  = cross(s, e1);
 	float v = f * dot(ray.direction, q);
 
 	if (v < 0.0 || u + v > 1.0) {
-		return true;
+		return false;
     }
 
 	// at this stage we can compute t to find out where
@@ -59,11 +69,11 @@ bool rayIntersetsTriangle(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out ve
 	if (depth > 0.00001) {// ray intersection
         where = ray.place + depth * ray.direction;
 
-        return false;
+        return true;
     } else {
         // this means that there is a line intersection
 		// but not a ray intersection
-		return true;
+		return false;
     }
 
 }

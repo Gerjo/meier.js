@@ -36,12 +36,15 @@ define(function(require){
         this.setLowFps(1);
         this.logger.setColor("red");
         
-        this.sceneTexture = null;
-        this.scene        = require("./Scene");
-        this.frameCounter = 0;
-        this.interlacing  = 6; // Interlacing constant
-        this.viewport     = new V2(this.width, this.height);
-        this.add(this.camera = new Camera());
+        this.photonTexture    = null;
+        this.photonDimensions = null;
+        this.sceneTexture     = null;
+        this.sceneDimensions  = null;
+        this.scene            = require("./Scene");
+        this.frameCounter     = 0;
+        this.interlacing      = 16; // Interlacing constant
+        this.viewport         = new V2(this.width, this.height);
+        this.add(this.camera  = new Camera());
 
         
         // Add a second canvas, only one context can be created per canvas.
@@ -82,9 +85,20 @@ define(function(require){
         
         this.photonBase = new PhotonBase(this);
         
-        this.photonBase.prepare(lights);
+        this.photonBase.prepare(lights, this.sceneTexture, this.sceneDimensions);
         
         this.photonBase.iterate();
+        
+        var floats = this.photonBase.toArray();
+        var texture = this.photonTexture = gl.createTexture();
+        var dims = this.photonDimensions = new V2(floats.length / 3, 1);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); 
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, dims.x, dims.y, 0, gl.RGB, gl.FLOAT, floats);
+        gl.bindTexture(gl.TEXTURE_2D, null);
     }
     
     Raytracer.prototype.prepareInterlacing = function() {
@@ -155,6 +169,8 @@ define(function(require){
         ASSERT(size.x < texmax && size.y < texmax);
         ASSERT(size.x * size.y == pixels);
         
+        this.sceneDimensions = size;
+        
         // Upload to the GPU.
         var texture = this.sceneTexture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -176,7 +192,7 @@ define(function(require){
         Game.prototype.draw.call(this, renderer2d);
         
         
-        return;
+        //return;
         
         // Clean buffers.
         //gl.clearColor(0.0, 0.0, 0.5, 1.0);
@@ -206,6 +222,14 @@ define(function(require){
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
         gl.uniform1i(shader.uniform("sceneTexture"), 0);
+        
+        
+        // Enable photon data texture. (Always on sampler slot #1)
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.photonTexture);
+        gl.uniform1i(shader.uniform("photonTexture"), 1);
+        gl.uniform2f(shader.uniform("photonTextureSize"), this.photonDimensions.x, this.photonDimensions.y);
+        gl.uniform2f(shader.uniform("photonTextureUnit"), 1.0/this.photonDimensions.x, 1.0/this.photonDimensions.y);
         
         // Upload uniforms
         gl.uniform2f(shader.uniform("windowSize"), this.width, this.height);

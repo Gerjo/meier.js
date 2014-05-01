@@ -4,19 +4,20 @@ define(function(require) {
     var V2     = require("meier/math/Vec")(2);
     var V3     = require("meier/math/Vec")(3);
     var Tools  = require("./Tools");
+    var Grid   = require("./Grid");
     var Random = require("meier/math/Random");
     
     /// Schematic photon representation.
-    var Photon = function() {
-        this.position  = new V3(0, 0, 0);
-        this.direction = new V3(0, 0, 0);
-        this.meta      = new V3(0, 0, 0);
+    var Photon = function(d, p, m) {
+        this.direction = d || new V3(0, 0, 0);
+        this.position  = p || new V3(0, 0, 0);
+        this.meta      = m || new V3(0, 0, 0);
     }
     
     // Not so portable? (http://jbuckley.ca/~jon/WebGL/extensions/proposals/WEBGL_fbo_color_attachments/)    
     function PhotonBase(game, photonCount) {
         this.game         = game || null;
-        this.photonCount  = photonCount || (512 * 512);
+        this.photonCount  = photonCount || (4 * 4 * 4 * 4 * 4);//(512 * 512);
         this.outTextures  = [];
         this.inTextures   = [];
         this.photons      = [];
@@ -33,11 +34,20 @@ define(function(require) {
         this._prepareBuffers();
         this._uploadUnitFrame();
         
+        this._sceneTexture = null;
+        this._sceneDimensions = null;
+        
         this._shader = new Shader("shaders/photon.vsh.glsl", "shaders/photon.fsh.glsl");
 
     }
     
-    PhotonBase.prototype.prepare = function(lights) {
+    PhotonBase.prototype.prepare = function(lights, sceneTexture, sceneDimensions) {
+        
+        // Texture containing the scene.
+        this._sceneTexture    = sceneTexture;
+        this._sceneDimensions = sceneDimensions;
+        
+        this.grid = new Grid();
         
         // Accumulate total energy emitted by light sources
         var totalEngergy = lights.reduce(function(p, l) {return p + l.energy;}, 0);
@@ -59,7 +69,7 @@ define(function(require) {
             positions[i + 2] = lights[l].position.z;
             
             // Random uniform distributed direction
-            var direction = Random.Vector();
+            var direction = new V3(Random(-1, 1, true), Random(-1, 1, true), Random(-1, 1, true)).normalize();
             
             directions[i + 0] = direction.x;
             directions[i + 1] = direction.y;
@@ -84,7 +94,12 @@ define(function(require) {
    
         // Unbind any global state.
         gl.bindTexture(gl.TEXTURE_2D, null);        
+        
+        console.log(directions);
+        console.log(positions);
+        console.log(metas);
     };
+    
     
     PhotonBase.prototype.iterate = function() {
         console.log("Photon iteration [" + this.width + "x" + this.height + "]...");
@@ -111,14 +126,19 @@ define(function(require) {
         
         // Enable read buffers (previous photons):
         for(var i = 0; i < 3; ++i) {
-            gl.activeTexture(gl.TEXTURE0 + i);
+            gl.activeTexture(gl.TEXTURE1 + i);
             gl.bindTexture(gl.TEXTURE_2D, this.inTextures[i]);
         }
-
-        gl.uniform1i(shader.uniform("samplerDirection"), 0);
-        gl.uniform1i(shader.uniform("samplerPosition"),  1);
-        gl.uniform1i(shader.uniform("samplerMeta"),      2);
-
+        
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this._sceneTexture);
+        
+        gl.uniform1i(shader.uniform("samplerDirection"), 1);
+        gl.uniform1i(shader.uniform("samplerPosition"),  2);
+        gl.uniform1i(shader.uniform("samplerMeta"),      3);
+        gl.uniform1i(shader.uniform("sceneTexture"),     0);
+        gl.uniform2f(shader.uniform("sceneTextureSize"), this._sceneDimensions.x, this._sceneDimensions.y);
+        gl.uniform2f(shader.uniform("sceneTextureUnit"), 1.0 / this._sceneDimensions.x, 1.0 / this._sceneDimensions.y);
         
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
         gl.vertexAttribPointer(shader.attribute("attribPosition"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
@@ -146,10 +166,23 @@ define(function(require) {
         var metaX      = this.getFloats(this.outTextures[6]);
         var metaY      = this.getFloats(this.outTextures[7]);
 
+
         for(var i = 0; i < positionX.length; ++i) {
-            console.log("Position: " + positionX[i].toFixed(6) + ", " + positionY[i].toFixed(6) + ", " + positionZ[i].toFixed(6));
+            //console.log("Position: " + positionX[i].toFixed(6) + ", " + positionY[i].toFixed(6) + ", " + positionZ[i].toFixed(6));
     
-            if(i > 16) break;
+            var photon = new Photon(
+                    new V3(directionX[i], directionY[i], directionZ[i]), 
+                    new V3(positionX[i], positionY[i], positionZ[i]), 
+                    new V2(metaX[i], metaY[i], 0)
+            );
+            
+            // Alive test
+            if(parseInt(photon.meta.x) == 1) {
+                this.grid.insert(photon);    
+                
+                // Assume positive flux
+                ASSERT(photon.meta.y >= 0);
+            }
         }
 ////////////////////////////////////////////////
         
@@ -192,6 +225,10 @@ define(function(require) {
         
         // Performs some sort of JavaScript reinterpret_cast<float>(bytes)
         return new Float32Array(data.buffer);
+    };
+    
+    PhotonBase.prototype.toArray = function() {
+        return this.grid.toArray();
     };
     
     PhotonBase.prototype.exportToGrid = function(dims) {

@@ -1,6 +1,7 @@
 precision highp float;
 
 #include "shaders/common.glsl"
+#include "shaders/settings.glsl"
 
 
 // Per program uniforms:
@@ -14,15 +15,39 @@ uniform vec2 sceneTextureUnit;      // Scale pixel positions to UV scale.
 uniform int numObjects;             // Amount of objects in scene texture.
 uniform int frameCounter;           // Frame counter.
 uniform int interlacing;            // Interlacing constant
+uniform sampler2D photonTexture;    // Texture containing the photon data.
+uniform vec2 photonTextureSize;      // Dimensions in scene texture.
+uniform vec2 photonTextureUnit;      // Scale pixel positions to UV scale.
 
 // Received from fragment shader:
 varying vec2 inPosition;
 
-// One stride to rule them all.
-const int objectStride = 10;
-const int sceneTextureCount = 380;
 
-
+Photon nearestPhoton(in vec3 where) {
+    
+    
+    float nearestDistance = 9999999.0;
+    int nearestIndex      = -1;
+    
+    for(int i = 0; i < photonTextureCount; i += photonStride) {
+        vec3 position = texture2D(photonTexture, indexWrap(i + 1, photonTextureSize.x) * photonTextureUnit).xyz;
+        
+        float d = lengthSq(position - where);
+        
+        if(d < nearestDistance) {
+            nearestDistance = d;
+            nearestIndex    = i;
+        }
+    }
+    
+    int i = nearestIndex;
+    Photon photon;
+    photon.direction = texture2D(photonTexture, indexWrap(i + 0, photonTextureSize.x) * photonTextureUnit).xyz;
+    photon.position  = texture2D(photonTexture, indexWrap(i + 1, photonTextureSize.x) * photonTextureUnit).xyz;
+    photon.meta      = texture2D(photonTexture, indexWrap(i + 2, photonTextureSize.x) * photonTextureUnit).xy;
+    
+    return photon;
+}
     
 bool canSeePoint(in vec3 point, in vec3 where) {
     
@@ -45,7 +70,7 @@ bool canSeePoint(in vec3 point, in vec3 where) {
             float depth;
 
             // Ray intersection trial
-            if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+            if( rayIntersetsTriangle(ray, a, b, c, where, depth)) {
                 if( depth >= -0.0000001 && depth <= 1.0000001 ) {
                     hasCollision = true;
                 }
@@ -121,7 +146,7 @@ void main(void) {
             float depth;
  
             // Ray intersection trial
-            if( ! rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+            if( rayIntersetsTriangle(ray, a, b, c, where, depth)) {
 
                 // Only keep the nearest object
                 if(nearestDepth > depth) {
@@ -136,8 +161,6 @@ void main(void) {
         }
     }
 
-    // Hardcoded light source
-    //vec3 light = vec3(-2.22, -2.444 + sin(float(frameCounter) * 0.05) * 0.5, 0.75);
     vec3 light = vec3(-2.22, -2.444, 0.75);
     
     vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);
@@ -152,9 +175,7 @@ void main(void) {
         vec3 n1 = texture2D(sceneTexture, indexWrap(i + 4, sceneTextureSize.x) * sceneTextureUnit).xyz;
         vec3 n2 = texture2D(sceneTexture, indexWrap(i + 5, sceneTextureSize.x) * sceneTextureUnit).xyz;
         vec3 n3 = texture2D(sceneTexture, indexWrap(i + 6, sceneTextureSize.x) * sceneTextureUnit).xyz;
-        //vec2 u  = texture2D(sceneTexture, indexWrap(i + 7, sceneTextureSize.x) * sceneTextureUnit).xy;
-        //vec2 v  = texture2D(sceneTexture, indexWrap(i + 8, sceneTextureSize.x) * sceneTextureUnit).xy;
-        //vec2 w  = texture2D(sceneTexture, indexWrap(i + 9, sceneTextureSize.x) * sceneTextureUnit).xy;
+
 
         vec3 normal       = barycentric3(nearestPosition, a, b, c, n1, n2, n3);
         vec4 textureColor = int(m.y) != 1 ? colors[0] : colors[2];
@@ -173,15 +194,34 @@ void main(void) {
         // Light has no "alpha".
         blend.a    = 1.0;
 
-        if(!canSeePoint(light, nearestPosition)) {
+        // No light.
+        if( ! canSeePoint(light, nearestPosition)) {
             blend.r = 0.0;
             blend.g = 0.0;
             blend.b = 0.0;
         }
+        
+        Photon photon = nearestPhoton(nearestPosition);
 
         blend.r = max(0.17, blend.r);
         blend.g = max(0.17, blend.g);
         blend.b = max(0.17, blend.b);
+
+
+        float d = lengthSq(photon.position - nearestPosition);
+        
+        if(d < 0.1) {
+            blend.r += 0.4;
+            blend.g += 0.4;
+            blend.b += 0.4;
+        } else if(d < 0.12) {
+            blend.r = 0.1;
+            blend.g = 0.1;
+            blend.b = 0.1;
+        } else {
+            // too far
+        }
+
     
         // Mix light and the texture color
         finalColor = textureColor * blend;
