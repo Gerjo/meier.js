@@ -31,13 +31,12 @@ define(function(require){
     Raytracer.prototype = new Game();
     function Raytracer(container) {  
         Game.call(this, container);
-    
+        
         this.setHighFps(15);
         this.setLowFps(1);
         this.logger.setColor("red");
         
         this.photonTexture    = null;
-        this.photonDimensions = null;
         this.sceneTexture     = null;
         this.sceneDimensions  = null;
         this.scene            = require("./Scene");
@@ -89,21 +88,8 @@ define(function(require){
         
         this.photonBase.iterate();
         
-        var grid = this.photonBase.toGrid();
-        
-        console.log(grid);
-        
-        
-        var floats = this.photonBase.toArray();
-        var texture = this.photonTexture = gl.createTexture();
-        var dims = this.photonDimensions = new V2(floats.length / 3, 1);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); 
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, dims.x, dims.y, 0, gl.RGB, gl.FLOAT, floats);
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        // Upload the grid texture and set the required uniform constants
+        this.photonTexture = this.photonBase.upload(this.tracerProgram);
     }
     
     Raytracer.prototype.prepareInterlacing = function() {
@@ -233,8 +219,6 @@ define(function(require){
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.photonTexture);
         gl.uniform1i(shader.uniform("photonTexture"), 1);
-        gl.uniform2f(shader.uniform("photonTextureSize"), this.photonDimensions.x, this.photonDimensions.y);
-        gl.uniform2f(shader.uniform("photonTextureUnit"), 1.0/this.photonDimensions.x, 1.0/this.photonDimensions.y);
         
         // Upload uniforms
         gl.uniform2f(shader.uniform("windowSize"), this.width, this.height);

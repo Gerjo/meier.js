@@ -16,39 +16,116 @@ uniform int numObjects;             // Amount of objects in scene texture.
 uniform int frameCounter;           // Frame counter.
 uniform int interlacing;            // Interlacing constant
 uniform sampler2D photonTexture;    // Texture containing the photon data.
+
 uniform vec2 photonTextureSize;      // Dimensions in scene texture.
 uniform vec2 photonTextureUnit;      // Scale pixel positions to UV scale.
+
+// Grid related properties:
+uniform ivec3 gridResolution;
+uniform vec3 gridInterval;
+uniform vec3 gridSize;
+uniform vec3 gridMin;
+uniform vec3 gridMax;
+
 
 // Received from fragment shader:
 varying vec2 inPosition;
 
+Photon nearestPhoton(in vec3 where) {    
+    Photon photon; 
+    photon.direction = vec3(0.3, 0.3, 0.3);
+    
+    // Quantize pixel location to a grid location
+    ivec3 gridQuantize = ivec3(
+        floor((where.x - gridMin.x) / gridInterval.x),
+        floor((where.y - gridMin.y) / gridInterval.y),
+        floor((where.z - gridMin.z) / gridInterval.z)
+    );
+        
+   // gridQuantize = ivec3(0, 1, 1);
+        
+    int cellIndex = gridQuantize.z + (gridQuantize.y * gridResolution.x) + (gridQuantize.x * gridResolution.x * gridResolution.y);
+    
+    if(cellIndex == 3) {        
+        //photon.direction.r += 10.0;
+    }
+    
+    
+    vec2 texIndex = indexWrap(cellIndex, photonTextureSize.x) * photonTextureUnit;
+    
+    vec3 cell = texture2D(photonTexture, texIndex).xyz;
+    
+    int count = int(cell.x);
+    int start = int(cell.y);
+    int end   = int(cell.z);
+    
 
-Photon nearestPhoton(in vec3 where) {
-    
-    
     float nearestDistance = 9999999.0;
     int nearestIndex      = -1;
     
-    for(int i = 0; i < photonTextureCount; i += photonStride) {
-        vec3 position = texture2D(photonTexture, indexWrap(i + 1, photonTextureSize.x) * photonTextureUnit).xyz;
+    float a = length(where - vec3(gridQuantize) * gridInterval) * 0.1;
+    //photon.direction = vec3(a, a, a);
+    //photon.direction = vec3(0.2, 0.2, 0.2);
+    
+      
+    /*if(int(gridQuantize.x) == 0 && int(gridQuantize.y) == 1 && int(gridQuantize.z) == 1) {
+        if(count == 2) {
+            photon.direction.r = 5.0;
+        } else {
+            photon.direction.g = 5.0;
+        }
+    }
+   
         
-        float d = lengthSq(position - where);
+    return photon;    
+*/
         
-        if(d < nearestDistance) {
-            nearestDistance = d;
-            nearestIndex    = i;
+    if(count > 0) {
+        //photon.direction.g += 1000.0;
+        
+        
+        for(int i = 0; i < 100 * photonStride; i += photonStride) {
+            int current = start + i;
+            
+            if(current <= end) {
+                vec2 posIndex = indexWrap(current + 1, photonTextureSize.x) * photonTextureUnit;
+                vec3 pos = texture2D(photonTexture, posIndex).xyz;
+                
+                float d = length(pos - where);
+                
+                //photon.direction.r += d * 0.04;
+                
+                if(d < 0.1) {
+                    photon.direction.r += 0.4;
+                    photon.direction.g += 0.4;
+                    photon.direction.b += 0.4;
+                } else if(d < 0.12) {
+                    photon.direction.r += 0.1;
+                    photon.direction.g += 0.1;
+                    photon.direction.b += 0.1;
+                } else {
+                    // too far
+                }
+                
+                if(d < nearestDistance) {
+                    nearestDistance  = d;
+                    nearestIndex     = current;
+                    
+                    photon.position  = pos;
+                }
+            }
+            
         }
     }
     
-    int i = nearestIndex;
-    Photon photon;
-    photon.direction = texture2D(photonTexture, indexWrap(i + 0, photonTextureSize.x) * photonTextureUnit).xyz;
-    photon.position  = texture2D(photonTexture, indexWrap(i + 1, photonTextureSize.x) * photonTextureUnit).xyz;
-    photon.meta      = texture2D(photonTexture, indexWrap(i + 2, photonTextureSize.x) * photonTextureUnit).xy;
+    if(nearestIndex == -1) {
+        photon.position = vec3(9999, 9999, 9999);
+        //vec3(gridQuantize) * gridInterval;
+    }
     
     return photon;
 }
-    
+
 bool canSeePoint(in vec3 point, in vec3 where) {
     
     bool hasCollision = false;
@@ -208,7 +285,9 @@ void main(void) {
         blend.b = max(0.17, blend.b);
 
 
-        float d = lengthSq(photon.position - nearestPosition);
+        float d = length(photon.position - nearestPosition);
+        
+        //blend += d / 1.8;
         
         if(d < 0.1) {
             blend.r += 0.4;
@@ -221,9 +300,11 @@ void main(void) {
         } else {
             // too far
         }
-
+        
+        blend.a = 1.0;
     
         // Mix light and the texture color
+        //finalColor = textureColor * vec4(photon.direction, 1.0);
         finalColor = textureColor * blend;
     }
 

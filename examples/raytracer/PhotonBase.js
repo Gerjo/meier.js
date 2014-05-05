@@ -16,8 +16,10 @@ define(function(require) {
     
     // Not so portable? (http://jbuckley.ca/~jon/WebGL/extensions/proposals/WEBGL_fbo_color_attachments/)    
     function PhotonBase(game, photonCount) {
+        Random.Seed(42);
+        
         this.game         = game || null;
-        this.photonCount  = photonCount || (4 * 4 * 4);//(512 * 512);
+        this.photonCount  = photonCount || (512 * 512);
         this.outTextures  = [];
         this.inTextures   = [];
         this.photons      = [];
@@ -29,7 +31,6 @@ define(function(require) {
         
         this.readBuffer  = 0;
         this.writeBuffer = 1;
-        
         
         this._prepareBuffers();
         this._uploadUnitFrame();
@@ -95,9 +96,9 @@ define(function(require) {
         // Unbind any global state.
         gl.bindTexture(gl.TEXTURE_2D, null);        
         
-        console.log(directions);
-        console.log(positions);
-        console.log(metas);
+        //console.log(directions);
+        //console.log(positions);
+        //console.log(metas);
     };
     
     
@@ -231,8 +232,8 @@ define(function(require) {
         return this.grid.toArray();
     };
     
-    PhotonBase.prototype.toGrid = function() {
-        return this.grid.toGrid();
+    PhotonBase.prototype.upload = function(shader) {
+        return this.grid.upload(shader);
     };
     
     PhotonBase.prototype.exportToGrid = function(dims) {
