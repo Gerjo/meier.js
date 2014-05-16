@@ -7,7 +7,8 @@ define(function(require) {
         this.photons = [];
         // Amount of buckets
         //this.resolution = new V3(2, 2, 2);
-        this.resolution = new V3(15, 15, 15);
+        //this.resolution = new V3(15, 15, 15);
+        this.resolution = new V3(20, 20, 20);
         //this.resolution = new V3(1, 1, 1);
     }
     
@@ -15,40 +16,54 @@ define(function(require) {
         return vector.z + (vector.y * this.resolution.x) + (vector.x * this.resolution.x * this.resolution.y);
     };
     
+    Grid.prototype.quantize = function(p) {
+        return new V3(
+            Math.floor((p.x - this.min.x) / this.interval.x),
+            Math.floor((p.y - this.min.y) / this.interval.y),
+            Math.floor((p.z - this.min.z) / this.interval.z)
+        );
+    };
+    
+    Grid.prototype.toBucket = function(gridQuantize) {
+        var gridResolution = this.resolution;
+        
+        return gridQuantize.z + (gridQuantize.y * gridResolution.x) + (gridQuantize.x * gridResolution.x * gridResolution.y)
+    };
+    
     Grid.prototype.insert = function(photon) {
         this.photons.push(photon);
     };
     
     Grid.prototype.upload = function(shader) {
-        var min = new V3( Infinity,  Infinity,  Infinity);
-        var max = new V3(-Infinity, -Infinity, -Infinity);
+        this.min = new V3( Infinity,  Infinity,  Infinity);
+        this.max = new V3(-Infinity, -Infinity, -Infinity);
         
         // Find extrema (bounding volume)
         for(var i = 0; i < this.photons.length; ++i) {
             var p = this.photons[i];
 
-            min.x = Math.min(min.x, p.position.x);
-            min.y = Math.min(min.y, p.position.y);
-            min.z = Math.min(min.z, p.position.z);
-            
-            max.x = Math.max(max.x, p.position.x);
-            max.y = Math.max(max.y, p.position.y);
-            max.z = Math.max(max.z, p.position.z);
+            this.min.x = Math.min(this.min.x, p.position.x);
+            this.min.y = Math.min(this.min.y, p.position.y);
+            this.min.z = Math.min(this.min.z, p.position.z);
+
+            this.max.x = Math.max(this.max.x, p.position.x);
+            this.max.y = Math.max(this.max.y, p.position.y);
+            this.max.z = Math.max(this.max.z, p.position.z);
         }
         
-        /*min.x = -41;
-        min.y = -41;
-        min.z = -41;
-        max.x = 41;
-        max.y = 41;
-        max.z = 41;
-        */
+        this.min.x = -41;
+        this.min.y = -41;
+        this.min.z = -41;
+        this.max.x = 41;
+        this.max.y = 41;
+        this.max.z = 41;
+        
         // Distance between bounds
-        var range    = max.clone().subtract(min);
+        var range    = this.max.clone().subtract(this.min);
         
         // Vector to scale world space to grid space. Removing one to bound it
         // by [0,max)
-        var interval = range.clone().divide(this.resolution.clone());
+        this.interval = range.clone().divide(this.resolution.clone());
         //.subtract(new V3(1, 1, 1)));
         
         // array of arrays?
@@ -58,18 +73,14 @@ define(function(require) {
         this.photons.forEach(function(p) {
 
             // TODO: one liner.
-            var sub = new V3(
-                Math.floor((p.position.x - min.x) / interval.x),
-                Math.floor((p.position.y - min.y) / interval.y),
-                Math.floor((p.position.z - min.z) / interval.z)
-            );
+            var sub = this.quantize(p.position);
             
             //console.log("Index: " + sub.pretty());
             //console.log("Position: " + p.position.wolfram());
             // Quantize to grid space. NB: Some numbers might be flipped here
             var index = this.indexOf(sub);
             
-            
+            //console.log(index,this.resolution.volume());
             ASSERT(index >= 0);
             ASSERT(index <= this.resolution.volume());
             
@@ -80,6 +91,55 @@ define(function(require) {
             buckets[index].push(p);
         }.bind(this));
         
+        var perBucket = 10;
+        buckets.forEach(function(bucket) {
+            if(bucket.length > perBucket) {
+                bucket.shuffle();
+                
+                while(bucket.length > perBucket) {
+                    bucket.pop();
+                }
+            }
+        });
+        
+        var merged = [];
+    
+
+        for(var x = 0, i = 0; x < this.resolution.x; ++x) {
+            for(var y = 0; y < this.resolution.y; ++y) {
+                for(var z = 0; z < this.resolution.z; ++z, ++i) {
+                    merged[i] = [];
+                    
+                    for(var offsetX = -1; offsetX <= 1; ++offsetX) {
+                        for(var offsetY = -1; offsetY <= 1; ++offsetY) {
+                            for(var offsetZ = -1; offsetZ <= 1; ++offsetZ) {
+                                var index = this.toBucket(new V3(x + offsetX, y + offsetY, z + offsetZ));
+                                
+                                if(buckets[index]) {
+                                    merged[i].merge(buckets[index]);
+                                    
+                                    ASSERT(buckets[index].length > 0);
+                                }
+                            }
+                        }   
+                    }
+    
+                    // Sort by distance to grid "center". TODO: "center!"
+                    var pos = new V3(
+                        x * this.interval.x + this.interval.x * 0.5, 
+                        x * this.interval.y + this.interval.y * 0.5,
+                        x * this.interval.z + this.interval.z * 0.5
+                    );
+                    
+                    merged[i].sort(function(aton, bton) {
+                        return aton.position.distanceSq(pos) < bton.position.distanceSq(pos);
+                    });
+                }
+            }
+        }
+        
+        // Overwrite the previous buckets with the convoluted set.
+        buckets = merged;
         
         // TODO: determine optimal size.
         var floatons = [];
@@ -88,14 +148,20 @@ define(function(require) {
         var photonIndex  = this.resolution.volume() * 3;
         var indexIndex   = 0;
         
+        
+        var maxPerCell = 0;
+        
         for(var x = 0, i = 0; x < this.resolution.x; ++x) {
             for(var y = 0; y < this.resolution.y; ++y) {
                 for(var z = 0; z < this.resolution.z; ++z, ++i) {
             
                     // If something inside bucket
                     if(buckets[i]) {
-
+                        //console.log("[" + i + "] " + buckets[i].length + " photons");
+                        
                         var count = buckets[i].length;
+                
+                        maxPerCell = Math.max(maxPerCell, count);
                 
                         // Amount of photons in grid bucket.
                         floatons[indexIndex + 0] = count;
@@ -105,23 +171,20 @@ define(function(require) {
                 
                         // Export photons to float array
                         for(var j = 0; j < count; ++j) {
-
-                            var xIndex = Math.floor((buckets[i][j].position.x - min.x) / interval.x);
-                            var yIndex = Math.floor((buckets[i][j].position.y - min.y) / interval.y);
-                            var zIndex = Math.floor((buckets[i][j].position.z - min.z) / interval.z);
+                            /*var q = this.quantize(buckets[i][j].position);
                     
-                            if(xIndex != x) {
+                            if(q.x != x) {
                                 console.log("%d != %d\n", xIndex, x);
-                                ASSERT(xIndex == x);
+                                ASSERT(q.x == x);
                             }
-                            if(yIndex != y) {
+                            if(q.y != y) {
                                 console.log("%d != %d\n", yIndex, y);
-                                ASSERT(yIndex == y);
+                                ASSERT(q.y == y);
                             }
-                            if(zIndex != z) {
+                            if(q.z != z) {
                                 console.log("%d != %d\n", zIndex, z);
-                                ASSERT(zIndex == z);
-                            }
+                                ASSERT(q.z == z);
+                            }*/
                     
                     
                             floatons[photonIndex + 0] = buckets[i][j].direction.x;
@@ -173,20 +236,18 @@ define(function(require) {
         
         var floats = new Float32Array(floatons);
         
-        // TODO: pop photons till dims are OK.
-        
-        console.log("min  " + min.wolfram());
-        console.log("max  " + max.wolfram());
-        console.log("int  " + interval.wolfram());
+        console.log("min  " + this.min.wolfram());
+        console.log("max  " + this.max.wolfram());
+        console.log("int  " + this.interval.wolfram());
         console.log("dims " + dims.wolfram());
         console.log("res  " + this.resolution.wolfram());
-        console.log("");
+        console.log("max  " + maxPerCell + " per bucket");
         
         shader.use();
-        gl.uniform3f(shader.uniform("gridInterval"), interval.x, interval.y, interval.z);
+        gl.uniform3f(shader.uniform("gridInterval"), this.interval.x, this.interval.y, this.interval.z);
         gl.uniform3i(shader.uniform("gridResolution"), this.resolution.x, this.resolution.y, this.resolution.z);
-        gl.uniform3f(shader.uniform("gridMin"), min.x, min.y, min.z);
-        gl.uniform3f(shader.uniform("gridMax"), max.x, max.y, max.z);
+        gl.uniform3f(shader.uniform("gridMin"), this.min.x, this.min.y, this.min.z);
+        gl.uniform3f(shader.uniform("gridMax"), this.max.x, this.max.y, this.max.z);
         gl.uniform2f(shader.uniform("photonTextureSize"), dims.x, dims.y);
         gl.uniform2f(shader.uniform("photonTextureUnit"), 1.0 / dims.x, 1.0 / dims.y);
         

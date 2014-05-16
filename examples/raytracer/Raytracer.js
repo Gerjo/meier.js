@@ -76,16 +76,17 @@ define(function(require){
         this.uploadScene();
         
         var lights = [
-        new Light(new V3(2.22, -2.444, 0.75)),
-        // new Light(),
-        // new Light(),
-        // new Light(),
+            new Light(new V3(-2.22, -2.444, 0.75)),
+            // new Light(),
+            // new Light(),
+            // new Light(),
         ];
         
         this.photonBase = new PhotonBase(this);
         
         this.photonBase.prepare(lights, this.sceneTexture, this.sceneDimensions);
         
+        this.photonBase.iterate();
         this.photonBase.iterate();
         
         // Upload the grid texture and set the required uniform constants

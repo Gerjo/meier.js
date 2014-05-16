@@ -31,9 +31,13 @@ uniform vec3 gridMax;
 // Received from fragment shader:
 varying vec2 inPosition;
 
-Photon nearestPhoton(in vec3 where) {    
+Photon nearestPhoton(in vec3 where, inout vec4 blend) {    
+    
     Photon photon; 
-    photon.direction = vec3(0.3, 0.3, 0.3);
+    photon.direction = vec3(0.0, 0.0, 0.0);
+    photon.position  = vec3(Infinity, Infinity, Infinity);
+    photon.meta      = vec2(0.0, 0.0);
+    
     
     // Quantize pixel location to a grid location
     ivec3 gridQuantize = ivec3(
@@ -42,70 +46,32 @@ Photon nearestPhoton(in vec3 where) {
         floor((where.z - gridMin.z) / gridInterval.z)
     );
         
-   // gridQuantize = ivec3(0, 1, 1);
-        
     int cellIndex = gridQuantize.z + (gridQuantize.y * gridResolution.x) + (gridQuantize.x * gridResolution.x * gridResolution.y);
-    
-    if(cellIndex == 3) {        
-        //photon.direction.r += 10.0;
-    }
-    
-    
     vec2 texIndex = indexWrap(cellIndex, photonTextureSize.x) * photonTextureUnit;
-    
-    vec3 cell = texture2D(photonTexture, texIndex).xyz;
+    vec3 cell     = texture2D(photonTexture, texIndex).xyz;
     
     int count = int(cell.x);
     int start = int(cell.y);
     int end   = int(cell.z);
     
-
-    float nearestDistance = 9999999.0;
+    float weight   = 0.0;
+    
+    float nearestDistance = Infinity;
     int nearestIndex      = -1;
     
-    float a = length(where - vec3(gridQuantize) * gridInterval) * 0.1;
-    //photon.direction = vec3(a, a, a);
-    //photon.direction = vec3(0.2, 0.2, 0.2);
-    
-      
-    /*if(int(gridQuantize.x) == 0 && int(gridQuantize.y) == 1 && int(gridQuantize.z) == 1) {
-        if(count == 2) {
-            photon.direction.r = 5.0;
-        } else {
-            photon.direction.g = 5.0;
-        }
-    }
-   
-        
-    return photon;    
-*/
-        
+    float sigmaSum = 0.0;
+     
     if(count > 0) {
-        //photon.direction.g += 1000.0;
         
-        
-        for(int i = 0; i < 100 * photonStride; i += photonStride) {
+        for(int i = 0; i < 160 * photonStride; i += photonStride) {
             int current = start + i;
             
             if(current <= end) {
-                vec2 posIndex = indexWrap(current + 1, photonTextureSize.x) * photonTextureUnit;
-                vec3 pos = texture2D(photonTexture, posIndex).xyz;
+                vec3 dir  = texture2D(photonTexture, indexWrap(current + 0, photonTextureSize.x) * photonTextureUnit).xyz;
+                vec3 pos  = texture2D(photonTexture, indexWrap(current + 1, photonTextureSize.x) * photonTextureUnit).xyz;
+                vec2 meta = texture2D(photonTexture, indexWrap(current + 2, photonTextureSize.x) * photonTextureUnit).xy;
                 
-                float d = length(pos - where);
-                
-                //photon.direction.r += d * 0.04;
-                
-                if(d < 0.1) {
-                    photon.direction.r += 0.4;
-                    photon.direction.g += 0.4;
-                    photon.direction.b += 0.4;
-                } else if(d < 0.12) {
-                    photon.direction.r += 0.1;
-                    photon.direction.g += 0.1;
-                    photon.direction.b += 0.1;
-                } else {
-                    // too far
-                }
+                float d = lengthSq(pos - where);
                 
                 if(d < nearestDistance) {
                     nearestDistance  = d;
@@ -113,16 +79,25 @@ Photon nearestPhoton(in vec3 where) {
                     
                     photon.position  = pos;
                 }
+                
+                float sigma = 1.2;
+                float sigmaPrecomputed = 1.0 / (2.0 * sigma * sigma);
+                
+                float w = exp(-d * sigmaPrecomputed);
+                
+                sigmaSum += w;
+                weight   += meta.y * w;
             }
             
         }
     }
     
-    if(nearestIndex == -1) {
-        photon.position = vec3(9999, 9999, 9999);
-        //vec3(gridQuantize) * gridInterval;
-    }
+    weight /= sigmaSum * 55.0;
     
+    blend.r += weight;
+    blend.g += weight;
+    blend.b += weight;
+  
     return photon;
 }
 
@@ -206,7 +181,7 @@ void main(void) {
     bool hasNearest = false;
     vec3 nearestPosition;
     int nearestOffset;
-    float nearestDepth = 999999999.0;
+    float nearestDepth = Infinity;
 
     // Test against the whole world.
     for(int i = 0; i < sceneTextureCount; i += objectStride) {
@@ -223,7 +198,7 @@ void main(void) {
             float depth;
  
             // Ray intersection trial
-            if( rayIntersetsTriangle(ray, a, b, c, where, depth)) {
+            if(rayIntersetsTriangle(ray, a, b, c, where, depth)) {
 
                 // Only keep the nearest object
                 if(nearestDepth > depth) {
@@ -268,9 +243,6 @@ void main(void) {
         // Weight the diffuse color with the cosine
         vec4 blend = diffuse * lambert;
 
-        // Light has no "alpha".
-        blend.a    = 1.0;
-
         // No light.
         if( ! canSeePoint(light, nearestPosition)) {
             blend.r = 0.0;
@@ -278,7 +250,7 @@ void main(void) {
             blend.b = 0.0;
         }
         
-        Photon photon = nearestPhoton(nearestPosition);
+        Photon photon = nearestPhoton(nearestPosition, blend);
 
         blend.r = max(0.17, blend.r);
         blend.g = max(0.17, blend.g);
@@ -287,9 +259,14 @@ void main(void) {
 
         float d = length(photon.position - nearestPosition);
         
-        //blend += d / 1.8;
-        
-        if(d < 0.1) {
+        if(d < Infinity) {
+            //blend += 1.0 / (d * 20.8);
+            
+            if(d < 0.03) {
+                blend.r += 10.0;
+            }
+        }
+        /*if(d < 0.1) {
             blend.r += 0.4;
             blend.g += 0.4;
             blend.b += 0.4;
@@ -299,13 +276,14 @@ void main(void) {
             blend.b = 0.1;
         } else {
             // too far
-        }
+        }*/
         
+        // Light has no "alpha".
         blend.a = 1.0;
     
         // Mix light and the texture color
         //finalColor = textureColor * vec4(photon.direction, 1.0);
-        finalColor = textureColor * blend;
+        finalColor = textureColor * blend + vec4(photon.direction, 1.0);
     }
 
     gl_FragColor = finalColor;

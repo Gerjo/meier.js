@@ -1,3 +1,5 @@
+const float Infinity = 1.0 / 0.0;
+
 struct Ray {
     vec3 place;
     vec3 direction;
@@ -141,4 +143,17 @@ vec4 encode_float (in float val) {
 float decode_float(in vec4 value) {
    const vec4 bitSh = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
    return(dot(value, bitSh));
+}
+
+// Some initial seed.
+int _seed = 10;
+
+void srand(float s) {
+    _seed = int(s * 12345.0);
+}
+
+float rand() {
+    _seed = mod(1103515245 * _seed + 12345,  2147483647);
+
+    return fract(float(_seed) * 0.001);
 }

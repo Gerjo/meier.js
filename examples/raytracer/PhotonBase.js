@@ -12,6 +12,14 @@ define(function(require) {
         this.direction = d || new V3(0, 0, 0);
         this.position  = p || new V3(0, 0, 0);
         this.meta      = m || new V3(0, 0, 0);
+        
+        this.toArray = function() {
+            return [
+                this.direction.x, this.direction.y, this.direction.z,
+                this.position.x, this.position.y, this.position.z,
+                this.meta.z, this.meta.y, this.meta.z || 0
+            ];
+        }.bind(this);
     }
     
     // Not so portable? (http://jbuckley.ca/~jon/WebGL/extensions/proposals/WEBGL_fbo_color_attachments/)    
@@ -19,7 +27,7 @@ define(function(require) {
         Random.Seed(42);
         
         this.game         = game || null;
-        this.photonCount  = photonCount || (512 * 512);
+        this.photonCount  = photonCount || 512 * 100; (512 * 512);
         this.outTextures  = [];
         this.inTextures   = [];
         this.photons      = [];
@@ -35,8 +43,9 @@ define(function(require) {
         this._prepareBuffers();
         this._uploadUnitFrame();
         
-        this._sceneTexture = null;
+        this._sceneTexture    = null;
         this._sceneDimensions = null;
+        this._iteration       = 0;
         
         this._shader = new Shader("shaders/photon.vsh.glsl", "shaders/photon.fsh.glsl");
 
@@ -81,29 +90,29 @@ define(function(require) {
             metas[i + 2] = 0;  // not available for use
         }
         
+        this._uploadPhotonTextures(directions, positions, metas);
+    };
+    
+    PhotonBase.prototype._uploadPhotonTextures = function(direction, position, meta) {
         // Upload photon directions
         gl.bindTexture(gl.TEXTURE_2D, this.inTextures[0]);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, directions);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, direction);
 
         // Upload photon positions
         gl.bindTexture(gl.TEXTURE_2D, this.inTextures[1]);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, positions);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, position);
 
         // Upload photon meta data
         gl.bindTexture(gl.TEXTURE_2D, this.inTextures[2]);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, metas);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, this.width, this.height, 0, gl.RGB, gl.FLOAT, meta);
    
         // Unbind any global state.
-        gl.bindTexture(gl.TEXTURE_2D, null);        
-        
-        //console.log(directions);
-        //console.log(positions);
-        //console.log(metas);
+        gl.bindTexture(gl.TEXTURE_2D, null);    
     };
     
     
     PhotonBase.prototype.iterate = function() {
-        console.log("Photon iteration [" + this.width + "x" + this.height + "]...");
+        console.log("Photon iteration [" + this._iteration + "] [" + this.width + "x" + this.height + "]...");
         
         var ext = this.ext;
         gl.viewport(0, 0, this.width, this.height);
@@ -167,34 +176,45 @@ define(function(require) {
         var metaX      = this.getFloats(this.outTextures[6]);
         var metaY      = this.getFloats(this.outTextures[7]);
 
+        var directionTexture = new Float32Array(this.photonCount * 3);
+        var positionTexture  = new Float32Array(directionTexture.length);
+        var metaTexture      = new Float32Array(directionTexture.length);
+        for(var i = 0, j = 0; i < positionX.length; ++i, j += 3) {
 
-        for(var i = 0; i < positionX.length; ++i) {
-            //console.log("Position: " + positionX[i].toFixed(6) + ", " + positionY[i].toFixed(6) + ", " + positionZ[i].toFixed(6));
-    
             var photon = new Photon(
                     new V3(directionX[i], directionY[i], directionZ[i]), 
                     new V3(positionX[i], positionY[i], positionZ[i]), 
-                    new V2(metaX[i], metaY[i], 0)
+                    new V3(metaX[i], metaY[i], 0)
             );
             
+            // Export to textures for the next bounce iteration.
+            directionTexture[j + 0] = directionX[i];
+            directionTexture[j + 1] = directionY[i];
+            directionTexture[j + 2] = directionZ[i];
+            positionTexture[j + 0]  = positionX[i];
+            positionTexture[j + 1]  = positionY[i];
+            positionTexture[j + 2]  = positionZ[i];
+            metaTexture[j + 0]      = metaX[i];
+            metaTexture[j + 1]      = metaY[i];
+            metaTexture[j + 2]      = 0;
+            
             // Alive test
-            if(parseInt(photon.meta.x) == 1) {
+            if(parseInt(photon.meta.x) == 1 && this._iteration > 0) {
                 this.grid.insert(photon);    
                 
                 // Assume positive flux
                 ASSERT(photon.meta.y >= 0);
             }
         }
-////////////////////////////////////////////////
         
-        // Unbind buffer so we may read from it.
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null);//*/
+        this._uploadPhotonTextures(directionTexture, positionTexture, metaTexture);       
         
         // Toggle buffers.
         this.readBuffer  = 1 - this.readBuffer;
         this.writeBuffer = 1 - this.writeBuffer;
         ASSERT(this.readBuffer != this.writeBuffer);
+        
+        ++this._iteration;
     };
     
     PhotonBase.prototype.getFloats = function(texture) {
