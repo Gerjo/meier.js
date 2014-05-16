@@ -35,14 +35,11 @@ define(function(require) {
     	this.gui.add(this, 'seperationWeight', 0, 2, 0.01);
     	this.gui.add(this, 'cohesionWeight', 0, 2, 0.01);
     	this.gui.add(this, 'alignmentWeight', 0, 2, 0.01);
-        this.gui.add(this, 'mouseRepel', 0, 2, 0.01);
+        this.gui.add(this, 'mouseRepel', -2, 2, 0.01);
     	this.gui.add(this, 'viewRadius', 0, this.hw);
     	this.gui.add(this, 'mouseRadius', 0, this.hw);
     	this.gui.add(this, 'full360view', 0, 1);
     	this.gui.add(this, 'speed', 0, 10);
-        
-        
-        
         
         
         this.lines = [];
