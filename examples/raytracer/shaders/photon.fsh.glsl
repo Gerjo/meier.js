@@ -123,13 +123,7 @@ void main() {
             outMeta.y    = inMeta.y * max(0.2, dot(normal, outDirection));// * 0.8;
         
         
-        // Photon hit nothing at all
-        } else {
-            outMeta.x = 0.0; // Death.
-            outMeta.y = -1.0; // No flux.
-        
-            //outDirection = inDirection;
-            //outPosition  = inPosition;
+        // Photon hit nothing at all. Defaults are OK
         }
     }
     

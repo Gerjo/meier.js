@@ -10,6 +10,9 @@ define(function(require) {
         //this.resolution = new V3(15, 15, 15);
         this.resolution = new V3(20, 20, 20);
         //this.resolution = new V3(1, 1, 1);
+        
+        this.min = new V3(-41, -41, -41);
+        this.max = new V3(+41, +41, +41);
     }
     
     Grid.prototype.indexOf = function(vector) {
@@ -31,11 +34,15 @@ define(function(require) {
     };
     
     Grid.prototype.insert = function(photon) {
-        this.photons.push(photon);
+        if(photon.position.x > this.max.x || photon.position.y > this.max.y || photon.position.z > this.max.z) {
+            console.log("Disregarding out-of-bound photon at " + photon.position.wolfram());
+        } else {
+            this.photons.push(photon);
+        }
     };
     
     Grid.prototype.upload = function(shader) {
-        this.min = new V3( Infinity,  Infinity,  Infinity);
+        /*this.min = new V3( Infinity,  Infinity,  Infinity);
         this.max = new V3(-Infinity, -Infinity, -Infinity);
         
         // Find extrema (bounding volume)
@@ -49,15 +56,9 @@ define(function(require) {
             this.max.x = Math.max(this.max.x, p.position.x);
             this.max.y = Math.max(this.max.y, p.position.y);
             this.max.z = Math.max(this.max.z, p.position.z);
-        }
+        }*/
         
-        this.min.x = -41;
-        this.min.y = -41;
-        this.min.z = -41;
-        this.max.x = 41;
-        this.max.y = 41;
-        this.max.z = 41;
-        
+
         // Distance between bounds
         var range    = this.max.clone().subtract(this.min);
         
@@ -75,14 +76,18 @@ define(function(require) {
             // TODO: one liner.
             var sub = this.quantize(p.position);
             
-            //console.log("Index: " + sub.pretty());
-            //console.log("Position: " + p.position.wolfram());
-            // Quantize to grid space. NB: Some numbers might be flipped here
+            // Quantize to grid space.
             var index = this.indexOf(sub);
             
-            //console.log(index,this.resolution.volume());
+            // "min" might not be low enough.
             ASSERT(index >= 0);
-            ASSERT(index <= this.resolution.volume());
+            
+            if(index > this.resolution.volume()) {
+                console.log(index + " > " + this.resolution.volume());
+                console.log(sub.wolfram());
+                console.log(p.position.wolfram());
+                ASSERT(index <= this.resolution.volume());
+            }
             
             if( ! buckets[index]) {
                 buckets[index] = [];
@@ -171,22 +176,6 @@ define(function(require) {
                 
                         // Export photons to float array
                         for(var j = 0; j < count; ++j) {
-                            /*var q = this.quantize(buckets[i][j].position);
-                    
-                            if(q.x != x) {
-                                console.log("%d != %d\n", xIndex, x);
-                                ASSERT(q.x == x);
-                            }
-                            if(q.y != y) {
-                                console.log("%d != %d\n", yIndex, y);
-                                ASSERT(q.y == y);
-                            }
-                            if(q.z != z) {
-                                console.log("%d != %d\n", zIndex, z);
-                                ASSERT(q.z == z);
-                            }*/
-                    
-                    
                             floatons[photonIndex + 0] = buckets[i][j].direction.x;
                             floatons[photonIndex + 1] = buckets[i][j].direction.y;
                             floatons[photonIndex + 2] = buckets[i][j].direction.z;

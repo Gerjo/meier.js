@@ -80,7 +80,7 @@ Photon nearestPhoton(in vec3 where, inout vec4 blend) {
                     photon.position  = pos;
                 }
                 
-                float sigma = 1.2;
+                float sigma = 1.0;
                 float sigmaPrecomputed = 1.0 / (2.0 * sigma * sigma);
                 
                 float w = exp(-d * sigmaPrecomputed);
