@@ -282,6 +282,41 @@ define(function(require) {
             return m;
         };
         
+        /// Create a gaussian weighted kernel.
+        M.CreateGaussian = function(sigma) {
+        
+            // Create a kernel matrix
+            var matrix = new M();
+        
+            // Default sigma
+            sigma = isNaN(sigma) ? 2 : sigma;
+        
+            var hr  = (matrix.numrows - 1) * 0.5;
+            var hc  = (matrix.numcolumns - 1) * 0.5;
+            var sum = 0;
+            var sigmaPrecomputed = 2 * sigma * sigma;
+        
+            for(var row = 0; row < matrix.numrows; ++row) {
+                for(var col = 0; col < matrix.numcolumns; ++col) {
+                
+                    // Center the kernel
+                    var r = row - hr;
+                    var c = col - hc;
+              
+                    // Guassian distribution
+                    var g = Math.exp(-(r * r + c * c) / sigmaPrecomputed);
+                
+                    // Accumulate for normalisaton term
+                    sum += g;
+                
+                    matrix.set(row, col, g);
+                }
+            }
+        
+            // Normalize here, more efficient than inside the convolute method
+            return matrix.multiply(1 / sum);
+        };
+        
         function M(data) {
             this.numrows    = rows;
             this.numcolumns = columns;
