@@ -230,7 +230,9 @@ define(function(require) {
         
         this._entities.forEach(function(entity) {
             if(entity._delete !== true) {
-                entity._draw(renderer);
+                if(entity.visible === true) {
+                    entity._draw(renderer);
+                }
             }
         });
     };
