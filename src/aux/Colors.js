@@ -169,12 +169,15 @@ define(function(require) {
         if(htmlColors.hasOwnProperty(k)) {
             var rgba = HexToRGBA(htmlColors[k]);
             
-            // Lower case, more pleasant to the eye?
+            // Lowercase, more pleasant to the eye?
             Colors[k] = rgba;
             
-            // Upercase version, matches all other enums in
+            // Uppercase version, matches all other enums in
             // meier.js
             Colors[k.toUpperCase()] = rgba;
+
+            // First character upppercase.
+            Colors[k.ucFirst()] = rgba;
             
             // We cannot efficiently pick a random property, so
             // stick them in an array as well. Random items from
