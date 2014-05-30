@@ -234,6 +234,28 @@ Array.prototype.clear = function() {
     this.length = 0;
 };
 
+/// Search in an array for the first item matching the given predicate.
+///
+/// @param {callback} A predicate function. 
+/// @return the first found item, or null if nothing found.
+Array.prototype.find = function(callback) {
+    var result = null;
+    
+    this.every(function(item) {
+        var r = callback(item);
+        
+        if(r) {
+            result = item;
+            return false;
+        }
+        
+        return true;
+    });
+    
+    return result;
+}
+
+
 /// Merge all internal array entries in the outer array.
 /// In other words, it reduces a multidimensional array
 /// into one dimension, recursively.
@@ -263,6 +285,25 @@ Array.prototype.merge = function(array) {
     } else {
         throw new Error("Argument is not an array.");
     }
+    
+    return this;
+};
+
+/// Recurse depth-first over the array. Varies from forEach in the sense
+/// that it iteratives over nested arrays, as well.
+Array.prototype.walk = function(callback) {
+    
+    // Depth first iteration
+    this.forEach(function(item) {
+        if(item instanceof Array) {
+            // Recurse deeper into the structure.
+            item.walk(callback);
+            
+        } else {
+            // Call user specified callback.
+            callback(item);
+        }
+    });
     
     return this;
 };
