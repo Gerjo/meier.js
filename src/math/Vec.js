@@ -138,9 +138,9 @@ define(function(require) {
             };
         }
         
-        V.prototype.trim = function(length) {
+        V.prototype.trim = function(newLength) {
             
-            var l = length / this.length();
+            var l = newLength / this.length();
             
             for(var i = this.numrows - 1; i >= 0; --i) {
                 this._[i] *= l;
