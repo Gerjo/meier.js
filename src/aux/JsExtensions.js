@@ -353,6 +353,37 @@ Array.prototype.eachPair = function(callback, wraparound) {
     return true;
 };
 
+/// Toggle the key and value properties. The array values become
+/// the new keys and vice versa. If non unique values are present,
+/// only the last is kept.
+///
+/// NB: only properties are taken into account.
+///
+/// @return A new array with the key value properties reversed.
+Array.prototype.flip = function() {
+    
+    var clone = [];
+    
+    for(var k in this) {
+        if(this.hasOwnProperty(k)) {
+            clone[this[k]] = k;
+        }
+    }
+    
+    return clone;
+};
+
+/// Transform the first character to uppercase. Returns a new string.
+String.prototype.ucFirst = function() {
+    if(this.length == 0) {
+        return this;
+    } else if(this.length == 1) {
+        return this.toUpperCase();
+    }
+    
+    return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
 /// Determine if a string ends with the given suffix:
 String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
