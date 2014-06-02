@@ -285,6 +285,19 @@ define(function(require) {
             return r;
         }
         
+        /// Determine if the vector is a null vector, i.e., all components
+        /// equal zero.
+        V.prototype.isNull = V.prototype.isZero = function() {
+          
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                if(this._[i] !== 0) {
+                    return false;
+                }
+            }
+                        
+            return true;
+        }; 
+        
         V.prototype.equals = function(o) {
             
             if(o.numrows !== this.numrows) {
