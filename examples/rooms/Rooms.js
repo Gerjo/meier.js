@@ -134,7 +134,7 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(30);
         this.setAutoClear(false);
-        this.logger.top().left();
+        this.logger.top().left().hideInternals();
         
         this.gui = new dat.GUI();
 
@@ -144,8 +144,8 @@ define(function(require) {
         this.gui.add(Config, "minRoomSize",     20,  500).onChange(this.rebuild.bind(this));
  
         
-        this.houseWidth  = this.width - 30;
-        this.houseHeight = this.height - 30;
+        this.houseWidth  = this.width-2;// - 30;
+        this.houseHeight = this.height-2;// - 30;
 
         this.rebuild();
     }
