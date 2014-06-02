@@ -13,9 +13,10 @@ define(function(require) {
     }
     
     Field.prototype = new Entity();
-    function Field(color) {
+    function Field(color, size) {
         Entity.call(this, 0, 0, 10, 10);        
         
+        this.size  = size || 10;
         this.previousMouse = null;
         this.color = color || Colors.black;
         
@@ -28,7 +29,6 @@ define(function(require) {
         this.height  = game.height;
         
         this.buckets = [];
-        this.size    = 10;
         
         var offsets = new V2(
             0, 0//(this.hw  % this.size),
@@ -88,11 +88,47 @@ define(function(require) {
                 if( ! b.v.isNull()) {
                     renderer.line(b.x, b.y, b.x + b.v.x * l, b.y + b.v.y * l);
                 }
-                
             }   
         }
         
         renderer.stroke(Colors.Alpha(b.color, 0.7));
+    }
+    
+    Field.prototype.load = function(storage) {
+
+        storage.forEach(function(bucket) {
+            var index = this.toIndex(this.toLocal(new V2(bucket.x, bucket.y)));
+            var v = new V2(parseFloat(bucket.vx || 0), parseFloat(bucket.vy || 0));
+            
+            // The world might've been generated with a smaller resolution.
+            if(this.buckets[index.x] && this.buckets[index.x][index.y]) {
+                this.buckets[index.x][index.y].v = v;
+                
+                ;
+            } else {
+                this.game.log("Error","Could not load data. Data in memory is smaller than visual world.");
+            }
+            
+        }.bind(this));
+    };
+    
+    Field.prototype.toArray = function() {
+        var array = [];
+        
+        this.buckets.walk(function(bucket) {
+            
+            // Skip null vectors.
+            if(bucket.v && ! bucket.v.isNull()) {
+                array.push({
+                    x:  bucket.x,
+                    y:  bucket.y,
+                    vx: bucket.v.x,
+                    vy: bucket.v.y
+                });
+            }
+        });
+        
+        return array;
     }
     
     return Field;

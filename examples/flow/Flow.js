@@ -13,13 +13,26 @@ define(function(require){
         this.leftDown = false;
         this.active   = 0;
         this.weight0  = this.weight1 = this.weight2 = 0.30;
-        this.fields   = [
-            new Field(Colors.Red),
-            new Field(Colors.Green),
-            new Field(Colors.Blue)
-        ];
         
-        this.fields.forEach(this.add.bind(this));
+        
+        var storage  = JSON.TryParse(localStorage.getItem("flowfields"));
+        var tileSize = (storage && storage.size) || 10;
+                
+        this.fields   = [
+            new Field(Colors.Red, tileSize),
+            new Field(Colors.Green, tileSize),
+            new Field(Colors.Blue, tileSize)
+        ];
+    
+    
+        this.fields.forEach(function(field, i) {
+            this.add(field);
+            
+            field.load((storage && storage.fields && storage.fields[i]) || []);
+            
+        }.bind(this));
+       
+        
         
         this.input.subscribe(Input.MOUSE_MOVE, this.onMouseMove.bind(this));
         this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
@@ -30,9 +43,9 @@ define(function(require){
         this.gui.width = 300;
         
         var folder = this.gui.addFolder("Guidance Field Visibility");
-    	folder.add(this, "enableField1").name('Only guidance field #1');
-    	folder.add(this, "enableField2").name('Only guidance field #2');
-    	folder.add(this, "enableField3").name('Only guidance field #3');
+    	folder.add(this, "enableField1").name('Guidance field #1');
+    	folder.add(this, "enableField2").name('Guidance field #2');
+    	folder.add(this, "enableField3").name('Guidance field #3');
     	folder.add(this, "enableFields").name('All guidance fields');
         
         folder = this.gui.addFolder("Guidance Field Weights");
@@ -63,6 +76,8 @@ define(function(require){
     
     Flow.prototype.onLeftUp = function(input) {
         this.leftDown = false;
+        
+        this.save();
     };
     
     Flow.prototype.onMouseMove = function(input) {
@@ -99,6 +114,21 @@ define(function(require){
         Game.prototype.draw.call(this, renderer);
 
         this.log("Active", (this.active+1) + "/" + this.fields.length);
+    }
+    
+    Flow.prototype.save = function(renderer) {
+        
+        var json = {
+            fields: [],
+            size: this.fields[0].size
+            
+        };
+        
+        this.fields.forEach(function(field) {
+            json.fields.push(field.toArray());
+        });
+        
+        localStorage.setItem("flowfields", JSON.stringify(json))
     }
     
     return Flow;

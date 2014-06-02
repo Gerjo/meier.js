@@ -89,8 +89,8 @@ define(function(require){
         this.photonBase.iterate();
         this.photonBase.iterate();
         this.photonBase.iterate();
-        this.photonBase.iterate();
-        this.photonBase.iterate();
+        //this.photonBase.iterate();
+        //this.photonBase.iterate();
         
         // Upload the grid texture and set the required uniform constants
         this.photonTexture = this.photonBase.upload(this.tracerProgram);
