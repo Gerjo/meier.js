@@ -405,6 +405,10 @@ String.prototype.startsWith = function(suffix) {
     return true;
 };
 
+/// Implementing a function to catch a common error.
+String.prototype.toFixed = function(precision) {
+    throw new Error("Strings do not have a toFixed function. Parse the variable into a Number first.");
+};
 
 String.prototype.trim = function(string) {
     if(typeof string == "undefined") {
