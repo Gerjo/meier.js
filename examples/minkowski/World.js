@@ -33,7 +33,6 @@ define(function(require) {
         this.enableEvent(Input.LEFT_DOWN, Input.LEFT_UP, Input.MOUSE_MOVE);
         
         // Mouse down in hull:
-        this.inhull = false;
         this.track  = -1;
         this.offset = new Vector(0, 0);
     }
@@ -54,21 +53,6 @@ define(function(require) {
     
     World.prototype.onMouseMove = function(input) {
         this._containsMouse = this.containsPoint(input);
-        
-        // Logic for hover action:
-        var inhull = this.polygon.some(function(p, i) {
-            return this._mouseInHull(p.hull, this.translate[i]);
-        }.bind(this));
-        
-        if(inhull != this.inhull) {
-            this.inhull = inhull;
-        
-            if(inhull) {
-                input.cursor(Input.Cursor.MOVE);
-            } else {
-                input.cursor(Input.Cursor.DEFAULT);
-            }
-        }
     };
     
     World.prototype.onLeftDown = function(input) {
@@ -91,6 +75,15 @@ define(function(require) {
         if(this.track != -1) {
             var local = this.toLocal(this.input);
             this.translate[this.track] = local.subtract(this.offset);
+        }
+        
+        // Logic for hover action:
+        var inhull = this.polygon.some(function(p, i) {
+            return this._mouseInHull(p.hull, this.translate[i]);
+        }.bind(this));
+        
+        if(inhull) {
+            this.input.cursor(Input.Cursor.MOVE);
         }
     };
     
