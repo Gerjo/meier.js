@@ -232,6 +232,8 @@ Array.prototype.unique = function(compare) {
 /// Empty an array.
 Array.prototype.clear = function() {
     this.length = 0;
+
+    return this;
 };
 
 /// Search in an array for the first item matching the given predicate.
