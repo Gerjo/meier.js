@@ -13,7 +13,7 @@ function refactor($dir) {
         } else if(substr($file, -3) == ".js") {
 		$source = file_get_contents($dir . DIRECTORY_SEPARATOR . $file);
 		
-		$source = str_replace("meier/aux/Colors", "meier/engine/Colors", $source);
+		$source = str_replace("meier/aux/", "meier/extra/", $source);
 
 		file_put_contents($dir . DIRECTORY_SEPARATOR . $file, $source);
 

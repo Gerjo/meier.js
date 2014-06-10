@@ -18,7 +18,7 @@
 
 
 define(function(require) {
-    var Stopwatch = require("meier/aux/Stopwatch");
+    var Stopwatch = require("meier/extra/Stopwatch");
     var Renderer  = require("meier/engine/Renderer");
     var Vector    = require("meier/math/Vector");
     var Logger    = require("meier/engine/Logger");

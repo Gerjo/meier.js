@@ -3,7 +3,7 @@ define(function(require) {
     var Sound = require("meier/engine/Sound");
     var Rand  = require("meier/math/Random");
     var Input = require("meier/engine/Input");
-    var Timer = require("meier/aux/Timer");
+    var Timer = require("meier/extra/Timer");
     var Pad   = require("./Pad");
     
     AudioApp.prototype = new Game();

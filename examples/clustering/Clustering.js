@@ -9,7 +9,7 @@ define(function(require) {
     var Voronoi   = require("meier/math/Voronoi").Voronoi;
     var Colors    = require("meier/engine/Colors");
     var Lerp      = require("meier/math/Lerp");
-    var Noise     = require("meier/aux/Noise");
+    var Noise     = require("meier/extra/Noise");
     var Circle    = require("meier/math/Disk");
     var ClosestVector      = require("meier/math/Math").ClosestVector;
     var LeastSquaresCircle = require("meier/math/Math").LeastSquaresCircle;

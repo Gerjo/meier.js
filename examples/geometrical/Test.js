@@ -20,7 +20,7 @@ define(function(require){
     var V3 = require("meier/math/Vec")(3);
     
     
-    var Stopwatch = require("meier/aux/Stopwatch");
+    var Stopwatch = require("meier/extra/Stopwatch");
     
     Test.prototype = new Game();
     
