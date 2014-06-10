@@ -50,7 +50,7 @@ var Meier = (function() {
                     });
                     
                     // Firstly load my javascript extentions, then start loading everything else.
-                    require(["meier/aux/JsExtensions"], function(Extentions) {
+                    require(["meier/engine/JsExtensions"], function(Extentions) {
                         // Nothing to be done. Including file suffices.
                     });
                                         
