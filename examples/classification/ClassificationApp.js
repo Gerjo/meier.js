@@ -1,6 +1,6 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
-    var Color  = require("meier/aux/Colors");
+    var Color  = require("meier/engine/Colors");
     var Random = require("meier/math/Random");
     var Grid   = require("meier/prefab/Grid");
     var dat    = require("meier/contrib/datgui");

@@ -7,7 +7,7 @@ define(function(require) {
     var Vector    = require("meier/math/Vec")(2);
     var dat       = require("meier/contrib/datgui");
     var Voronoi   = require("meier/math/Voronoi").Voronoi;
-    var Colors    = require("meier/aux/Colors");
+    var Colors    = require("meier/engine/Colors");
     var Lerp      = require("meier/math/Lerp");
     var Noise     = require("meier/aux/Noise");
     var Circle    = require("meier/math/Disk");

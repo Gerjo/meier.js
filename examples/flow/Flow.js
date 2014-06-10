@@ -1,7 +1,7 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
     var Input  = require("meier/engine/Input");
-    var Colors = require("meier/aux/Colors");
+    var Colors = require("meier/engine/Colors");
     var Input  = require("meier/engine/Input");
     var dat    = require("meier/contrib/datgui");
     var Field  = require("./Field");

@@ -4,7 +4,7 @@ define(function(require){
     var LeastSqCircle   = require("meier/math/Math").LeastSquaresCircle
     var Vector          = require("meier/math/Vec")(2);
     var Disk            = require("meier/math/Disk");
-    var Colors          = require("meier/aux/Colors");
+    var Colors          = require("meier/engine/Colors");
     var NearestVoronoi  = require("meier/math/Voronoi").Voronoi;
     var FarthestVoronoi = require("meier/math/Voronoi").FarthestVoronoi;
     var dat             = require("meier/contrib/datgui");

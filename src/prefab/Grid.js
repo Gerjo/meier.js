@@ -10,7 +10,7 @@ define(function(require) {
     var Vector    = require("meier/math/Vec")(2);
     var Input     = require("meier/engine/Input");
     var Pixel     = require("meier/prefab/Pixel");
-    var Color     = require("meier/aux/Colors");
+    var Color     = require("meier/engine/Colors");
     var PinRect   = require("meier/math/Intersection").Test.PointInRectangle;
     var Rectangle = require("meier/math/Rectangle");
     
