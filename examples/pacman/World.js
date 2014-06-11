@@ -4,6 +4,7 @@ define(function(require) {
 	var Level  = require("./Map");
 	var V2     = require("meier/math/Vec")(2);
 
+	var nextTileId = 0;
 
 	/// Structure to hold tile related properties.
 	World.Tile = function(type, index, position) {
@@ -20,6 +21,8 @@ define(function(require) {
 
 		this.index    = index    || new V2(0, 0); // Array index
 		this.position = position || new V2(0, 0); // World index
+
+		this.id = ++nextTileId;
 	};
 
 	World.prototype = new Entity();
@@ -75,11 +78,6 @@ define(function(require) {
 		Entity.prototype.draw.call(this, renderer);
 
 		var size = this.size;
-		
-
-		renderer.begin();
-		renderer.circle(0, 0, 5, 5);
-		renderer.stroke("black");
 
 		this.tiles.forEach(function(row, y) {
 
@@ -123,6 +121,10 @@ define(function(require) {
 
 		return t;
 	}
+
+	World.prototype.isWalkable = function(tile) {
+		return tile && ! tile.wall;
+	};
 
 	World.prototype.atIndex = function(x, y) {
 		if(x.x) {

@@ -18,8 +18,8 @@ define(function(require){
         this.world.add(new Player(this.world.start, this.world));
 
         this.world.add(new Ghost(this.world.spawns[0], this.world));
-        this.world.add(new Ghost(this.world.spawns[1], this.world));
-        this.world.add(new Ghost(this.world.spawns[2], this.world));
+        //this.world.add(new Ghost(this.world.spawns[1], this.world));
+        //this.world.add(new Ghost(this.world.spawns[2], this.world));
     }
     
     PacGame.prototype.update = function(dt) {
@@ -29,6 +29,12 @@ define(function(require){
     
     PacGame.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
+
+        var t = this.world.atPosition(this.input);
+
+        if(t) {
+            renderer.text(t.id, this.input.x, this.input.y, "black", "center", "bottom");
+        }
     }
     
     return PacGame;

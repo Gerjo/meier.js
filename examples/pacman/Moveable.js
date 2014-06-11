@@ -43,11 +43,13 @@ define(function(require) {
 						}
 					}
 
+					var oldTarget = this.target;
+
 					// Found next tile, set as target.
 					if(next && ! next.wall) {
 						this.position.add(velocity);
 
-						var oldTarget = this.target;
+						
 
 						// Set next target.
 						this.target = next;
@@ -58,8 +60,10 @@ define(function(require) {
 					// No next tile. Halt.
 					} else {
 						this.position = this.target.position.clone();
+						this.target = null;
 
-						this.atDestination(this.target);
+						this.atDestination(oldTarget);
+
 					}
 				} else {
 					this.position.add(velocity);

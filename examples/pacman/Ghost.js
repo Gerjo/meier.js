@@ -15,7 +15,11 @@ define(function(require) {
 	}
 
 	Ghost.prototype.atDestination = function(tile) {
+		console.log("atDestination(" + tile.id + ")");
+		
 		this.random(tile);
+
+
 	};
 
 	Ghost.prototype.random = function(tile) {
@@ -27,18 +31,33 @@ define(function(require) {
 			var candidate = this.world[fn](tile);
 
 			if(candidate && ! candidate.wall) {
+
+				console.log(fn, "from: " + tile.id + ", to: " + candidate.id);
+
 				this.target = candidate;
+
 				break;
 			}
 		}
 	};
 
 	Ghost.prototype.atIntermediate = function(tile) {
-		var n = Random(0, 100);
-		if(n > 50) {
-			this.random(tile);
 
-			console.log("randomize");
+		console.log("atIntermediate(" + tile.id + ")");
+
+		var n = Random(0, 100);
+		if(n > 0) {
+
+			var count = 0;
+
+			count += this.world.isWalkable(this.world.aboveOf(tile));
+			count += this.world.isWalkable(this.world.rightOf(tile));
+			count += this.world.isWalkable(this.world.leftOf(tile));
+			count += this.world.isWalkable(this.world.belowOf(tile));
+
+			if(count > 2) {
+				this.random(tile);
+			}
 		}
 
 		
@@ -49,6 +68,11 @@ define(function(require) {
 		renderer.begin();
 		renderer.circle(0, 0, this.width);
 		renderer.fill(this.color);
+
+		if(this.target) {
+			renderer.text(this.target.id, 0, 0);
+		}
+
 	};
 
 	return Ghost;

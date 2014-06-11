@@ -21,19 +21,19 @@ define(function(require) {
 
 		var target = null;
 
-		if(key == Key.A) {
+		if(key == Key.A || key == Key.LEFT) {
 			target = this.world.leftOf(current);
 		}
 
-		if(key == Key.D) {
+		if(key == Key.D || key == Key.RIGHT) {
 			target = this.world.rightOf(current);
 		}
 
-		if(key == Key.W) {
+		if(key == Key.W || key == Key.UP) {
 			target = this.world.aboveOf(current);
 		}
 
-		if(key == Key.S) {
+		if(key == Key.S || key == Key.DOWN) {
 			target = this.world.belowOf(current);
 		}
 
