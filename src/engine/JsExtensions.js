@@ -236,6 +236,11 @@ Array.prototype.clear = function() {
     return this;
 };
 
+/// Empty an array.
+Array.prototype.empty = function() {
+    return this.length == 0;
+};
+
 /// Search in an array for the first item matching the given predicate.
 ///
 /// @param {callback} A predicate function. 
