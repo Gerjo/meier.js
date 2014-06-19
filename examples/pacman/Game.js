@@ -1,5 +1,6 @@
 define(function(require){
     var Game = require("meier/engine/Game");
+    var V2   = require("meier/math/Vec")(2);
     
     var Level  = require("./Map");
     var World  = require("./World");
@@ -30,10 +31,14 @@ define(function(require){
     PacGame.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 
-        var t = this.world.atPosition(this.input);
+        var a = this.world.atPosition(this.input);
+        var b = this.world.atPosition(new V2(0, 20));
 
-        if(t) {
-            renderer.text(t.id, this.input.x, this.input.y, "black", "center", "bottom");
+        if(a) {
+            renderer.text(a.id, this.input.x, this.input.y, "black", "center", "bottom");
+
+            this.world.path(a, b, renderer);
+
         }
     }
     

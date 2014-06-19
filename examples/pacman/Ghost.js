@@ -15,8 +15,8 @@ define(function(require) {
 	}
 
 	Ghost.prototype.atDestination = function(tile) {
-		console.log("atDestination(" + tile.id + ")");
-		
+		//console.log("atDestination(" + tile.id + ")");
+
 		this.random(tile);
 
 
@@ -32,7 +32,7 @@ define(function(require) {
 
 			if(candidate && ! candidate.wall) {
 
-				console.log(fn, "from: " + tile.id + ", to: " + candidate.id);
+				//console.log(fn, "from: " + tile.id + ", to: " + candidate.id);
 
 				this.target = candidate;
 
@@ -43,10 +43,10 @@ define(function(require) {
 
 	Ghost.prototype.atIntermediate = function(tile) {
 
-		console.log("atIntermediate(" + tile.id + ")");
+		//console.log("atIntermediate(" + tile.id + ")");
 
 		var n = Random(0, 100);
-		if(n > 0) {
+		if(n > 80) {
 
 			var count = 0;
 
