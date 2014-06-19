@@ -29,7 +29,7 @@ define(function(require) {
         /// @param n Amount selected?
         /// @return float indicating the binomial coefficient
         BinomialCoefficient: function(d, n) {
-            return Factorial(d) / (Factorial(d - n) * Factorial(n));
+            return Factorial(k) / (Factorial(k - n) * Factorial(n));
         },
     
         /// Calculate Bernstein basis polynomials.
