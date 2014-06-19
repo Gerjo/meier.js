@@ -299,15 +299,31 @@ define(function(require) {
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.movingToFixed = function() {
-        var r = Matrix.CreateXoY(this.rotation);
-        var t = Matrix.CreateTranslation(this.position);
-        
-        return t.product(r);
+        var r, t;
+
+        // No translation
+        var isNull = this.position.isNull();
+
+        // No rotation
+        var noRotation = this.rotation == 0;
+
+        // No transform at all, return identity
+        if(noRotation && isNull) {
+            return Matrix.CreateIdentity();
+
+        // No rotation, just translation
+        } else if(noRotation) {
+            return Matrix.CreateTranslation(this.position);
+        }
+
+        // Just rotation in the XoY plane
+        return Matrix.CreateXoY(this.rotation);
     };
     
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.fixedToMoving = function() {
+
         var r = Matrix.CreateXoY(-this.rotation);
         var t = Matrix.CreateTranslation(new Vector(-this.position.x, -this.position.y));
         
