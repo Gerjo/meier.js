@@ -10,9 +10,10 @@ define(function(require) {
     var Disk      = require("meier/math/Disk");
     var Line      = require("meier/math/Line");
     
-    // Some canvas implementations crash. The standard doesn't mandate
-    // a minimal size. At the time of writing, the following seems
-    // sensible (signed 16 bit range, with some removed).
+    /// Some canvas implementations crash when rendering too 
+    /// extreme coordinates. The standard doesn't mandate
+    /// a minimal size. At the time of writing, the following seems
+    /// sensible (signed 16 bit range, with some removed).
     var MAX_CANVAS_DRAW_SIZE = Math.pow(2, 16) * 0.25;
     
     function Triangle(a, b, c) {
@@ -23,9 +24,7 @@ define(function(require) {
         this.center   = new Vector(0, 0);
         this.radius   = 0;
         this.radiusSQ = 0;
-        
-        //this.neighbours = [];
-        
+                
         if(a && b && c) {
             this.updateInternals();
         }
@@ -87,7 +86,7 @@ define(function(require) {
     }
     
     var self = {
-        //test
+
         Triangle: Triangle,
         
         /// Generate a Voronoi diagram.
