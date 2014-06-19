@@ -321,9 +321,7 @@ define(function(require) {
         var t = this.fixedToMoving();
         
         var e = this.parent;
-        
-        //console.log(t.pretty());
-        
+                
         while(e) {
             t = t.product(e.fixedToMoving());
             e = e.parent;
