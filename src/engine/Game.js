@@ -187,6 +187,8 @@ define(function(require) {
         
             // Draw from center. A 0.5 offset is given to align the game
             // coordinate frame with canvas coordinate frame.
+            // TODO: Windows platforms seem to disagree with this. Further study is required
+            // to determine optimal platform independend solutions.
             this._renderer.hw + 0.5,
             this._renderer.hh + 0.5);
     
