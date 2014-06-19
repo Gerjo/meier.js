@@ -369,6 +369,7 @@ define(function(require) {
         return this.position.x + (this.width * 0.5 * this.scale);
     };
     
+    /// Don't use this unless you know what you are doing.
     Entity.NaiveIntersection = function(entity, b) {
         var ehw = entity.width  * 0.5;
         var ehh = entity.height * 0.5;        
