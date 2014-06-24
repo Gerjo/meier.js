@@ -95,8 +95,6 @@ define(function(require) {
                 if(entity !== self) {
                     if(entity.position.distanceSQ(self.position) < range) {
                         
-                        //var dot = self.velocity.clone().normalize().dot(entity.velocity.clone().normalize());
-                        
                         var dot = self.velocity.dot(entity.position.clone().subtract(self.position));
                         
                         //console.log(dot, this.viewAngle);
