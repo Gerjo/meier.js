@@ -21,7 +21,6 @@ define(function(require) {
         
         
         this.add(this.sketch = new Sketch(0, 0, 300, 300));
-        // fix random.
         
         this.input.subscribe(Input.KEY_DOWN, this.onKeyDown.bind(this));
                
@@ -49,60 +48,10 @@ define(function(require) {
         this.previous = this.current;
         
         this.lastGuess = null;
-        /*
-        var seed = 22; // For initial random values.
-        this.nnet = new Nnet([2, 3, 3, 1], NaN);
-        
-        this.log("seed", this.nnet.seed);
-        
-        this.train = [
-            [0, 1],
-            [0, 0],
-            [1, 1],
-            [1, 0]
-        ];
-        
-        this.expected = [
-            [1],
-            [0],
-            [0],
-            [1]
-        ];
-        */
-        
-        //for(var i = 0; i < 10; ++i) {
-            //this.nnet.train(this.train, this.expected);
-            //}
     }
     
     MachineLearning.prototype.onKeyDown = function(input, key) {
         this.renew();
-        
-        /*if(key == Key.SPACE) {
-            this.nnet.train(this.train, this.expected);
-        } else if(key == Key.LEFT_ENTER) {
-            for(var i = 0; i < this.train.length; ++i) {
-                var r = this.nnet.classify(this.train[i]);
-                
-                console.log("[" + this.train[i].join() + "] Expected: " + this.expected[i] + ", received: " + r[0].toFixed(6));
-            }
-        } else if(key == Key.ONE) {
-            var r = this.nnet.classify(this.train[0]);
-            
-            console.log("[" + this.train[0].join() + "] Expected: " + this.expected[0] + ", received: " + r[0].toFixed(6));
-        } else if(key == Key.TWO) {
-            var r = this.nnet.classify(this.train[1]);
-            
-            console.log("[" + this.train[1].join() + "] Expected: " + this.expected[1] + ", received: " + r[0].toFixed(6));
-        } else if(key == Key.THREE) {
-            var r = this.nnet.classify(this.train[2]);
-            
-            console.log("[" + this.train[2].join() + "] Expected: " + this.expected[2] + ", received: " + r[0].toFixed(6));
-        } else if(key == Key.FOUR) {
-            var r = this.nnet.classify(this.train[3]);
-            
-            console.log("[" + this.train[3].join() + "] Expected: " + this.expected[3] + ", received: " + r[0].toFixed(6));
-        }*/
     };
     
     MachineLearning.prototype.renew = function() {
