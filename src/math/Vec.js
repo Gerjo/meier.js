@@ -468,6 +468,8 @@ define(function(require) {
             for(var i = 0; i < this.numrows; ++i) {
                 var padding = "";
                 
+                // Padding to account for missing "-" sign. Looks prettier
+                // in the debug console. That's all.
                 if(this._[i] >= 0) {
                     padding = " ";
                 }
@@ -475,7 +477,7 @@ define(function(require) {
                 r += padding + this._[i].toFixed(6) + ", ";
             }
         
-            r = r.trim(", ") + "}";
+            r = r.trim(", ") + " }";
         
             return r;
         };
