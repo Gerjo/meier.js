@@ -5,28 +5,29 @@ define(function(require) {
     var Colors = require("meier/aux/Colors");
     var Matrix = require("meier/math/Mat");
     
-    function Bucket(x, y, color, v) {
+    var Bucket = Field.Bucket = function(x, y, v) {
         this.x     = x;
         this.y     = y;
-        this.color = color || Colors.BLACK;
         this.v     = v || new V2(0, 0);
+        this.fill  = null;
+        
+        // Algorithmic related properties
+        this.p     = null;    // Back pointer
+        this.c     = 0;       // Cost from here to sink.
+        
+        this.count = 0;       // N times visited.
     }
     
     Field.prototype = new Entity();
-    function Field(color, size) {
-        Entity.call(this, 0, 0, 10, 10);        
+    function Field(color, size, w, h) {
+        Entity.call(this, 0, 0, w, h);        
         
         this.size  = size || 10;
         this.previousMouse = null;
         this.color = color || Colors.black;
+        this.isNavigation = false;
         
-        
-        this.kernel = Matrix(7, 7).CreateGaussian(2.2);        
-    }
-    
-    Field.prototype.onAdd = function(game) {
-        this.width   = game.width;
-        this.height  = game.height;
+        this.kernel = Matrix(3, 3).CreateGaussian(2.2);        
         
         this.buckets = [];
         
@@ -38,7 +39,7 @@ define(function(require) {
         for(var x = -(this.hw + offsets.x); x <= this.hw; x += this.size) {
             this.buckets.push([]);
             for(var y = -this.hh - offsets.y; y <= this.hh; y += this.size) {
-                this.buckets.last().push(new Bucket(x, y, this.color, null));
+                this.buckets.last().push(new Bucket(x, y, null));
             }
         }
     }
@@ -74,24 +75,54 @@ define(function(require) {
         this.previousMouse = local;
     };
     
+    Field.prototype.atIndex = function(x, y) {
+        if( ! isNaN(x.x)) {
+            return this.buckets[x.x][x.y];
+        }
+    
+        return this.buckets[x][y];
+    };
+    
+    Field.prototype.atPosition = function(x, y) {
+        if( ! isNaN(x)) {
+            x = new V2(x, y);
+        }
+        
+        return this.atIndex(this.toIndex(x));
+    };
+    
     Field.prototype.draw = function(renderer) {
-        var size  = this.size;
+
         var hover = this.toIndex(this.toLocal(this.input));
-        var l     = 20;
+        var l     = 10;
         
-        
+        var color = Colors.Alpha(this.color, 0.7);
         renderer.begin();
         
         for(var x = 0; x < this.buckets.length; ++x) {
             for(var y = 0; y < this.buckets[x].length; ++y) {
                 var b = this.buckets[x][y];
+                
+                if(this.isNavigation) {
+                    renderer.rectangle(b.x, b.y, this.size, this.size);
+                }
+                
+                if(b.fill) {
+                    renderer.stroke(color);
+                    renderer.begin();
+                    renderer.rectangle(b.x, b.y, this.size, this.size);
+                    renderer.fill(b.fill);
+                    renderer.begin();
+                }
+                
                 if( ! b.v.isNull()) {
-                    renderer.line(b.x, b.y, b.x + b.v.x * l, b.y + b.v.y * l);
+                    //renderer.line(b.x, b.y, b.x + b.v.x * l, b.y + b.v.y * l);
+                    renderer.arrow(b.x, b.y, b.x + b.v.x * l, b.y + b.v.y * l);
                 }
             }   
         }
         
-        renderer.stroke(Colors.Alpha(b.color, 0.7));
+        renderer.stroke(color, 1);
     }
     
     Field.prototype.load = function(storage) {
