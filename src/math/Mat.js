@@ -486,6 +486,20 @@ define(function(require) {
             return r;
         };
         
+        M.prototype.traceProduct = function() {
+            if( ! isSquare) {
+                throw new Error("Mat::traceProduct is only defined for n*n square matrices.");
+            }
+            
+            var r = 1;
+            
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r *= this._[At(i, i)];
+            }
+            
+            return r;
+        };
+        
         M.prototype.add = function(m) {
             if(this.numrows !== m.numrows && m.numrows !== this.numcolumns) {
                 throw new Error("Cannot add, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
