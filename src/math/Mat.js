@@ -650,25 +650,51 @@ define(function(require) {
             return this;
         };
         
-        M.prototype.pretty = function() {
-            var out = "", n, l = 6, d = 2;
+        /// Generate a tidy looking string representation of this matrix
+        ///
+        /// @param {precision} Optionally, the number of digits behind the comma.
+        ///                    Defaults to 4.
+        /// @return A string representing this matrix.
+        M.prototype.pretty = function(precision) {
+            precision = precision || 4;
+            
+            var out = [];
+            var pad = 0;
         
-            for(var i = 0, n, j = 1; i < this.num; ++i, ++j) {
-                n = Round(this._[i], d) + "";
-            
-                out += n;
-            
-                for(var k = n.length; k < l; ++k) {
-                    out += " ";
+            for(var col = 0; col < columns; ++col) {
+                var max = 0;
+                
+                for(var row = 0; row < rows; ++row) {
+                    var string = this.at(row, col).toFixed(precision) + " ";
+                    
+                    // Inverse logic to deal with NaN and infinity.
+                    if( ! (this.at(row, col) < 0) ) {
+                        string = " " + string;
+                    }
+                    
+                    // First entry.
+                    if(col == 0) {
+                        out[row] = "";
+                    }
+                    
+                    // Pad the string to match alignment.
+                    while(out[row].length < pad) {
+                        out[row] += " ";
+                    }
+                    
+                    // Append the number.
+                    out[row] += string;
+                    
+                    // Record longest strong for padding next time.
+                    max = Math.max(max, out[row].length);
+                
                 }
-            
-                if(j === this.numcolumns) {
-                    out += "\n";
-                    j = 0;
-                }
+                
+                pad = max;
             }
         
-            return out;
+            
+            return out.join("\n");
         };
         
         M.prototype.wolfram = function() {
