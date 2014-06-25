@@ -275,11 +275,16 @@ define(function(require) {
             return r;
         },
         
+        GaussJordanElimination: function(input, out) {
+            return self._GaussJordanEliminationInternal(input, out, false);
+        },
 
         /// A half-baked implementation of Gauss-Jordan elemination.
         /// 
         ///
-        GaussJordanElimination: function(input, out) {
+        _GaussJordanEliminationInternal: function(input, out, lowerTriangleOnly) {
+            
+            lowerTriangleOnly = lowerTriangleOnly || false;
             
             if( ! input || ! input._) {
                 throw new Error("GaussJordanElimination - argument is probably not a matrix.");
@@ -390,37 +395,40 @@ define(function(require) {
             
             // We do a full elimination. Though for some cases we can back-substitute from here on.
             
-            for(var it = size - 1; it > 0; --it) 
-            {
-                var pivot = matrix._[At(it, it)];
+            if( ! lowerTriangleOnly) {
+                for(var it = size - 1; it > 0; --it) {
+                    
+                    var pivot = matrix._[At(it, it)];
                 
-                for(var row = 0; row < it; ++row) {
-                    var ratio = matrix._[At(row, it)] / pivot;
+                    for(var row = 0; row < it; ++row) {
+                        var ratio = matrix._[At(row, it)] / pivot;
                     
-                    if(ratio == 0) {
-                        console.error("GaussJordanElimination - pivot ratio is zero");
-                    }
-                    
-                    //console.log("pivot[row " + it + "] " + pivot + " ratio: " + ratio);
-                    
-                    for(var col = 0; col < size; ++col) {
-                        matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
-                        
-                        if(col < out.numcolumns) {
-                            var r = out._[At2(row, col)] - (ratio * out._[At2(it, col)]);
-
-                            //console.log(row, col, out._[At(row, col)]);
-                        
-                            //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
-                        
-                        
-                            out._[At2(row, col)] = r;
+                        if(ratio == 0) {
+                            console.log(matrix.pretty());
+                            console.error("GaussJordanElimination - pivot ratio is zero");
                         }
-                    }
                     
-                }
+                        //console.log("pivot[row " + it + "] " + pivot + " ratio: " + ratio);
+                    
+                        for(var col = 0; col < size; ++col) {
+                            matrix._[At(row, col)] -= (ratio * matrix._[At(it, col)]);
+                        
+                            if(col < out.numcolumns) {
+                                var r = out._[At2(row, col)] - (ratio * out._[At2(it, col)]);
+
+                                //console.log(row, col, out._[At(row, col)]);
+                        
+                                //console.log(out._[At(row, col)] + " - " + out._[At(it, col)] + "*" + ratio + " = " + r);
+                        
+                        
+                                out._[At2(row, col)] = r;
+                            }
+                        }
+                    
+                    }
                 
-                //break;
+                    //break;
+                }
             }
             /*
             */
