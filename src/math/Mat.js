@@ -370,14 +370,177 @@ define(function(require) {
                        (this._[At(0,1)] * this._[At(1,0)] * this._[At(2,2)]) -
                        (this._[At(0,0)] * this._[At(1,2)] * this._[At(2,1)]);
             };
+        } else if(isSquare) {
+            M.prototype.determinant = function() {
+                var clone = this.clone();
+                
+                var swap = 1;
+                
+                // Create a matrix with non-zero diagonal. Doesn't work,
+                // when applying the guassian rules, new null-values may
+                // arrise. Now using the hack from princeton later in the code.
+                /*for(var i = 0; i < rows; ++i) {
+                    if(clone.at(i, i) === 0) {
+                        swapped = false;
+                        
+                        for(var j = i + 1; j < rows; ++j) {
+                            if(clone.at(j, i) != 0) {
+                                clone.swapRows(i, j);
+                            
+                                //console.log("GaussJordanElimination: swap rows:", i, "and", j);
+                                swapped = true;
+                                
+                                // Swapping rows requires a sign change
+                                swap *= -1;
+                                break;
+                            }
+                        }
+                    
+                        if( ! swapped) {
+                            console.log("Mat::determinant Unable to find suitable pivot value. Rework logic!");
+                        }
+                    }
+                }*/
+                
+                // Logic copied from math/Math.GaussJordanElimination
+                for(var i = 0; i < rows; i++) {
+                    
+                    //console.log("Pivot: " + i);
+                    
+                    var maxRow = i;
+                    var maxVal = 0;
+                    
+                    // Swapping logic inspired by: http://introcs.cs.princeton.edu/java/95linear/GaussianElimination.java.html
+                    // Though it still contains singularies.
+                    for(var j = i; j < rows; j++) {
+                        var val = Math.abs(clone._[At(j, i)]);
+                        
+                        if(val > maxVal) {
+                            maxVal = val;
+                            maxRow = j;
+                        }
+                    }
+                    
+                    if(i != maxRow) {
+                        //console.log("swap rows " + i + " and " + maxRow);
+                        clone.swapRows(i, maxRow);
+                        swap *= -1;
+                    }
+                    
+                    //console.log("Max row: " + maxRow + " max val: " + maxVal);
+                    
+                    for(var j = 0; j < rows; j++) {
+                        
+                        
+                        // Low triangle only
+                        if(j > i) {
+                            var ratio = clone._[At(j,i)] / clone._[At(i,i)];
+
+                            if(clone._[At(i,i)] == 0) {
+                                console.log(clone.pretty());
+                                throw new Error("error at row " + i);
+                            }
+
+                            for(var k = 0; k < rows; k++) {
+                                clone._[At(j,k)] -= ratio * clone._[At(i,k)];
+                            }
+                        }
+                    }
+                    
+                    //console.log("Step: " + (i+1) + " / " + rows);
+                    //console.log(clone.pretty());
+                }
+
+                var det = clone.traceProduct() * swap;
+              
+
+                return det;
+                
+            };
         } else {
             M.prototype.determinant = function() {
-                if(!isSquare) {
-                    throw new Error("Matrix must be square for determinant.");
+                throw new Error("Matrix must be square for determinant.");
+            }
+        }
+        
+        if(isSquare) {
+            M.prototype.adjugate = M.prototype.adjoint = function() {
+                
+                //  
+                //  + - + -
+                //  - + - +
+                //  + - + -
+                //  - + - +
+                //
+                
+                var minors = this.minors();
+                
+                var checkerboard = 1;
+                
+                for(var i = 0, j = 0; i < minors._.length; ++i, ++j) {
+                    
+                    // Apply checkerboard pattern
+                    minors._[i] *= checkerboard;
+                                        
+                    if(j != rows) {
+                        checkerboard *= -1;
+                        
+                    } else {
+                        j = 0;
+                    }
+                     
                 }
                 
-                throw new Error("TODO: implement determinant.");
+                return minors.transpose();
+            };
+        } else {
+            M.prototype.adjugate = M.prototype.adjoint = function() {
+                throw new Error("Mat::adjugate / Mat::adjoint only available on square matrices");
+            };
+        }
+        
+        if(isSquare) {
+            M.prototype.minors = function() {
                 
+                // To hold the solution
+                var minors = this.clone();
+                
+                // To perform math on
+                var tmp    = new (Builder(rows - 1, rows - 1));
+                
+                // For each row and column
+                for(var row = 0; row < rows; ++row) {
+                    for(var col = 0; col < columns; ++col) {
+                        
+                        // Create a submatrix
+                        for(var a = 0, b = 0; a < rows; ++a) {
+                            
+                            if(a == row) {
+                                continue;
+                            }
+                            
+                            for(var c = 0, d = 0; c < columns; ++c) {
+                                if(c != col) {
+                                    
+                                    tmp.set(b, d, this.at(a, c));
+                                    
+                                    ++d;
+                                }
+                            }
+                            
+                            b++;
+                        }
+                        
+                        // Compute determinant of submatrix and store it.
+                        minors.set(row, col, tmp.determinant());
+                    }
+                }
+                
+                return minors;
+            };
+        } else {
+            M.prototype.minors = function() {
+                throw new Error("Matrix must be square for minors.");
             };
         }
         
@@ -447,14 +610,24 @@ define(function(require) {
                 return adjugate;
             };
             
-        } else {
+        } else if(isSquare) {
             M.prototype.inverse = function() {
-                if(!isSquare) {
-                    throw new Error("Matrix must be square for inverse.");
+                
+                var adjugate = this.adjugate();
+                var det = this.determinant();
+
+                if(det == 0) {
+                    throw new Error("Cannot inverse a singular matrix. The determinant is 0. (you probably don't have to invert it)");
                 }
                 
-                throw new Error("TODO: implement matrix inverse.");
+                return adjugate.multiply(1 / det);
                 
+               // throw new Error("TODO: implement matrix inverse.");
+                
+            };
+        } else {
+            M.prototype.inverse = function() {
+                throw new Error("Matrix must be square for inverse.");
             };
         }
         
@@ -474,12 +647,12 @@ define(function(require) {
         
         M.prototype.trace = function() {
             if( ! isSquare) {
-                throw new Error("Trace is only defined for n*n square matrices.");
+                throw new Error("Mat::trace is only defined for n*n square matrices.");
             }
             
             var r = 0;
             
-            for(var i = this.numrows - 1; i > 0; --i) {
+            for(var i = this.numrows - 1; i >= 0; --i) {
                 r += this._[At(i, i)];
             }
             
