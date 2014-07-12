@@ -1,7 +1,22 @@
 define(function(require) {
     var V2 = require("meier/math/Vec")(2);
     
-    var NextUniqueId = 0;
+    /// Collection of all used IDs
+    var ids = [0];
+    
+    /// Create a unique ID for serialisation
+    function UniqueId() {
+        var max = Math.max.apply(null, ids);
+        var next = max + 1;
+
+        return next;
+    }
+    
+    /// Store the unique ID internally
+    function ReserveId(id) {
+        ids.push(id);
+        return id;
+    }
     
     Waypoint.prototype = new V2();
     function Waypoint(x, y) {
@@ -11,8 +26,10 @@ define(function(require) {
         
         this.radius = 10;
         
-        this.id = ++NextUniqueId;
+        this.id = ReserveId(UniqueId());
     }
+    
+    
     
     Waypoint.prototype.contains = function(point) {
         return this.distanceSq(point) < Math.pow(this.radius, 2);
@@ -29,6 +46,13 @@ define(function(require) {
             "y":     this.y,
             "id":    this.id
         };
+    };
+    
+    Waypoint.fromObject = function(o) {
+        var waypoint = new Waypoint(o.x, o.y);
+        waypoint.id = ReserveId(o.id);
+        
+        return waypoint;
     };
     
     return Waypoint;

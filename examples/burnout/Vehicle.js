@@ -1,47 +1,117 @@
 define(function(require) {
-    var Entity = require("meier/engine/Entity");
-    var V2     = require("meier/math/Vec")(2);
-    var Lerp   = require("meier/math/Lerp");
+    var Entity   = require("meier/engine/Entity");
+    var V2       = require("meier/math/Vec")(2);
+    var Lerp     = require("meier/math/Lerp");
+    var Texture  = require("meier/engine/Texture");
+    var Nearest  = require("meier/math/Intersection").Nearest;
     
     Vehicle.prototype = new Entity();
     function Vehicle(x, y) {
         Entity.call(this, x, y, 10, 10);
         
-        this.direction = new V2(1, 1).normalize();
-        this.speed = 200;
-        this.momentum = 1;
+        this.direction  = new V2(1, 1).normalize();
+        this.speed      = 200;
+        this.momentum   = 1;
+        this.maxSteerAngle = 0.08;
+        this.maxSpeed   = 10;
+        this.speed      = 40;
+        this.lookAhead  = 30;
         
-        this.target   = new V2(10, 1);
+        this.target     = new V2(10, 1);
+        
+        this.background = new Texture("vehicle.png");
     }
     
     Vehicle.prototype.update = function(dt) {
-        
-        this.target = this.game.map.getAttractionCandidates(this.position, this.direction)[3];
-        
-        var direction = this.target.direction(this.position).normalize();
-        
-        this.direction = Lerp(this.direction, direction, this.momentum);
-        
-        this.position.addScaled(this.direction, dt * this.speed);
+        this.dt = dt;
     };
     
     Vehicle.prototype.draw = function(renderer) {
+        var dt = this.dt;
+        renderer.texture(this.background);
+        
+        var run, timeout = 10;
+
+        // Current road.
+        var currentRoad      = this.game.map.findSelectedRoad(this.position);  
+        var targetRoad       = currentRoad;
+        
+        // Nearest to current.      
+        var nearestCurrent   = Nearest.PointOnLineSegment(this.position, currentRoad);
+        var target           = nearestCurrent;
+        
+        var ahead = this.lookAhead;
+        
+        do {
+            run = false;
+            
+            var direction = targetRoad.direction().normalize();
+        
+            target        = target.clone().addScaled(direction, ahead);
+        
+        
+            // Attraction point does not lie on the current segment.
+            if(!(target.x > Math.min(targetRoad.b.x, targetRoad.a.x) && target.x < Math.max(targetRoad.b.x, targetRoad.a.x))) {
+                if(!(target.y > Math.min(targetRoad.b.y, targetRoad.a.y) && target.y < Math.max(targetRoad.b.y, targetRoad.a.y))) {
+
+                    // Find the successor road
+                    for(var i = 0; i < targetRoad.b.roads.length; ++i) {
+                        var tentativeNextRoad = targetRoad.b.roads[i];
+                    
+                        // Found one. Halt looping.
+                        if( ! targetRoad.equals(tentativeNextRoad)) {
+                            targetRoad = tentativeNextRoad;
+                            
+                            // Reduce lookahead (May be buggy with roads.magnitude < this.lookahead)
+                            ahead -= nearestCurrent.distance(targetRoad.a);
+                            
+                            // Jump to the far edge.
+                            target = targetRoad.a;
+                            break;
+                        }
+                    }
+    
+                    run = true;
+                }
+            }
+            
+        
+        } while(run && --timeout > 0);
+        
+        if(timeout <= 0) {
+            console.log("Vehicle::update timeout");
+        }
+        
+        // Direction does not imply speed. Normalize.
+        var dir       = target.direction(this.position).normalize();
+        
+        
+        var currentAngle = this.direction.angle();
+        var deltaAngle   = this.direction.angleBetween(dir);
+        
+        // Clamp steering angle
+        if(Math.abs(deltaAngle) > this.maxSteerAngle) {
+            var angle = deltaAngle > 0 ? this.maxSteerAngle : -this.maxSteerAngle;
+            
+            // Create a dampened direction
+            dir = V2.CreateAngular(currentAngle + angle);
+        }
+        
+        // TODO: This does not integrate well over time.
+        this.position.addScaled(this.direction, this.speed * dt * 0.5);
+        this.position.addScaled(dir, this.speed * dt * 0.5);
+       
+        
+        this.direction = dir;
+        
+        // For animation purposes.
+        this.rotation = dir.angle();
+        
+        
         renderer.begin();
-        renderer.circle(0, 0, 10);
-        renderer.stroke("black");
-        
-        renderer.save();
-        renderer.translate(-this.position.x, -this.position.y);
-        var candidates = this.game.map.getAttractionCandidates(this.position, this.direction, renderer);
-        renderer.restore();
-       /* renderer.begin();
-        candidates.forEach(function(p) {
-            renderer.circle(p.subtract(this.position), 3);    
-        }.bind(this));
-        renderer.fill("red");
-        */
-        
-        
+        renderer.circle(this.toLocal(target), 5);
+        renderer.circle(this.toLocal(nearestCurrent), 5);
+        renderer.fill("blue");        
     };
     
     return Vehicle;

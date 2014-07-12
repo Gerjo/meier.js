@@ -4,8 +4,9 @@ define(function(require) {
     var Input    = require("meier/engine/Input");
     var Color    = require("meier/aux/Colors");
     var Keys     = require("meier/engine/Key");
-    var Nearest  = require("meier/math/Intersection").Nearest;;
-    var M        = require("meier/math/Math");;
+    var Nearest  = require("meier/math/Intersection").Nearest;
+    var M        = require("meier/math/Math");
+    var Texture  = require("meier/engine/Texture");
     
     
     var Waypoint = require("./Waypoint");
@@ -27,6 +28,8 @@ define(function(require) {
         this.selected = null;
         
         this.load();
+        
+        this.background = new Texture("map.png");
     }
     
     Map.prototype.deleteWaypoint = function(waypoint) {
@@ -35,21 +38,54 @@ define(function(require) {
         });
         
         this.roads = this.roads.filter(function(r) {
-            return ! (r.from.id == waypoint.id || r.to.id == waypoint.id);
+            return ! (r.a.id == waypoint.id || r.b.id == waypoint.id);
         });
     };
+    
+    Map.prototype.deleteRoad = function(road) {
+        this.waypoints.forEach(function(w) {
+            w.roads = w.roads.filter(function(r) {
+                var found = r.equals(road);
+                
+                if(found) {
+                    console.log("remove");
+                }
+                
+                return ! found;
+            });
+        });
+        
+        this.roads = this.roads.filter(function(r) {
+            var found = r.equals(road);
+            
+            if(found) {
+                console.log("be gone");
+            }
+            
+            return ! found;
+        });
+        
+    };
+    
     
     Map.prototype.onKeyDown = function(input, key) {
         
         if(key == Keys.D) {
             
             if( ! this.mouseRightDown && ! this.mouseLeftDown && ! this.selected) {
-                var waypoint = this.findSelected(this.toLocal(this.input));
+                var local = this.toLocal(this.input);
+                
+                var waypoint = this.findSelected(local);
                 
                 if(waypoint) {
                     this.deleteWaypoint(waypoint);
+                } else {
+                    var road = this.findSelectedRoad(local);
+                    
+                    if(road) {
+                        this.deleteRoad(road);
+                    }
                 }
-                
             }
             
             this.save();
@@ -64,11 +100,10 @@ define(function(require) {
         });
     };
     
-    Map.prototype.findSelectedRoad = function(point, exclude) {
+    Map.prototype.findSelectedRoad = function(point) {
         var bestPoint = null;
         var bestD = Infinity;
         var bestRoad = null;
-        exclude = exclude || [];
         
         for(var i = 0; i < this.roads.length; ++i) {
             var road = this.roads[i];
@@ -76,11 +111,9 @@ define(function(require) {
             var d    = p.distanceSq(point);
          
             if(d < bestD) {
-                if( ! exclude.find(function(a) { return a.equals(road); })) {
-                    bestD     = d;
-                    bestPoint = p;
-                    bestRoad  = road;
-                }
+                bestD     = d;
+                bestPoint = p;
+                bestRoad  = road;
             }
         }
         
@@ -165,6 +198,9 @@ define(function(require) {
     };
     
     Map.prototype.draw = function(renderer) {
+        
+        renderer.texture(this.background);
+        
         Entity.prototype.draw.call(this, renderer);
         var local = this.toLocal(this.input);
         
@@ -173,7 +209,7 @@ define(function(require) {
             if(this.mouseRightDown) {
                 renderer.begin();
                 renderer.line(this.selected, local);
-                renderer.stroke("black", 2);
+                renderer.stroke("yellow", 2);
             }
         }
         
@@ -181,15 +217,15 @@ define(function(require) {
         // Draw each waypoint
         renderer.begin();
         this.waypoints.forEach(function(p) {
-            renderer.circle(p.x, p.y, 10);
+            renderer.circle(p.x, p.y, 5);
             
-            renderer.text(p.id, p.x, p.y, "black", "center", "middle");
+            //renderer.text(p.id, p.x, p.y, "white", "center", "middle");
             
             if(p.contains(local)) {
-                renderer.text("hi", local.x, local.y, "black", "left", "bottom");
+                //renderer.text("hi", local.x, local.y, "black", "left", "bottom");
             }
         });
-        renderer.stroke("red");
+        renderer.fill("red");
         
         
         var selectedRoad = this.findSelectedRoad(local);
@@ -197,11 +233,11 @@ define(function(require) {
         // Draw each road
         this.roads.forEach(function(road) {
             
-            var color = selectedRoad.equals(road) ? Color.GREEN : Color.BLACK;
+            var color = Color.RED;//selectedRoad.equals(road) ? Color.RED : Color.YELLOW;
             
             renderer.begin();
-            renderer.line(road.from, road.to);
-            renderer.stroke(Color.Alpha(color, 0.2), 22);
+            renderer.arrow(road.a, road.b);
+            renderer.stroke(color, 1);
         });
     };
     
@@ -214,11 +250,7 @@ define(function(require) {
                 
                 // Recreate all waypoints
                 var waypoints = this.waypoints = object.waypoints.map(function(o) {
-                    var w = new Waypoint(o.x, o.y);
-        
-                    w.id  = o.id;
-        
-                    return w;
+                    return Waypoint.fromObject(o);
                 });
                 
                 // Recreate all roads
@@ -231,8 +263,8 @@ define(function(require) {
                     road.lanes  = o.lanes;
                     
                     // Subscribe the road to a waypoint
-                    road.from.roads.push(road);
-                    road.to.roads.push(road);
+                    road.a.roads.push(road);
+                    road.b.roads.push(road);
         
                     return road;
                 });
@@ -261,88 +293,6 @@ define(function(require) {
         
         localStorage.setItem("map", JSON.stringify(object));
     };
-    
-    
-    Map.prototype.getAttractionCandidates = function(currentLocation, desiredDirection, renderer) {
-        var candidates = [];
-        var interval   = 20;  // Distance
-        var lookahead  = 10;  // Number of steps.
-        
-        // Nearest road.
-        var road = this.findSelectedRoad(currentLocation);
-        
-        var direction = road.segment().direction().normalize();
-    
-        var sign = M.Sign(desiredDirection.dot(direction));
-    
-        direction.scaleScalar(sign);
-    
-        // TODO: flip direction based on desiredDirection? i.e., always
-        // advance
-    
-        var point = currentLocation.clone();
-        for(var i = 0; i < lookahead; ++i) {
-            var color = Color.RED;
-            
-            //
-            candidate = Nearest.PointOnLineSegment(point, road.segment());
-            
-            var intersection = null;
-            
-            if(candidate.equals(road.to)) {
-                intersection = road.to.roads;
-            } else if(candidate.equals(road.from)) {
-                intersection = road.from.roads;
-            }
-            
-            // Reached an intersection, find the next road.
-            if(intersection) {
-                var winner = intersection.find(function(tentativeRoad) {
-                    return ! tentativeRoad.equals(road);
-                });
-                
-                road      = winner;
-                point     = candidate;
-                var newDirection = road.segment().direction().normalize();
-                
-                //sign = M.Sign(direction.dot(newDirection));
-                
-                //if(renderer)
-                //    console.log("Turning. At " + point.wolfram());
-                
-                direction = newDirection.scaleScalar(sign);
-                
-                color = Color.GREEN;
-                
-                if(renderer) {
-                    renderer.begin();
-                    renderer.circle(candidate, 10);
-                    renderer.fill(color);
-                    
-                    renderer.begin();
-                    renderer.arrow(point, direction.clone().scaleScalar(30).add(point));
-                    renderer.stroke(Color.Purple);
-                    
-                }
-            }
-            
-            // Assign candidate to collection
-            candidates[i] = candidate;
-            
-            // Advance to the next sample location
-            point.addScaled(direction, interval);
-            
-            if(renderer) {
-                renderer.begin();
-                renderer.circle(candidate, 4);
-                renderer.fill(color);
-                
-            }
-        }
-    
-        return candidates;
-    };
-    
     
     return Map;
     
