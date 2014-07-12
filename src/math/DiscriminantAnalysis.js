@@ -123,14 +123,15 @@ define(function(require) {
                 // Total number of training entries
                 var total    = a.n + b.n;
                 
+                
                 // Precompute some variables
                 [a, b].forEach(function(d) {
                     d.mean     = Mean(d.data);
                     d.cov      = CovarianceMatrix(d.data, d.mean);
                     d.meanT    = d.mean.transpose();
-                    d.lnRatio  = Math.ln(d.n / total);
+                    d.lnRatio  = Math.ln(Math.abs(d.n / total));
                     d.covDet   = d.cov.determinant();
-                    d.lnCovDet = Math.ln(d.covDet);
+                    d.lnCovDet = Math.ln(Math.abs(d.covDet));
                     
                     // Will hold the constant term for each method
                     d.constant = 0;
