@@ -1,7 +1,7 @@
 define(function(require) {
     
     var Vector = require("meier/math/Vec")(2);
-    var Colors = require("meier/aux/Colors");
+    var Colors = require("meier/engine/Colors");
     
     /// Class that represents an annulus.
     function Annulus(position, min, max) {

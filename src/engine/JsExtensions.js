@@ -232,6 +232,13 @@ Array.prototype.unique = function(compare) {
 /// Empty an array.
 Array.prototype.clear = function() {
     this.length = 0;
+
+    return this;
+};
+
+/// Empty an array.
+Array.prototype.empty = function() {
+    return this.length == 0;
 };
 
 /// Test if this array is empty.
@@ -316,17 +323,26 @@ Array.prototype.walk = function(callback) {
 /// Filter combined with a map.
 Array.prototype.filterMap = function(callback) {
     var r;
+    var toRemove = [];
+
     for(var k in this) {
         if(parseInt(k, 10) == k) {
-        //for(var i = 0, r; i < this.length; ++i) {
             r = callback(this[k]);
     
             if(r === undefined) {
-                this.splice(k, 1);
+                // Enqueue removal
+                toRemove.push(k);
+              
             } else {
                 this[k] = r;
             }
         }
+    }
+  
+    // Remove indices
+    for(var i = 0, j = toRemove.length; i < j; ++i) {
+         // Subtract "i" to account for shifting indices due to splice
+         this.splice(toRemove[i] - i, 1);
     }
 
     return this;

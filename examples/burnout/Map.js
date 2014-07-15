@@ -2,7 +2,7 @@ define(function(require) {
     var Entity   = require("meier/engine/Entity");
     var V2       = require("meier/math/Vec")(2);
     var Input    = require("meier/engine/Input");
-    var Color    = require("meier/aux/Colors");
+    var Color    = require("meier/engine/Colors");
     var Keys     = require("meier/engine/Key");
     var Nearest  = require("meier/math/Intersection").Nearest;
     var M        = require("meier/math/Math");

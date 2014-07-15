@@ -6,8 +6,8 @@ define(function(require){
     var Lerp   = require("meier/math/Lerp");
     var Random = require("meier/math/Random");
     var Vector = require("meier/math/Vec")(2);
-    var Colors = require("meier/aux/Colors");
-    var Noise  = require("meier/aux/Noise");
+    var Colors = require("meier/engine/Colors");
+    var Noise  = require("meier/extra/Noise");
     var dat    = require("meier/contrib/datgui");
     var Intersection = require("meier/math/Intersection");
     

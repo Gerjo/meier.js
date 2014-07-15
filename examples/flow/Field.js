@@ -2,7 +2,7 @@ define(function(require) {
     var Entity = require("meier/engine/Entity");
     var V2     = require("meier/math/Vec")(2);
     var math   = require("meier/math/Math");
-    var Colors = require("meier/aux/Colors");
+    var Colors = require("meier/engine/Colors");
     var Matrix = require("meier/math/Mat");
     
     var Bucket = Field.Bucket = function(x, y, v) {
