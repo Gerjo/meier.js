@@ -32,6 +32,9 @@ define(function(require) {
         this.inTextures   = [];
         this.photons      = [];
         this.ext          = gl.getExtension("WEBGL_draw_buffers");
+
+
+        console.log("EXT:", gl.getExtension("WEBGL_draw_buffers"));
         
         var dims         = Tools.BalanceDimensions(this.photonCount);
         this.width       = dims.x;
@@ -269,8 +272,11 @@ define(function(require) {
     
     PhotonBase.prototype._prepareBuffers = function() {
         var ext = this.ext;
+
+        console.log(ext);
         
         ASSERT(gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL) >= 8);
+
         
         console.log("Max color attachments: " + gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL) + "/8");
         

@@ -31,11 +31,42 @@ define(function(require){
     Raytracer.prototype = new Game();
     function Raytracer(container) {  
         Game.call(this, container);
-        
+
+        this.isLoaded = false;
+        this.errors   = [];
+
         this.setHighFps(15);
         this.setLowFps(1);
         this.logger.setColor("red");
+
         
+        var tmpGL = document.createElement("canvas").getContext("experimental-webgl");
+
+        if( ! tmpGL) {
+            this.errors.push("No WebGL support detected.");
+        } else if( ! tmpGL.getExtension('OES_texture_float')) {
+            this.errors.push("No support for OES_texture_float.");
+        } else if( ! tmpGL.getExtension("WEBGL_draw_buffers")) {
+            this.errors.push("No support for WEBGL_draw_buffers.");
+        } else if( ! Float32Array ) {
+            this.errors.push("No support for Float32Array.");
+        } else if(tmpGL.getParameter(tmpGL.getExtension("WEBGL_draw_buffers").MAX_COLOR_ATTACHMENTS_WEBGL) < 8) {
+            this.errors.push("Only " + gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL) + " out of 8 color attachments are available.");
+        }
+
+        if(this.errors.empty()) {
+            this.load();
+        } else {
+            this.errors.push("");
+            this.errors.push("Not all required WebGL extensions are available, you could");
+            this.errors.push("try a different browser or operating system.");
+            this.errors.push("");
+            this.errors.push("¬_¬");
+        }
+    }
+
+    Raytracer.prototype.load = function() {
+
         this.photonTexture    = null;
         this.sceneTexture     = null;
         this.sceneDimensions  = null;
@@ -94,7 +125,9 @@ define(function(require){
         
         // Upload the grid texture and set the required uniform constants
         this.photonTexture = this.photonBase.upload(this.tracerProgram);
-    }
+
+        this.isLoaded = true;
+    };
     
     Raytracer.prototype.prepareInterlacing = function() {
         var fbo = this._interlacingFbo = gl.createFramebuffer();
@@ -186,21 +219,21 @@ define(function(require){
     Raytracer.prototype.draw = function(renderer2d) {        
         Game.prototype.draw.call(this, renderer2d);
         
-        
-        //return;
-        
-        // Clean buffers.
-        //gl.clearColor(0.0, 0.0, 0.5, 1.0);
-        //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._interlacingFbo);
-        this.runRaytracer();        
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        
-  
-        this.renderTexture(this._interlacingTexture);
-        
-        gl.flush();
+        if(this.isLoaded) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this._interlacingFbo);
+            this.runRaytracer();        
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            
+      
+            this.renderTexture(this._interlacingTexture);
+            
+            gl.flush();
+        }
+
+        this.errors.forEach(function(error, i) {
+            renderer2d.text(error, 0, i * -20, "black", "center", "middle");
+        });
+
     }
     
     /// Run the raytracer program
