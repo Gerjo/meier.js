@@ -473,25 +473,32 @@ define(function(require) {
                 //  - + - +
                 //
                 
-                var minors = this.minors();
+                var minors = this.minors().transpose();
                 
                 var checkerboard = 1;
+                
+                var str = "";
                 
                 for(var i = 0, j = 0; i < minors._.length; ++i, ++j) {
                     
                     // Apply checkerboard pattern
                     minors._[i] *= checkerboard;
+                    
+                    str += (checkerboard < 0) ? "" : " ";
+                    str += checkerboard + " ";
                                         
-                    if(j != rows) {
+                    if(j < rows-1) {
                         checkerboard *= -1;
                         
                     } else {
-                        j = 0;
+                        j = -1;
+                        
+                        str += "'\n";
                     }
                      
                 }
                 
-                return minors.transpose();
+                return minors;
             };
         } else {
             M.prototype.adjugate = M.prototype.adjoint = function() {
