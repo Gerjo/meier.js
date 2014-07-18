@@ -89,9 +89,11 @@ define(function(require) {
             }
             
             this.save();
+
+            return false;
         }
         
-        return false;
+        return true;
     };
     
     Map.prototype.findSelected = function(point) {
@@ -242,8 +244,13 @@ define(function(require) {
     };
     
     Map.prototype.load = function() {
-        var object = localStorage.getItem("map");
+        var object = null;//localStorage.getItem("map");
         
+        if( ! object) {
+            object = '{"waypoints":[{"type":"Waypoint","x":-318,"y":238,"id":2},{"type":"Waypoint","x":-322,"y":53,"id":12},{"type":"Waypoint","x":129,"y":55,"id":13},{"type":"Waypoint","x":128,"y":-102,"id":14},{"type":"Waypoint","x":330,"y":-104,"id":15},{"type":"Waypoint","x":329,"y":237,"id":16}],"roads":[{"type":"Road","from":16,"to":2,"lanes":2},{"type":"Road","from":2,"to":12,"lanes":2},{"type":"Road","from":12,"to":13,"lanes":2},{"type":"Road","from":13,"to":14,"lanes":2},{"type":"Road","from":14,"to":15,"lanes":2},{"type":"Road","from":15,"to":16,"lanes":2}]}';
+        }
+
+
         if(object && (object = JSON.TryParse(object))) {
             
             if(object.waypoints) {

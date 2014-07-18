@@ -12,10 +12,11 @@ define(function(require) {
         this.direction  = new V2(1, 1).normalize();
         this.speed      = 200;
         this.momentum   = 1;
-        this.maxSteerAngle = 0.08;
+        this.maxSteerAngle = 0.04;
         this.maxSpeed   = 10;
         this.speed      = 40;
         this.lookAhead  = 30;
+        this.viewRange  = 40;
         
         this.target     = new V2(10, 1);
         
@@ -84,8 +85,10 @@ define(function(require) {
         
         // Direction does not imply speed. Normalize.
         var dir       = target.direction(this.position).normalize();
+
+        dir.add(this.getSteering());
         
-        
+        // Angles for maximum steering (Fake nonholonomic constraints)
         var currentAngle = this.direction.angle();
         var deltaAngle   = this.direction.angleBetween(dir);
         
@@ -109,10 +112,37 @@ define(function(require) {
         
         
         renderer.begin();
-        renderer.circle(this.toLocal(target), 5);
-        renderer.circle(this.toLocal(nearestCurrent), 5);
+        renderer.circle(this.toLocal(target), 2);
+        renderer.circle(this.toLocal(nearestCurrent), 2);
         renderer.fill("blue");        
+
+        renderer.begin();
+        renderer.circle(0, 0, this.viewRange);
+        renderer.stroke("rgba(255, 255, 255, 0.1)");
     };
+
+
+    Vehicle.prototype.getSteering = function() {
+        var force = new V2(0, 0);
+
+        this.game.getVehiclesInRange(this).forEach(function(vehicle) {
+            if(vehicle != this) {
+                var distance = vehicle.position.distance(this.position);
+                var direction = vehicle.position.direction(this.position).normalize().flip();
+
+                if(distance < this.viewRange * 2) {
+
+                    force.addScaled(
+                        direction,
+                        1 / distance * 10
+                    );
+                }
+
+            }
+        }.bind(this));
+
+        return force;
+    }
     
     return Vehicle;
 });
