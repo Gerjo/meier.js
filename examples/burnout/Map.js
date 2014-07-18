@@ -215,7 +215,8 @@ define(function(require) {
             }
         }
         
-        
+        var color = Color.Alpha(Color.Red, 0.1);
+
         // Draw each waypoint
         renderer.begin();
         this.waypoints.forEach(function(p) {
@@ -227,18 +228,16 @@ define(function(require) {
                 //renderer.text("hi", local.x, local.y, "black", "left", "bottom");
             }
         });
-        renderer.fill("red");
+        renderer.fill(color);
         
         
         var selectedRoad = this.findSelectedRoad(local);
         
         // Draw each road
-        this.roads.forEach(function(road) {
-            
-            var color = Color.RED;//selectedRoad.equals(road) ? Color.RED : Color.YELLOW;
-            
+        this.roads.forEach(function(road) {            
             renderer.begin();
-            renderer.arrow(road.a, road.b);
+            //renderer.arrow(road.a, road.b);
+            renderer.line(road.a, road.b);
             renderer.stroke(color, 1);
         });
     };

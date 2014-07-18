@@ -13,7 +13,7 @@ define(function(require) {
         this.direction  = new V2(1, 1).normalize();
         this.speed      = 200;
         this.momentum   = 1;
-        this.maxSteerAngle = 0.104;
+        this.maxSteerAngle = 10.104;
         this.maxSpeed   = 10;
         this.speed      = Random(10, 50, true);
         this.lookAhead  = 20;
@@ -79,22 +79,19 @@ define(function(require) {
                 if(!(target.y > Math.min(targetRoad.b.y, targetRoad.a.y) && target.y < Math.max(targetRoad.b.y, targetRoad.a.y))) {
 
                     // Find the successor road
-                    for(var i = 0; i < targetRoad.b.roads.length; ++i) {
-                        var tentativeNextRoad = this.nextRoad;//targetRoad.b.roads[i];
+                    var tentativeNextRoad = this.nextRoad;
+                
+                    ASSERT( ! tentativeNextRoad.equals(this.road) );
+
+                    // Found one. Halt looping.
+                    targetRoad = tentativeNextRoad;
                     
-                        // Found one. Halt looping.
-                        if( ! targetRoad.equals(tentativeNextRoad)) {
-                            targetRoad = tentativeNextRoad;
-                            
-                            // Reduce lookahead (May be buggy with roads.magnitude < this.lookahead)
-                            ahead -= nearestCurrent.distance(targetRoad.a);
-                            
-                            // Jump to the far edge.
-                            target = targetRoad.a;
-                            break;
-                        }
-                    }
-    
+                    // Reduce lookahead (May be buggy with road.magnitude < this.lookahead)
+                    ahead -= nearestCurrent.distance(targetRoad.a);
+                    
+                    // Jump to the far edge.
+                    target = targetRoad.a;
+                  
                     run = true;
                 }
             }
@@ -153,10 +150,13 @@ define(function(require) {
                 var direction = vehicle.position.direction(this.position).normalize().flip();
 
                 if(distance < this.viewRange * 2) {
+                    var s = 10;
+
+                    //var s = 1 / (1 + Math.exp(distance)) * 10;
 
                     force.addScaled(
                         direction,
-                        1 / distance * 10
+                        1 / distance * s
                     );
                 }
 
