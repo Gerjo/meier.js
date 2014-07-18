@@ -23,8 +23,7 @@ define(function(require){
         Random.Seed(10);
         
         for(var i = 0; i < 10; ++i) {
-            this.vehicles.push(new Vehicle(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
-        
+            //this.vehicles.push(new Vehicle(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
         }
         
         this.vehicles.forEach(this.add.bind(this));

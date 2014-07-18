@@ -4,6 +4,7 @@ define(function(require) {
     var Lerp     = require("meier/math/Lerp");
     var Texture  = require("meier/engine/Texture");
     var Nearest  = require("meier/math/Intersection").Nearest;
+    var Random   = require("meier/math/Random");
     
     Vehicle.prototype = new Entity();
     function Vehicle(x, y) {
@@ -12,11 +13,14 @@ define(function(require) {
         this.direction  = new V2(1, 1).normalize();
         this.speed      = 200;
         this.momentum   = 1;
-        this.maxSteerAngle = 0.04;
+        this.maxSteerAngle = 0.104;
         this.maxSpeed   = 10;
-        this.speed      = 40;
-        this.lookAhead  = 30;
+        this.speed      = Random(10, 50, true);
+        this.lookAhead  = 20;
         this.viewRange  = 40;
+
+        this.road       = null;
+        this.nextRoad   = null;
         
         this.target     = new V2(10, 1);
         
@@ -27,14 +31,27 @@ define(function(require) {
         this.dt = dt;
     };
     
+    Vehicle.prototype.computeNextRoad = function() {
+
+        // Find the first road that is not the current road
+        return this.road.b.roads.shuffle().find(function(road) {
+            return ! road.equals(this.road) && ! road.b.equals(this.road.b);
+        }.bind(this));
+    };
+
     Vehicle.prototype.draw = function(renderer) {
         var dt = this.dt;
         renderer.texture(this.background);
         
         var run, timeout = 10;
 
+        if( ! this.road) {
+            this.road = this.game.map.findSelectedRoad(this.position);
+            this.nextRoad = this.computeNextRoad();
+        }
+
         // Current road.
-        var currentRoad      = this.game.map.findSelectedRoad(this.position);  
+        var currentRoad      = this.road;
         var targetRoad       = currentRoad;
         
         // Nearest to current.      
@@ -42,6 +59,12 @@ define(function(require) {
         var target           = nearestCurrent;
         
         var ahead = this.lookAhead;
+
+        if(nearestCurrent.equals(currentRoad.b)) {
+            console.log("switching lanes");
+            this.road = this.nextRoad;
+            this.nextRoad = this.computeNextRoad();
+        }
         
         do {
             run = false;
@@ -57,7 +80,7 @@ define(function(require) {
 
                     // Find the successor road
                     for(var i = 0; i < targetRoad.b.roads.length; ++i) {
-                        var tentativeNextRoad = targetRoad.b.roads[i];
+                        var tentativeNextRoad = this.nextRoad;//targetRoad.b.roads[i];
                     
                         // Found one. Halt looping.
                         if( ! targetRoad.equals(tentativeNextRoad)) {
@@ -120,7 +143,6 @@ define(function(require) {
         renderer.circle(0, 0, this.viewRange);
         renderer.stroke("rgba(255, 255, 255, 0.1)");
     };
-
 
     Vehicle.prototype.getSteering = function() {
         var force = new V2(0, 0);
