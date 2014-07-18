@@ -78,7 +78,7 @@ define(function(require){
 
         
         // Add a second canvas, only one context can be created per canvas.
-        container.appendChild(this._canvas = document.createElement("canvas"));
+        this.htmlContainer.appendChild(this._canvas = document.createElement("canvas"));
         // Intentionally setting a global state.
         gl = this._canvas.getContext("experimental-webgl");
         
