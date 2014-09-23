@@ -32,9 +32,10 @@ define(function(require) {
     };
     
     Vehicle.prototype.computeNextRoad = function() {
-
+        //.shuffle()
+        
         // Find the first road that is not the current road
-        return this.road.b.roads.shuffle().find(function(road) {
+        return this.road.b.roads.find(function(road) {
             return ! road.equals(this.road) && ! road.b.equals(this.road.b);
         }.bind(this));
     };
@@ -75,13 +76,13 @@ define(function(require) {
         
         
             // Attraction point does not lie on the current segment.
-            if(!(target.x > Math.min(targetRoad.b.x, targetRoad.a.x) && target.x < Math.max(targetRoad.b.x, targetRoad.a.x))) {
-                if(!(target.y > Math.min(targetRoad.b.y, targetRoad.a.y) && target.y < Math.max(targetRoad.b.y, targetRoad.a.y))) {
+            if( ! (target.x >= Math.min(targetRoad.b.x, targetRoad.a.x) && target.x <= Math.max(targetRoad.b.x, targetRoad.a.x))) {
+                if( ! (target.y >= Math.min(targetRoad.b.y, targetRoad.a.y) && target.y <= Math.max(targetRoad.b.y, targetRoad.a.y))) {
 
                     // Find the successor road
                     var tentativeNextRoad = this.nextRoad;
                 
-                    ASSERT( ! tentativeNextRoad.equals(this.road) );
+                    ASSERT( ! tentativeNextRoad.equals(this.road));
 
                     // Found one. Halt looping.
                     targetRoad = tentativeNextRoad;
@@ -93,6 +94,8 @@ define(function(require) {
                     target = targetRoad.a;
                   
                     run = true;
+                    
+                    console.log("Timeout: " + timeout + " x: " + target.y + " x: " + targetRoad.a.y);
                 }
             }
             

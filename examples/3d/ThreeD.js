@@ -2,194 +2,249 @@ define(function(require) {
     var Game     = require("meier/engine/Game");
     var Input    = require("meier/engine/Input");
     var Key      = require("meier/engine/Key");
-    var Vector3  = require("meier/math/Vec")(3);
+    var V3       = require("meier/math/Vec")(3);
     var Matrix33 = require("meier/math/Mat")(3, 3);
     var Matrix44 = require("meier/math/Mat")(4, 4);
-    var Grid     = require("meier/prefab/Grid");
+    
+    var gl     = require("meier/webgl/Gl");
+    var Shader = require("meier/webgl/Shader");
+    var Camera = require("meier/webgl/FpsCamera");
+    var Vertex = require("meier/webgl/Structs").Vertex;
+    var Light  = require("meier/webgl/Structs").Light;
+    
+    var Cube   = require("meier/webgl/Cube");
+    var Plane  = require("meier/webgl/Plane");
     
     ThreeD.prototype = new Game();
     
     function ThreeD(container) {
         Game.call(this, container);
         
-        this.coordinates = [
-            new Vector3(0, 0, 0),
-            new Vector3(100, 0, 0),
-            new Vector3(100, 100, 0),
-            new Vector3(0, 100, 0),
         
-            new Vector3(0, 100, 200),
-            new Vector3(100, 100, 200),
-            new Vector3(100, 0, 200),
+        this.aaWidth  = this.width;// * 2;
+        this.aaHeight = this.height;// * 2;
         
-            new Vector3(0, 0, 200)
+        
+        this.load();
+
+    }
+    
+    ThreeD.prototype.load = function() {
+        var floatTextures = gl.getExtension('OES_texture_float');
+        var ext = this.ext = gl.getExtension('WEBGL_draw_buffers');
+        
+        this.frame = 0;
+        
+        gl.viewport(0, 0, this.aaWidth, this.aaHeight);
+        
+
+        gl.canvas.style.width  = this.width;
+        gl.canvas.style.height = this.height;
+        gl.canvas.width        = this.width;
+        gl.canvas.height       = this.height;
+        
+        this.htmlContainer.appendChild(gl.canvas);
+        
+        this.firstShader  = new Shader("./First.vsh", "./First.fsh");
+        this.secondShader = new Shader("./Second.vsh", "./Second.fsh");
+        
+        
+        this.vertices = gl.createBuffer();
+        this.indices  = gl.createBuffer();
+        this.nIndices = Plane.indices().length;
+        this.nVertices = Plane.vertices().length / 12;
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
+        gl.bufferData(gl.ARRAY_BUFFER, Plane.vertices(), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+         
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Plane.indices(), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+        
+        this.cam = new Camera(this);
+        
+        gl.disable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.depthFunc(gl.LEQUAL)
+        
+        this.lights = [
+            new Light(new V3(4, 2, 4))
         ];
         
-        this.rotation = 0;
-        this.axis = new Vector3(1, 1, 1);
+        // Hold output from 1st pass
+        this.textures = [];
+        for(var i = 0; i < 4; ++i) {
+            this.textures[i] = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this.textures[i]);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.aaWidth, this.aaHeight, 0, gl.RGBA, gl.FLOAT, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        }
+
+        // Ties all other buffers together.
+        var fbo = this.firstFbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         
-        this.add(new Grid(0, 0, this.width, this.height));
+        // Allocate storage.
+        var rbo = this.firstRbo = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, rbo);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.aaWidth, this.aaHeight);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo);
         
-        this.setFps(60);
+        // Attach textures to the (shader) outputs
+        for(var i = 0; i < this.textures.length; ++i) {
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, ext.COLOR_ATTACHMENT0_WEBGL + i, gl.TEXTURE_2D, this.textures[i], 0);
+        }
         
-        this.position  = new Vector3(100, 100, 0);
-        this.rotations = new Vector3(0, 0, 0);
+        var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if(status != gl.FRAMEBUFFER_COMPLETE) {
+            throw new Error("Broken framebuffer, code: " + status);
+        }
         
-        this.keys = {};
-        this.keys[Key.A] = new Vector3(1, 0, 0);
-        this.keys[Key.D] = new Vector3(-1, 0, 0);
-        this.keys[Key.W] = new Vector3(0, 1, 0);
-        this.keys[Key.S] = new Vector3(0, -1, 0);
+        // Unbind from global state.
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         
         
-        this.forward = new Vector3(0, 1, 0);
-        
-        this.xyz     = Matrix33.CreateIdentity();
+        this.uploadUnitFrame();
     }
+    
+    
+    /// Upload a generic frame that matches the unit screen size.
+    ThreeD.prototype.uploadUnitFrame = function() {
+        var vertices = new Float32Array([
+               -1, -1,
+                1, -1,
+               -1,  1,
+                1,  1,
+        ]);
+
+        // Vertex buffer object to contain the unit rectangle coordinates
+        this._vboUnitFrame = gl.createBuffer();
+        
+        // Bind global state and upload vertices to the GPU
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        
+        this._vboUnitFrame.itemSize = 2;        // Stride: two floats
+        this._vboUnitFrame.numItems = 4;        // Four in total, a pair at each corner.
+        this._vboUnitFrame.length   = this._vboUnitFrame.itemSize * this._vboUnitFrame.numItems;
+        
+        
+        // Detach VBO from global state.
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    
+    ThreeD.prototype.firstPass = function(dt) {
+        
+        gl.viewport(0, 0, this.aaWidth, this.aaHeight);
+        
+        
+        var ext = this.ext;
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.firstFbo);
+        
+        ext.drawBuffersWEBGL([
+          ext.COLOR_ATTACHMENT0_WEBGL,
+          ext.COLOR_ATTACHMENT1_WEBGL,
+          ext.COLOR_ATTACHMENT2_WEBGL,
+          ext.COLOR_ATTACHMENT3_WEBGL
+        ]);
+        
+        gl.clearColor(0.2, 0.1, 1, 0.5);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        
+        this.firstShader.use();
+        
+
+        gl.uniformMatrix4fv(this.firstShader.uniform("projection"), false, this.cam.projection()._);
+        gl.uniformMatrix4fv(this.firstShader.uniform("model"), false, this.cam.model()._);
+        gl.uniformMatrix4fv(this.firstShader.uniform("view"), false, this.cam.view()._);
+        
+        gl.uniform3fv(this.firstShader.uniform("camera"), this.cam.position._);
+        
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
+        
+        
+        gl.vertexAttribPointer(this.firstShader.attribute("position"), 3, gl.FLOAT, false, Vertex.Stride, 0);
+        gl.vertexAttribPointer(this.firstShader.attribute("normal"), 3, gl.FLOAT, false, Vertex.Stride, 3 * 4);
+
+        gl.enableVertexAttribArray(this.firstShader.attribute("position"));
+        gl.enableVertexAttribArray(this.firstShader.attribute("normal"));
+                
+        this.firstShader.validate();
+        //gl.drawElements(gl.TRIANGLES, this.nIndices, gl.UNSIGNED_SHORT, 0);
+        
+        gl.drawArrays(gl.TRIANGLES, 0, this.nVertices);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    };    
+    
+    ThreeD.prototype.secondPass = function(dt) {
+        gl.viewport(0, 0, this.width, this.height);
+        
+        gl.clearColor(0.2, 0.1, 1, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        
+        
+        var shader = this.secondShader;
+        
+        shader.use();
+        
+        // Sample the data from VBO on the GPU, not CPU.
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vboUnitFrame);
+        gl.vertexAttribPointer(shader.attribute("position"), this._vboUnitFrame.itemSize, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader.attribute("position"));
+        
+        
+        for(var i = 0; i < this.textures.length; ++i) {
+            gl.activeTexture(gl.TEXTURE0 + i);
+            gl.bindTexture(gl.TEXTURE_2D, this.textures[i]);
+        }
+        
+        // G-buffer
+        gl.uniform1i(shader.uniform("samplerColor"), 0);
+        gl.uniform1i(shader.uniform("samplerPosition"), 1);
+        gl.uniform1i(shader.uniform("samplerNormal"), 2);
+        gl.uniform1i(shader.uniform("samplerDepth"), 3);
+        
+        // Lights
+        gl.uniform3fv(shader.uniform("lights[0]"), this.lights[0].position._);
+        
+        // Transformations
+        gl.uniformMatrix4fv(shader.uniform("projection"), false, this.cam.projection()._);
+        gl.uniformMatrix4fv(shader.uniform("view"), false, this.cam.view()._);
+        
+        shader.validate();
+        
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this._vboUnitFrame.numItems);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
     
     ThreeD.prototype.update = function(dt) {
-                
-        this.rotations.x = this.input.x / -(this.hw * 0.5);
-        this.rotations.z = this.input.y / (this.hh * 0.5);
-       
         
-        var z   = Matrix33.CreateXoY(this.rotations.x);
-        var y   = Matrix33.CreateXoZ(this.rotations.y);
-        var x   = Matrix33.CreateYoZ(this.rotations.z);
-        this.xyz = z.product(x).product(y);
+        this.lights[0].position.y = Math.sin(++this.frame / 10) * 4;
         
-       
-        var movement;
-        var m;
-       
-        for(var k in this.keys) {
-            if(this.keys.hasOwnProperty(k)) {
-                
-                if(this.input.isKeyDown(k)) {
-                    movement = this.xyz.transform(this.keys[k]).scaleScalar(10);
-                    
-                    this.position.add(movement);
-                    
-                }
-            }
-        }
+        //console.log(this.lights[0].position.y);
         
-        this.rotation += dt * 0.1;
+        this.cam.update(dt);
+        
+        this.firstPass();
+        this.secondPass();
     };
-    
-    ThreeD.prototype.createCamera = function(eye, center) {
-        
-       
-        var lookat = this.xyz.transform(this.forward);
-        
-        center = this.position.clone().add(lookat)//new Vector3(0, 0, 0);
-        eye    = this.position;//new Vector3(200, 200, 200);
-        
-        //var r  = Matrix33.CreateAngleAxisRotation(this.input.x / 100, new Vector3(0, 0, 1));
-        
-        //eye = r.transform(eye);
-        
-        var up = new Vector3(0, 0, 1);
-        var n = eye.clone().subtract(center).normalize();
-        var u = up.cross(n).normalize();
-        var v = n.cross(u);
-        
-        var m = new Matrix44([
-            u.x, v.x, n.x, 0,
-            u.y, v.y, n.y, 0,
-            u.z, v.z, n.z, 0,
-            
-            u.flip().dot(eye),
-            v.flip().dot(eye),
-            n.flip().dot(eye),
-            1
-        ]).transpose();        
-        
-        return m;
-    };
-    
-    ThreeD.prototype.draw = function(renderer) {
-        Game.prototype.draw.call(this, renderer);
-        
-        var z   = Matrix33.CreateXoY(this.rotation);
-        var y   = Matrix33.CreateXoZ(this.rotation);
-        var x   = Matrix33.CreateYoZ(this.rotation);
-        var xyz = z.product(x).product(y);
-        
-        var param = Matrix33.CreateEulerParametersTransform(this.rotation, this.axis);
-        var axis  = Matrix33.CreateAngleAxisRotation(this.rotation, this.axis);
-        var euler = Matrix33.CreateEulerAngles(this.rotation, this.rotation, this.rotation);
-        
-        var t1 = Matrix44.CreateTranslation(new Vector3(-350, 0, 0));
-        var t2 = Matrix44.CreateTranslation(new Vector3(-150, 0, 0));
-        var t3 = Matrix44.CreateTranslation(new Vector3(150, 0, 0));
-        var t4 = Matrix44.CreateTranslation(new Vector3(300, 0, 0));
-        
-        var camera = this.createCamera();
-        
-        // Build first polytope:
-        var poly1 = [];
-        for(var i = 0, p; i < this.coordinates.length; ++i) {
-            p = this.coordinates[i];
-            p = param.transform(p);
-            p = t1.transform(p);
-            p = camera.transform(p);
-            poly1.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly1);
-        renderer.stroke("black");
-        renderer.fill("rgba(0,0,0,0.1)");
-        renderer.text("Euler–Rodrigues (1,1,1)", -350, -40, "black");    
-
-
-        // Build second polytope:
-        var poly2 = [];
-        for(var i = 0, p; i < this.coordinates.length; ++i) {
-            p = this.coordinates[i];
-            p = axis.transform(p);
-            p = t2.transform(p);
-            p = camera.transform(p);
-            poly2.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly2);
-        renderer.stroke("red");
-        renderer.fill("rgba(255,0,0,0.1)");    
-        renderer.text("Axis angle rotation (1,1,1)", -130, -40, "red");    
-
-        // Build third polytope:
-        var poly3 = [];
-        for(var i = 0, p; i < this.coordinates.length; ++i) {
-            p = this.coordinates[i];
-            p = euler.transform(p);
-            p = t3.transform(p);
-            p = camera.transform(p);
-
-            poly3.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly3);
-        renderer.stroke("blue");
-        renderer.fill("rgba(0,0,255,0.1)");    
-        renderer.text("XZX Euler Angles", 150, -40, "blue");    
-
-        // Build third polytope:
-        var poly4 = [];
-        for(var i = 0, p; i < this.coordinates.length; ++i) {
-            p = this.coordinates[i];
-            p = xyz.transform(p);
-            p = t4.transform(p);
-            p = camera.transform(p);
-
-            poly4.push(p);
-        }
-        renderer.begin();
-        renderer.polygon(poly4);
-        renderer.stroke("green");
-        renderer.fill("rgba(0,255,0,0.1)");    
-        renderer.text("XYZ rotation", 300, -40, "green");  
-    }
     
     return ThreeD;
 });

@@ -59,7 +59,7 @@ define(function(require) {
             var found = r.equals(road);
             
             if(found) {
-                console.log("be gone");
+                //console.log("be gone");
             }
             
             return ! found;
@@ -215,7 +215,7 @@ define(function(require) {
             }
         }
         
-        var color = Color.Alpha(Color.Red, 0.1);
+        var color = Color.Alpha(Color.Red, 0.4);
 
         // Draw each waypoint
         renderer.begin();

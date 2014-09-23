@@ -13,6 +13,8 @@ define(function(require){
         Game.call(this, container);
         this.setHighFps(30);
         this.setLowFps(1);
+        this.logger.showInternals(false);
+        this.setAutoClear(false);
 
         this.add(this.map = new Map());
         
@@ -52,6 +54,7 @@ define(function(require){
     };
     
     Burnout.prototype.draw = function(renderer) {
+        renderer.clearSolid("#3e6c01");
         Game.prototype.draw.call(this, renderer);
         
     };

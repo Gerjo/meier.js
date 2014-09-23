@@ -59,7 +59,7 @@ define(function(require) {
         M.CreateScale = function(s) {
             var m = new M();
             
-            // Load identity matrix. May fail on some sizes.
+            // Set scaling diagonal
             for(var i = columns - 1; i >= 0; --i) {
                 m._[At(i, i)] = s;
             }
@@ -67,11 +67,39 @@ define(function(require) {
             return m;
         };
         
-        M.CreatePerspectiveProjection = function(near, far, fieldOfView) {
+        //M.CreatePerspectiveProjection = function(near, far, fieldOfView) {
+        
+        M.CreatePerspectiveProjection = function(fovy, aspect, nearZ, farZ) {
             if(rows < 4 || rows < 4) {
                 throw new Error("Perspective only available for [4x4] matrices.");
             }
             
+            return makePerspective(fovy, aspect, nearZ, farZ).transpose();
+            
+            function makePerspective(fieldOfViewInRadians, aspect, near, far) {
+              var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+              var rangeInv = 1.0 / (near - far);
+
+              return new M([
+                f / aspect, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (near + far) * rangeInv, -1,
+                0, 0, near * far * rangeInv * 2, 0
+              ]);
+            };
+            
+            
+            var cotan = 1.0 / Math.tan(fovy / 2.0);
+    
+                var m = new M([
+                           cotan / aspect, 0.0, 0.0, 0.0,
+                           0.0, cotan, 0.0, 0.0,
+                           0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,
+                           0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0
+                ]);
+                return m;
+            
+            /*
             var fn = far - near;
             
             var a = far / fn;
@@ -84,7 +112,7 @@ define(function(require) {
                 0,  0, -a, -1,
                 0,  0, -b,  0
             ]);
-            
+            */
             return m;
         };
         
@@ -891,14 +919,26 @@ define(function(require) {
             return out.join("\n");
         };
         
-        M.prototype.wolfram = function() {
+        M.prototype.wolfram = function(digits) {
             var r = "{";
+            
+            digits = digits || 3;
         
             for(var i = 0; i < this.numrows; ++i) {
                 r += "{"
             
+                
+            
                 for(var j = 0; j < this.numcolumns; ++j) {
-                    r += this._[At(i, j)] + ", ";
+                    
+                    if(this._[At(i, j)] == 0) {
+                        r += this._[At(i, j)] + ", ";
+                        
+                    } else {
+                        r += this._[At(i, j)].toFixed(digits) + ", ";
+                        
+                    }
+                    
                 }
             
                 r = r.trim(", ") + "},"
@@ -907,6 +947,10 @@ define(function(require) {
             r = r.trim(",") + "}";
         
             return r;
+        };
+        
+        M.prototype.toString = function() {
+            return this.wolfram();
         };
         
         return M;
