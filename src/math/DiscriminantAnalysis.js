@@ -139,14 +139,15 @@ define(function(require) {
                     // Will hold a precomputed matrix
                     d.matrix = null;
                 });
-            
+                
+               
                 // Equal covariance, rendering quadratic useless, and linear error-stricken.
                 if(a.covDet == b.covDet) {
                 
                     // Estimate the common group-covariance matrix Σ by the
                     // pooled (within-group) sample covariance matrix. In other 
                     // words, a weighted average of covariance matrices.
-                    var pooled  = a.cov.clone().multiply(a.n/total).add(b.cov.clone().multiply(b.n/total));
+                    var pooled  = a.cov.clone().multiply(a.n/total).add(b.cov.clone().multiply(b.n / total));
                     
                     // This call may fail when pooled.det == 0
                     var pooledInverse = pooled.inverse();
@@ -176,10 +177,17 @@ define(function(require) {
                     
                     if(doLinear === true) {
                         
+                        console.log(
+                            a.cov.determinant()
+                        );
+                        
                         a.constant = a.lnCovDet - 2 * a.lnRatio + a.mean.product(a.covInverse).product(a.meanT).get(0, 0);
                         b.constant = b.lnCovDet - 2 * b.lnRatio + b.mean.product(b.covInverse).product(b.meanT).get(0, 0);
                         
                         classifier = function(d, m) {
+                            console.log("m: \n" + d.matrix.numrows + "x" + d.matrix.numcolumns);
+                            console.log(d.matrix);
+                            
                             // Linear term
                             var linear = 2 * d.matrix.product(m).get(0, 0);
                 
@@ -209,11 +217,13 @@ define(function(require) {
                 var aOdds = classifier(a, m);
                 var bOdds = classifier(b, m);
                 
+                //console.log(a,b,aOdds, bOdds);
+                
                 // x > group "b"
                 // x < group "a"
                 // x = 0, your favourite tie breaker.
                 
-                //console.log(aOdds, bOdds);
+                console.log(aOdds, bOdds);
                 return aOdds - bOdds;
             };
         }

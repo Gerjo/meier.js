@@ -7,6 +7,9 @@ define(function(require){
     var Map     = require("./Map");
     var Vehicle = require("./Vehicle");
     
+    var dat     = require("meier/contrib/datgui");
+    
+    
     Burnout.prototype = new Game();
     
     function Burnout(container) {        
@@ -15,6 +18,20 @@ define(function(require){
         this.setLowFps(1);
         this.logger.showInternals(false);
         this.setAutoClear(false);
+
+        // Pull GUI default settings from a test vehicle.
+        var dummy = new Vehicle();
+        this.maxSteerAngle = dummy.maxSteerAngle;
+        this.lookAhead     = dummy.lookAhead;
+        this.viewRange     = dummy.viewRange;
+        this.speed         = dummy.speed;
+        
+        
+        this.gui = new dat.GUI();
+        this.gui.add(this, "maxSteerAngle", 0, 0.5).step(0.001).name("Max Steering");
+        this.gui.add(this, "lookAhead", 0, 100).name("Lookahead");
+        this.gui.add(this, "viewRange", 0, 50).name("Viewrange");
+        this.gui.add(this, "speed", 0, 300).name("Speed");
 
         this.add(this.map = new Map());
         

@@ -1,21 +1,20 @@
 define(function(require) {
-    var Entity   = require("meier/engine/Entity");
-    var V2       = require("meier/math/Vec")(2);
-    var Lerp     = require("meier/math/Lerp");
-    var Texture  = require("meier/engine/Texture");
-    var Nearest  = require("meier/math/Intersection").Nearest;
-    var Random   = require("meier/math/Random");
+    var Entity    = require("meier/engine/Entity");
+    var V2        = require("meier/math/Vec")(2);
+    var Lerp      = require("meier/math/Lerp");
+    var Texture   = require("meier/engine/Texture");
+    var Nearest   = require("meier/math/Intersection").Nearest;
+    var Random    = require("meier/math/Random");
     
     Vehicle.prototype = new Entity();
     function Vehicle(x, y) {
         Entity.call(this, x, y, 10, 10);
         
         this.direction  = new V2(1, 1).normalize();
-        this.speed      = 200;
-        this.momentum   = 1;
-        this.maxSteerAngle = 10.104;
+        this.momentum   = 1; // no used
+        this.maxSteerAngle = 0.0604;
         this.maxSpeed   = 10;
-        this.speed      = Random(10, 50, true);
+        this.speed      = 50;
         this.lookAhead  = 20;
         this.viewRange  = 40;
 
@@ -29,6 +28,11 @@ define(function(require) {
     
     Vehicle.prototype.update = function(dt) {
         this.dt = dt;
+        
+        this.maxSteerAngle = this.game.maxSteerAngle;
+        this.lookAhead     = this.game.lookAhead;
+        this.viewRange     = this.game.viewRange;
+        this.speed         = this.game.speed;
     };
     
     Vehicle.prototype.computeNextRoad = function() {
@@ -61,11 +65,6 @@ define(function(require) {
         
         var ahead = this.lookAhead;
 
-        if(nearestCurrent.equals(currentRoad.b)) {
-            console.log("switching lanes");
-            this.road = this.nextRoad;
-            this.nextRoad = this.computeNextRoad();
-        }
         
         do {
             run = false;
@@ -76,8 +75,8 @@ define(function(require) {
         
         
             // Attraction point does not lie on the current segment.
-            if( ! (target.x >= Math.min(targetRoad.b.x, targetRoad.a.x) && target.x <= Math.max(targetRoad.b.x, targetRoad.a.x))) {
-                if( ! (target.y >= Math.min(targetRoad.b.y, targetRoad.a.y) && target.y <= Math.max(targetRoad.b.y, targetRoad.a.y))) {
+            if( ! (target.x > Math.min(targetRoad.b.x, targetRoad.a.x) && target.x <= Math.max(targetRoad.b.x, targetRoad.a.x))) {
+                if( ! (target.y > Math.min(targetRoad.b.y, targetRoad.a.y) && target.y <= Math.max(targetRoad.b.y, targetRoad.a.y))) {
 
                     // Find the successor road
                     var tentativeNextRoad = this.nextRoad;
@@ -87,20 +86,27 @@ define(function(require) {
                     // Found one. Halt looping.
                     targetRoad = tentativeNextRoad;
                     
+                    var dist = nearestCurrent.distance(targetRoad.a)
+                    
                     // Reduce lookahead (May be buggy with road.magnitude < this.lookahead)
-                    ahead -= nearestCurrent.distance(targetRoad.a);
+                    // in such event this.nextRoad must be updated.
+                    ahead -= dist;
                     
                     // Jump to the far edge.
                     target = targetRoad.a;
                   
                     run = true;
-                    
-                    console.log("Timeout: " + timeout + " x: " + target.y + " x: " + targetRoad.a.y);
                 }
             }
             
         
         } while(run && --timeout > 0);
+        
+        if(nearestCurrent.equals(currentRoad.b)) {
+            //console.log("switching lanes");
+            this.road = this.nextRoad;
+            this.nextRoad = this.computeNextRoad();
+        }
         
         if(timeout <= 0) {
             console.log("Vehicle::update timeout");
@@ -123,11 +129,10 @@ define(function(require) {
             dir = V2.CreateAngular(currentAngle + angle);
         }
         
-        // TODO: This does not integrate well over time.
+        // Semi implicit euler?
         this.position.addScaled(this.direction, this.speed * dt * 0.5);
         this.position.addScaled(dir, this.speed * dt * 0.5);
        
-        
         this.direction = dir;
         
         // For animation purposes.
