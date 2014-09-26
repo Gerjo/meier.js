@@ -350,14 +350,15 @@ define(function(require) {
     /// Call back, return false to halt event bubble, e.g., menu blocks game.
     /// priority, higher gets called first. Defaults to highest.
     Input.prototype.subscribe = function(eventtype, callback, priority) {
-        priority = priority || this.highest(eventtype);
     
-        if(eventtype > Input.Events.COUNT) {
+        if(eventtype > Input.Events.COUNT || eventtype < 0 || eventtype === null || eventtype === undefined) {
             throw new Error("Unknown mouse event.");
         }
+
+        priority = priority || this.highest(eventtype);
     
         var callbackBundle = new PriorityCallback(priority, callback, eventtype);
-    
+        
         this.listeners[eventtype].push(callbackBundle);
     
         // Re-sort, descending:
