@@ -26,14 +26,14 @@ define(function(require){
         this.maxSteerAngle = dummy.maxSteerAngle;
         this.lookAhead     = dummy.lookAhead;
         this.viewRange     = dummy.viewRange;
-        this.speed         = dummy.speed;
+        this.speed         = 1;
         this.showDebug     = false;
         
         this.gui = new dat.GUI();
         this.gui.add(this, "maxSteerAngle", 0, 0.5).step(0.001).name("Max steering");
         this.gui.add(this, "lookAhead", 0, 100).name("Lookahead");
         this.gui.add(this, "viewRange", 0, 50).name("Viewrange");
-        this.gui.add(this, "speed", 0, 300).name("Speed");
+        this.gui.add(this, "speed", 0, 10).step(0.1).name("Speed");
         this.gui.add(this, "showDebug").name("Show debug");
         this.gui.add(this, "removeAllVehicles").name("Remove all");
 

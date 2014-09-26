@@ -14,7 +14,7 @@ define(function(require) {
         this.momentum   = 1; // no used
         this.maxSteerAngle = 0.0604;
         this.maxSpeed   = 10;
-        this.speed      = 50;
+        this.speed      = Random(10, 30);
         this.lookAhead  = 30;
         this.viewRange  = 40;
 
@@ -33,10 +33,10 @@ define(function(require) {
     Vehicle.prototype.update = function(dt) {
         this.dt = dt;
         
+        // Update some properties to match the GUI
         this.maxSteerAngle = this.game.maxSteerAngle;
         this.lookAhead     = this.game.lookAhead;
         this.viewRange     = this.game.viewRange;
-        this.speed         = this.game.speed;
     };
     
     Vehicle.prototype.computeNextRoad = function() {
@@ -140,9 +140,12 @@ define(function(require) {
         
         var start = this.position.clone();
         
-        // Semi implicit euler?
-        this.position.addScaled(this.direction, this.speed * dt * 0.5);
-        this.position.addScaled(dir, this.speed * dt * 0.5);
+        // Scale the speed with the GUI
+        var speed = this.game.speed * this.speed;
+                
+        // Semi implicit euler without acceleration?
+        this.position.addScaled(this.direction, speed * dt * 0.5);
+        this.position.addScaled(dir, speed * dt * 0.5);
        
         this.direction = dir;
         
