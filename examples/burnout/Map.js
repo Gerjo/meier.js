@@ -16,6 +16,8 @@ define(function(require) {
     function Map() {
         Entity.call(this, 0, 0);
         
+        this.fullEdit = false;
+                
         this.waypoints = [];
         this.roads     = [];
         
@@ -70,7 +72,7 @@ define(function(require) {
     
     Map.prototype.onKeyDown = function(input, key) {
         
-        if(key == Keys.D) {
+        if(key == Keys.D && this.fullEdit) {
             
             if( ! this.mouseRightDown && ! this.mouseLeftDown && ! this.selected) {
                 var local = this.toLocal(this.input);
@@ -128,6 +130,11 @@ define(function(require) {
     };
     
     Map.prototype.onRightUp = function(input) {
+        
+        if( ! this.fullEdit) {
+            return true;
+        }
+        
         var local = this.toLocal(input);
         
         if(this.selected) {
@@ -155,6 +162,11 @@ define(function(require) {
     };
     
     Map.prototype.onRightDown = function(input) {
+        
+        if( ! this.fullEdit) {
+            return true;
+        }
+        
         // Find selected waypoint
         this.selected       = this.findSelected(this.toLocal(this.input));
         this.mouseRightDown = true;
@@ -162,13 +174,29 @@ define(function(require) {
     };
     
     Map.prototype.onLeftDown = function(input) {
+        
+        // Road graph is hidden, don't enable editing.
+        if( ! this.game.showDebug) {
+            return true;
+        }
 
         // Find selected waypoint
-        if( ! (this.selected = this.findSelected(this.toLocal(this.input)))) {
-            this.waypoints.push(this.selected = new Waypoint(input.x, input.y));
+        this.selected = this.findSelected(this.toLocal(this.input));
+
+        this.mouseLeftDown = true;
+        
+        if( ! this.selected) {
+            
+            // Spawn node
+            if(this.fullEdit) {
+                this.waypoints.push(this.selected = new Waypoint(input.x, input.y));
+                
+            } else {
+                return true;
+            }
         }
         
-        this.mouseLeftDown = true;
+        
         return false;
     };
     
@@ -191,12 +219,15 @@ define(function(require) {
             }
         }
         
-        // Edit waypoints
-        this.waypoints.forEach(function(p) {
-            if(p.contains(local)) {
-                this.input.cursor(Input.Cursor.MOVE);
-            }
-        }.bind(this));
+        if(this.game.showDebug) {
+            
+            // Edit waypoints
+            this.waypoints.forEach(function(p) {
+                if(p.contains(local)) {
+                    this.input.cursor(Input.Cursor.MOVE);
+                }
+            }.bind(this));
+        }
     };
     
     Map.prototype.draw = function(renderer) {
@@ -252,7 +283,7 @@ define(function(require) {
             object = '{"waypoints":[{"type":"Waypoint","x":-318,"y":238,"id":2},{"type":"Waypoint","x":-322,"y":53,"id":12},{"type":"Waypoint","x":129,"y":55,"id":13},{"type":"Waypoint","x":128,"y":-102,"id":14},{"type":"Waypoint","x":330,"y":-104,"id":15},{"type":"Waypoint","x":329,"y":237,"id":16}],"roads":[{"type":"Road","from":16,"to":2,"lanes":2},{"type":"Road","from":2,"to":12,"lanes":2},{"type":"Road","from":12,"to":13,"lanes":2},{"type":"Road","from":13,"to":14,"lanes":2},{"type":"Road","from":14,"to":15,"lanes":2},{"type":"Road","from":15,"to":16,"lanes":2}]}';
         }
 
-
+        // Merge with above line.
         if(object && (object = JSON.TryParse(object))) {
             
             if(object.waypoints) {
