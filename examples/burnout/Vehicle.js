@@ -15,7 +15,7 @@ define(function(require) {
         this.maxSteerAngle = 0.0604;
         this.maxSpeed   = 10;
         this.speed      = 50;
-        this.lookAhead  = 20;
+        this.lookAhead  = 30;
         this.viewRange  = 40;
 
         this.road       = null;
@@ -118,7 +118,7 @@ define(function(require) {
         
         var perp = target.direction(nearestCurrent).perp().normalize();
         
-        var offset = perp.scaleScalar(Math.sin(this.distanceTraveled / 50) * 10);
+        var offset = perp.scaleScalar(Math.sin(this.distanceTraveled / 50) * 5);
         
         
         // Direction does not imply speed. Normalize.
