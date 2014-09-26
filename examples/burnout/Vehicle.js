@@ -24,6 +24,10 @@ define(function(require) {
         this.target     = new V2(10, 1);
         
         this.background = new Texture("vehicle.png");
+        
+        // Initial seed for distance traveled. We cannot assume all cars started at
+        // the same point in time.
+        this.distanceTraveled = Random(0, 100, true);
     }
     
     Vehicle.prototype.update = function(dt) {
@@ -112,8 +116,13 @@ define(function(require) {
             console.log("Vehicle::update timeout");
         }
         
+        var perp = target.direction(nearestCurrent).perp().normalize();
+        
+        var offset = perp.scaleScalar(Math.sin(this.distanceTraveled / 50) * 10);
+        
+        
         // Direction does not imply speed. Normalize.
-        var dir       = target.direction(this.position).normalize();
+        var dir       = target.clone().add(offset).direction(this.position).normalize();
 
         dir.add(this.getSteering());
         
@@ -129,6 +138,8 @@ define(function(require) {
             dir = V2.CreateAngular(currentAngle + angle);
         }
         
+        var start = this.position.clone();
+        
         // Semi implicit euler?
         this.position.addScaled(this.direction, this.speed * dt * 0.5);
         this.position.addScaled(dir, this.speed * dt * 0.5);
@@ -138,15 +149,18 @@ define(function(require) {
         // For animation purposes.
         this.rotation = dir.angle();
         
+        this.distanceTraveled += this.position.distance(start);
         
-        renderer.begin();
-        renderer.circle(this.toLocal(target), 2);
-        renderer.circle(this.toLocal(nearestCurrent), 2);
-        renderer.fill("blue");        
+        if(this.game.showDebug) {
+            renderer.begin();
+            renderer.circle(this.toLocal(target), 2);
+            renderer.circle(this.toLocal(nearestCurrent), 2);
+            renderer.fill("blue");        
 
-        renderer.begin();
-        renderer.circle(0, 0, this.viewRange);
-        renderer.stroke("rgba(255, 255, 255, 0.1)");
+            renderer.begin();
+            renderer.circle(0, 0, this.viewRange);
+            renderer.stroke("rgba(255, 255, 255, 0.1)");
+        }
     };
 
     Vehicle.prototype.getSteering = function() {

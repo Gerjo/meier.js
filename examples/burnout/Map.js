@@ -214,32 +214,35 @@ define(function(require) {
                 renderer.stroke("yellow", 2);
             }
         }
-        
-        var color = Color.Alpha(Color.Red, 0.4);
 
-        // Draw each waypoint
-        renderer.begin();
-        this.waypoints.forEach(function(p) {
-            renderer.circle(p.x, p.y, 5);
-            
-            //renderer.text(p.id, p.x, p.y, "white", "center", "middle");
-            
-            if(p.contains(local)) {
-                //renderer.text("hi", local.x, local.y, "black", "left", "bottom");
-            }
-        });
-        renderer.fill(color);
-        
-        
-        var selectedRoad = this.findSelectedRoad(local);
-        
-        // Draw each road
-        this.roads.forEach(function(road) {            
+
+        if(this.game.showDebug) {        
+            var color = Color.Alpha(Color.Red, 0.4);
+
+            // Draw each waypoint
             renderer.begin();
-            //renderer.arrow(road.a, road.b);
-            renderer.line(road.a, road.b);
-            renderer.stroke(color, 1);
-        });
+            this.waypoints.forEach(function(p) {
+                renderer.circle(p.x, p.y, 5);
+            
+                //renderer.text(p.id, p.x, p.y, "white", "center", "middle");
+            
+                if(p.contains(local)) {
+                    //renderer.text("hi", local.x, local.y, "black", "left", "bottom");
+                }
+            });
+            renderer.fill(color);
+        
+        
+            var selectedRoad = this.findSelectedRoad(local);
+        
+            // Draw each road
+            this.roads.forEach(function(road) {            
+                renderer.begin();
+                //renderer.arrow(road.a, road.b);
+                renderer.line(road.a, road.b);
+                renderer.stroke(color, 1);
+            });
+        }
     };
     
     Map.prototype.load = function() {
