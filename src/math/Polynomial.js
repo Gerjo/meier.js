@@ -28,7 +28,7 @@ define(function(require) {
         /// @param d Available options?
         /// @param n Amount selected?
         /// @return float indicating the binomial coefficient
-        BinomialCoefficient: function(d, n) {
+        BinomialCoefficient: function(k, n) {
             return Factorial(k) / (Factorial(k - n) * Factorial(n));
         },
     
