@@ -65,10 +65,17 @@ define(function(require) {
         
         // Nearest to current.      
         var nearestCurrent   = Nearest.PointOnLineSegment(this.position, currentRoad);
-        var target           = nearestCurrent;
         
-        var ahead = this.lookAhead;
-
+        var nearestNext = Nearest.PointOnLineSegment(this.position, this.nextRoad);
+        
+        if(nearestCurrent.distance(this.position) > nearestNext.distance(this.position)) {
+            this.road      = this.nextRoad;
+            this.nextRoad  = this.computeNextRoad();
+            nearestCurrent = nearestNext;
+        }
+        
+        var target = nearestCurrent;
+        var ahead  = this.lookAhead;
         
         do {
             run = false;
@@ -107,7 +114,7 @@ define(function(require) {
         } while(run && --timeout > 0);
         
         if(nearestCurrent.equals(currentRoad.b)) {
-            //console.log("switching lanes");
+            console.log("switching lanes");
             this.road = this.nextRoad;
             this.nextRoad = this.computeNextRoad();
         }
@@ -149,21 +156,27 @@ define(function(require) {
        
         this.direction = dir;
         
-        // For animation purposes.
-        this.rotation = dir.angle();
-        
         this.distanceTraveled += this.position.distance(start);
-        
+                
         if(this.game.showDebug) {
             renderer.begin();
-            renderer.circle(this.toLocal(target), 2);
             renderer.circle(this.toLocal(nearestCurrent), 2);
             renderer.fill("blue");        
+
+            renderer.begin();
+            renderer.circle(this.toLocal(target), 2);
+            renderer.fill("hotpink");        
+
+            
 
             renderer.begin();
             renderer.circle(0, 0, this.viewRange);
             renderer.stroke("rgba(255, 255, 255, 0.1)");
         }
+        
+        
+        // For animation purposes.
+        this.rotation = dir.angle();
     };
 
     Vehicle.prototype.getSteering = function() {
