@@ -14,7 +14,7 @@ define(function(require) {
         this.momentum   = 1; // no used
         this.maxSteerAngle = 0.049;
         this.maxSpeed   = 10;
-        this.speed      = Random(10, 20) * 8;
+        this.speed      = Random(10, 15) * 8;
         this.lookAhead  = 45;
         this.viewRange  = 40;
 
