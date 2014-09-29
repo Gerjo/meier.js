@@ -39,6 +39,31 @@ define(function(require) {
         ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3])
     };
     
+    
+    
+    RawTexture.fromMatrix = function(r, g, b, a) {
+        
+        var width  = r.numcolumns;
+        var height = r.numrows;
+        var img    = context.createImageData(width, height);
+        
+        for(var i = 0, j = 0; i < img.data.length; i += 4, ++j) {
+            var red = r._[j];
+            
+            img.data[i + 0] = red;
+                        
+            // Use the given channel, or switch to "red" (grey scale)
+            img.data[i + 1] = (g) ? g._[j] : red;
+            img.data[i + 2] = (b) ? b._[j] : red;
+            
+            // Alpha must be present, or "255" (no alpha) is used
+            img.data[i + 3] = (a) ? a._[j] : 255;
+        }
+                
+        return new RawTexture(img, null);
+    };
+    
+    
     RawTexture.prototype = new Texture(null);
     function RawTexture(url, callback) {
         Texture.call(this, null, null);
@@ -506,6 +531,32 @@ define(function(require) {
         }.bind(this));
     };
     
+    RawTexture.prototype.asMatrix = function() {
+
+        var source    = this._raw.data;
+        var width     = this._raw.width;
+        var height    = this._raw.height;
+    
+        var r = new (M(width, height))();
+        var g = new (M(width, height))();
+        var b = new (M(width, height))();
+        var a = new (M(width, height))();
+        
+
+        for(var i = 0, j = 0; i < source.length; i += this._channels, ++j) {
+            r._[j] = source[i + 0];
+            g._[j] = source[i + 1];
+            b._[j] = source[i + 2];
+            a._[j] = source[i + 3];
+        };
+        
+        return {
+            r: r,
+            g: g,
+            b: b,
+            a: a
+        };
+    };
     
     return RawTexture;
 });
