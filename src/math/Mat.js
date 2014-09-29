@@ -921,6 +921,18 @@ define(function(require) {
             return out.join("\n");
         };
         
+        /// Test if any matrix value is "undefined"
+        M.prototype.hasUndefined = function() {
+            
+            for(var i = 0; i < this._.length; ++i) {
+                if(this._[i] === undefined) {
+                    return true;
+                }
+            }
+            
+            return false;
+        };
+        
         M.prototype.wolfram = function(digits) {
             var r = "{";
             
