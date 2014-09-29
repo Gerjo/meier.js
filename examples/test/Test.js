@@ -16,7 +16,7 @@ define(function(require){
     Test.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-    }
+    };
     
     return Test;
 });
