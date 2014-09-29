@@ -14,7 +14,7 @@ define(function(require){
     
     function Burnout(container) {        
         Game.call(this, container);
-        this.setHighFps(30);
+        this.setHighFps(60);
         this.setLowFps(1);
         this.logger.showInternals(false);
         this.setAutoClear(false);
@@ -32,8 +32,8 @@ define(function(require){
         this.gui = new dat.GUI();
         this.gui.add(this, "maxSteerAngle", 0, 0.5).step(0.001).name("Max steering");
         this.gui.add(this, "lookAhead", 0, 100).name("Lookahead");
-        this.gui.add(this, "viewRange", 0, 50).name("Viewrange");
-        this.gui.add(this, "speed", 0, 10).step(0.1).name("Speed");
+        this.gui.add(this, "viewRange", 0, 70).name("Viewrange");
+        this.gui.add(this, "speed", 0, 3).step(0.1).name("Speed");
         this.gui.add(this, "showDebug").name("Show debug");
         this.gui.add(this, "removeAllVehicles").name("Remove all");
 
@@ -45,8 +45,8 @@ define(function(require){
         
         Random.Seed(10);
         
-        for(var i = 0; i < 10; ++i) {
-            //this.vehicles.push(new Vehicle(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
+        for(var i = 0; i < 5; ++i) {
+            this.vehicles.push(new Vehicle(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
         }
         
         this.vehicles.forEach(this.add.bind(this));
