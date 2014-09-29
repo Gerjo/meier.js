@@ -56,6 +56,7 @@ define(function(require) {
         if(typeof url == "string") {
             this._getRawByUrl(url);
             
+        // Load from ImageData
         } else if(url instanceof ImageData) {
             this._raw      = url;
             this.width     = this._raw.width;
@@ -225,15 +226,7 @@ define(function(require) {
             data.data[i] = this._raw.data[i];
         }
         
-        var texture = new Texture(null);
-        texture.hw = this.hw;
-        texture.hh = this.hh;
-        texture.height = this.height;
-        texture.width  = this.width;
-        texture._raw = data;
-        texture._isLoaded = true;
-        
-        return texture;
+        return new RawTexture(data);
     };
     
     /// Turn this image into a luminance representation. Leaves alpha
