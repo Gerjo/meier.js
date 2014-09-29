@@ -778,6 +778,24 @@ define(function(require) {
             return this;
         };
         
+        /// Change the size of this matrix. This is well defined for shrinking, growing
+        /// may leave "undefined" values in your matrix.
+        ///
+        /// @param Number of rows
+        /// @param Number of columns
+        /// @return A copied matrix with altered dimensions.
+        M.prototype.resize = function(rows, columns) {
+            var m = new (Builder(rows, columns))();
+           
+            for(var row = 0; row < Math.min(this.numrows, rows); ++row) {
+                for(var col = 0; col < Math.min(this.numcolumns, columns); ++col) {
+                    m.set(row, col, this._[At(row, col)]);
+                }
+            }
+                    
+            return m;
+        };
+        
         /// Transform vectors for graphics purposes. Does probably 
         /// not do what you'd expect.
         ///
