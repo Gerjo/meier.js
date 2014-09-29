@@ -973,6 +973,8 @@ define(function(require) {
         /// Compute the singular value decomposition. Code was taken from http://www.numericjs.com/
         /// License: https://github.com/sloisel/numeric/blob/master/license.txt
         /// 
+        /// More information: http://www.cs.utexas.edu/users/inderjit/public_papers/HLA_SVD.pdf
+        /// More information: http://www.ling.ohio-state.edu/~kbaker/pubs/Singular_Value_Decomposition_Tutorial.pdf
         ///
         M.prototype.svd = function() {
             /*
