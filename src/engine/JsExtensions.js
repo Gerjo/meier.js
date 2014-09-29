@@ -449,6 +449,25 @@ String.prototype.trim = function(string) {
     return r;
 };
 
+/// Apply US style number formatting. Truncates any decimals.
+Number.prototype.pretty = function() {
+  
+    var str = this.toFixed(0).toString();
+    var res = "";
+
+    for(var i = str.length - 1, j = 0; i >= 0; --i, ++j) {
+
+        if(j == 3) {
+            res = "," + res;
+            j = 0;
+        }
+
+        res = str[i] + res;
+    }
+
+    return res;
+};
+
 /// Add support for context binding on older platforms e.g.: the ipad 1 or older ipods.
 ///
 /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
