@@ -47,6 +47,43 @@ define(function(require) {
             return row * columns + column;
         }
         
+        M.CreateHaar = function() {
+            
+            if(! isSquare) {
+                // As far as I can tell, anyway.
+                throw new Error("Haar transform is only well defined by square matrices.");
+            }
+            
+            function Haar(n) {
+                
+                // Recursion end condition:
+                if(n == 1) {
+                    return Builder(1, 1).Create([1]);
+                }
+                
+                // Recurse deeper for the top matrix:
+                var top = Haar(n - 1).kronecker(Builder(1, 2).Create([1, 1]));
+       
+                // Make sure the bottom matrix grows at the same speed as the top matrix:
+                var degree = Math.pow(2, n-1) / 2;
+            
+                // Compute the bottom matrix:
+                var bottom = Builder(degree, degree).
+                    CreateIdentity().
+                    multiply(Math.pow(2, (n - 1) / 2)).
+                    kronecker(Builder(1, 2).Create([1, -1]));
+                    
+                // Concatenate both matrices
+                return top.appendBottom(bottom);
+            }
+  
+            return Haar(rows / 2);
+        };
+        
+        M.Create = function(array) {
+            return new M(array);
+        };
+        
         M.CreateIdentity = function() {
             var m = new M();
             
