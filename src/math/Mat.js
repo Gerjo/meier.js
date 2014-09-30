@@ -1290,9 +1290,38 @@ define(function(require) {
             }
         }; // End prototype.svd = function() {} ...
         
+        
+        /// Compute the kronecker product.
+        M.prototype.kronecker = function(b) {
+            var a = this;
+        
+            var m = new (Builder(b.numrows * a.numrows, b.numcolumns * a.numcolumns))();
+          
+            for(var row = 0; row < a.numrows; ++row) {
+                for(var col = 0; col < a.numcolumns; ++col) {
+                    
+                    // Offset in result
+                    var x = row * b.numrows;
+                    var y = col * b.numcolumns;
+                    
+                    for(var i = 0; i < b.numrows; ++i) {
+                        for(var j = 0; j < b.numcolumns; ++j) {
+                            var val = a.get(row, col) * b.get(i, j);
+                            
+                            m.set(x + i, y + j, val);
+                        }   
+                    }
+                }
+            }
+        
+            return m;
+        };
+    
+        
         return M;
     };
     
+
     Builder.fromArrays = function(arrays) {
         
         if( ! (arrays instanceof Array && arrays.length > 0)) {
