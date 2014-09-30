@@ -1000,6 +1000,32 @@ define(function(require) {
             return array;
         };
         
+        M.prototype.appendBottom = function(bottom) {
+            var top = this;
+            
+            if(bottom.numcolumns != top.numcolumns) {
+                throw new Error("Cannot append, number of columns does not equal.");
+            }
+            
+            var m = Builder(top.numrows + bottom.numrows, bottom.numcolumns).Create();
+            
+            // Copy top
+            for(var row = 0; row < top.numrows; ++row) {
+                for(var col = 0; col < top.numcolumns; ++col) {
+                    m.set(row, col, top.get(row, col));
+                }
+            }
+            
+            // Copy bottom
+            for(var row = 0; row < bottom.numrows; ++row) {
+                for(var col = 0; col < bottom.numcolumns; ++col) {
+                    m.set(row + top.numrows, col, bottom.get(row, col));
+                }
+            }
+            
+            return m;
+        };
+        
         /// Compute the singular value decomposition. Code was taken from http://www.numericjs.com/
         /// License: https://github.com/sloisel/numeric/blob/master/license.txt
         /// 
