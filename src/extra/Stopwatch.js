@@ -15,6 +15,11 @@ define(function(require) {
         this.startTime = new Date().getTime();
         return this;
     };
+    
+    Stopwatch.prototype.restart = function() {
+        this.startTime = new Date().getTime();
+        return this;
+    };
 
     Stopwatch.prototype.forwardSecond = function() {
         this.startTime  -= 1001;
