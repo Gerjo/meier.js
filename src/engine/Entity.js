@@ -67,6 +67,16 @@ define(function(require) {
         return this._entities[n] || null;
     };
     
+    /// Rettrieve first add child entity.
+    Entity.prototype.first = function() {
+        return this._entities.first() || null;
+    };
+    
+    /// Retrieve last added child entity.
+    Entity.prototype.last = function() {
+        return this._entities.last() || null;
+    };
+    
     /// Add a new child entity
     Entity.prototype.add = function(entity) {
         if(entity instanceof Entity) {
