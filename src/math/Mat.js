@@ -65,19 +65,21 @@ define(function(require) {
                 var top = Haar(n - 1).kronecker(Builder(1, 2).Create([1, 1]));
        
                 // Make sure the bottom matrix grows at the same speed as the top matrix:
-                var degree = Math.pow(2, n-1) / 2;
+                var degree = Math.pow(2, n - 1) / 2;
             
                 // Compute the bottom matrix:
                 var bottom = Builder(degree, degree).
                     CreateIdentity().
                     multiply(Math.pow(2, (n - 1) / 2)).
                     kronecker(Builder(1, 2).Create([1, -1]));
-                    
+                
+                //console.log("n: " + n + ", columns: " + bottom.numcolumns);
+                                    
                 // Concatenate both matrices
                 return top.appendBottom(bottom);
             }
   
-            return Haar(rows / 2);
+            return Haar(rows + 1);
         };
         
         M.Create = function(array) {
