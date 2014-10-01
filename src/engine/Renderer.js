@@ -215,9 +215,9 @@ define(function(require) {
                     texture._image,            // The image
                     right,                     // Source X
                     top,                       // Source Y
-                    texture.width + left,             // Source width
-                    texture.height + bottom,            // Source height
-                    x - width * 0.5 + right,           // Target X
+                    texture.width + left,      // Source width
+                    texture.height + bottom,   // Source height
+                    x - width * 0.5 + right,   // Target X
                     -y - height * 0.5 + top,   // Target Y
                     width,                     // Target width
                     height                     // Target height
