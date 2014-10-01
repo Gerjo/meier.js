@@ -62,6 +62,20 @@ define(function(require) {
         this._entities = [];
     }
     
+    /// Change visibility state
+    Entity.prototype.hide = function() {
+        this.visible = false;
+        
+        return this;
+    };
+    
+    /// Change visibility state
+    Entity.prototype.show = function() {
+        this.visible = true;
+        
+        return this;
+    };
+    
     /// Retrieve a child entity at a given offset.
     Entity.prototype.get = function(n) {
         return this._entities[n] || null;
