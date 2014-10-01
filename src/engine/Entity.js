@@ -167,8 +167,10 @@ define(function(require) {
     };
     
     Entity.prototype.containsPoint = function(point) {
-        // TODO: recurse.
-        return PointInObb(point, this.position, this.width * this.scale, this.height * this.scale, this.rotation);
+        
+        var world = this.toWorld(this.position);
+        
+        return PointInObb(point, world, this.width * this.scale, this.height * this.scale, this.rotation);
     };
     
     Entity.prototype._registerEvents = function() {
