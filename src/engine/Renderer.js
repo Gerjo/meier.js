@@ -166,16 +166,18 @@ define(function(require) {
     };
 
     /// Draw a texture:
-    /// Accepts:
-    /// [Texture, Number, Number]
-    /// [Texture, Number, Number, Number, Number]
-    Renderer.prototype.texture = function(texture, x, y, width, height) {
+    Renderer.prototype.texture = function(texture, x, y, width, height, top, right, bottom, left) {
     
     	if(IsVector(x)) {
+            // Shift everyhing
+            left   = bottom;
+            bottom = right;
+            right  = top
+            top    = height;
     		height = width;
-    		width = y;
-    		y = x.y;
-    		x = x.x;
+    		width  = y;
+    		y      = x.y;
+    		x      = x.x;
     	}
 	
         if(isNaN(x)) {
@@ -195,6 +197,13 @@ define(function(require) {
         if(isNaN(height)) {
             height = texture.height;
         }
+        
+        // clipping default values
+        top    = top    || 0;
+        right  = right  || 0;
+        bottom = bottom || 0;
+        left   = left   || 0;
+        
  
         if( ! texture._isLoaded) {
             return this;
@@ -203,15 +212,15 @@ define(function(require) {
         // Render an "img" tag onto the canvas.
         if(texture._image !== null) {
             this.context.drawImage(
-                    texture._image,    // The image
-                    0,                 // Source X
-                    0,                 // Source Y
-                    texture.width,     // Source width
-                    texture.height,    // Source height
-                    x - width * 0.5,   // Target X
-                    -y - height * 0.5, // Target Y
-                    width,             // Target width
-                    height             // Target height
+                    texture._image,            // The image
+                    right,                     // Source X
+                    top,                       // Source Y
+                    texture.width + left,             // Source width
+                    texture.height + bottom,            // Source height
+                    x - width * 0.5 + right,           // Target X
+                    -y - height * 0.5 + top,   // Target Y
+                    width,                     // Target width
+                    height                     // Target height
             );
         } else if(texture._raw !== null) {
             // TODO: this is free from transformations. Simulate them here?
