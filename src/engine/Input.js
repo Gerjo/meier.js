@@ -71,10 +71,11 @@ define(function(require) {
         // Always center the initial mouse position.
         Vector.call(this, width * 0.5, height * 0.5);
         
-        this.isTablet   = isTablet;
-        this._container = container;
-        this._size      = new Vector(width, height);
-        this._keystates = {};
+        this.isTablet     = isTablet;
+        this._container   = container;
+        this._size        = new Vector(width, height);
+        this._keystates   = {};
+        this._mouseStates = {};
     
         this.gamepads   = new Gamepads(this);
         
@@ -209,6 +210,9 @@ define(function(require) {
             } else if(event.which === 1) {
                 this.trigger(Input.Events.LEFT_DOWN, event);
             }
+            
+            this._mouseStates[event.which] = true;
+            
         }.bind(this);
     
         container.onmouseup = function(event) {
@@ -221,6 +225,8 @@ define(function(require) {
             } else if(event.which === 1) {
                 this.trigger(Input.Events.LEFT_UP, event);
             }
+            
+            this._mouseStates[event.which] = false;
         }.bind(this);
         
         eventContainer.onkeydown = function(event) {
@@ -261,6 +267,14 @@ define(function(require) {
         // Restore default cursor, it's up to the application
         // to repeatedly set a different state.
         this.cursor(Input.Cursor.DEFAULT);
+    };
+
+    Input.prototype.isLeftDown = function() {
+        return this._mouseStates[1] === true;
+    };
+    
+    Input.prototype.isRightDown = function() {
+        return this._mouseStates[3] === true;
     };
 
     Input.prototype.cursor = function(cursortype) {
