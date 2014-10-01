@@ -62,6 +62,12 @@ define(function(require) {
         this._entities = [];
     }
     
+    /// Retrieve a child entity at a given offset.
+    Entity.prototype.get = function(n) {
+        return this._entities[n] || null;
+    };
+    
+    /// Add a new child entity
     Entity.prototype.add = function(entity) {
         if(entity instanceof Entity) {
             this._entities.push(entity);
