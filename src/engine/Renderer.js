@@ -78,18 +78,34 @@ define(function(require) {
     };
 
     /// Clear the canvas with a solid fill color:
-    Renderer.prototype.clearTexture = function(texture) {
-        this.context.drawImage(
-                texture.image,  // The image
-                0,              // Source X
-                0,              // Source Y
-                texture.width,  // Source width
-                texture.height, // Source height
-                -this.hw,       // Target X
-                -this.hh,       // Target Y
-                this.width,     // Target width
-                this.height     // Target height
-        );    
+    Renderer.prototype.clearTexture = function(texture, tileImage) {
+        
+        // Image is still loading.
+        if(texture._image === null) {
+            return;
+        }
+        
+        // File image with a pattern:
+        if(tileImage === true) {
+            this.begin();
+            this.rectangle(0, 0, this.width, this.height);
+            this.fill(texture);
+            
+        // Stretch image to fit
+        } else {
+            this.context.drawImage(
+                    texture._image,  // The image
+                    0,              // Source X
+                    0,              // Source Y
+                    texture.width,  // Source width
+                    texture.height, // Source height
+                    -this.hw,       // Target X
+                    -this.hh,       // Target Y
+                    this.width,     // Target width
+                    this.height     // Target height
+            );    
+        }
+        
         return this;
     };
 
