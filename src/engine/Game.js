@@ -84,6 +84,21 @@ define(function(require) {
         }
     };
     
+    /// Retrieve a child entity at a given offset.
+    Game.prototype.get = function(n) {
+        return this._entities[n] || null;
+    };
+    
+    /// Rettrieve first add child entity.
+    Game.prototype.first = function() {
+        return this._entities.first() || null;
+    };
+    
+    /// Retrieve last added child entity.
+    Game.prototype.last = function() {
+        return this._entities.last() || null;
+    };
+    
     Game.prototype._onFocus = function() {
         // Restore high FPS
         this._applyFps(this._highFps);
