@@ -38,19 +38,17 @@ define(function(require) {
         return mt.nextBoolean();
     };
     
-    /// Depricated.
-    Random.Range = function(min, max) {
-        console.log("Warning:using severely deprecated method. Use Random(min, max, true); instead.");
-        return mt.nextFloat() * (max - min) + min;
-    };
-    
     /// Depricated. Use Random(min, max, true);
     Random.FloatInRange = function(min, max) {
+        console.log("Warning:using severely deprecated method. Use FloatInRange(min, max, true); instead.");
+        
         return mt.nextFloat() * (max - min) + min;
     };
 
     /// Depricated. Use Random(min, max);
     Random.IntegerInRange = function(min, max) {
+        console.log("Warning:using severely deprecated method. Use IntegerInRange(min, max, true); instead.");
+        
         return Math.round(mt.nextFloat() * (max - min) + min);
     };
     
