@@ -76,6 +76,11 @@ define(function(require) {
         return this;
     };
     
+    /// Retrieve visual visability state
+    Entity.prototype.isVisible = function() {
+        return this.visible;
+    };
+    
     /// Retrieve a child entity at a given offset.
     Entity.prototype.get = function(n) {
         return this._entities[n] || null;
@@ -167,7 +172,6 @@ define(function(require) {
     };
     
     Entity.prototype.containsPoint = function(point) {
-        
         var world = this.toWorld(this.position);
         
         return PointInObb(point, world, this.width * this.scale, this.height * this.scale, this.rotation);
