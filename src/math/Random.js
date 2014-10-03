@@ -17,7 +17,16 @@ define(function(require) {
         if(asFloat === true) {
             return Random.FloatInRange(min, max);
         } else {
-            return Random.IntegerInRange(min, max);
+            
+            var range = max - min;
+            
+            var max   = Math.floor(Math.pow(2, 32) / range) * range;
+            
+            var n;
+            
+            while((n = mt.nextInteger()) > max);
+            
+            return n % range + min;
         }
     }
     
