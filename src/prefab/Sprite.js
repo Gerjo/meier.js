@@ -56,6 +56,32 @@ define(function(require){
         
     }
     
+    Sprite.prototype.setUrl = function(url) {
+        this._texture = new Texture(url);
+        return this;
+    };
+    
+    Sprite.prototype.clone = function() {
+        var clone = new Sprite(
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height,
+            this._texture._url
+        );
+        
+        clone._opacityModifier = this._opacityModifier;
+        clone._slideModifier   = this._slideModifier;
+        clone._glow            = this._glow;
+        clone._clipping        = this._clipping.clone();
+        clone._slide           = this._slide.clone();
+        clone._offset          = this._offset.clone();
+        
+        // clone more? recursive decent?
+        
+        return clone;
+    };
+    
     /// Move up / down with respect to top
     Sprite.prototype.slideTop = function(amount) {
         this._slide[0] = -amount; // NB: flipping sign to make user input make sense.
