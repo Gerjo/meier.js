@@ -2,6 +2,7 @@
 define(function(require){
     var Game    = require("meier/engine/Game");
     var Random  = require("meier/math/Random");
+    var Vector2 = require("meier/math/Vec")(2);
     var Sprite  = require("meier/prefab/Sprite");
     var Entity  = require("meier/engine/Entity");
     var Texture = require("meier/engine/Texture");
@@ -26,15 +27,20 @@ define(function(require){
     
     
     function Door() {
-        return Random(0, 2);
+        return Random(0, 3);
     }
     
     function MontyHall(container) {        
         Game.call(this, container);
         
+        this.n = [];
+        
         this.logger.showInternals(false);
         this.setAutoClear(false);
         this.setHighFps(60);
+        
+        this.speed = 1.0;
+        this.games = 0;
         
         this.background = new Texture("backdrop.png");
         
@@ -44,13 +50,13 @@ define(function(require){
             var entity = new Entity();
             
             entity.garage = entity.add(new Sprite("garage.png"));
-            entity.tux    = entity.add(new Sprite("tux.png").hide());
+            entity.tux    = entity.add(new Sprite("tuxies/1.png").hide());
             entity.door   = entity.add(new Sprite("door.png"));
             entity.cross  = entity.add(new Sprite("cross.png").fade(-10));
             entity.check  = entity.add(new Sprite("check.png").fade(-10));
             entity.light  = entity.add(new Sprite("light.png").fade(-10));
             
-            entity.tux.position.y = -30;
+            entity.tux.position.y = -10;
             entity.door.position.y = entity.cross.position.y = -10;
             return entity;
         });
@@ -68,25 +74,30 @@ define(function(require){
         this.host   = -1;
         this.second = -1;
         
+        this.win  = 0;
+        this.lost = 0;
+        
         this.penguins = [];
-        
-        
-        /*setInterval(function() {
-
-            var s = 0.5;
-            var w = 90 * s;
-            
-            this.penguins.push(this.add(new Sprite("tux.png")));
-            this.penguins.last().position.y = -this.hh + w * 0.5 + Math.sin(this.penguins.length * 3) * 10;
-            
-            this.penguins.last().position.x = -this.hw + this.penguins.length * w;
-            this.penguins.last().scale = s;
-            
-        }.bind(this), 500);*/
+        this.animate  = [];
     }
     
     MontyHall.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
+       
+        
+        if(! this.penguins.empty() && this.penguins.last().isVisible()) {
+            var s = 0.5;
+            var w = 90 * s;
+            
+            var target = new Vector2(
+                (this.penguins.length * w) % this.width - this.hw,
+                -this.hh + w + Math.sin(this.penguins.length * 3) * 10
+            );
+            
+            var delta = this.penguins.last().position.direction(target);
+            
+            this.penguins.last().position.addScaled(delta, -0.1);
+        }
         
         var input = this.input;
         
@@ -107,8 +118,8 @@ define(function(require){
             // Determine door with the prize
             var prize = this.prize = Door();
             
-            // Show the penguin
-            this.garages[prize].tux.show();
+            // Generate random penguin and show it
+            this.garages[prize].tux.setUrl("tuxies/" + Random(1, 23) + ".png").show();
             
             // Update the GUI text
             this.text[0] = "Pick a door.";
@@ -132,14 +143,14 @@ define(function(require){
                         
                         this.player = i;
                         
-                        garage.light.fade(-3);
-                        garage.cross.fade(3);
+                        garage.light.fade(-3 * this.speed);
+                        garage.cross.fade(+3 * this.speed);
                     } else {
-                        garage.light.fade(+5);
+                        garage.light.fade(+5 * this.speed);
                     }
                     
                 } else {
-                    garage.light.fade(-3);
+                    garage.light.fade(-3 * this.speed);
                 }
             }.bind(this));
         
@@ -147,7 +158,7 @@ define(function(require){
         case MontyHall.State.PreSystemOpenDoor:
             this.text[0] = "The host opens door...";
             this.text[1] = "";
-            this.timer = new Timer(300);
+            this.timer = new Timer(300 / this.speed);
             
             this.state = MontyHall.State.SystemOpenDoor;
             break;
@@ -157,11 +168,11 @@ define(function(require){
                 
                 while((this.host = Door()) == this.player || this.host == this.prize );
                 
-                this.garages[this.host].door.slideTop(-100);
+                this.garages[this.host].door.slideTop(-100 * this.speed);
                 
                 this.state = MontyHall.State.PreConfirmation;
                 
-                this.timer = new Timer(1000);
+                this.timer = new Timer(1000 / this.speed);
             }
             
             break;
@@ -173,7 +184,7 @@ define(function(require){
                 
                 this.garages.forEach(function(garage, i) {
                     if(i != this.player && i != this.host) {
-                        garage.check.fade(5);
+                        garage.check.fade(+5 * this.speed);
                     }
                 }.bind(this));
                 
@@ -184,28 +195,27 @@ define(function(require){
             
             this.garages.forEach(function(garage, i) {
                 if(garage.first().contains(input) && i != this.host) {
-                    garage.light.fade(+5);
+                    garage.light.fade(+5 * this.speed);
                 
                     input.cursor(Input.Cursor.FINGER);
                 
                     if(input.isLeftDown()) {                    
                         this.second = i;
                         
-                        garage.door.slideTop(-100);
+                        garage.door.slideTop(-100 * this.speed);
                         
-                        this.timer = new Timer(1000);
+                        this.timer = new Timer(1000 / this.speed);
                         
                         this.state = MontyHall.State.PostConfirmation;
                         
                         this.garages.forEach(function(g) {
-                            g.cross.fade(-5);
-                            g.check.fade(-5);
-                        });
-                        
+                            g.cross.fade(-5 * this.speed);
+                            g.check.fade(-5 * this.speed);
+                        }.bind(this));
                     }
                 
                 } else {
-                    garage.light.fade(-3);
+                    garage.light.fade(-3 * this.speed);
                 }
             }.bind(this));
             break;
@@ -216,38 +226,63 @@ define(function(require){
                 
                 if(this.prize == this.second) {
                     this.text[0] = "SWEET! You won a penguin.";
+                    ++this.win;
+                    
                 } else {
                     this.text[0] = "Empty. Nothingness. Void. MEH.";
+                    ++this.lost;
                 }
                 
                 this.text[1] = "Click anywhere.";
                 
                 this.state = MontyHall.State.Result;
+                
+                ++this.games;
+                
+                this.speed = Math.log(this.games + 2);
+        
+                console.log("Set game speed to: " + this.speed.toFixed(2));
+        
+                
             }
             
             break;
         case MontyHall.State.Result:
+            
             if(this.input.isLeftDown()) {
                 
                 // Loop back to the beginning
                 this.state = MontyHall.State.PostResult;
                 
+                // Penguin animation
+                if(this.prize == this.second) {
+                    var clone = this.garages[this.prize].tux.clone();
+                
+                    this.penguins.push(this.add(clone));
+                    this.penguins.last().position = this.garages[this.prize].tux.toWorld();
+                }
+                
+                
                 this.garages.forEach(function(g) {
-                    g.cross.fade(-5);
-                    g.check.fade(-5);
-                    g.light.fade(-5);
+                    g.cross.fade(-5 * this.speed);
+                    g.check.fade(-5 * this.speed);
+                    g.light.fade(-5 * this.speed);
                     g.tux.hide();
-                    g.door.slideTop(100);
-                });
+                    g.door.slideTop(100 * this.speed);
+                }.bind(this));
+                
+                
+                
             }
+            
             
             break;
         case MontyHall.State.PostResult:
-            
+
             var isAnimating = this.garages.some(function(g) {
                 return g.door.isSliding();
             });
-                        
+                                                
             if( ! isAnimating) {
                 this.state = MontyHall.State.PrePickDoor;
             }
@@ -275,7 +310,14 @@ define(function(require){
             "white", "center", "center", "15px monospace"
         );
         
+        if(this.win + this.lost > 0) {
+            renderer.text(
+                "Penguins won: " + this.win + ", success rate: " + (100 * this.win / (this.win + this.lost)).toFixed(0) + "%.", 0, this.stage.bottom() - 80, 
+                "white", "center", "center", "15px monospace"
+            );
+        }
     };
     
     return MontyHall;
 });
+
