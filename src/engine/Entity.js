@@ -316,6 +316,12 @@ define(function(require) {
     /// 0   1  -t.y  .  sin   cos  1  v.y
     /// 0   0     1     0     0    1    1
     Entity.prototype.toWorld = function(local) {
+        
+        // No argument given, assume position of this entity instead.
+        if( ! local) {
+            local = this.position;
+        }
+        
         var t = this.movingToFixed();
         
         var e = this.parent;
