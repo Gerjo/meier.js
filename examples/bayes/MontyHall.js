@@ -46,6 +46,33 @@ define(function(require){
         
         this.add(this.stage = new Sprite("stage.png"));
         
+        this.penguinTitles = [
+            "Counting starts at index 1",
+            "a penguin with a blue hat",
+            "a karate penguin",
+            "an ancient pharaoh penguin",
+            "a construction worker penguin",
+            "a penguin that carries a wheel",
+            "an old wizard penguin",
+            "a penguin on-top-a-cloud",
+            "a sprite penguin",
+            "an e-book scholar penguin",
+            "a maya penguin",
+            "a sophisticated librarian penguin",
+            "a useless drunk penguin",
+            "an esteemed gentleman penguin",
+            "a penguin artist of sorts",
+            "a semi transparent penguin",
+            "a village people sailor penguin",
+            "a christmas themed penguin",
+            "a penguin that will love you forever",
+            "some sort of lifeguard penguin",
+            "a penguin with a cake",
+            "a barbecue chef penguin",
+            "a bunny penguin",
+            "a pilot penguin"
+        ];
+        
         this.garages = [0,1,2].map(function(i) {
             var entity = new Entity();
             
@@ -69,6 +96,7 @@ define(function(require){
         
         this.timer = new Timer();    
         
+        this.penguinID = -1;
         this.player = -1; 
         this.prize  = -1;
         this.host   = -1;
@@ -86,11 +114,11 @@ define(function(require){
        
         
         if(! this.penguins.empty() && this.penguins.last().isVisible()) {
-            var s = 0.5;
+            var s = 1;
             var w = 90 * s;
             
             var target = new Vector2(
-                (this.penguins.length * w) % this.width - this.hw,
+                (this.penguins.length * w * 0.5) % (this.width - w) - this.hw + w * 0.5,
                 -this.hh + w + Math.sin(this.penguins.length * 3) * 10
             );
             
@@ -118,8 +146,10 @@ define(function(require){
             // Determine door with the prize
             var prize = this.prize = Door();
             
+            this.penguinID = Random(1, 23);
+            
             // Generate random penguin and show it
-            this.garages[prize].tux.setUrl("tuxies/" + Random(1, 23) + ".png").show();
+            this.garages[prize].tux.setUrl("tuxies/" + this.penguinID + ".png").show();
             
             // Update the GUI text
             this.text[0] = "Pick a door.";
@@ -225,7 +255,7 @@ define(function(require){
             if(this.timer.expired()) {
                 
                 if(this.prize == this.second) {
-                    this.text[0] = "SWEET! You won a penguin.";
+                    this.text[0] = "SWEET! You won " + this.penguinTitles[this.penguinID] + ".";
                     ++this.win;
                     
                 } else {
@@ -312,7 +342,7 @@ define(function(require){
         
         if(this.win + this.lost > 0) {
             renderer.text(
-                "Penguins won: " + this.win + ", success rate: " + (100 * this.win / (this.win + this.lost)).toFixed(0) + "%.", 0, this.stage.bottom() - 80, 
+                "Penguins won: " + this.win + ", success rate: " + (100 * this.win / (this.win + this.lost)).toFixed(0) + "%.", 0, this.stage.bottom() - 30, 
                 "white", "center", "center", "15px monospace"
             );
         }
