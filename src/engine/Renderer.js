@@ -11,10 +11,12 @@ define(function(require) {
     var Matrix      = require("meier/math/Mat")(3, 3);
     var Vector      = require("meier/math/Vec")(2);
     var Texture     = require("meier/engine/Texture");
+    var Colors      = require("meier/engine/Colors");
     var LineSegment = require("meier/math/Line");
     var Disk        = require("meier/math/Disk");
     var Rectangle   = require("meier/math/Rectangle");
     var Polygon     = require("meier/math/Polygon");
+    var Fonts       = require("meier/engine/Fonts");
     
     
     // Macro to determine if argument is a vector.
@@ -357,6 +359,173 @@ define(function(require) {
         }
     
         return this;
+    };
+    
+    
+    /// Render text formatting according to the stack-based 
+    /// modelling language (SBML). Which is something I just
+    /// made up on the fly.
+    ///
+    /// Example: <monospace><10px>grass<> is <#00ff00>green<> and
+    ///          the <yellow>sun<> is <bold>yellow.
+    ///
+    ///
+    ///
+    Renderer.prototype.styled = function(string, x, y, align, valign) {
+        x = x || 0;
+        y = y || 0;
+        align  = align || "center";
+        valgin = valign || "middle"
+        
+        /// Struct to hold statemachine states
+        function Style(text, size, color, font, style) {
+            this.text    = text;
+            this.size    = size;
+            this.color   = color;
+            this.font    = font;
+            this.style   = style;
+            this.width   = null;
+            this.measure = null;
+        }
+        
+        var states = [];
+        var events = [];
+        
+        var height = 0;
+        var width  = 0;
+        var baseline = 0;
+        
+        // Default figures:
+        var style = ""; // bold / italic, etc.
+        var font  = "monospace";
+        var color = "default";
+        var size  = 10;
+        var startBracket = null;
+        var startString  = 0;
+        
+        // Adding two brackets makes sure the statemachine terminates.
+        string = string + "<>";
+        
+        // Totals
+        var width  = 0;
+        var height = 0;
+        
+        for(var i = 0, sub; i < string.length; ++i) {
+            if(string[i] == "<") {
+                
+                if(startString != i) {
+                    sub = string.substring(startString, i);
+                                    
+                    states.push(new Style(
+                        sub,
+                        size,
+                        color,
+                        font,
+                        style
+                    ));
+                    
+                    // Load text style for measuring
+                    this.context.font =  size + " " + font;
+                    
+                    width  += states.last().width = this.context.measureText(sub).width;
+                    states.last().height = parseInt(size, 10);
+                    states.last().measure = Fonts.Measure(size + " " + style + " " + font);
+                    
+                    // Global maximum
+                    height   = Math.max(height,   states.last().measure.height);    
+                    baseline = Math.max(baseline, states.last().measure.baseline);    
+                }
+                
+                startBracket = i;
+            } else if(string[i] == ">") {
+                sub = string.substring(startBracket + 1, i);
+                
+                // Undo last event
+                if(startBracket + 1 == i) {                    
+                    events.pop()();
+                    
+                // It's a number.
+                } else if(parseInt(sub[0]) == sub[0]) {
+                    
+                    events.push(function(old) {
+                        size = old;
+                    }.curry(size));
+                    
+                    size = sub;
+                
+                // Or a color.
+                } else if(Colors.IsColor(sub)) {
+                    events.push(function(old) {
+                        color = old;
+                    }.curry(color));
+                    
+                    color = sub;
+                
+                // Font styling
+                } else if(sub == "bold" || sub == "italic" || sub == "normal") {
+                    events.push(function(old) {
+                        style = old;
+                    }.curry(style));
+                    
+                    style = sub;
+                     
+                // Whatever else, it's a font.
+                } else {
+                    events.push(function(old) {
+                        font = old;
+                    }.curry(font));
+                    
+                    font = sub;
+                }
+                
+                startBracket = null;
+                startString  = i + 1;
+            }
+        }
+        
+        if(align == "center") {
+            x -= width / 2;
+        } else if(align == "right") {
+            x -= width;
+        }
+        
+        for(var i = 0, o; i < states.length; ++i) {
+            var state = states[i];
+            
+            // e.g.,  "bold 14px monospace";
+            this.context.font         = states[i].style + " " + states[i].size + " " + states[i].font;
+            this.context.fillStyle    = states[i].color;
+            this.context.textAlign    = "left";
+            this.context.textBaseline = "bottom";
+            
+            if(valign == "center") {
+                this.context.textBaseline = "middle";
+                
+                o = state.measure.baseline * 0.5 - baseline * 0.25;   
+            
+            } else if(valign == "bottom") {
+                this.context.textBaseline = "bottom";
+                
+                o = -state.measure.baseline + baseline * 0.5;   
+            
+            // Unsure how top align should look like...
+            } else if(valign == "top") {
+                this.context.textBaseline = "top";
+                throw new Error("Not implemented yet");
+                
+            } else {
+                o = 0;
+            }
+            
+            //this.begin();
+            //this.rectangle(x + state.width * .5, y + state.measure.height * 0.5, state.width, state.measure.height);
+            //this.stroke("red");
+            
+            this.context.fillText(states[i].text, x, - (y + o));
+            
+            x += states[i].width;
+        }
+        
     };
 
     Renderer.prototype.text = function(string, x, y, color, align, valign, font) {
