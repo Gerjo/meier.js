@@ -468,6 +468,38 @@ Number.prototype.pretty = function() {
     return res;
 };
 
+/// Offer experimental currying support.
+/// Example:
+///
+/// // Create some function
+/// function Echo(arg1, arg2) {
+///    console.log("Echo: " + arg1 + " " + arg2);
+/// }
+/// 
+/// // Bind the first parameter
+/// var Echo = Echo.curry("a");
+/// 
+/// // Call, and supply an extra parameter
+/// Echo("b"); // Output: "Echo: a b"
+///
+Function.prototype.curry = function() {
+    var args = arguments;
+    var self = this;
+    
+    return function() {
+        
+        // We are given more arguments, merge this with the initially
+        // given arguments. This is done conditionally for performance
+        // reasons.
+        if(arguments.length > 0) {
+            args = Array.prototype.slice.call(args).
+            merge(Array.prototype.slice.call(arguments));
+        }
+        
+        return self.apply(self, args);
+    }
+}
+
 /// Add support for context binding on older platforms e.g.: the ipad 1 or older ipods.
 ///
 /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
