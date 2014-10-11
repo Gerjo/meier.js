@@ -207,6 +207,24 @@ define(function(require) {
         
         return r;
     };
+    
+    /// Determine if the given argument is a color.
+    Colors.IsColor = function(color) {
+        if(color.charAt(1) == "#") {
+            return true;
+            
+        } if(color.startsWith("RGBA(") || color.startsWith("rgba(")) {
+            return true;
+
+        } if(color.startsWith("RGB(") || color.startsWith("rgb(")) {
+            return true;
+            
+        } else if(Colors[color]) {
+            return true;
+        }
+        
+        return false;
+    };
 
     /// Change the transparency of a color. Work in 
     /// progress. Behaviour may change.
