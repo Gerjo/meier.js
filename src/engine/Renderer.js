@@ -363,7 +363,7 @@ define(function(require) {
     
     
     /// Render text formatting according to the stack-based 
-    /// modelling language (SBML). Which is something I just
+    /// markup language (SBML). Which is something I just
     /// made up on the fly.
     ///
     /// Example: <monospace><10px>grass<> is <#00ff00>green<> and
@@ -375,7 +375,7 @@ define(function(require) {
         x = x || 0;
         y = y || 0;
         align  = align || "center";
-        valgin = valign || "middle"
+        valgin = valign || "bottom"
         
         /// Struct to hold statemachine states
         function Style(text, size, color, font, style) {
@@ -398,7 +398,7 @@ define(function(require) {
         // Default figures:
         var style = ""; // bold / italic, etc.
         var font  = "monospace";
-        var color = "default";
+        var color = "white";
         var size  = 10;
         var startBracket = null;
         var startString  = 0;
@@ -510,7 +510,11 @@ define(function(require) {
             
             // Unsure how top align should look like...
             } else if(valign == "top") {
-                this.context.textBaseline = "top";
+                this.context.textBaseline = "bottom";
+                //o = 0;state.measure.drop;
+                
+                //console.log();
+                
                 throw new Error("Not implemented yet");
                 
             } else {

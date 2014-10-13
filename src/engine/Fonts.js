@@ -13,12 +13,12 @@ define(function(require) {
     /// Attempt to determine a font's height and baseline. Measurements are
     /// cached internally, only the first call will be slow.
     ///
-    ///     _____             -+ height    
-    ///    / ____|             |
-    ///   | |  __  __ _        |
-    ///   | | |_ |/ _` |       |
-    ///   | |__| | (_| |       |
-    ///    \_____|\__, |       |  -+
+    ///     _____             -+ height   -+
+    ///    / ____|             |           | drop (doesn't work)
+    ///   | |  __  __ _        |          -+ -+
+    ///   | | |_ |/ _` |       |              |
+    ///   | |__| | (_| |       |              | baseheight (doesn't work)
+    ///    \_____|\__, |       |  -+         -+
     ///            __/ |       |   | baseline
     ///           |___/       -+  -+
     ///
@@ -33,8 +33,10 @@ define(function(require) {
         }
         
         var result = {
-            "height":    0,
-            "baseline":  0
+            "height":     0,
+            "baseline":   0,
+            //"baseheight": 0,
+            //"drop":       0
         };
         
         var body    = document.getElementsByTagName("body")[0];
@@ -52,14 +54,21 @@ define(function(require) {
         body.appendChild(span);
         body.appendChild(div);
 
-        result.height   = div.offsetTop;
+        result.height           = div.offsetTop;
 
         div.style.verticalAlign = "baseline";
-
-        result.baseline = result.height - div.offsetTop;
+        result.baseline         = result.height - div.offsetTop;
         
+        //div.style.verticalAlign = "text-top";
+        //result.drop             = div.offsetTop;
+        
+        //result.baseheight = result.height - result.baseline - result.drop;
+        
+        //console.log(css, result.drop);
+        
+        // Store into cache
         MeasurementCache[css] = result;
-        
+                
         return result;
     };
     
