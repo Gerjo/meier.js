@@ -246,6 +246,7 @@ define(function(require) {
                         lookup[neighbour.id] = tentative;
                     
                         // Additional test. This entry might've been popped before.
+                        // The neighbours collection might contain duplicates?
                         if(tentative.o === true) { 
                             open.updateItem(neighbour);
                         }
