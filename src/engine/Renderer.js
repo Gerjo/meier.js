@@ -378,14 +378,16 @@ define(function(require) {
         valgin = valign || "bottom"
         
         /// Struct to hold statemachine states
-        function Style(text, size, color, font, style) {
+        function Style(text, size, color, font, style, line, height, measure) {
             this.text    = text;
             this.size    = size;
             this.color   = color;
             this.font    = font;
             this.style   = style;
+            this.line    = line;
             this.width   = null;
-            this.measure = null;
+            this.height  = height;
+            this.measure = measure;
         }
         
         var states = [];
@@ -396,7 +398,7 @@ define(function(require) {
         var baseline = 0;
         
         // Default figures:
-        var style = ""; // bold / italic, etc.
+        var style = ""; // bold / italic and normal.
         var font  = "monospace";
         var color = "white";
         var size  = 10;
@@ -407,11 +409,15 @@ define(function(require) {
         string = string + "<>";
         
         // Totals
-        var width  = 0;
-        var height = 0;
+        var widths    = [0];
+        var heights   = [0];
+        var baselines = [0];
+        var offsets   = [0];
+        var line   = 0;
         
         for(var i = 0, sub; i < string.length; ++i) {
-            if(string[i] == "<") {
+                            
+            if(string[i] == "<" || string[i] == "\n") {
                 
                 if(startString != i) {
                     sub = string.substring(startString, i);
@@ -421,28 +427,46 @@ define(function(require) {
                         size,
                         color,
                         font,
-                        style
+                        style,
+                        line,
+                        parseInt(size, 10),
+                        Fonts.Measure(size + " " + style + " " + font)
                     ));
+                                        
+                    // Load text style, then measure it.
+                    this.context.font   =  size + " " + font;
+                    states.last().width = this.context.measureText(sub).width,
                     
-                    // Load text style for measuring
-                    this.context.font =  size + " " + font;
+                    // Collect dimensions of each fragment
+                    heights[line]    = Math.max(heights[line],   states.last().measure.height);  
+                    baselines[line]  = Math.max(baselines[line], states.last().measure.baseline);
+                    widths[line]    += states.last().width;
                     
-                    width  += states.last().width = this.context.measureText(sub).width;
-                    states.last().height = parseInt(size, 10);
-                    states.last().measure = Fonts.Measure(size + " " + style + " " + font);
-                    
-                    // Global maximum
-                    height   = Math.max(height,   states.last().measure.height);    
-                    baseline = Math.max(baseline, states.last().measure.baseline);    
+                    // Offset to skip a newline or bracket character.
+                    startString = i + 1;
                 }
                 
                 startBracket = i;
+                
+                if(string[i] == "\n") {
+                    ++line;
+                    
+                    // Reset counters for the next line
+                    offsets.push(heights.last() + offsets.last());
+                    widths.push(0);
+                    heights.push(0);
+                    baselines.push(0);
+                }
+                
+            // "command" terminating symbol
             } else if(string[i] == ">") {
                 sub = string.substring(startBracket + 1, i);
                 
                 // Undo last event
-                if(startBracket + 1 == i) {                    
-                    events.pop()();
+                if(startBracket + 1 == i) {      
+                    if( ! events.empty()) {       
+                        events.pop()();
+                    }
                     
                 // It's a number.
                 } else if(parseInt(sub[0]) == sub[0]) {
@@ -462,7 +486,7 @@ define(function(require) {
                     color = sub;
                 
                 // Font styling
-                } else if(sub == "bold" || sub == "italic" || sub == "normal") {
+                } else if(sub == "bold" || sub == "italic" || sub == "normal" || sub == "italic bold" || sub == "bold italic") {
                     events.push(function(old) {
                         style = old;
                     }.curry(style));
@@ -483,14 +507,22 @@ define(function(require) {
             }
         }
         
-        if(align == "center") {
-            x -= width / 2;
-        } else if(align == "right") {
-            x -= width;
-        }
+        var baseX = x;
         
-        for(var i = 0, o; i < states.length; ++i) {
+        var h = 0;
+        for(var i = 0, yOffset; i < states.length; ++i) {
             var state = states[i];
+            
+            
+            if(i == 0 || state.line != states[i-1].line) {
+                if(align == "center") {
+                    x = baseX - widths[state.line] / 2;
+                } else if(align == "right") {
+                    x = baseX - widths[state.line];
+                } else {
+                    x = baseX;
+                }
+            }
             
             // e.g.,  "bold 14px monospace";
             this.context.font         = states[i].style + " " + states[i].size + " " + states[i].font;
@@ -498,35 +530,28 @@ define(function(require) {
             this.context.textAlign    = "left";
             this.context.textBaseline = "bottom";
             
+            yOffset = 0;
+            
             if(valign == "center") {
                 this.context.textBaseline = "middle";
                 
-                o = state.measure.baseline * 0.5 - baseline * 0.25;   
+                yOffset = state.measure.baseline * 0.5 - baseline * 0.25;   
             
             } else if(valign == "bottom") {
                 this.context.textBaseline = "bottom";
                 
-                o = -state.measure.baseline + baseline * 0.5;   
+                yOffset = -state.measure.baseline + baseline * 0.5;   
             
             // Unsure how top align should look like...
             } else if(valign == "top") {
-                this.context.textBaseline = "bottom";
-                //o = 0;state.measure.drop;
-                
-                //console.log();
-                
                 throw new Error("Not implemented yet");
-                
-            } else {
-                o = 0;
             }
             
-            //this.begin();
-            //this.rectangle(x + state.width * .5, y + state.measure.height * 0.5, state.width, state.measure.height);
-            //this.stroke("red");
-            
-            this.context.fillText(states[i].text, x, - (y + o));
-            
+            this.context.fillText(
+                states[i].text, 
+                x, 
+                -(y + yOffset) + offsets[state.line]);
+                        
             x += states[i].width;
         }
         
