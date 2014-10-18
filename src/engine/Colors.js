@@ -7,6 +7,8 @@
 
 
 define(function(require) {
+    var Lerp = require("meier/math/Lerp");
+    
     var htmlColors = {
         "aliceblue": "#F0F8FF",
         "lightsalmon": "#FFA07A",
@@ -261,6 +263,29 @@ define(function(require) {
         }
         
         return rgba.substring(0, rgba.length - 2) + alpha + ")";
+    };
+    
+    // Colors as used by R, these seem pleasant to the eye.
+    var HeatColors = [
+    "#e93f33","#e93f33","#eb5333","#ed6f33",
+    "#ef8835","#f2a044","#f5b453","#f8c762",
+    "#fbd870","#fee680",
+    
+    "#ccb826","#bdc421","#9cbb17","#7db30b",
+    "#60ab01","#54a304","#4e9907","#4a9209",
+    "#468909","#418111",
+    
+    "#504cfc","#474cfc","#454bfc","#5565fc",
+    "#7192fc","#8db7fc","#aad4fd","#c6eafd",
+    "#e3f7fe","#ffffff"
+    ].reverse();
+        
+    
+    Colors.HeatMap = function(min, max, current) {
+        var index = Math.floor((current-min) / (max-min)  * HeatColors.length);
+        
+        
+        return HeatColors[index];
     };
     
     return Colors;
