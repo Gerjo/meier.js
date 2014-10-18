@@ -173,6 +173,26 @@ Array.Range = function(from, to) {
     return arr;
 };
 
+Array.Fill = function(size, data) {
+    var arr = new Array(size);
+    
+    // Call function
+    if(typeof data == "function") {
+        for(var i = 0; i < size; ++i) {
+            arr[i] = data(i);
+        }
+        
+    // Simple setter.
+    } else {
+        for(var i = 0; i < size; ++i) {
+            arr[i] = data;
+        }
+    }
+
+    return arr;
+};
+
+
 /// Retrieve unique values from this array. Non javascript
 /// primitives (number, string) should use a custom compare
 /// function, else "references" are compared. Without the
