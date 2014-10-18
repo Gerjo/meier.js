@@ -2,6 +2,7 @@ define(function(require) {
     
     var gl = require("meier/webgl/Gl");
     
+    // TODO: use ReadFile.js
     function ReadFile(url) {
     
         var http = new XMLHttpRequest();

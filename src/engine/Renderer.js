@@ -542,7 +542,7 @@ define(function(require) {
                 
                 yOffset = -state.measure.baseline + baseline * 0.5;   
             
-            // Unsure how top align should look like...
+            // Unsure how top align should look like.
             } else if(valign == "top") {
                 throw new Error("Not implemented yet");
             }
