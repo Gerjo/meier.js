@@ -5,6 +5,8 @@
  !*
  !*/
 
+Number.prototype._MeierMathType = 0;
+
 
 /// Return random item from array:
 Array.prototype.random = function() {
