@@ -23,6 +23,20 @@ Math.ln = function(r) {
     return Math.log(r);
 };
 
+/// Log a message only once to the console.
+var NOTICE = (function() {
+    
+    var cache = {};
+    
+    return function NOTICE(str) {
+        if( ! cache.hasOwnProperty(str)) {
+            console.log("NOTICE: " + str);
+            
+            cache[str] = true;
+        }
+    }
+}())
+
 /// Assertion to be used for development only.
 ///
 function ASSERT(statement) {
