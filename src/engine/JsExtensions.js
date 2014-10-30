@@ -84,6 +84,9 @@ define(function(require) {
     // we may end up loading half the engine.
     var Random = require("meier/math/Random");
     
+    // Always load number.
+    var Number = require("meier/math/Number")
+    
     /// Return random item from array:
     Array.prototype.random = function() {
         if(this.length == 0) {
