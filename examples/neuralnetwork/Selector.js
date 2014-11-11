@@ -74,13 +74,11 @@ define(function(require) {
     };
     
     Selector.prototype.onLeftDown = function(input) {
-        var local = this.toLocal(input);
-        
         var propegateEvent = true;
         
         // Determine if a box was clicked
         this._entities.forEach(function(entity) {
-            if(entity.containsPoint(local)) {
+            if(entity.containsPoint(input)) {
                 this.active    = entity;
                 propegateEvent = false;
             }
