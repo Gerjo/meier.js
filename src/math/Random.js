@@ -18,6 +18,12 @@ define(function(require) {
             return Random.FloatInRange(min, max);
         } else {
             
+            if(min > max) {
+                var tmp = max;
+                max = min;
+                min = tmp;
+            }
+            
             var range = max - min;
             
             var max   = Math.floor(Math.pow(2, 32) / range) * range;
