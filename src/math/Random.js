@@ -55,14 +55,14 @@ define(function(require) {
     
     /// Depricated. Use Random(min, max, true);
     Random.FloatInRange = function(min, max) {
-        console.log("Warning:using severely deprecated method. Use FloatInRange(min, max, true); instead.");
+        NOTICE("Warning:using severely deprecated 'FloatInRange' method. Use Random(min, max, true); instead.");
         
         return mt.nextFloat() * (max - min) + min;
     };
 
     /// Depricated. Use Random(min, max);
     Random.IntegerInRange = function(min, max) {
-        console.log("Warning:using severely deprecated method. Use IntegerInRange(min, max, true); instead.");
+        NOTICE("Warning:using severely deprecated 'IntegerInRange' method. Use Random(min, max); instead.");
         
         return Math.round(mt.nextFloat() * (max - min) + min);
     };
