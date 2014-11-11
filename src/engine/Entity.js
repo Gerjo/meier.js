@@ -172,7 +172,12 @@ define(function(require) {
     };
     
     Entity.prototype.containsPoint = function(point) {
-        var world = this.toWorld(this.position);
+        //var world = this.toWorld(this.position);
+        var world = this.position;
+        
+        if(this.parent) {
+            world = this.parent.toWorld(world);
+        }
         
         return PointInObb(point, world, this.width * this.scale, this.height * this.scale, this.rotation);
     };
