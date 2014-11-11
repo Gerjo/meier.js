@@ -15,7 +15,7 @@ define(function(require) {
     
     function Random(min, max, asFloat) {
         if(asFloat === true) {
-            return Random.FloatInRange(min, max);
+            return mt.nextFloat() * (max - min) + min; //Random.FloatInRange(min, max);
         } else {
             
             if(min > max) {
