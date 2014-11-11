@@ -28,7 +28,7 @@ define(function(require) {
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
         Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
         
-        // The following are gradient based operators
+        // The following are gradient-based operators
         SobelX: new (M(3,3))([1, 0, -1, 2, 0, -2, 1, 0, -1]),
         SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),        
         PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
