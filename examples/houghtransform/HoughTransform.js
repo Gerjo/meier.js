@@ -15,7 +15,7 @@ define(function(require){
     
     function HoughApp(container) {        
         Game.call(this, container);
-        
+   
         this.grid = new Grid(
             this.hw * 0.5, 0, this.hw, this.height
         );
@@ -151,7 +151,7 @@ define(function(require){
                 this.normals[x][y].push(new Line(this.grid.position, normal));
                 
                 // Record the highest number of votes, used for normalisation into [0,1]
-                this.maxVotes = Math.max(this.maxVotes, this.buckets[x][y].length);     
+                this.maxVotes = Math.max(this.maxVotes, this.buckets[x][y].length);  
             }
         }
     };
@@ -178,27 +178,32 @@ define(function(require){
         var normals  = this.normals;
         var hw       = this.hw;
         
+        
+        var cursorText = "";
+        
         // Draw the buckets
         this.buckets.forEach(function(bucket, x) {
             bucket.forEach(function(coordinates, y) {
                 var rectX = x + hSize - hw;
                 var rectY = y - grid.hh + hSize;
                 
-                renderer.begin();
-                renderer.rectangle(rectX, rectY, size, size);
-                renderer.fill(
-                    Lerp([40, 255, 0, 0.2], [255, 0, 0, 1], coordinates.length / maxVotes)
-                );
+                if(coordinates.length > 0) {
+                    renderer.begin();
+                    renderer.rectangle(rectX, rectY, size, size);
+                    renderer.fill(
+                        Colors.HeatMap(0, maxVotes, coordinates.length)
+                        //Lerp([40, 255, 0, 0.2], [255, 0, 0, 1], coordinates.length / maxVotes)
+                    );
+                }
                 
                 if(input.x > rectX - hSize && input.x <= rectX + hSize) {
                     if(input.y > rectY - hSize && input.y <= rectY + hSize) {
                         
-                        var text = (coordinates.length/2) + " vote";
-                        if(coordinates.length != 2) {
-                            text += "s";
-                        }
+                        cursorText = (coordinates.length/2) + " vote";
                         
-                        renderer.text(text, input.x + 20, input.y, "black", "left", "top");
+                        if(coordinates.length != 2) {
+                            cursorText += "s";
+                        }
                         
                         // The lines
                         renderer.begin();
@@ -210,11 +215,7 @@ define(function(require){
                         normals[x][y].forEach(renderer.line.bind(renderer));
                         renderer.stroke(Colors.blue);
                         
-                        renderer.begin();
-                        renderer.line();
-                        renderer.stroke("green", 2);
-                        
-                        // Draw an outline in Hough Space
+                        // Draw an outline border in Hough Space
                         renderer.begin();
                         renderer.rectangle(rectX, rectY, size, size);
                         renderer.stroke(Colors.black, 2);
@@ -230,6 +231,10 @@ define(function(require){
                 
             });
         });
+        
+        if(cursorText) {
+            renderer.text(cursorText, input.x + 20, input.y, "black", "left", "top");
+        }
                 
         // Don't bother drawing a tiny grid.
         if(size > 5) {  
