@@ -37,15 +37,11 @@ define(function(require) {
         
         var lowPriority = -99;
         this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this), lowPriority);
-        
         this.input.subscribe(Input.KEY_DOWN, this.onKeyDown.bind(this));
-        
         
         this.trainingClasses = [];
         
-        
         this.restart();
-        
     }
     
     NeuralApp.prototype.onKeyDown = function(input, key) {
@@ -89,11 +85,10 @@ define(function(require) {
             this.selector.numOfClasses()    // Size of output layer
         ]);
         
-        this.log.log("Nnet seed", this.nnet.seed);
+        this.log("Nnet seed", this.nnet.seed);
     };
     
     NeuralApp.prototype.onLeftDown = function(input) {
-        
         var addNew = true;
         
         for(var i = this.trainingClasses.length - 1; i >= 0; --i) {
