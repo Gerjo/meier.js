@@ -84,7 +84,7 @@ define(function(require) {
         
         
         // Random number seeding:
-        Random.Seed(49);
+        Random.Seed(44);
         this.addRandomCluster();
         this.addRandomCluster();
         this.addRandomCluster();
