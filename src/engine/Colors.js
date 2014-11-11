@@ -282,8 +282,7 @@ define(function(require) {
         
     
     Colors.HeatMap = function(min, max, current) {
-        var index = Math.floor((current-min) / (max-min)  * HeatColors.length);
-        
+        var index = Math.floor((current-min) / (max-min) * (HeatColors.length-1));
         
         return HeatColors[index];
     };
