@@ -97,6 +97,22 @@ define(function(require) {
             return m;
         };
         
+        M.Make = function(type) {
+            var m = new M();
+            
+            // All values to "zero" element.
+            for(var i = length - 1; i >= 0; --i) {
+                m._[i] = type.identity('+');
+            }
+            
+            // Diagonals under multiplication
+            for(var i = 0; i < Math.min(columns, rows); ++i) {
+                m._[At(i, i)] = type.identity('*');
+            }
+            
+            return m;
+        };
+        
         M.CreateScale = function(s) {
             var m = new M();
             
@@ -408,6 +424,8 @@ define(function(require) {
             }
         }
         
+        M.prototype._MeierMathType = 2;
+        
         // A class that knows its own anonymous "type"!
         M.prototype.type = function() {
             return M;
@@ -417,7 +435,7 @@ define(function(require) {
             var m = new M();
             
             for(var i = this.num - 1; i >= 0; --i) {
-                m._[i] = this._[i];
+                m._[i] = this._[i].clone();
             }
             
             return m;
@@ -428,103 +446,123 @@ define(function(require) {
         /////////////////////////////////////////////////////////////////////
         if(isSquare && rows == 2) {
             M.prototype.determinant = function() {
-                return this._[0] * this._[3] - this._[1] * this._[2]; 
+                return this._[0].clone().multiply(this._[3]).multiply(this._[1]).multiply(this._[2]); 
             };
-        } else if(isSquare && rows == 3) {
+        } else if(false && isSquare && rows == 3) {
             M.prototype.determinant = function() {
-                return (this._[At(0,0)] * this._[At(1,1)] * this._[At(2,2)]) +
-                       (this._[At(0,1)] * this._[At(1,2)] * this._[At(2,0)]) +
-                       (this._[At(0,2)] * this._[At(1,0)] * this._[At(2,1)]) -
-                       (this._[At(0,2)] * this._[At(1,1)] * this._[At(2,0)]) -
-                       (this._[At(0,1)] * this._[At(1,0)] * this._[At(2,2)]) -
-                       (this._[At(0,0)] * this._[At(1,2)] * this._[At(2,1)]);
+                return (
+                        this._[At(0,0)].clone().multiply(this._[At(1,1)]).multiply(this._[At(2,2)])
+                    .add( 
+                        this._[At(0,1)].clone().multiply(this._[At(1,2)]).multiply(this._[At(2,0)]) 
+                    )
+                    .add( 
+                        this._[At(0,2)].clone().multiply(this._[At(1,0)]).multiply(this._[At(2,1)]) 
+                    )
+                    .subtract( 
+                        this._[At(0,2)].clone().multiply(this._[At(1,1)]).multiply(this._[At(2,0)]) 
+                    )
+                    .subtract( 
+                        this._[At(0,1)].clone().multiply(this._[At(1,0)]).multiply(this._[At(2,2)]) 
+                    )
+                    .subtract( 
+                        this._[At(0,0)].clone().multiply(this._[At(1,2)]).multiply(this._[At(2,1)]) 
+                    )
+                );
             };
         } else if(isSquare) {
             M.prototype.determinant = function() {
-                var clone = this.clone();
                 
-                var swap = 1;
+                function Solver(clone) {
                 
-                // Create a matrix with non-zero diagonal. Doesn't work,
-                // when applying the guassian rules, new null-values may
-                // arrise. Now using the hack from princeton later in the code.
-                /*for(var i = 0; i < rows; ++i) {
-                    if(clone.at(i, i) === 0) {
-                        swapped = false;
+                    var swap = 1;
+                
+                    // Logic copied from math/Math.GaussJordanElimination
+                    for(var i = 0; i < rows; i++) {                    
+                        var maxRow = i;
+                        var maxVal = 0;
+                    
+                        // The highest value should be the pivot. This mostly works.
+                        for(var j = i; j < rows; j++) {
+                            var val = Math.abs(clone._[At(j, i)]);
                         
-                        for(var j = i + 1; j < rows; ++j) {
-                            if(clone.at(j, i) != 0) {
-                                clone.swapRows(i, j);
+                            if(val > maxVal) {
+                                maxVal = val;
+                                maxRow = j;
+                            }
+                        }
+                    
+                        // Swapping rows requires a determinant sign change 
+                        if(i != maxRow) {
+                            clone.swapRows(i, maxRow);
+                            swap *= -1;
+                        }
+                        
+                        
+                                        
+                        for(var j = 0; j < rows; j++) {   
                             
-                                //console.log("GaussJordanElimination: swap rows:", i, "and", j);
-                                swapped = true;
-                                
-                                // Swapping rows requires a sign change
-                                swap *= -1;
-                                break;
+                            console.log(clone.pretty());
+                            
+                                                 
+                            // Low triangle only
+                            if(j > i) {
+                                var ratio = clone._[At(j,i)].clone().divide( clone._[At(i,i)] );
+
+                                if(clone._[At(i,i)] == 0) {
+                                    throw new Error("Error at row " + i + " when solving lower triangle.");
+                                }
+
+                                for(var k = 0; k < rows; k++) {
+                                    clone._[At(j,k)] = clone._[At(j,k)].subtract( clone._[At(i,k)].clone().multiply(ratio) );
+                                }
                             }
                         }
-                    
-                        if( ! swapped) {
-                            console.log("Mat::determinant Unable to find suitable pivot value. Rework logic!");
-                        }
                     }
-                }*/
+                    
+                    console.log("triangle: swap(" + swap + ")");
+                    console.log(clone.pretty());
+                    
+                    var det = clone.traceProduct().multiply( swap );
+                    
+                    return det;
+                }                
                 
-                // Logic copied from math/Math.GaussJordanElimination
-                for(var i = 0; i < rows; i++) {
+                // Complex numbers
+                if(this._[0]._MeierMathType == 1) {
                     
-                    //console.log("Pivot: " + i);
+                    var c = this.clone();
                     
-                    var maxRow = i;
-                    var maxVal = 0;
-                    
-                    // Swapping logic inspired by: http://introcs.cs.princeton.edu/java/95linear/GaussianElimination.java.html
-                    // Though it still contains singularies.
-                    for(var j = i; j < rows; j++) {
-                        var val = Math.abs(clone._[At(j, i)]);
-                        
-                        if(val > maxVal) {
-                            maxVal = val;
-                            maxRow = j;
-                        }
+                    for(var i = 0; i < rows * columns; ++i) {
+                        var t = c._[i].re;
+                        c._[i].re = c._[i].im;
+                        c._[i].im = t;
                     }
                     
-                    if(i != maxRow) {
-                        //console.log("swap rows " + i + " and " + maxRow);
-                        clone.swapRows(i, maxRow);
-                        swap *= -1;
+                    return Solver(c);
+                    
+                    /*var re = M.Make(Number);
+                    var im = M.Make(Number);
+                    
+                    for(var i = 0; i < rows * columns; ++i) {
+                        re._[i] = this._[i].re;
+                        im._[i] = this._[i].im;
                     }
                     
-                    //console.log("Max row: " + maxRow + " max val: " + maxVal);
+                    var reDet = Solver(re);
+                    var imDet = Solver(im);
                     
-                    for(var j = 0; j < rows; j++) {
-                        
-                        
-                        // Low triangle only
-                        if(j > i) {
-                            var ratio = clone._[At(j,i)] / clone._[At(i,i)];
-
-                            if(clone._[At(i,i)] == 0) {
-                                console.log(clone.pretty());
-                                throw new Error("error at row " + i);
-                            }
-
-                            for(var k = 0; k < rows; k++) {
-                                clone._[At(j,k)] -= ratio * clone._[At(i,k)];
-                            }
-                        }
-                    }
+                    // Clone instead of "new" - this way we don't need an include.
+                    var complex = this._[0].clone();
                     
-                    //console.log("Step: " + (i+1) + " / " + rows);
-                    //console.log(clone.pretty());
+                    complex.re = reDet;
+                    complex.im = imDet;
+                    
+                    return complex;*/
+                    
+                // Reals
+                } else {
+                    return Solver(this.clone());
                 }
-
-                var det = clone.traceProduct() * swap;
-              
-
-                return det;
-                
             };
         } else {
             M.prototype.determinant = function() {
@@ -546,23 +584,15 @@ define(function(require) {
                 
                 var checkerboard = 1;
                 
-                var str = "";
-                
                 for(var i = 0, j = 0; i < minors._.length; ++i, ++j) {
                     
                     // Apply checkerboard pattern
                     minors._[i] *= checkerboard;
-                    
-                    str += (checkerboard < 0) ? "" : " ";
-                    str += checkerboard + " ";
                                         
                     if(j < rows-1) {
-                        checkerboard *= -1;
-                        
+                        checkerboard *= -1;        
                     } else {
                         j = -1;
-                        
-                        str += "'\n";
                     }
                      
                 }
@@ -708,8 +738,6 @@ define(function(require) {
         }
         
         M.prototype.transpose = function() {
-            // NB.: this might be complicated for the GC. Perhaps help 
-            // by creating a cache? A builder builder, if you will.
             var m = new (Builder(this.numcolumns, this.numrows))();
             
             for(var i = 0; i < this.numcolumns; ++i) {
@@ -726,10 +754,10 @@ define(function(require) {
                 throw new Error("Mat::trace is only defined for n*n square matrices.");
             }
             
-            var r = 0;
+            var r = this._[0].identity('+');
             
             for(var i = this.numrows - 1; i >= 0; --i) {
-                r += this._[At(i, i)];
+                r = r.add(this._[At(i, i)]);
             }
             
             return r;
@@ -740,10 +768,11 @@ define(function(require) {
                 throw new Error("Mat::traceProduct is only defined for n*n square matrices.");
             }
             
-            var r = 1;
             
-            for(var i = this.numrows - 1; i >= 0; --i) {
-                r *= this._[At(i, i)];
+            var r = this._[0].clone();
+            
+            for(var i = this.numrows - 2; i >= 0; --i) {
+                r = r.multiply(this._[At(i, i)]);
             }
             
             return r;
@@ -757,7 +786,7 @@ define(function(require) {
             
             // Works due to equal length
             for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
-                this._[i] += m._[i];
+                this._[i] = this._[i].add(m._[i]);
             }
             
             return this;
@@ -771,36 +800,35 @@ define(function(require) {
             
             // Works due to equal length
             for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
-                this._[i] -= m._[i];
+                this._[i] = this._[i].subtract(m._[i]);
             }
             
             return this;
         };
         
         M.prototype.product = function(o) {
-            //if(this.numrows !== o.numcolumns) {
+            
             if(this.numrows !== o.numrows && o.numrows !== this.numcolumns) {
                 throw new Error("Cannot multiply, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
                 "] and [" + o.numrows + "x" + o.numcolumns + "]");
             }
          
-            var m = new (Builder(this.numrows, o.numcolumns))();
-
+            var m = Builder(this.numrows, o.numcolumns).Make(this._[0]);
+            
             for(var row = 0; row < m.numrows; ++row) {
                 for(var col = 0; col < m.numcolumns; ++col) {
-                    m._[row * m.numcolumns + col] = 0;
+                    
+                    m._[row * m.numcolumns + col] = this._[0].identity('+');
                     
                     for(var k = 0; k < this.numcolumns; ++k) {
-                        m._[row * m.numcolumns + col] += (
-                            this._[At(row, k)] * o.at(k, col)
-                        );
                         
-                        if(isNaN(m._[row * m.numcolumns + col])) {
-                            //console.log("Error: col:",col, "k:",k);
-                        }
-                        
+                        m._[row * m.numcolumns + col] += this._[At(row, k)] * o.at(k, col)
+                                                
+                        // Broken:
+                        //m._[row * m.numcolumns + col].add (
+                            //this._[At(row, k)].clone().multiply( o.at(k, col) )
+                        //);
                     }
-                    
                 }
             }
             
@@ -810,7 +838,7 @@ define(function(require) {
         M.prototype.multiply = function(number) {
             for(var row = 0; row < this.numrows; ++row) {
                 for(var col = 0; col < this.numcolumns; ++col) {
-                    this._[At(row, col)] *= number;
+                    this._[At(row, col)] = this._[At(row, col)].multiply(number);
                 }
             }
             
@@ -839,6 +867,8 @@ define(function(require) {
         /// not do what you'd expect.
         ///
         M.prototype.transform = function(vector, verbose) {
+            //NOTICE("Matrix.transform is deprecated.");
+            
             var r = new (vector.type())();
             
             // Multiply what we can:
@@ -914,7 +944,6 @@ define(function(require) {
             return this;
         };
         
-    
         M.prototype.eachRow = function(column, callback) {
             for(var i = 0; i < this.numrows; ++i) {
                 callback(this._[At(i, column)], i);
@@ -998,8 +1027,6 @@ define(function(require) {
             for(var i = 0; i < this.numrows; ++i) {
                 r += "{"
             
-                
-            
                 for(var j = 0; j < this.numcolumns; ++j) {
                     
                     if(this._[At(i, j)] == 0) {
@@ -1009,7 +1036,6 @@ define(function(require) {
                         r += this._[At(i, j)].toFixed(digits) + ", ";
                         
                     }
-                    
                 }
             
                 r = r.trim(", ") + "},"
@@ -1034,7 +1060,6 @@ define(function(require) {
                     array[i][j] = this._[At(i, j)];
                 }
             }
-            
             
             return array;
         };
@@ -1371,7 +1396,7 @@ define(function(require) {
                     
                     for(var i = 0; i < b.numrows; ++i) {
                         for(var j = 0; j < b.numcolumns; ++j) {
-                            var val = a.get(row, col) * b.get(i, j);
+                            var val = a.get(row, col).multiply(b.get(i, j));
                             
                             m.set(x + i, y + j, val);
                         }   
