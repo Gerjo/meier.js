@@ -356,10 +356,16 @@ define(function(require) {
         // No rotation, just translation
         } else if(noRotation) {
             return Matrix.CreateTranslation(this.position);
+            
+        // No translation, just translation
+        } else if(isNull) {
+            return Matrix.CreateXoY(this.rotation);
         }
-
-        // Just rotation in the XoY plane
-        return Matrix.CreateXoY(this.rotation);
+        
+        var r = Matrix.CreateXoY(this.rotation);
+        var t = Matrix.CreateTranslation(this.position);
+        
+        return t.product(r);
     };
     
     /// Create a matrix that transforms local coordinates
