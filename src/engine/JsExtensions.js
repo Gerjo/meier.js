@@ -111,19 +111,23 @@ define(function(require) {
     
     /// Array shuffling
     Array.prototype.shuffle = function(){
-        var counter = this.length, temp, index;
+        
+        // Only shuffle arrays with two items or more.
+        if(this.length > 1) {
+            var counter = this.length, temp, index;
 
-        // While there are elements in the array
-        while (counter-- > 0) {
-            // Pick a random index
-            index = Random(0, this.length-1);
+            // While there are elements in the array
+            while (counter-- > 0) {
+                // Pick a random index
+                index = Random(0, this.length-1);
 
-            // And swap the last element with it
-            temp          = this[counter];
-            this[counter] = this[index];
-            this[index]   = temp;
+                // And swap the last element with it
+                temp          = this[counter];
+                this[counter] = this[index];
+                this[index]   = temp;
+            }
         }
-    
+        
         return this;
     };
     
