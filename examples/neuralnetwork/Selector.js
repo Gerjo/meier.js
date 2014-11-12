@@ -73,18 +73,21 @@ define(function(require) {
         return 5; // Eventually this could be variable.
     };
     
-    Selector.prototype.onLeftDown = function(input) {
-        var propegateEvent = true;
-        
-        // Determine if a box was clicked
-        this._entities.forEach(function(entity) {
-            if(entity.containsPoint(input)) {
-                this.active    = entity;
-                propegateEvent = false;
-            }
+    Selector.prototype._getSelectedAt = function(input) {
+        return this._entities.find(function(entity) {
+            return entity.containsPoint(input);
         }.bind(this));
+    };
+    
+    Selector.prototype.onLeftDown = function(input) {
+        var selected = this._getSelectedAt(input);
         
-        return propegateEvent;
+        if(selected) {
+            this.active = selected;
+            return false;
+        }
+        
+        return true;
     };
     
     Selector.prototype.onMouseMove = function(input) {
@@ -104,6 +107,10 @@ define(function(require) {
         // Hack, draw it a few times to it appears "bold".
         for(var i = 0; i < 5; ++i) { 
             this.active._draw(renderer);
+        }
+        
+        if(this._getSelectedAt(this.input)) {
+            this.input.cursor(Input.Cursor.POINTER);
         }
     };
     
