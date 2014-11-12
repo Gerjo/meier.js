@@ -69,6 +69,10 @@ define(function(require) {
         // Store into cache
         MeasurementCache[css] = result;
                 
+        span.removeChild(text)
+        body.removeChild(span);
+        body.removeChild(div);
+                
         return result;
     };
     
