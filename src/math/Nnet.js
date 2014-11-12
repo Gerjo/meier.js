@@ -289,7 +289,7 @@ define(function(require) {
         var max = Math.max.apply(null, this.rmse);
         var min = Math.min.apply(null, this.rmse);
         var xPos = -435;
-        var yPos = -300;
+        var yPos = -310;
         
         renderer.begin();
         renderer.rectangle(xPos + width*0.5, yPos + height * 0.5, width, height);
