@@ -98,6 +98,9 @@ define(function(require) {
         // Lookup table for errors.
         this.errors   = {};
         this.expected = {};
+        
+        
+        this.rmse = [0];
     }
     
     Nnet.prototype.train = function(inputValues, expectedValues) {
@@ -125,7 +128,7 @@ define(function(require) {
         }
         
         var learningRate = 0.01;
-        var reps = 1;
+        var reps = 10;
         
         //inputValues = inputValues.slice(inputValues.length - 1);
         //expectedValues = expectedValues.slice(expectedValues.length - 1);
@@ -135,7 +138,8 @@ define(function(require) {
         var indices = Array.Range(0, inputValues.length).shuffle();
         
         var avgerror = 0;
-        
+        var rmse = 0;
+                
         for(var k = 0; k < indices.length; ++k) {
             var i = indices[k];
 
@@ -147,9 +151,7 @@ define(function(require) {
             if( ! this.errors[hash]) {
                 this.errors[hash] = [];
             }
-            
-            //console.log("derp");
-            
+                        
             for(var rep = 0; rep < reps; ++rep) {
                 var output = this.classify(input);
                 
@@ -197,10 +199,11 @@ define(function(require) {
                 
                 
                 // Average the errors
-                avgerror = Math.sqrt(avgerror / this.layers.last().length);
+                avgerror = Math.sqrt(avgerror / this.layers.last().length / reps);
                 // Record output error
                 this.errors[hash].push(avgerror); 
                                 
+                rmse += avgerror
             
                 // Adjust weights
                 for(var layer = 0; layer < this.layers.length; ++layer) {
@@ -218,16 +221,11 @@ define(function(require) {
                     
                     //console.log("  iter");
                 }
-                
-                //var out = output.map(function(n) {
-                //    return n.toFixed(2);
-                //}).join();
-            
-                //console.log("[" + input.join() + "] generated: [" + out + "], expected: [" + expected + "], rms-error:", avgerror);
             }
-            //break;
         }
         
+        rmse /= indices.length;
+        this.rmse.push(rmse)
         
         return avgerror;
     };
@@ -279,39 +277,36 @@ define(function(require) {
     
     Nnet.prototype.drawErrorGraphs = function(renderer) {
         
-        var ypos = 100;
-        var j = 0;
-        for(var k in this.errors) {
-            
-            while(this.errors[k].length > 200) {
-                this.errors[k].shift();
-            }
-            
-            //renderer.text("class: [" + k + "]", -435, ypos + 50, "black", "left");
         
-            if(this.errors.hasOwnProperty(k)) {
-                renderer.begin();
-                
-                for(var i = 0; i < this.errors[k].length; ++i) {
-                    var xpos = -435;
-                    renderer.line(i + xpos, ypos, i + xpos, this.errors[k][i] * 4 + ypos);
-                }
-                
-                renderer.stroke("black", 1);
-                
-                //console.log("derp");
-            }
-            
-            renderer.text("error: " + this.errors[k].last().toFixed(2), -435, ypos + 15, "red", "left");
-            
-            
-            ypos -= 30;
-            
-            // Don't bother going offscreen
-            if(j > 10) {
-                break;
-            }
+        var height = 100;
+        var width  = 200;
+        
+        
+        while(this.rmse.length > width) {
+           this.rmse.shift();
         }
+        
+        var max = Math.max.apply(null, this.rmse);
+        var min = Math.min.apply(null, this.rmse);
+        var xPos = -435;
+        var yPos = -300;
+        
+        renderer.begin();
+        renderer.rectangle(xPos + width*0.5, yPos + height * 0.5, width, height);
+        renderer.fill("rgba(0,0,0,0.2)");
+        renderer.stroke("black");
+                
+        renderer.begin();
+        for(var i = 0; i < this.rmse.length; ++i) {
+            renderer.line(i + xPos, yPos + 1, i + xPos, height / max * this.rmse[i] + yPos);
+        }
+        renderer.stroke("black");
+        
+        renderer.styled("<red><13px>Avg. Error: " + this.rmse.last().toFixed(4), xPos + width*0.5, yPos + height + 5, "center", "bottom");
+        
+        renderer.styled("<red><13px>max: " + max.toFixed(4), xPos + 1, yPos + height - 10, "left", "bottom");
+        renderer.styled("<red><13px>min: " + min.toFixed(4), xPos + 1, yPos + 3, "left", "bottom");
+        
     };
     
     /// For debug and educative purposes
@@ -320,7 +315,7 @@ define(function(require) {
         this.drawErrorGraphs(renderer);
 
         
-        return;
+       // return;
         
         // Find layer with the most units:
         var largest = this.layers.reduce(function(p, c) {
@@ -370,7 +365,7 @@ define(function(require) {
                 var middle = Lerp(from, to, 0.2);
                 
                 renderer.text(Round(synapse.w, 2), middle.x, middle.y, "black", "center", "middle", "9px monospace");
-                renderer.text(Round(synapse.change, 2), middle.x, middle.y - 10, "green", "center", "middle", "9px monospace");
+                //renderer.text(Round(synapse.change, 2), middle.x, middle.y - 10, "green", "center", "middle", "9px monospace");
                 
                 renderer.line(from, to);
             });
