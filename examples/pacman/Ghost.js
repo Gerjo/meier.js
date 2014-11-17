@@ -114,8 +114,12 @@ define(function(require) {
     };
     
     Ghost.prototype.hunting = function(score) {
-        this.updatePath();
         this.world.add(new TextBubble(this.position.x, this.position.y, "hunting(" + score.toFixed(2) + ")"));
+        
+        var world = this.world;
+    
+        this.path = world.path(world.atPosition(this.position), world.atPosition(this.game.player.position) );
+        //this.path.shift();        
     };
     
     Ghost.prototype.defense = function(score) {
@@ -123,44 +127,44 @@ define(function(require) {
         
         
         var distribution = this.world.pelletDistribution();
-        
-        //console.log(distribution);
-        
+
         var max = math.ArgMax(distribution, math.ItemGetter("sum"));
         
-        //console.log(distribution[max]);
-        
-        
+        var world = this.world;
+    
+        this.path = world.path(this.getTile(), distribution[max].tile);
+        this.path.shift();
     };
     
     Ghost.prototype.shy = function(score) {
         this.world.add(new TextBubble(this.position.x, this.position.y, "shy(" + score.toFixed(2) + ")"));
-    };
-    
-    Ghost.prototype.updatePath = function() {
-        var world = this.world;
-    
-        this.path = world.path(world.atPosition(this.position), world.atPosition(this.game.player.position) );
-        this.path.shift();
         
-        // /this.world.add(new TextBubble(this.position.x, this.position.y, "new"));
+        var ghosts = this.game.ghosts;
+        
+        // Find nearest ghost
+        var min = math.ArgMin(ghosts, function(ghost) {
+            if(ghost == this) {
+                return Infinity;
+            }
+            
+            return ghost.position.distance(this.position);
+        }.bind(this));
+        
+        // Walkable neighbours around the current ghost
+        var neighbours = this.world.walkableNeighboursOf(this.getTile());
+
+        // Find neighbouring tile farthest away from nearest ghost        
+        var far = math.ArgMax(neighbours, function(tile) {
+            return tile.position.distance(ghosts[min].position);
+        });
+        
+        this.target = neighbours[far];
     };
 
 	Ghost.prototype.atDestination = function(tile) {
-
-        if(this.path.length == 0) {
-            
-            //this.updatePath();
-        
-            //this.target = this.path.shift();
-        }
-
         if(this.path.length > 0) {
             this.target = this.path.shift();
-            //this.world.add(new TextBubble(this.position.x, this.position.y, "atDestination"));
         }
-
-		//this.random(tile);
 	};
 
 	Ghost.prototype.random = function(tile) {

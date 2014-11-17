@@ -179,6 +179,18 @@ define(function(require) {
 		return neighbour || this.wall;
 	};
 
+    World.prototype.walkableNeighboursOf = function(tile) {
+        return ["rightOf", "leftOf", "aboveOf", "belowOf"].filterMap(function(fn) {
+			var t = this[fn](tile);
+
+			if(this.isWalkable(t)) {
+				return t;
+			}
+
+			return undefined;
+		}.bind(this));
+    };
+
 	World.prototype.path = function(start, end, renderer) {
 		var world = this;
 
@@ -191,18 +203,6 @@ define(function(require) {
 
 		function H(a, b) {
 			return a.position.distance(b.position);
-		}
-
-		function Neighbours(tile) {
-			return ["rightOf", "leftOf", "aboveOf", "belowOf"].filterMap(function(fn) {
-				var t = world[fn](tile);
-
-				if(world.isWalkable(t)) {
-					return t;
-				}
-
-				return undefined;
-			});
 		}
     
         open.push(start);
@@ -221,7 +221,7 @@ define(function(require) {
                 break;
             }
         
-            var neighbours = Neighbours(current);
+            var neighbours = this.walkableNeighboursOf(current);
            
             for(i = 0; i < neighbours.length; ++i) {
                 neighbour = neighbours[i];
@@ -304,6 +304,7 @@ define(function(require) {
             
             for(var j = 0; j < 3; ++j) {
                 var sum = 0;
+                
                 for(var row = Math.floor(this.tiles.length * a[i]); row < this.tiles.length * b[i]; ++row) {
                     for(var col = Math.floor(this.tiles[row].length * a[j]); col < this.tiles[row].length * b[j]; ++col) {
                         if(this.tiles[row][col].pellet) {
@@ -311,7 +312,10 @@ define(function(require) {
                         }
                     }
                 }
-                grid.push( {"row": row, "col": col, "sum": sum} );
+                
+                var tile = this.tiles[Math.floor(row / 2)][Math.floor(col / 2)];
+                
+                grid.push( {"tile": tile, "sum": sum} );
             }
         }
         

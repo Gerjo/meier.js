@@ -15,6 +15,10 @@ define(function(require) {
 		this.velocity = new V2(0, 0);
 	}
 
+    Moveable.prototype.getTile = function() {
+        return this.world.atPosition(this.position);
+    };
+
 	Moveable.prototype.update = function(dt) {
 
 		if(this.target) {
