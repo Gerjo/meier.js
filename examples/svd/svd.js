@@ -40,12 +40,14 @@ define(function(require){
         this.image = this.images.first();
         
         this.svd_k = 20;
+        this.cutoff = 50;
         
         this.gui = new dat.GUI();
         this.gui.width = 300;
         this.gui.add(this, "image", this.images).name("Image").onChange(this.onChange.bind(this));
         
         this.gui.add(this, "svd_k", 1, 256).step(1).name("SVD K-value").onChange(this.onChange.bind(this));
+        this.gui.add(this, "cutoff", 1, 256).step(1).name("Haar cut-off").onChange(this.onChange.bind(this));
        
         // Trigger initial drawing.
         this.onChange();
@@ -53,18 +55,95 @@ define(function(require){
     
     Svd.prototype.onChange = function() {
         this.texture = new RawTexture(this.image, function(texture) {
-             
+            
+            
+            var m = texture.luminance().asMatrix().r;
+     
+            var scale = Math.sqrt(2);
+            
+            var H = function(width, height, inverse) {
+                for(var row = 0; row < height; ++row) {    
+                    for(var col = 0; col < width; ++col) {
+                        var a = m.get(row, col);
+                        var b = m.get(row, col + width);
                 
-            var degree = Math.ln(256) / Math.ln(2);
+                        if(inverse === true) {
+                            m.set(row, col, (a + b) / 2 * scale);
+                            m.set(row, col + width, (a - b) / 2 * scale);
+                        } else {
+                            m.set(row, col, (a + b) / scale);
+                            m.set(row, col + width, (a - b) / scale);
+                        }
+                    }
+                }
+            }.bind(this);
+            
+            var V = function(width, height, inverse) {
+                for(var col = 0; col < width; ++col) {
+                    for(var row = 0; row < height; ++row) {    
+                    
+                        var a = m.get(row, col);
+                        var b = m.get(row + height, col);
+                
+                        if(inverse === true) {
+                            m.set(row, col, (a + b) / 2 * scale);
+                            m.set(row + height, col, (a - b) / 2 * scale);
+                        } else {
+                            m.set(row, col, (a + b) / scale);
+                            m.set(row + height, col, (a - b) / scale);
+                        }
+                    }
+                }
+            }.bind(this);
+            
+            var width  = m.numrows;
+            var height = m.numrows;
+            
+            while(height >= 4 && width >= 4) {
+                
+                H(width * 0.5, height);
+                V(width, height * 0.5);
+                                
+                width *= 0.5;
+                height *= 0.5;
+                
+                console.log("a " + width);
+            }
+            
+            for(var col = 0; col < m.numrows; ++col) {
+                for(var row = 0; row < m.numrows; ++row) {    
+                    if(Math.abs(m.get(row, col)) < this.cutoff) {
+                       //m.set(row, col, 0);
+                    }
+                }
+            }
+            
+            width  = 1;m.numrows;1
+            height = 1;m.numrows;
+            while(height < m.numrows-128) {
+                
+                V(width*2, height * 2, true);
+                
+                H(width * 2, height, true);
+                
+                width  *= 2;
+                height *= 2;
+                
+                console.log("b" + width);
+            }
+            
+            this.texture = RawTexture.fromMatrix(m);
+                
+            //var degree = Math.ln(256) / Math.ln(2);
                    
-            var grey = texture.luminance().asMatrix().r;
-            var haar = M(degree, degree).CreateHaar();
+            //var grey = texture.luminance().asMatrix().r;
+            //var haar = M(degree, degree).CreateHaar();
             
-            this.texture = RawTexture.fromMatrix(
-                grey.product(haar)
-            );
+            //this.texture = RawTexture.fromMatrix(
+            //    grey.product(haar)
+            //);
             
-            console.log(grey.numrows);
+            //console.log(grey.numrows);
             /*
                    
             // SVK code:
