@@ -105,7 +105,7 @@ define(function(require) {
             // Only call when a parent is available. Else it'll be 
             // called later on.
             if(this.game) {
-                entity._onAdd(this);
+                entity._onAdd(this.game);
             }
         } else {
             throw new Error("Game::add is only meant for entities.");
