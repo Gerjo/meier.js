@@ -32,14 +32,24 @@ define(function(require) {
 
 		this.spawns = [];   // Reference to ghost spawn locations
 		this.tiles  = [];   // Two dimensional grid.
-		this.size   = 16;   // Tile width and height measured in pixels.
+		this.size   = 20;   // Tile width and height measured in pixels.
 		this.start  = null; // Player starting tile
 		this.wall   = new World.Tile(); // Used instead of "null"
 	}
 
+    /// Used for fuzzy logic upperbound.
+    World.prototype.diagonal = function() {
+        return Math.hyp(this.tiles.length * this.size, this.tiles.last().length * this.size);
+    };
+    
+    /// Used for fuzzy logic upperbound.
+    World.prototype.baseTime = function() {
+        return Math.max(this.tiles.length, this.tiles.last().length); // Measured in ticks
+    };
+
 	World.prototype.onAdd = function(game) {
 		this.width  = game.width;
-		this.height = game.height;
+		this.height = game.height;        
 	};
 
 	World.prototype.load = function(level) {
@@ -73,6 +83,8 @@ define(function(require) {
 
 			}.bind(this));
 		}.bind(this));
+        
+        this.pelletDistribution();
 	};
 
 	World.prototype.draw = function(renderer) {
@@ -224,10 +236,12 @@ define(function(require) {
                 tentative.f = tentative.g + tentative.h * 1.1;
                 tentative.p = current;
             
-            	renderer.begin();
-                renderer.rectangle(current.position, 10, 10);
-                renderer.fill("yellow");
-            
+                if(renderer) {
+            	    renderer.begin();
+                    renderer.rectangle(current.position, 10, 10);
+                    renderer.fill("yellow");
+                }
+                
                 if( ! lookup[neighbour.id] ) {
                     tentative.o = true;
                     lookup[neighbour.id] = tentative;
@@ -236,11 +250,7 @@ define(function(require) {
                 } else {
                     if(lookup[neighbour.id].f > tentative.f) {
                         lookup[neighbour.id] = tentative;
-                    
-                        // Additional test. This entry might've been popped before.
-                        if(tentative.o === true) { 
-                            open.updateItem(neighbour);
-                        }
+                        open.updateItem(neighbour);
                     }
                 }
             }
@@ -254,11 +264,12 @@ define(function(require) {
             while(iterator) {
                 route.push(iterator); 
                 
-
-                renderer.begin();
-                renderer.rectangle(iterator.position, 6, 6);
-                renderer.fill("red");
-
+                if(renderer) {
+                    renderer.begin();
+                    renderer.rectangle(iterator.position, 6, 6);
+                    renderer.fill("red");
+                }
+                
                 iterator = lookup[iterator.id].p;
             }
         
@@ -278,6 +289,34 @@ define(function(require) {
         }
 
 	};
+    
+    
+    World.prototype.pelletDistribution = function() {
+        var a = [  0, 1/4, 1/2];    // From  a[i]
+        var b = [1/2, 3/4,   1];    // To    b[i]
+        
+        var grid = [];
+        
+        var i = 0;
+        var j = 0;
+        
+        for(var i = 0; i < 3; ++i) {
+            
+            for(var j = 0; j < 3; ++j) {
+                var sum = 0;
+                for(var row = Math.floor(this.tiles.length * a[i]); row < this.tiles.length * b[i]; ++row) {
+                    for(var col = Math.floor(this.tiles[row].length * a[j]); col < this.tiles[row].length * b[j]; ++col) {
+                        if(this.tiles[row][col].pellet) {
+                            ++sum;
+                        }
+                    }
+                }
+                grid.push( {"row": row, "col": col, "sum": sum} );
+            }
+        }
+        
+        return grid;
+    };
 
 	return World;
 

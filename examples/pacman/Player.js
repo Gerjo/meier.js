@@ -13,7 +13,24 @@ define(function(require) {
 		//this.speed = 100;
 
 		this.enableEvent(Input.KEY_DOWN);
+        
+        this.ate = 0;
+        
+        this.lastAte = 0;
+        this.lastDie = 0;
 	}
+    
+    Player.prototype.pelletRate = function() {
+        return this.ate / this.game.ticks;
+    };
+
+    Player.prototype.timeLife = function() {
+        return this.game.ticks - this.lastDie;
+    };
+    
+    Player.prototype.sinceLastPellet = function() {
+        return this.game.ticks - this.lastAte;
+    };
 
 	Player.prototype.onKeyDown = function(input, key) {
 
@@ -53,6 +70,9 @@ define(function(require) {
 	Player.prototype.handlePickup = function(tile) {
 		if(tile.pellet) {
 			tile.pellet = false;
+            ++this.ate;
+            
+            this.lastAte = this.game.ticks;
 		}
 
 		if(tile.power) {
