@@ -747,6 +747,11 @@ define(function(require) {
         
     }; // End var self = {}
     
+    // Inherit all features from the build-in Math object.
+    for(var k in Math) {
+        self[k] = Math[k];
+    }
+    
     return self;
     
 }); // End define
