@@ -38,7 +38,6 @@ define(function(require) {
         this.isSlow          = false;
     
         // Update loop related matter:
-        this._frameCounter   = 0;               // frame counter.
         this.clock           = new Stopwatch(); // Wall Clock.
         this._fps            = 15;              // Desired framerate
         this._lowFps         = null;
@@ -79,9 +78,9 @@ define(function(require) {
     }
     
     Game.prototype._onBlur = function() {
-        if(this._lowFps !== null) {
-            this._applyFps(this._lowFps);
-        }
+        //if(this._lowFps !== null) {
+        //    this._applyFps(this._lowFps);
+        //}
     };
     
     /// Retrieve a child entity at a given offset.
@@ -101,7 +100,7 @@ define(function(require) {
     
     Game.prototype._onFocus = function() {
         // Restore high FPS
-        this._applyFps(this._highFps);
+        //this._applyFps(this._highFps);
     };
     
     Game.prototype.onBlur = function() {
@@ -215,7 +214,6 @@ define(function(require) {
 
     /// Update the game.
     Game.prototype.update = function(dt) {
-        
         this.input.update(dt);
         
         for(var i = 0; i < this._entities.length; i++) {
