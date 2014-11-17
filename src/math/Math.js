@@ -663,6 +663,41 @@ define(function(require) {
             return result;
         },
         
+        /// Return the index of the maximum value. If the maximum is not
+        /// unique, the first occurence is returned.
+        /// @param {array} An array of numbers
+        /// @return argument maximum
+        ArgMax: function(array) {
+            var max = -1;
+            var score = -Infinity;
+            
+            for(var i = array.length - 1; i >= 0; --i) {
+                if(array[i] >= score) {
+                    max = i;
+                    score = array[i];
+                }
+            }
+            
+            return max;
+        },
+        
+        /// Return the index of the minimum value. If the minimum is not
+        /// unique, the first occurence is returned.
+        /// @param {array} An array of numbers
+        /// @return argument minimum
+        ArgMin: function(array) {
+            var max = -1;
+            var score = Infinity;
+            
+            for(var i = array.length - 1; i >= 0; --i) {
+                if(array[i] <= score) {
+                    max = i;
+                    score = array[i];
+                }
+            }
+            
+            return max;
+        },
         
     }; // End var self = {}
     
