@@ -665,16 +665,31 @@ define(function(require) {
         
         /// Return the index of the maximum value. If the maximum is not
         /// unique, the first occurence is returned.
+        ///
         /// @param {array} An array of numbers
+        /// @param {getter} Optional property getter
         /// @return argument maximum
-        ArgMax: function(array) {
+        /// @see {ItemGetter}
+        ArgMax: function(array, getter) {
             var max = -1;
             var score = -Infinity;
             
-            for(var i = array.length - 1; i >= 0; --i) {
-                if(array[i] >= score) {
-                    max = i;
-                    score = array[i];
+            
+            if(getter) {
+                for(var i = array.length - 1; i >= 0; --i) {
+                    var val = getter(array[i]);
+                    
+                    if(val >= score) {
+                        max = i;
+                        score = val;
+                    }
+                }
+            } else {
+                for(var i = array.length - 1; i >= 0; --i) {
+                    if(array[i] >= score) {
+                        max = i;
+                        score = array[i];
+                    }
                 }
             }
             
@@ -683,20 +698,51 @@ define(function(require) {
         
         /// Return the index of the minimum value. If the minimum is not
         /// unique, the first occurence is returned.
+        ///
         /// @param {array} An array of numbers
+        /// @param {getter} Optional property getter
         /// @return argument minimum
-        ArgMin: function(array) {
+        /// @see {ItemGetter}
+        ArgMin: function(array, getter) {
             var max = -1;
             var score = Infinity;
             
-            for(var i = array.length - 1; i >= 0; --i) {
-                if(array[i] <= score) {
-                    max = i;
-                    score = array[i];
+            if(getter) {
+                for(var i = array.length - 1; i >= 0; --i) {
+                    var val = getter(array[i]);
+                    
+                    if(val <= score) {
+                        max = i;
+                        score = val;
+                    }
+                }
+            } else {
+                for(var i = array.length - 1; i >= 0; --i) {
+                    if(array[i] <= score) {
+                        max = i;
+                        score = array[i];
+                    }
                 }
             }
-            
             return max;
+        },
+        
+        /// Python style argument getter.
+        ///
+        ///   Example usage:
+        ///     // Some array with objects
+        ///     var arr = [ {a: 10}, {a:23}, {a:22} ];
+        ///   
+        ///     // Retrieve the array index of greatest "a" property.
+        ///     var max = math.ArgMax(arr, math.ItemGetter("a"));
+        ///     console.log("Greatest: ", obj[max]);
+        ///
+        /// @param {name} property name or index number.
+        /// @return A function retrieving the specified property.
+        ItemGetter: function(name) {
+            return function(obj) {
+                return obj[name];
+            }
         },
         
     }; // End var self = {}
