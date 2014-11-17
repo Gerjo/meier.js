@@ -244,7 +244,7 @@ define(function(require) {
     Fuzzy.Trapezoid = Fuzzy.prototype.trapezoid = function(left, first, second, right) {
         return function FuzzyTrapezoid(value) {
             
-            if(value <= left || value >= right) {
+            if(value < left || value > right) {
                 return 0;
             }
             
