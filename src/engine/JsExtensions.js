@@ -279,11 +279,6 @@ Array.prototype.clear = function() {
     return this;
 };
 
-/// Empty an array.
-Array.prototype.empty = function() {
-    return this.length == 0;
-};
-
 /// Test if this array is empty.
 Array.prototype.empty = function() {
     return this.length <= 0;
