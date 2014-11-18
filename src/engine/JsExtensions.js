@@ -432,6 +432,24 @@ Array.prototype.flip = function() {
     return clone;
 };
 
+/// Remove an item from an array. The remaining items will be shifted
+/// to remove empty slots. Comparisons are done using the == operator.
+///
+///  Usage:
+///   [1,2,3,1,2].remove(1); // output: [2, 3, 2]
+///
+/// @param {item} some item to remove.
+/// @return the original array with {item} removed
+Array.prototype.remove = function(item) {
+    for(var i = this.length; i >= 0; --i) {
+        if(this[i] == item) {
+            this.splice(i, 1);
+        }
+    }
+    
+    return this;
+};
+
 /// Transform the first character to uppercase. Returns a new string.
 String.prototype.ucFirst = function() {
     if(this.length == 0) {
