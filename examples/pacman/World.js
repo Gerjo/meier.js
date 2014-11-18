@@ -104,6 +104,8 @@ define(function(require) {
 					renderer.begin();
 					renderer.rectangle(px, py, size, size);
 					renderer.stroke(Color.Black);
+					renderer.fill(Color.Black);
+                    
 				}
 
 				if(tile.pellet) {
@@ -113,9 +115,9 @@ define(function(require) {
 				}
 
 				if(tile.power) {
-					renderer.begin();
-					renderer.circle(px, py, size * 0.3);
-					renderer.fill(Color.Yellow);	
+					//renderer.begin();
+					//renderer.circle(px, py, size * 0.3);
+					//renderer.fill(Color.Yellow);	
 				}
 			});
 		});

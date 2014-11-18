@@ -14,10 +14,12 @@ define(function(require){
     function PacGame(container) {        
         Game.call(this, container);
         this.setFps(60);
+        this.setAutoClear(false);
+        this.logger.setColor("black");
         this.add(this.world = new World());
 
         this.ticks = 1;
-        this.ticker = new Timer(500); // ms
+        this.ticker = new Timer(1000); // ms
 
         this.world.load(Level);
 
@@ -47,6 +49,8 @@ define(function(require){
     };
     
     PacGame.prototype.draw = function(renderer) {
+        renderer.clearSolid("#a1bf9a");
+        
         Game.prototype.draw.call(this, renderer);
 
         var terms = this.ghosts.last().brain.terms(this.ghosts.last());
