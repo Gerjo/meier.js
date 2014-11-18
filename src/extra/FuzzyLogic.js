@@ -56,13 +56,27 @@ define(function(require) {
         }
     }
     
+    /// Internal struct to store a fuzzy logic rule.
+    function Rule(controller, rule, callback, name) {
+        this.controller = controller;
+        this.rule     = rule
+        this.callback = callback;
+        this.name     = name;
+        this._infix    = null;
+        
+        // TODO: these functions might be useful
+        // this.isEnabled = true;
+        // this.disable = function() { this.isEnabled = false; return this; }
+        // this.enable  = function() { this.isEnabled = true;  return this; }
+        // this.destroy = function() { this.controller._rules.remove(this); }
+    }
+    
     function Fuzzy() {
         this._rules     = [];
-        this._callbacks = [];
-        this._infix     = [];
         this._terms     = {};
     }
     
+    /// Define a linguistic term
     Fuzzy.prototype.define = function(attribute, min, max, terms) {
         for(var k in terms) {
             if(terms.hasOwnProperty(k)) {
@@ -73,9 +87,10 @@ define(function(require) {
         return this;
     };
     
-    Fuzzy.prototype.rule = function(rule, callback) {
-        this._rules.push(rule);
-        this._callbacks.push(callback);
+    /// Create a new fuzzy logic rule.
+    Fuzzy.prototype.rule = function(rule, callback, name) {
+        
+        var r = new Rule(this, rule, callback, name || no-name);
         
         var stack  = [];
         var output = [];
@@ -145,10 +160,12 @@ define(function(require) {
                 output.push(token);
             }
         }
-        
-        this._infix.push(output);
+                
+        r._infix = output;
 
-        return this;
+        this._rules.push(r);
+
+        return r;
     };
     
     /// Retrieve the current value of the linguistic terms.
@@ -174,10 +191,10 @@ define(function(require) {
         var terms = this.terms(context);
         
         // Execute each logical rule
-        var scores = this._infix.map(function(infix, i) {
-            var output = infix.clone();
+        var scores = this._rules.map(function(rule, i) {
+            var output = rule._infix.clone();
             
-            //console.log("Reasoning about: " + this._rules[i]);
+            //console.log("Reasoning about: " + rule.rule);
             
             var operands = [];
         
@@ -221,11 +238,9 @@ define(function(require) {
             
         }.bind(this));
         
-        //console.log("scores: " + scores.join(", "));
-        
         var max = math.ArgMax(scores);
         
-        this._callbacks[max](scores[max]);
+        this._rules[max].callback(scores[max]);
         
         return this;
     };
