@@ -275,15 +275,13 @@ define(function(require) {
         
             // New start:
             route.pop();
-            route.push(start);
+            //route.push(start);
         
             route = route.reverse();
         
             // new end:
-            route.pop();
-            route.push(end);
-        
-            //console.log("found. splendid");
+            //route.pop();
+            //route.push(end);
         
             return route;    
         }

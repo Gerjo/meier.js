@@ -5,18 +5,28 @@ define(function(require) {
 	Moveable.prototype = new Entity();
 
 	function Moveable(tile, world) {
-		Entity.call(this, 0, 0, 10, 10);
+        if(tile) {
+    		Entity.call(this, tile.position.x, tile.position.y, 10, 10);
 
-		this.target = tile;
-		this.world  = world;
+    		this.target = tile;
+    		this.world  = world;
 
-		this.speed  = 80;
+    		this.speed  = 80;
 
-		this.velocity = new V2(0, 0);
+    		this.velocity = new V2(0, 0);
+        }
 	}
 
     Moveable.prototype.getTile = function() {
         return this.world.atPosition(this.position);
+    };
+
+    Moveable.prototype.moveTo = function(tile) {
+        this.path = this.world.path(this.getTile(), tile);
+        
+        if(this.path.length > 0) {
+            this.target = this.path.shift();
+        }
     };
 
 	Moveable.prototype.update = function(dt) {
@@ -24,6 +34,8 @@ define(function(require) {
 		if(this.target) {
 
 			var direction = this.target.position.direction(this.position);
+
+            
 
 			if(! direction.isNull()) {
 
@@ -72,7 +84,10 @@ define(function(require) {
 				} else {
 					this.position.add(velocity);
 				}
-			}
+			} else {
+                console.log("Forced atDestination");
+		        this.atDestination(this.target);
+		    }
 		}
 	};
 

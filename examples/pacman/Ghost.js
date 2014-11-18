@@ -54,7 +54,6 @@ define(function(require) {
             "pellet_rate_good"   : brain.triangle(0.0, 1.0, 1.0)
         });
         
-        
         brain.rule("pacman_near and (time_life_long or pellet_rate_good)", this.hunting.bind(this));
         brain.rule("pacman_near and (time_life_medium or pellet_rate_medium) and pellet_med", this.hunting.bind(this));
         brain.rule("pacman_near and (time_life_medium or pellet_rate_medium) and pellet_long", this.hunting.bind(this));
@@ -116,10 +115,7 @@ define(function(require) {
     Ghost.prototype.hunting = function(score) {
         this.world.add(new TextBubble(this.position.x, this.position.y, "hunting(" + score.toFixed(2) + ")"));
         
-        var world = this.world;
-    
-        this.path = world.path(world.atPosition(this.position), world.atPosition(this.game.player.position) );
-        //this.path.shift();        
+        this.moveTo(this.world.atPosition(this.game.player.position));
     };
     
     Ghost.prototype.defense = function(score) {
@@ -130,10 +126,7 @@ define(function(require) {
 
         var max = math.ArgMax(distribution, math.ItemGetter("sum"));
         
-        var world = this.world;
-    
-        this.path = world.path(this.getTile(), distribution[max].tile);
-        this.path.shift();
+        this.moveTo(distribution[max].tile);
     };
     
     Ghost.prototype.shy = function(score) {
@@ -158,7 +151,9 @@ define(function(require) {
             return tile.position.distance(ghosts[min].position);
         });
         
-        this.target = neighbours[far];
+        this.moveTo(neighbours[far]);
+       
+        //this.target = neighbours[far];
     };
 
 	Ghost.prototype.atDestination = function(tile) {

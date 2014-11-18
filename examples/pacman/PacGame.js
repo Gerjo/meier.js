@@ -24,8 +24,8 @@ define(function(require){
         this.world.add(this.player = new Player(this.world.start, this.world));
 
         this.ghosts = [];
-        for(var i = 0; i < 2; ++i) {
-            this.ghosts.push(this.world.add(new Ghost(this.world.spawns[i], this.world)));
+        for(var i = 0; i < 3; ++i) {
+            this.ghosts.push(this.world.add(new Ghost(this.world.spawns[i % 3], this.world)));
         }
         
         
