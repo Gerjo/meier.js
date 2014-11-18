@@ -252,7 +252,7 @@ define(function(require) {
                 return 1.0;
             }
             
-            if(value > left && value < first) {
+            if(value >= left && value < first) {
                 return (value - left) / (first - left);
             }
             
