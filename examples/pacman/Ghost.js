@@ -152,8 +152,6 @@ define(function(require) {
         });
         
         this.moveTo(neighbours[far]);
-       
-        //this.target = neighbours[far];
     };
 
 	Ghost.prototype.atDestination = function(tile) {
