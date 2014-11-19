@@ -554,6 +554,26 @@ define(function(require) {
         }.bind(this));
     };
     
+    /// Apply a per-channel classification based on an
+    /// optional threshold. The resulting image will have
+    /// either 0 (off) or 254 (on) as value per channel per pixel.
+    ///
+    /// @param {threshold} optional threshold figure. Defaults to 128
+    /// @return the modified image
+    RawTexture.prototype.binary = function(threshold) {
+        threshold = threshold || 128;
+        
+        for(var i = this._raw.data.length-1; i >= 0; --i) {
+            if(this._raw.data[i] > threshold) {
+                this._raw.data[i] = 254;
+            } else {
+                this._raw.data[i] = 0;
+            }
+        }
+        
+        return this;
+    };
+    
     /// Split this image into 4 matrices, one for each color channel.
     /// 
     /// @return An object with 4 matrices as properties (r, g, b, a)
