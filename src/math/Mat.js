@@ -1407,11 +1407,95 @@ define(function(require) {
             return m;
         };
     
+        /// Zoom in or out. Makes most sense if the matrix is an image.
+        ///
+        ///
+        M.prototype.zoom = function(scale) {
+
+            if(scale == 1) {
+                return this.clone();
+            }
+            
+            // Custom clamp function, avoid importing Math.js
+            function Clamp(n, a, b) {
+                if(n > b) {
+                    return b;
+                }
+                
+                if(n < a) {
+                    return a;
+                }
+                
+                return n;
+            }
+            
+            function Bilinear(x, y, x1 ,x2, y1, y2, Q11, Q21, Q12, Q22) {
+                var ans1 = (((x2 - x) * (y2 - y)) / ((x2 - x1) * (y2 - y1))) * Q11;
+                var ans2 = (((x - x1) * (y2 - y)) / ((x2 - x1) * (y2 - y1))) * Q21;
+                var ans3 = (((x2 - x) * (y - y1)) / ((x2 - x1) * (y2 - y1))) * Q12;
+                var ans4 = (((x - x1) * (y - y1)) / ((x2 - x1) * (y2 - y1))) * Q22;
+                
+                return ans1 + ans2 + ans3 + ans4;
+            };
+            
+            var target = new (Builder(Math.round(this.numrows * scale), Math.round(this.numcolumns * scale)))();
+            
+            // Downscaling using average of neighbours.
+            if(scale < 1) {   
+                for(var x = 0; x < this.numrows; ++x) {
+                    for(var y = 0; y < this.numcolumns; ++y) {
+                    
+                        // Target:
+                        var tx = Math.floor(x * scale);
+                        var ty = Math.floor(y * scale);
+                        var c  = target.get(tx, ty);
+                    
+                        // Squared term is required due to nested for-loop.
+                        target.set(tx, ty, c + this.get(x, y) * Math.pow(scale, 2));
+                    }
+                }
+            
+            // Upscaling using bilinear sampling
+            } else {
+                for(var x = 0; x < this.numrows; ++x) {
+                    for(var y = 0; y < this.numcolumns; ++y) {
+                        
+                        // Lookup corners:
+                        var Q11 = this.get(Clamp(x + 0, 0, this.numrows - 1), Clamp(y + 0, 0, this.numcolumns - 1));
+                        var Q21 = this.get(Clamp(x + 1, 0, this.numrows - 1), Clamp(y + 0, 0, this.numcolumns - 1));
+                        var Q12 = this.get(Clamp(x + 1, 0, this.numrows - 1), Clamp(y + 1, 0, this.numcolumns - 1));
+                        var Q22 = this.get(Clamp(x + 0, 0, this.numrows - 1), Clamp(y + 1, 0, this.numcolumns - 1));
+                        
+                        // Corner positions:
+                        var x1 = 0 / (this.numrows-1);
+                        var x2 = 1 / (this.numrows-1);
+                        var y1 = 0 / (this.numcolumns-1);
+                        var y2 = 1 / (this.numcolumns-1);
+                        
+                        
+                        // Sample n times
+                        for(var i = 0; i < scale; ++i) {
+                            for(var j = 0; j < scale; ++j) {
+                                
+                                var c = Bilinear(
+                                    i / (target.numrows - 1), 
+                                    j / (target.numcolumns - 1),
+                                    x1, x2, y1, y2, Q11, Q21, Q22, Q12
+                                );
+                                
+                                target.set(x * scale + i, y * scale + j, c);    
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return target;
+        };
         
         return M;
     };
     
-
     Builder.fromArrays = function(arrays) {
         
         if( ! (arrays instanceof Array && arrays.length > 0)) {
