@@ -1467,10 +1467,10 @@ define(function(require) {
                         var Q22 = this.get(Clamp(x + 0, 0, this.numrows - 1), Clamp(y + 1, 0, this.numcolumns - 1));
                         
                         // Corner positions:
-                        var x1 = 0 / (this.numrows-1);
-                        var x2 = 1 / (this.numrows-1);
-                        var y1 = 0 / (this.numcolumns-1);
-                        var y2 = 1 / (this.numcolumns-1);
+                        var x1 = 0 / (this.numrows - 1);
+                        var x2 = 1 / (this.numrows - 1);
+                        var y1 = 0 / (this.numcolumns - 1);
+                        var y2 = 1 / (this.numcolumns - 1);
                         
                         
                         // Sample n times
