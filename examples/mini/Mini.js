@@ -13,9 +13,9 @@ define(function(require){
         
         this.tetri = [];
 
-        this.scale = 1/4;
+        this.scale = 1/2;
 
-        Array.Range(0, 7).forEach(function(n) {
+        Array.Range(0, 10).forEach(function(n) {
             new RawTexture("peoples/" + n + ".png", function(texture) {
                 var grey = texture.asMatrix().a.zoom(this.scale);
                 this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
@@ -144,7 +144,7 @@ define(function(require){
     };
     
     Mini.prototype.draw = function(renderer) {
-        renderer.clear();
+        renderer.clearSolid("#a99163");
         
         var tex = RawTexture.FromMatrix(this.world.clone());
         
