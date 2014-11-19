@@ -58,11 +58,14 @@ define(function(require) {
     
     /// Internal struct to store a fuzzy logic rule.
     function Rule(controller, rule, callback, name) {
-        this.controller = controller;
-        this.rule     = rule
-        this.callback = callback;
-        this.name     = name;
-        this._infix    = null;
+        this.controller  = controller;
+        this.rule        = rule
+        this.callback    = callback;
+        this.name        = name;
+        this._infix      = null;
+        
+        // Cached copy of the recent most score
+        this.recentScore = 0;
         
         // TODO: these functions might be useful
         // this.isEnabled = true;
@@ -184,6 +187,11 @@ define(function(require) {
         return terms;
     };
     
+    /// Retrieve the rules as stored internally.
+    Fuzzy.prototype.rules = function() {
+        return this._rules;
+    };
+    
     /// Evaluate all rules and execute the highest scoring.
     Fuzzy.prototype.reason = function(context) {
         
@@ -234,7 +242,7 @@ define(function(require) {
                 }
             }
             
-            return operands.last();
+            return rule.recentScore = operands.last();
             
         }.bind(this));
         
