@@ -56,7 +56,7 @@ define(function(require){
     Svd.prototype.onChange = function() {
         this.texture = new RawTexture(this.image, function(texture) {
             
-            
+            /*
             var m = texture.luminance().asMatrix().r;
      
             var scale = Math.sqrt(2);
@@ -118,7 +118,7 @@ define(function(require){
                 }
             }
             
-            width  = 1;m.numrows;1
+            width  = 1;m.numrows;
             height = 1;m.numrows;
             while(height < m.numrows-128) {
                 
@@ -144,10 +144,10 @@ define(function(require){
             //);
             
             //console.log(grey.numrows);
-            /*
+            */
                    
-            // SVK code:
-            var grey = texture.luminance().asMatrix().r;
+            // SVD code:
+            var grey = texture.clone().luminance().asMatrix().r;
             
             var k = this.svd_k;
             
@@ -162,8 +162,8 @@ define(function(require){
           
             var img = u.product(s).product(v.transpose());
             
-            this.texture = RawTexture.fromMatrix(img);
-            */
+            this.texture = RawTexture.fromMatrix(grey);
+            
         }.bind(this));
     };
     
