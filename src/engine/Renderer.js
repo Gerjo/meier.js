@@ -17,7 +17,7 @@ define(function(require) {
     var Rectangle   = require("meier/math/Rectangle");
     var Polygon     = require("meier/math/Polygon");
     var Fonts       = require("meier/engine/Fonts");
-    
+    var math        = require("meier/math/Math");
     
     // Macro to determine if argument is a vector.
     function IsVector(v) {
@@ -225,6 +225,12 @@ define(function(require) {
                     height                     // Target height
             );
         } else if(texture._raw !== null) {
+            
+            // NPOT doesn't work in all browsers.
+            if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
+                NOTICE("Rendering a non power of two RawTexture (" + width + "x" + height + ").");
+            }
+            
             // TODO: this is free from transformations. Simulate them here?
             //   - scaling
             //   - rotation (ugh!)
