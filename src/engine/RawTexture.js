@@ -3,6 +3,7 @@ define(function(require) {
     var Angle   = require("meier/math/Angle");
     var M       = require("meier/math/Mat");
     var Vector2 = require("meier/math/Vec")(2);
+    var math    = require("meier/math/Math");
     
     // Some operations require a canvas to create a so-called "ImageData"
     // object. Rather than introducing a dependancy on Renderer, a private
@@ -45,6 +46,11 @@ define(function(require) {
         
         var width  = r.numcolumns;
         var height = r.numrows;
+        
+        if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
+            NOTICE("Creating non power of two texture (" + width + "x" + height + ") using RawTexture.FromMatrix");
+        }
+        
         var img    = context.createImageData(width, height);
         
         for(var i = 0, j = 0; i < img.data.length; i += 4, ++j) {
