@@ -41,7 +41,7 @@ define(function(require) {
     
     
     
-    RawTexture.fromMatrix = function(r, g, b, a) {
+    RawTexture.fromMatrix = RawTexture.FromMatrix = function(r, g, b, a) {
         
         var width  = r.numcolumns;
         var height = r.numrows;
