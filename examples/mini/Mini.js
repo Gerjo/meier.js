@@ -22,7 +22,7 @@ define(function(require){
             }.bind(this));
         }.bind(this));
     
-
+        this.showTetris = true;
         this.tmpScale = 2;
         this.scale = 1/this.tmpScale;
         this.noise = 500;
@@ -32,6 +32,7 @@ define(function(require){
         
         this.gui.add(this, "tmpScale", 1, 10).step(1).name("Tetris scale").onChange(this.restart.bind(this));
         this.gui.add(this, "noise", 1, 10000).name("Noise").onChange(this.restart.bind(this));
+        this.gui.add(this, "showTetris").name("Show Tetris");
 
         this.restart();
     }
@@ -165,7 +166,7 @@ define(function(require){
     Mini.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
         
-        for(var i = 0; i < 30; ++i) {
+        for(var i = 0; i < 50; ++i) {
             this.place();
         }
     };
@@ -173,9 +174,10 @@ define(function(require){
     Mini.prototype.draw = function(renderer) {
         renderer.clearSolid("#a99163");
         
-        var tex = RawTexture.FromMatrix(this.world.clone());
-        
-        renderer.texture(tex);
+        if(this.showTetris) {
+            var tex = RawTexture.FromMatrix(this.world.clone());
+            renderer.texture(tex);
+        }
         
         Game.prototype.draw.call(this, renderer);
         
