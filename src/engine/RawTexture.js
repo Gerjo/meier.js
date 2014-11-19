@@ -88,7 +88,7 @@ define(function(require) {
             this._getRawByUrl(url);
             
         // Load from ImageData
-        } else if(url instanceof ImageData) {
+        } else if(url instanceof ImageData) { 
             this._raw      = url;
             this.width     = this._raw.width;
             this.height    = this._raw.height;
@@ -527,6 +527,9 @@ define(function(require) {
     /// @todo We're using two layers with callbacks, that is quite fragile and
     /// counter-intuitive. Figure a system with less callbacks.
     RawTexture.prototype._getRawByUrl = function(url) {
+        
+        this._url = url;
+        
         var texture = new Texture(url, function(texture) {
             
             // Use the helper canvas
@@ -538,7 +541,7 @@ define(function(require) {
         
             // Retrieve the binary data
             var data = context.getImageData(0, 0, canvas.width, canvas.height);
-                
+            
             // Update internals
             this._raw      = data;
             this.width     = data.width;
@@ -587,7 +590,6 @@ define(function(require) {
         var g = new (M(width, height))();
         var b = new (M(width, height))();
         var a = new (M(width, height))();
-        
 
         for(var i = 0, j = 0; i < source.length; i += this._channels, ++j) {
             r._[j] = source[i + 0];
