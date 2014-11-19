@@ -4,6 +4,8 @@ define(function(require){
     var RawTexture = require("meier/engine/RawTexture");
     var Texture = require("meier/engine/Texture");
     var Sprite  = require("meier/prefab/Sprite");
+    var Random = require("meier/math/Random");
+    var dat    = require("meier/contrib/datgui");
     
     Mini.prototype = new Game();
     
@@ -12,20 +14,45 @@ define(function(require){
         this.setAutoClear(false);
         
         this.tetri = [];
-
-        this.scale = 1/2;
-
-        Array.Range(0, 10).forEach(function(n) {
+        
+        Array.Range(0, 15 + 1).forEach(function(n) {
             new RawTexture("peoples/" + n + ".png", function(texture) {
                 var grey = texture.asMatrix().a.zoom(this.scale);
                 this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
             }.bind(this));
         }.bind(this));
     
+
+        this.tmpScale = 2;
+        this.scale = 1/this.tmpScale;
+        this.noise = 500;
+
+        this.gui = new dat.GUI();
+        this.gui.width = 300;
+        
+        this.gui.add(this, "tmpScale", 1, 10).step(1).name("Tetris scale").onChange(this.restart.bind(this));
+        this.gui.add(this, "noise", 1, 10000).name("Noise").onChange(this.restart.bind(this));
+
+        this.restart();
+    }
+    
+    Mini.prototype.restart = function() {
+
+        this.scale = 1 / this.tmpScale;
+
         this.world = Matrix(Math.round(this.height * this.scale), Math.round(this.width * this.scale)).Create();
         
+        for(var i = 0; i < this.noise; ++i) {
+            this.world.set(Random(0, this.world.numrows), Random(0, this.world.numcolumns), 200);
+        }
+        
+        
         this.lastRow = this.world.numrows - 1;
-    }
+        
+        for(var i = 0; i < this._entities.length; ++i) {
+            this._entities[i].destroy();
+        }
+    };
     
     Mini.prototype.place = function() {
         var ON   = 245;
