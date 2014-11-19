@@ -1,6 +1,6 @@
 define(function(require){
     var Game    = require("meier/engine/Game");
-    var Matrix  = require("meier/Math/Mat");
+    var Matrix  = require("meier/math/Mat");
     var RawTexture = require("meier/engine/RawTexture");
     var Texture = require("meier/engine/Texture");
     var Sprite  = require("meier/prefab/Sprite");
