@@ -28,7 +28,7 @@ define(function(require) {
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
         Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
         
-        // The following are gradient-based operators
+        // The following are gradient-based operators (come in pairs)
         SobelX: new (M(3,3))([1, 0, -1, 2, 0, -2, 1, 0, -1]),
         SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),        
         PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
@@ -119,7 +119,9 @@ define(function(require) {
         return b;
     };
     
+    /// A not working edge detection method,
     RawTexture.prototype.canny = function(xKernel, yKernel) {
+        NOTICE("RawTexture.canny doesn't work.");
         xKernel = xKernel || RawTexture.Matrices.SobelX;
         yKernel = yKernel || RawTexture.Matrices.SobelY;
         
@@ -331,6 +333,12 @@ define(function(require) {
         return this;
     };
     
+    /// Apply a gaussian filter (low-pass) to the current image
+    /// 
+    /// @param {x} the x direction.
+    /// @param {y} the y direction.
+    /// @param {sigma} optional standard deviation. Defaults to 2.
+    /// @return the modified (blurred) image.
     RawTexture.prototype.gaussian = function(x, y, sigma) {
         
         // Create a kernel matrix
@@ -392,6 +400,15 @@ define(function(require) {
         return gradients;
     };
     
+    /// Apply two convolution kernels and determine the magnitude
+    /// of the resulting gradient.
+    ///
+    /// @param {x} first matrix kernel
+    /// @param {y} second matrix kernel
+    /// @see prewitt
+    /// @see sobel
+    /// @see robertsCross
+    /// @see scharr
     RawTexture.prototype.gradientMagnitude = function(x, y) {
         
         // Apply the kernel to each texture
@@ -531,6 +548,9 @@ define(function(require) {
         }.bind(this));
     };
     
+    /// Split this image into 4 matrices, one for each color channel.
+    /// 
+    /// @return An object with 4 matrices as properties (r, g, b, a)
     RawTexture.prototype.asMatrix = function() {
 
         var source    = this._raw.data;
