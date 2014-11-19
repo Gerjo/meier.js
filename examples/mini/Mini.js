@@ -20,13 +20,13 @@ define(function(require){
         this.showTetris = true;
         this.tmpScale = 2;
         this.scale = 1/this.tmpScale;
-        this.noise = 500;
+        this.noise = 150;
 
         this.gui = new dat.GUI();
         this.gui.width = 300;
         
-        this.gui.add(this, "tmpScale", 1, 10).step(1).name("Tetris scale").onChange(this.restart.bind(this));
-        this.gui.add(this, "noise", 1, 10000).name("Noise").onChange(this.restart.bind(this));
+        this.gui.add(this, "tmpScale", 1, 10).step(1).name("Tetris Scale").onChange(this.restart.bind(this));
+        this.gui.add(this, "noise", 1, 10000).name("Tetris Noise").onChange(this.restart.bind(this));
         this.gui.add(this, "showTetris").name("Show Tetris");
 
         this.restart();
@@ -38,9 +38,10 @@ define(function(require){
 
         this.scale = 1 / this.tmpScale;
 
-        Array.Range(0, 19 + 1).forEach(function(n) {
+        Array.Range(0, 16 + 1).forEach(function(n) {
             new RawTexture("peoples/" + n + ".png", function(texture) {
                 var grey = texture.asMatrix().a.zoom(this.scale);
+                
                 this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
             }.bind(this));
         }.bind(this));
@@ -57,6 +58,8 @@ define(function(require){
         for(var i = 0; i < this._entities.length; ++i) {
             this._entities[i].destroy();
         }
+        
+        this.sum = 0;
     };
     
     Mini.prototype.place = function() {
@@ -67,7 +70,6 @@ define(function(require){
         var best = -Infinity;
         var bCol = 0, bRow = 0;
         
-        // Star
         for(var row = this.lastRow; row >= 0; --row) {
             
             var streak = 0;
@@ -116,6 +118,17 @@ define(function(require){
             
             
             var placed = ! this.tetri.shuffle().every(function(tetri) {
+                
+                var mean = this.sum / this.tetri.length;
+                
+                this.log("mean", mean);
+                this.log("sum", this.sum);
+                
+                if(tetri.count > mean) {
+                    this.sum += 0.4; // Higher number allows more repeating
+                    return true;
+                }
+                
                 var block = tetri.matrix;
                 var image = tetri.image;
                 
@@ -137,13 +150,9 @@ define(function(require){
                     }
                 }
             
-                if(fits) {
-                    //console.log("Fits: " + bCol + "," + bRow);
-                
+                if(fits) {                
                     this.add(new Sprite((bCol + block.numcolumns * 0.5) / this.scale - this.hw, (((bRow - block.numrows * 0.5) / this.scale) - this.hh) * -1, image));
-                
-                    //console.log(this.last().position.x, this.last().position.y);
-                
+                                
                     // Brick fits, color!
                     for(var row = block.numrows - 1; row >= 0; --row) {
                         for(var col = 0; col < block.numcolumns; ++col) {
@@ -152,6 +161,9 @@ define(function(require){
                             }
                         }
                     }
+                    
+                    ++tetri.count;
+                    this.sum += 1;
                     
                     return false;
                 } 
