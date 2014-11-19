@@ -78,6 +78,16 @@ define(function(require) {
             return parseInt(n, 10) == n;
         },
 
+        /// Determine if the given number is a power of two.
+        ///  More formally, determine if 'a' is an integer:
+        ///     2^a == n
+        ///
+        /// @param {n} some number.
+        /// @return a boolean indicating power of two status.
+        IsPowerOfTwo: function(n) {
+            return (n != 0) && ((n & (n - 1)) == 0);  
+        },
+
         /// Find the greatest common divisor of two numbers.
         /// Also known as: GCD, GCF, HCD or HCF. Return values are 
         /// always positive, this is coherent with wolfram alpha.
