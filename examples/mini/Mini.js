@@ -38,7 +38,7 @@ define(function(require){
 
         this.scale = 1 / this.tmpScale;
 
-        Array.Range(0, 15 + 1).forEach(function(n) {
+        Array.Range(0, 19 + 1).forEach(function(n) {
             new RawTexture("peoples/" + n + ".png", function(texture) {
                 var grey = texture.asMatrix().a.zoom(this.scale);
                 this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
@@ -140,7 +140,7 @@ define(function(require){
                 if(fits) {
                     //console.log("Fits: " + bCol + "," + bRow);
                 
-                    this.add(new Sprite(bCol / this.scale - this.hw, ((bRow / this.scale) - this.hh) * -1, image));
+                    this.add(new Sprite((bCol + block.numcolumns * 0.5) / this.scale - this.hw, (((bRow - block.numrows * 0.5) / this.scale) - this.hh) * -1, image));
                 
                     //console.log(this.last().position.x, this.last().position.y);
                 
