@@ -13,14 +13,9 @@ define(function(require){
         Game.call(this, container);
         this.setAutoClear(false);
         
-        this.tetri = [];
         
-        Array.Range(0, 15 + 1).forEach(function(n) {
-            new RawTexture("peoples/" + n + ".png", function(texture) {
-                var grey = texture.asMatrix().a.zoom(this.scale);
-                this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
-            }.bind(this));
-        }.bind(this));
+        
+
     
         this.showTetris = true;
         this.tmpScale = 2;
@@ -39,7 +34,16 @@ define(function(require){
     
     Mini.prototype.restart = function() {
 
+        this.tetri = [];
+
         this.scale = 1 / this.tmpScale;
+
+        Array.Range(0, 15 + 1).forEach(function(n) {
+            new RawTexture("peoples/" + n + ".png", function(texture) {
+                var grey = texture.asMatrix().a.zoom(this.scale);
+                this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
+            }.bind(this));
+        }.bind(this));
 
         this.world = Matrix(Math.round(this.height * this.scale), Math.round(this.width * this.scale)).Create();
         
