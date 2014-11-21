@@ -12,37 +12,66 @@ define(function(require){
     function Mini(container) {        
         Game.call(this, container);
         this.setAutoClear(false);
-        
-        
-        
-
     
         this.showTetris = true;
         this.tmpScale = 2;
         this.scale = 1/this.tmpScale;
         this.noise = 150;
-
+        this.spacing = 1;
+        
         this.gui = new dat.GUI();
         this.gui.width = 300;
         
         this.gui.add(this, "tmpScale", 1, 10).step(1).name("Tetris Scale").onChange(this.restart.bind(this));
         this.gui.add(this, "noise", 1, 10000).name("Tetris Noise").onChange(this.restart.bind(this));
+        this.gui.add(this, "spacing", 1, 20).step(1).name("Spacing").onChange(this.restart.bind(this));
+        
         this.gui.add(this, "showTetris").name("Show Tetris");
 
         this.restart();
+        
+        
+        var m = new (Matrix(10,10))([
+            1,0,0,0,0,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+            0,1,0,0,0,1,0,0,0,0,
+            0,0,1,0,0,1,0,0,0,0,
+            0,0,0,1,0,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,0,1,1,0,0,0,0,
+        ]);
+        
+        var f = Matrix(3,3).Ones();
+        
+        console.log(f.pretty());
+        console.log(m.pretty());
+        console.log(m.erode(f).pretty());
     }
     
     Mini.prototype.restart = function() {
-
         this.tetri = [];
 
         this.scale = 1 / this.tmpScale;
 
-        Array.Range(0, 16 + 1).forEach(function(n) {
+        Array.Range(0, 19 + 1).forEach(function(n) {
             new RawTexture("peoples/" + n + ".png", function(texture) {
-                var grey = texture.asMatrix().a.zoom(this.scale);
                 
-                this.tetri.push({ matrix: grey, image: "peoples/" + n + ".png", count:0 });
+                // Use the alpha channel
+                var tetris = texture.asMatrix().a;
+                
+                // Scale down
+                tetris = tetris.zoom(this.scale);
+                
+                // Dilate
+                
+                if(this.spacing > 1) {
+                    tetris = tetris.dilate(Matrix(this.spacing, this.spacing).Ones());
+                }
+                
+                this.tetri.push({ matrix: tetris, image: "peoples/" + n + ".png", count:0 });
             }.bind(this));
         }.bind(this));
 
@@ -114,9 +143,7 @@ define(function(require){
         
         this.lastRow = row;
         
-        if(best > 0) {
-            
-            
+        if(best > 0) {            
             var placed = ! this.tetri.shuffle().every(function(tetri) {
                 
                 var mean = this.sum / this.tetri.length;
@@ -125,7 +152,7 @@ define(function(require){
                 this.log("sum", this.sum);
                 
                 if(tetri.count > mean) {
-                    this.sum += 0.4; // Higher number allows more repeating
+                    this.sum += 0.01; // Higher number allows more repeating
                     return true;
                 }
                 
