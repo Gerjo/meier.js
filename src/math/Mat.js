@@ -21,7 +21,14 @@ define(function(require) {
         }
     }
     
-   
+    // Custom clamp function, avoid importing Math.js
+    function Clamp(a, b, n) {
+        if(n > b) {
+            return b;
+        }
+        
+        return (n < a) ? a : n;
+    }
     
     var Builder = function(rows, columns) {
         columns = typeof columns === "undefined" ? rows : columns;
@@ -1416,19 +1423,6 @@ define(function(require) {
                 return this.clone();
             }
             
-            // Custom clamp function, avoid importing Math.js
-            function Clamp(n, a, b) {
-                if(n > b) {
-                    return b;
-                }
-                
-                if(n < a) {
-                    return a;
-                }
-                
-                return n;
-            }
-            
             function Bilinear(x, y, x1 ,x2, y1, y2, Q11, Q21, Q12, Q22) {
                 var ans1 = (((x2 - x) * (y2 - y)) / ((x2 - x1) * (y2 - y1))) * Q11;
                 var ans2 = (((x - x1) * (y2 - y)) / ((x2 - x1) * (y2 - y1))) * Q21;
@@ -1461,10 +1455,10 @@ define(function(require) {
                     for(var y = 0; y < this.numcolumns; ++y) {
                         
                         // Lookup corners:
-                        var Q11 = this.get(Clamp(x + 0, 0, this.numrows - 1), Clamp(y + 0, 0, this.numcolumns - 1));
-                        var Q21 = this.get(Clamp(x + 1, 0, this.numrows - 1), Clamp(y + 0, 0, this.numcolumns - 1));
-                        var Q12 = this.get(Clamp(x + 1, 0, this.numrows - 1), Clamp(y + 1, 0, this.numcolumns - 1));
-                        var Q22 = this.get(Clamp(x + 0, 0, this.numrows - 1), Clamp(y + 1, 0, this.numcolumns - 1));
+                        var Q11 = this.get(Clamp(0, this.numrows - 1, x + 0), Clamp(0, this.numcolumns - 1, y + 0));
+                        var Q21 = this.get(Clamp(0, this.numrows - 1, x + 1), Clamp(0, this.numcolumns - 1, y + 0));
+                        var Q12 = this.get(Clamp(0, this.numrows - 1, x + 1), Clamp(0, this.numcolumns - 1, y + 1));
+                        var Q22 = this.get(Clamp(0, this.numrows - 1, x + 0), Clamp(0, this.numcolumns - 1, y + 1));
                         
                         // Corner positions:
                         var x1 = 0 / (this.numrows - 1);
