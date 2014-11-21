@@ -1427,6 +1427,53 @@ define(function(require) {
         
             return m;
         };
+        
+        /// Compute the dilated version of a matrix. Values at
+        /// the boundary are repeated. The kernel should hold
+        /// the values 1 (on) or 0 (off). This operation makes
+        /// most sense if the matrix represents a graphical image.
+        ///
+        /// @param {kernel} a binary (0s and 1s) n-by-m kernel.
+        /// @return A dilated matrix.
+        M.prototype.dilate = function(kernel) {
+            var target = new (Builder(this.numrows, this.numcolumns))();
+            
+            // Index of the kernel's center
+            var hrow = Math.floor(kernel.numrows * .5);
+            var hcol = Math.floor(kernel.numcolumns * .5);
+            
+            // Each entry in the resulting matrix
+            for(var row = 0; row < target.numrows; ++row) {
+                for(var col = 0; col < target.numcolumns; ++col) {
+                    
+                    var max = -Infinity;
+                    
+                    // Each entry in the kernel
+                    for(var krow = 0; krow < kernel.numrows; ++krow) {
+                        for(var kcol = 0; kcol < kernel.numcolumns; ++kcol) {
+                            
+                            if(kernel.get(krow, kcol) > 0) {       
+                                var val = this.get(
+                                    Clamp(0, target.numrows - 1, row - hrow + krow), 
+                                    Clamp(0, target.numcolumns - 1, col - hcol + kcol)
+                                );
+                            
+                                // Find the largest value
+                                if(val > max) {
+                                    max = val;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Set the largets value
+                    target.set(row, col, max);                    
+                }
+            }
+            
+            
+            return target;
+        };
     
         /// Zoom in or out. Makes most sense if the matrix is an image.
         ///
