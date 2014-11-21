@@ -29,26 +29,6 @@ define(function(require){
         this.gui.add(this, "showTetris").name("Show Tetris");
 
         this.restart();
-        
-        
-        var m = new (Matrix(10,10))([
-            1,0,0,0,0,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-            0,1,0,0,0,1,0,0,0,0,
-            0,0,1,0,0,1,0,0,0,0,
-            0,0,0,1,0,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-            0,0,0,0,1,1,0,0,0,0,
-        ]);
-        
-        var f = Matrix(3,3).Ones();
-        
-        console.log(f.pretty());
-        console.log(m.pretty());
-        console.log(m.erode(f).pretty());
     }
     
     Mini.prototype.restart = function() {
