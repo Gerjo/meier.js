@@ -123,6 +123,17 @@ define(function(require) {
             return m;
         };
         
+        /// Create a new matrix filled with 1s
+        M.Ones = function() {
+            var m = new M();
+            
+            for(var i = length - 1; i >= 0; --i) {
+                m._[i] = 1;
+            }
+            
+            return m;
+        };
+        
         M.CreateScale = function(s) {
             var m = new M();
             
