@@ -105,6 +105,9 @@ define(function(require) {
         };
         
         M.Make = function(type) {
+            
+            type = type || Number;
+            
             var m = new M();
             
             // All values to "zero" element.
