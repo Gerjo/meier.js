@@ -110,7 +110,7 @@ define(function(require) {
     };
     
     /// Array shuffling
-    Array.prototype.shuffle = function(){
+    Array.prototype.shuffle = function() {
         
         // Only shuffle arrays with two items or more.
         if(this.length > 1) {
@@ -271,6 +271,24 @@ Array.prototype.unique = function(compare) {
     
     return r;
 };
+
+(function() {
+    var sort = Array.prototype.sort;
+    
+    Array.prototype.sort = function(predicate) {
+    
+        if(predicate && predicate.length === 1) {
+            return sort.call(this, function(a, b) {
+                return predicate(a) - predicate(b);
+            });
+        }
+        
+        return sort.call(this, predicate);
+    };
+    
+})();
+
+
 
 /// Empty an array.
 Array.prototype.clear = function() {
