@@ -78,7 +78,11 @@ define(function(require) {
     
     Number.prototype.negate = function() {
         return -this;
-    }
+    };
+    
+    Number.prototype.magnitude = function() {
+        return Math.abs(this);
+    };
     
     return Number;
 });
