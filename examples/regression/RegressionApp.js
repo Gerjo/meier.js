@@ -7,6 +7,7 @@ define(function(require) {
     var Disk         = require("meier/math/Disk");
     var Round        = require("meier/math/Math").Round;
     var M            = require("meier/math/Mat");
+    var Noise        = require("meier/extra/Noise");
     var dat          = require("meier/contrib/datgui");
     var LeastSquares = require("meier/math/Polynomial").LeastSquares;
     var LeastSquareCircle  = require("meier/math/Math").LeastSquaresCircle
@@ -28,7 +29,7 @@ define(function(require) {
         this.coordinates = [];
         
         // Initial degree:
-        this.polynomialDegree = 4;
+        this.polynomialDegree = 7;
         
         // Matrix with polynomial coefficients:
         this.coefficients = null;
@@ -68,32 +69,21 @@ define(function(require) {
         
         folder = this.gui.addFolder("Randomness");
         folder.add(this, "randomArc").name("Add Arc");
+        folder.add(this, "randomWave").name("Add Wave");
         folder.add(this.grid, "clear").name("Clear");
         
 
-
-        this.randomArc();
+        this.randomWave();
     }
    
     RegressionApp.prototype.randomArc = function() {
-        // Generate a data set:
-        var w = this.width - 100, hw = w * 0.5;
-        
-        Random.Seed(1);
-        
-        var coordinates = [];
-        
-        for(var x = -hw; x <= hw; x += Random(20, 50)) {
-            var t = (x + hw) / w * Math.PI;
-            
-            var v = new Vector(x, Math.sin(t) * 100);
-            v.y += Random(-20, 20);
-            
-            coordinates.push(v);
-        }
-        
-        this.grid.addCoordinates(coordinates);            
-    }
+        this.grid.addCoordinates(Noise.LargeArc(this.width, this.height));            
+    };
+    
+    RegressionApp.prototype.randomWave = function() {
+        this.grid.addCoordinates(Noise.Wave(this.width, this.height));            
+    };
+    
    
     RegressionApp.prototype.recompute = function(coordinates) {
         //console.log(coordinates);
