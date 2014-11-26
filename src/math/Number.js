@@ -84,5 +84,9 @@ define(function(require) {
         return Math.abs(this);
     };
     
+    Number.prototype.pretty = function(digits) {
+        return this.toFixed(isNaN(digits) ? 4 : digits);
+    };
+    
     return Number;
 });
