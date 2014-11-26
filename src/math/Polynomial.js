@@ -341,7 +341,17 @@ define(function(require) {
             return R;
         },
         
+        /// Compute the moving least squares interpolant of a set of points.
+        /// Uses a normal distribution (gaussian curve) internally. MLS is a
+        /// sensible approach to reconstruct a signal that cannot be be 
+        /// computed by a regular least squares method. It doesn't quite
+        /// explode as much compared to fitting a high (n>7) degree polynomial.
         ///
+        /// @param {points} An array with 2 dimensional vectors
+        /// @param {sigma} Standard deviation as used in a normal distribution.
+        ///                higher values give a wider curve, thus blending more
+        ///                points at once.
+        /// @return An object with all the properties required.
         MovingLeastSquares: function(points, sigma) {
             
             if(isNaN(sigma)) {
@@ -370,7 +380,7 @@ define(function(require) {
             }
  
             for(var i = 0; i < res.points.length; ++i) {
-                
+                // Find extrema
                 res.xMax = Math.max(res.xMax, res.points[i].x);
                 res.xMin = Math.min(res.xMin, res.points[i].x);
                 
@@ -381,7 +391,7 @@ define(function(require) {
             }
             
             res.f = function(t) {
-                // Clamp range
+                // Clamp range. Repeat the signal at domain limits.
                 t = (t > res.xMax) ? res.xMax : t;
                 t = (t < res.xMin) ? res.xMin : t;
                 
@@ -391,8 +401,13 @@ define(function(require) {
                 for(var i = 0; i < res.basis.length; ++i) {
                     var p = res.points[i];
             
+                    // Evaluated guassian basis at time t
                     var weight = res.basis[i](t);
+                    
+                    // Weighted addition of the y component.
                     ysum += p.y * weight;
+                    
+                    // Accumulate weights
                     bsum += weight;
                 }
             
@@ -401,7 +416,6 @@ define(function(require) {
             }
             
             res.xRange = res.xMax - res.xMin;
-            
             
             return res;
         },
