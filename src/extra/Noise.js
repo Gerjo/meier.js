@@ -115,6 +115,67 @@ define(function(require) {
             
             return noise;
         },
+        
+        /// A single large arc
+        LargeArc: function(width, height) {
+            
+            // Generate a data set:
+            var w = width * 0.9, hw = w * 0.5;
+    
+            var coordinates = [];
+    
+            for(var x = -hw; x <= hw; x += Random(20, 50)) {
+                var t = (x + hw) / w * Math.PI;
+        
+                var v = new Vector(x, Math.sin(t) * 100);
+                v.y += Random(-20, 20);
+        
+                coordinates.push(v);
+            }
+    
+            return coordinates;
+        },
+        
+        /// A single large arc
+        LargeArc: function(width, height) {
+            
+            // Generate a data set:
+            var w = width * 0.9, hw = w * 0.5;
+    
+            var coordinates = [];
+    
+            for(var x = -hw; x <= hw; x += Random(20, 50)) {
+                var t = (x + hw) / w * Math.PI;
+        
+                var v = new Vector(x, Math.sin(t) * 100);
+                v.y += Random(-20, 20);
+        
+                coordinates.push(v);
+            }
+    
+            return coordinates;
+        },
+        
+        /// A single large arc
+        Wave: function(width, height) {
+            
+            // Generate a data set:
+            var w = width * 0.9, hw = w * 0.5;
+    
+            var coordinates = [];
+    
+            for(var x = -hw; x <= hw; x += Random(20/3, 50/3)) {
+                var t = (x + hw) / w * Math.PI;
+        
+                var v = new Vector(x, Math.sin(t * 10) * 100);
+                v.y += Random(-20, 20);
+        
+                coordinates.push(v);
+            }
+    
+            return coordinates;
+        },
+        
         /*,
         
         /// Generate uniformly distributed noise.
