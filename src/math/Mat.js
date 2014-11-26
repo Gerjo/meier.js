@@ -987,7 +987,7 @@ define(function(require) {
         ///                    Defaults to 4.
         /// @return A string representing this matrix.
         M.prototype.pretty = function(precision) {
-            precision = precision || 4;
+            precision = isNaN(precision) ? 4 : precision;
             
             var out = [];
             var pad = 0;
