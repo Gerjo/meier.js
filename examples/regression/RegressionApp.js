@@ -38,7 +38,7 @@ define(function(require) {
         
         // Moving least squares properties
         this.mls = null;
-        this.mlsSigma = 1.2;
+        this.mlsSigma = 12;
         this.showMls = true;
         this.showMlsBasis = false;
         
@@ -62,7 +62,7 @@ define(function(require) {
         folder.add(this, "showCircle").name("Show fitted Circle");
         
         folder = this.gui.addFolder("Moving Least Squares");
-        folder.add(this, "mlsSigma", 0, 25).step(0.001).name("MLS Sigma").onChange(this.recompute.bind(this));
+        folder.add(this, "mlsSigma", 0, 50).step(0.01).name("MLS Sigma").onChange(this.recompute.bind(this));
         folder.add(this, "showMls").name("Show MLS");
         folder.add(this, "showMlsBasis").name("Show Gaussian Basis");
         
@@ -133,7 +133,7 @@ define(function(require) {
         
         this.disk = LeastSquareCircle(coordinates);
         
-        this.mls = MovingLeastSquares(coordinates, this.mlsSigma);
+        this.mls = MovingLeastSquares(coordinates, this.mlsSigma * 0.1);
     };
     
     RegressionApp.prototype.polynomialName = function(count) {
