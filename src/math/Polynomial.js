@@ -29,6 +29,7 @@ define(function(require) {
         /// @param n Amount selected?
         /// @return float indicating the binomial coefficient
         BinomialCoefficient: function(k, n) {
+            // TODO: optimize factorials.
             return Factorial(k) / (Factorial(k - n) * Factorial(n));
         },
     
@@ -52,7 +53,7 @@ define(function(require) {
         /// performance sensitive, (internally,) the bernstein basis polynomal
         /// computation may be cached.
         ///
-        /// NB: a bézier curve is is simply a basis spline of the highest 
+        /// NB: a bézier curve is simply a basis spline of the highest 
         /// possible degree. (where degree equals the number of control points)
         ///
         /// @param points A collection indicating the control points.
@@ -338,7 +339,72 @@ define(function(require) {
             var R = GaussJordan(AtA, AtB);
         
             return R;
-        }
+        },
+        
+        ///
+        MovingLeastSquares: function(points, sigma) {
+            
+            if(isNaN(sigma)) {
+                sigma = 1.2;
+            }
+            
+            var res = {
+                "xMin": Infinity,
+                "xMax": -Infinity,
+                "xRange": 0,
+                "basis": [],
+                "points": points.clone().sort(function(a,b) { return a.x - b.x; }),
+                "f": null
+            };
+ 
+            function MakeGaussian(a, b, c) {
+                // Take the largest distance to ensure overlap.
+                var d = Math.max((a.x - b.x).norm() , (c.x - b.x).norm());
+        
+                var mean  = b.x;
+                var s = d / sigma;
+                
+                return function(t) {
+                    return (1 / (s * Math.sqrt(Math.TwoPI)) * Math.exp(-1/2* Math.pow((t - mean) / s, 2)))
+                };
+            }
+ 
+            for(var i = 0; i < res.points.length; ++i) {
+                
+                res.xMax = Math.max(res.xMax, res.points[i].x);
+                res.xMin = Math.min(res.xMin, res.points[i].x);
+                
+                res.basis.push(
+                    // First and last point are repeated.
+                    MakeGaussian(res.points[i - 1] || res.points[i], res.points[i], res.points[i + 1] || res.points[i])
+                );
+            }
+            
+            res.f = function(t) {
+                // Clamp range
+                t = (t > res.xMax) ? res.xMax : t;
+                t = (t < res.xMin) ? res.xMin : t;
+                
+                var ysum = 0;
+                var bsum = 0;
+            
+                for(var i = 0; i < res.basis.length; ++i) {
+                    var p = res.points[i];
+            
+                    var weight = res.basis[i](t);
+                    ysum += p.y * weight;
+                    bsum += weight;
+                }
+            
+                // Normalize (make sure the total weight does not exceed 1)
+                return ysum / bsum;
+            }
+            
+            res.xRange = res.xMax - res.xMin;
+            
+            
+            return res;
+        },
     };
     
     return self;
