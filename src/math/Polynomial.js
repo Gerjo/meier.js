@@ -369,7 +369,12 @@ define(function(require) {
  
             function MakeGaussian(a, b, c) {
                 // Take the largest distance to ensure overlap.
-                var d = Math.max((a.x - b.x).norm() , (c.x - b.x).norm());
+                var d = Math.max((a.x - b.x).norm(), (c.x - b.x).norm());
+        
+                if(d == 0) {
+                    // Can't use Number.MIN_VALUE as this gives 1/Number.MIN_VALUE == Infinity
+                    d = 0.0000000001;
+                }
         
                 var mean  = b.x;
                 var s = d / sigma;
