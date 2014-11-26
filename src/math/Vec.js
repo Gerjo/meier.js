@@ -446,20 +446,15 @@ define(function(require) {
             return this;
         };
         
-        V.prototype.pretty = function() {
-            var out = "", n, l = 6, d = 2;
+        V.prototype.pretty = function(digits) {
+            var out = [];
+            digits  = isNaN(digits) ? 4 : digits;
         
             for(var i = 0, n; i < this.numrows; ++i) {
-                n = Round(this._[i], d) + "";
-            
-                out += n;
-            
-                for(var k = n.length; k < l; ++k) {
-                    out += " ";
-                }
+                out.push(this._[i].toFixed(digits));
             }
         
-            return out;
+            return out.join(", ");
         };
         
         V.prototype.wolfram = function() {
