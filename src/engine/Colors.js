@@ -240,11 +240,18 @@ define(function(require) {
             
         // By RGBA
         } else if(color.startsWith("RGBA(") || color.startsWith("rgba(")) {
+			// 			var channels = color.substring(4, color.length - 1).split(",");
+
             rgba = color;
+			
+			throw new Error("TODO: implement Colors.Alpha RGBA()");
             
         // By RGB
         } else if(color.startsWith("RGB(") || color.startsWith("rgb(")) {
-            throw new Error("TODO: implement Colors.Alpha RGB()");
+			
+			var channels = color.substring(4, color.length - 1);
+		
+			return "rgba(" + channels + "," + alpha + ")";
             
         // By name
         } else {
