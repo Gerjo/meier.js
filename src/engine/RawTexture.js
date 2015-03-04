@@ -586,10 +586,10 @@ define(function(require) {
         var width     = this._raw.width;
         var height    = this._raw.height;
     
-        var r = new (M(width, height))();
-        var g = new (M(width, height))();
-        var b = new (M(width, height))();
-        var a = new (M(width, height))();
+        var r = new (M(height, width))();
+        var g = new (M(height, width))();
+        var b = new (M(height, width))();
+        var a = new (M(height, width))();
 
         for(var i = 0, j = 0; i < source.length; i += this._channels, ++j) {
             r._[j] = source[i + 0];
