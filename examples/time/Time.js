@@ -5,6 +5,7 @@ define(function(require){
     var Sprite = require("meier/prefab/Sprite");
 	var World  = require("./World");
 	var Action = require("./Action");
+	var Timer  = require("meier/extra/Timer");
 
     Time.prototype = new Game();
 	
@@ -18,11 +19,11 @@ define(function(require){
 
 		
 		var actions = [
+			new Action("Walk", "images/feet.png", "action"),
 			new Action("Kill something", "images/skull.png", "action"),
 			new Action("Violence", "images/violence.png", "action"),
 			new Action("Friendly talk", "images/talk.png", "action"),
 			new Action("Violent talk", "images/violenttalk.png", "action"),
-			new Action("Walk", "images/feet.png", "action"),
 			new Action("Die yourself", "images/cross.png", "action"),
 			new Action("Enemy person", "images/redperson.png", "actor"),
 			new Action("Some person", "images/blackperson.png", "actor"),
@@ -45,14 +46,27 @@ define(function(require){
 		this.gui.add(this, "evolve").name("Evolve world");
 		this.gui.add(this, "removeActions").name("Remove all actions");
 		this.gui.add(this, "removeActors").name("Remove all actors");
+		this.gui.add(this, "startReplay").name("Replay all actions");
 		
 		this.actions = [];
 		this.actors  = [];
+		this.replay  = [];
+		this.replayInterval = new Timer(200);
 		
 		this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
 		
 		this.load();
     }
+	
+	
+	Time.prototype.startReplay = function() {
+		
+		console.log(this);
+		
+		this.replay = this.actions.clone();
+		this.actions.clear();
+	};
+	
 	
 	Time.prototype.removeActions = function() {
 		if(this.actions.length > 0 && confirm("Remove all actions from the map?")) {
@@ -74,6 +88,40 @@ define(function(require){
 		// genius code
 	};
 	
+	Time.prototype.handleAction = function(action) {
+		
+		
+		this.actions.push(action);
+		
+		console.clear();
+		
+		switch(action.text) {
+		case "Walk":
+			var distance  = 0;
+			var lastwalk  = null;
+			
+			for(var i = 0; i < this.actions.length; ++i) {
+				var action = this.actions[i];
+				
+				if(action.text == "Walk") {
+					if(lastwalk != null) {
+						distance += Math.hypot(lastwalk.x - action.x, lastwalk.y - action.y);
+					}
+					
+					lastwalk = action;
+				}
+			}
+			
+			console.log("Traveled thus far: " + distance);
+			
+			break;
+		default:
+			console.log(action.toString());
+		}
+		
+		
+	};
+	
 	Time.prototype.onLeftDown = function(input) {
 		
 		if(this.activeAction == "Remove selected") {
@@ -90,7 +138,8 @@ define(function(require){
 			var instance = this.dict[this.activeAction].clone(input.x, input.y);
 			
 			if(instance.type == "action") {
-				this.actions.push(instance);
+				this.handleAction(instance);
+				
 			} else {
 				this.actors.push(instance);
 			}
@@ -99,11 +148,13 @@ define(function(require){
 		
 		this.save();
 	};
-	
+
 	Time.prototype.save = function() {
 		var out = {
 			"actions": this.actions.map(function(item) { return item.toObject(); }),
-			"actors":  this.actors.map(function(item) { return item.toObject(); })
+			"actors":  this.actors.map(function(item) { return item.toObject(); }),
+			"width": this.width,
+			"height": this.height,
 		};
 		
 		localStorage.setItem("map", JSON.stringify(out));
@@ -115,12 +166,23 @@ define(function(require){
 		
 		if(data) {
 			if(data = JSON.TryParse(data)) {
+		
+				// Rescaling item position back to their relative position.
+				var ratiox = this.width / (data.width  || this.width);
+				var ratioy = this.height / (data.height || this.height);
 				
+			
 				this.actions = data.actions.map(function(item) {
+					item.x *= ratiox;
+					item.y *= ratioy;
+					
 					return Action.fromObject(item);
 				});
 				
 				this.actors = data.actors.map(function(item) {
+					item.x *= ratiox;
+					item.y *= ratioy;
+					
 					return Action.fromObject(item);
 				});
 				
@@ -138,6 +200,13 @@ define(function(require){
         Game.prototype.update.call(this, dt);
         
 		this.input.cursor(Input.Cursor.POINTER);
+		
+		if(this.replay.length > 0) {
+			if(this.replayInterval.expired()) {
+				this.handleAction(this.replay.shift());
+			}
+		}
+		
     };
     
     Time.prototype.draw = function(renderer) {
@@ -147,12 +216,14 @@ define(function(require){
 		
 		this.actions.forEach(function(action, i) {
 			renderer.texture(action.texture, action.x, action.y);
-			renderer.text(i, action.x, action.y, "red", "center", "middle", "10px monospace")
+			renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace")
+			renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace")
 		});
 		
 		this.actors.forEach(function(action, i) {
 			renderer.texture(action.texture, action.x, action.y);
-			renderer.text(i, action.x, action.y, "red", "center", "middle", "10px monospace")
+			renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace")
+			renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace")
 		});
 		
     };
