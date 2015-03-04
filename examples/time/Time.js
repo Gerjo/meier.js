@@ -57,12 +57,16 @@ define(function(require){
 	Time.prototype.removeActions = function() {
 		if(this.actions.length > 0 && confirm("Remove all actions from the map?")) {
 			this.actions.clear();
+			
+			this.save();
 		}
 	};
 	
 	Time.prototype.removeActors = function() {
 		if(this.actors.length > 0 && confirm("Remove all actors from the map?")) {
 			this.actors.clear();
+			
+			this.save();
 		}
 	};
     
@@ -111,7 +115,6 @@ define(function(require){
 		
 		if(data) {
 			if(data = JSON.TryParse(data)) {
-				console.log(data);
 				
 				this.actions = data.actions.map(function(item) {
 					return Action.fromObject(item);
@@ -121,8 +124,12 @@ define(function(require){
 					return Action.fromObject(item);
 				});
 				
-				
+				console.log("Loaded " + this.actions.length + " action(s) and " + this.actors.length + " actor(s).");
+			} else {
+				console.log("Malformed localStorage. Try clearing it.");
 			}
+		} else {
+			console.log("Nothing inside localStorage.");
 		}
 		
 	};
