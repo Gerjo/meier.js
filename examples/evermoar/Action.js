@@ -8,6 +8,7 @@ define(function(require) {
 		this.type    = type || null
 		this.texture = new Texture(texture);
 		this.text    = text || "Default Action";
+		this.time    = NaN;
 	}
 	
 	Action.prototype.clone = function(x, y) {

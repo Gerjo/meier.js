@@ -7,9 +7,9 @@ define(function(require){
 	var Action = require("./Action");
 	var Timer  = require("meier/extra/Timer");
 
-    Time.prototype = new Game();
+    Evermoar.prototype = new Game();
 	
-    function Time(container) {        
+    function Evermoar(container) {        
         Game.call(this, container);
 		this.logger.hideInternals();
 		
@@ -40,6 +40,8 @@ define(function(require){
 		
 		this.activeAction = actions.first().toString();
 		
+		this.showIndices = false;
+		
 	    this.gui = new dat.GUI();
 		this.gui.width = 400;
 	    this.gui.add(this, "activeAction", dict).name("Actions");
@@ -47,6 +49,7 @@ define(function(require){
 		this.gui.add(this, "removeActions").name("Remove all actions");
 		this.gui.add(this, "removeActors").name("Remove all actors");
 		this.gui.add(this, "startReplay").name("Replay all actions");
+		this.gui.add(this, "showIndices").name("Show indices");
 		
 		this.actions = [];
 		this.actors  = [];
@@ -59,7 +62,7 @@ define(function(require){
     }
 	
 	
-	Time.prototype.startReplay = function() {
+	Evermoar.prototype.startReplay = function() {
 		
 		console.log(this);
 		
@@ -68,7 +71,7 @@ define(function(require){
 	};
 	
 	
-	Time.prototype.removeActions = function() {
+	Evermoar.prototype.removeActions = function() {
 		if(this.actions.length > 0 && confirm("Remove all actions from the map?")) {
 			this.actions.clear();
 			
@@ -76,7 +79,7 @@ define(function(require){
 		}
 	};
 	
-	Time.prototype.removeActors = function() {
+	Evermoar.prototype.removeActors = function() {
 		if(this.actors.length > 0 && confirm("Remove all actors from the map?")) {
 			this.actors.clear();
 			
@@ -84,11 +87,11 @@ define(function(require){
 		}
 	};
     
-	Time.prototype.evolve = function() {
+	Evermoar.prototype.evolve = function() {
 		// genius code
 	};
 	
-	Time.prototype.handleAction = function(action) {
+	Evermoar.prototype.handleAction = function(action) {
 		
 		
 		this.actions.push(action);
@@ -112,7 +115,7 @@ define(function(require){
 				}
 			}
 			
-			console.log("Traveled thus far: " + distance);
+			console.log("Travelled thus far: " + distance);
 			
 			break;
 		default:
@@ -122,7 +125,7 @@ define(function(require){
 		
 	};
 	
-	Time.prototype.onLeftDown = function(input) {
+	Evermoar.prototype.onLeftDown = function(input) {
 		
 		if(this.activeAction == "Remove selected") {
 			var radius = 15;
@@ -149,7 +152,7 @@ define(function(require){
 		this.save();
 	};
 
-	Time.prototype.save = function() {
+	Evermoar.prototype.save = function() {
 		var out = {
 			"actions": this.actions.map(function(item) { return item.toObject(); }),
 			"actors":  this.actors.map(function(item) { return item.toObject(); }),
@@ -160,7 +163,7 @@ define(function(require){
 		localStorage.setItem("map", JSON.stringify(out));
 	};
 	
-	Time.prototype.load = function() {
+	Evermoar.prototype.load = function() {
 		
 		var data = localStorage.getItem("map");
 		
@@ -196,7 +199,7 @@ define(function(require){
 		
 	};
 	
-    Time.prototype.update = function(dt) {
+    Evermoar.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
         
 		this.input.cursor(Input.Cursor.POINTER);
@@ -208,25 +211,35 @@ define(function(require){
 		}
 		
     };
+	
     
-    Time.prototype.draw = function(renderer) {
+    Evermoar.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-		renderer.styled("<30px><bold><hotpink><Courier New>EVERMOAR<10px><yellow> simulator v1", -this.hw + 10, this.hh - 30, "left", "bottom")
+		var showIndices = this.showIndices;
 		
-		this.actions.forEach(function(action, i) {
-			renderer.texture(action.texture, action.x, action.y);
-			renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace")
-			renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace")
-		});
+		renderer.styled("<bold><10px><yellow>the <hotpink><Courier New><30px>EVERMOAR<10px><yellow> simulator v1", -this.hw + 10, this.hh - 30, "left", "bottom")
 		
 		this.actors.forEach(function(action, i) {
 			renderer.texture(action.texture, action.x, action.y);
-			renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace")
-			renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace")
+			
+			if(showIndices){
+				renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
+				renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+			}
 		});
+		
+		this.actions.forEach(function(action, i) {
+			renderer.texture(action.texture, action.x, action.y);
+			
+			if(showIndices){
+				renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
+				renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+			}
+		});
+
 		
     };
     
-    return Time;
+    return Evermoar;
 });
