@@ -6,7 +6,8 @@ define(function(require){
 	var World  = require("./World");
 	var Action = require("./Action");
 	var Timer  = require("meier/extra/Timer");
-
+	var Logic  = require("./Logic");
+	
     Evermoar.prototype = new Game();
 	
     function Evermoar(container) {        
@@ -16,6 +17,7 @@ define(function(require){
 		
 		this.add(new Sprite(0, 0, this.width, this.height, "images/background.png"))
 		this.add(this.world = new World(this.width, this.height));
+		this.add(this.logic = new Logic());
 
 		
 		var actions = [
@@ -45,11 +47,11 @@ define(function(require){
 	    this.gui = new dat.GUI();
 		this.gui.width = 400;
 	    this.gui.add(this, "activeAction", dict).name("Actions");
-		this.gui.add(this, "evolve").name("Evolve world");
 		this.gui.add(this, "removeActions").name("Remove all actions");
 		this.gui.add(this, "removeActors").name("Remove all actors");
 		this.gui.add(this, "startReplay").name("Replay all actions");
 		this.gui.add(this, "showIndices").name("Show indices");
+		this.gui.add(this.logic, "showText").name("Show text baloons");
 		
 		this.actions = [];
 		this.actors  = [];
@@ -59,14 +61,13 @@ define(function(require){
 		this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
 		
 		this.load();
+		this.startReplay();
     }
 	
 	
-	Evermoar.prototype.startReplay = function() {
-		
-		console.log(this);
-		
+	Evermoar.prototype.startReplay = function() {		
 		this.replay = this.actions.clone();
+		this.logic.reset();
 		this.actions.clear();
 	};
 	
@@ -91,38 +92,11 @@ define(function(require){
 		// genius code
 	};
 	
-	Evermoar.prototype.handleAction = function(action) {
-		
-		
+	Evermoar.prototype.handleAction = function(action) {		
 		this.actions.push(action);
 		
-		console.clear();
-		
-		switch(action.text) {
-		case "Walk":
-			var distance  = 0;
-			var lastwalk  = null;
-			
-			for(var i = 0; i < this.actions.length; ++i) {
-				var action = this.actions[i];
-				
-				if(action.text == "Walk") {
-					if(lastwalk != null) {
-						distance += Math.hypot(lastwalk.x - action.x, lastwalk.y - action.y);
-					}
-					
-					lastwalk = action;
-				}
-			}
-			
-			console.log("Travelled thus far: " + distance);
-			
-			break;
-		default:
-			console.log(action.toString());
-		}
-		
-		
+		// Blackbox AI
+		this.logic.handleAction(action, this.actors);
 	};
 	
 	Evermoar.prototype.onLeftDown = function(input) {
@@ -206,7 +180,7 @@ define(function(require){
 		
 		if(this.replay.length > 0) {
 			if(this.replayInterval.expired()) {
-				this.handleAction(this.replay.shift());
+				this.handleAction(this.replay.shift(), this.actors.clone());
 			}
 		}
 		

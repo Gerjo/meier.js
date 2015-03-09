@@ -4,7 +4,7 @@ define(function(require) {
     var Vec2       = require("meier/math/Vec")(2);
 	var Color      = require("meier/engine/Colors");
 	
-	var Bucket     = require("Bucket");
+	var Bucket     = require("./Bucket");
 	
     World.prototype = new Entity();
     
@@ -14,8 +14,7 @@ define(function(require) {
 		this.size = new Vec2(0, 0);
 		
 		this.buckets = [];
-		this.bycolor = {};
-		
+		this.bycolor = {};		
 		
 		this.pixelmap = new RawTexture("images/pixelmap.png", function(image) {
 			var colors = image.asMatrix();
@@ -28,7 +27,6 @@ define(function(require) {
 			
 			console.log("Rows: " + colors.r.numrows);
 			console.log("Columns: " + colors.r.numcolumns);
-			
 				
 			var hsize = this.size.clone().scaleScalar(0.5);
 			
