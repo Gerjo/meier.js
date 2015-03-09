@@ -7,9 +7,9 @@ define(function(require) {
         this.min       = min;
         this.max       = max;
         this.shape     = shape;
-        
+		
         this.eval = function(context) {
-            
+			
             // Unfold the callable chain, e.g., "position.x" works as expected.
             var val = this.attribute.reduce(function(context, method) {
                 
@@ -93,7 +93,7 @@ define(function(require) {
     /// Create a new fuzzy logic rule.
     Fuzzy.prototype.rule = function(rule, callback, name) {
         
-        var r = new Rule(this, rule, callback, name || no-name);
+        var r = new Rule(this, rule, callback, name || "no-name");
         
         var stack  = [];
         var output = [];
@@ -103,13 +103,15 @@ define(function(require) {
         // Process a token event. Follows the Shunting-yard algorithm
         // to convert infix to postfix
         function process(token) {    
-            if(token != 'or' && token != 'and' && token != '(' && token != ')') {
+			
+			
+            if(token != 'or' && token != 'and' && token != '(' && token != ')' && token != 'not') {
                 output.push(token);
                 
             } else if(token == '(' || stack.length == 0 || stack.last() == '(') {
                 stack.push(token);
                 
-            } else if(token == 'or' || token == 'and') {
+            } else if(token == 'or' || token == 'and' || token == 'not') {
                 stack.push(token);
             
             } else if(token == ')') {
@@ -134,6 +136,7 @@ define(function(require) {
             ////console.log("");
         }
         
+		
         // TODO: rework this parser. One token should not emit multiple events.
         for(var i = 0, s = 0, token; i < rule.length; ++i) {
             
@@ -155,6 +158,8 @@ define(function(require) {
                 s = i + 1;
             }
         }
+
+
 
         // Push the remainder onto the output stack
         while(stack.length > 0) {
@@ -197,19 +202,26 @@ define(function(require) {
         
         // Compute linguistic terms.
         var terms = this.terms(context);
-        
+        		
         // Execute each logical rule
         var scores = this._rules.map(function(rule, i) {
             var output = rule._infix.clone();
             
             //console.log("Reasoning about: " + rule.rule);
+            //console.log("infix: " + rule._infix.join());
             
             var operands = [];
         
             while(output.length > 0) {
                 var token = output.shift();
             
-                if(token == 'or' || token == 'and') {
+				if(token == 'not') {
+					var a = operands.pop();
+					var c = 1 - (isNaN(a) ? terms[a] : a);
+					
+					operands.push(c);
+			
+                } else if(token == 'or' || token == 'and') {
                     var a = operands.pop();
                     var b = operands.pop();
                     var c = null;
@@ -242,12 +254,19 @@ define(function(require) {
                 }
             }
             
-            return rule.recentScore = operands.last();
+			var last = operands.last();
+			
+			// Just incase the rule only has one variable.
+			if(isNaN(last)) {
+				return terms[last];
+			} 
+			
+			return last;
             
         }.bind(this));
         
         var max = math.ArgMax(scores);
-        
+        		
         this._rules[max].callback(scores[max]);
         
         return this;
