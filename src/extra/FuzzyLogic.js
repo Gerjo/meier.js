@@ -6,7 +6,8 @@ define(function(require) {
         this.attribute = attribute.split('.');
         this.min       = min;
         this.max       = max;
-        this.shape     = shape;
+
+		this.shape = shape;
 		
         this.eval = function(context) {
 			
@@ -52,7 +53,7 @@ define(function(require) {
             }
             
             // Apply membership function
-            return shape(normalized);
+            return normalized;//shape(normalized);
         }
     }
     
@@ -77,16 +78,27 @@ define(function(require) {
     function Fuzzy() {
         this._rules     = [];
         this._terms     = {};
+		
+		this._grouped   = [];
     }
     
     /// Define a linguistic term
     Fuzzy.prototype.define = function(attribute, min, max, terms) {
+		
+		var group = [];
+		
         for(var k in terms) {
             if(terms.hasOwnProperty(k)) {
-                this._terms[k] = new Term(k, attribute, min, max, terms[k]);
+				var term = new Term(k, attribute, min, max, terms[k])
+				
+				group.push(term);
+                this._terms[k] = term;
             }
         }
         
+		// Store them as a group together, used for debug drawing.
+		this._grouped.push(group);
+		
         return this;
     };
     
@@ -183,7 +195,7 @@ define(function(require) {
         // Compute the value of linguistic terms,
         for(var k in this._terms) {
             if(this._terms.hasOwnProperty(k)) {
-                terms[k] = this._terms[k].eval(context);
+                terms[k] = this._terms[k].shape(this._terms[k].eval(context));
                 
                 //console.log("Reasoning about: " + k + " = " + terms[k] + " (" + this._terms[k].shape.name + ")");    
             }
@@ -267,11 +279,119 @@ define(function(require) {
         
         var max = math.ArgMax(scores);
         		
-        this._rules[max].callback(scores[max]);
-        
+		if(max != -1) {
+			this._rules[max].callback(scores[max]);
+		}
+		
         return this;
     };
     
+	Fuzzy.prototype.draw = function(renderer, context) {
+		
+		var h = 80;  var hh = h /2;
+		var w = 200; var hw = w/ 2;
+		
+		// Padding
+		var ho = 30;
+		var wo = 30;
+		
+		var x = -0.5 * renderer.width + hw + wo;
+		var y = -0.5 * renderer.height + hh + ho;
+		
+				
+		var font = "10px monospace";
+		
+		this._grouped.forEach(function(group, groupid) {
+						
+			var min   = group.first().min;
+			var max   = group.first().max;
+			var range = max - min;
+			var title = group.first().attribute;
+			var value = group.first().eval(context);
+
+			renderer.begin();
+			renderer.rectangle(x, y, w + wo, h + ho);
+			renderer.fill("white");
+			renderer.stroke("black");
+			
+			// Y labels
+			renderer.text("0", x - hw - 2, y - hh, "black", "right", "bottom", font);
+			renderer.text("1", x - hw - 2, y + hh, "black", "right", "top", font);
+			
+			// X labels
+			renderer.text(min, x - hw + 0, y - hh - 2, "black", "left", "top", font);
+			renderer.text(max, x + hw - 1, y - hh - 2, "black", "right", "top", font);
+
+			
+			renderer.text(title, x, y + hh + 1, "black", "center", "bottom", font);
+			
+
+			
+			renderer.begin();
+			group.forEach(function(term) {
+				renderer.line(
+					x + term.shape.left * w - hw,
+					y - hh,
+					x + term.shape.first * w - hw,
+					y + hh
+				);
+				
+				renderer.line(
+					x + term.shape.first * w - hw,
+					y + hh,
+					x + term.shape.second * w - hw,
+					y + hh
+				);
+				
+				renderer.line(
+					x + term.shape.second * w - hw,
+					y + hh,
+					x + term.shape.right * w - hw,
+					y - hh
+				);
+			});
+			renderer.stroke("grey");
+			
+			
+			renderer.begin();
+			group.forEach(function(term) {
+				renderer.circle(x + value * w - hw, y + term.shape(value) * h - hh, 3);
+			});
+			renderer.fill("red");
+			
+			
+			group.forEach(function(term, i) {
+				renderer.text(term.name + " " + term.shape(value).toFixed(2), x, y + (i-1) * 15, "green", "center", "middle", font);
+			});
+			
+			renderer.begin();
+			renderer.line( // left to right
+				x - hw, y - hh,
+				x + hw, y - hh
+			);
+			renderer.line( // top to bottom
+				x - hw, y + hh,
+				x - hw, y - hh
+			);
+			renderer.stroke("black");
+			
+			// Value from context:
+			var pos   = Math.round((value - 0.5) * (w));
+			
+			renderer.begin();
+			renderer.line(
+				x + pos, 
+				y - hh, 
+				x + pos, 
+				y + hh
+			);
+			renderer.stroke("red", 1);
+			
+			y += h + ho + ho*0.5;
+		});
+		
+	};
+	
     Fuzzy.Triangle = Fuzzy.prototype.triangle = function(left, center, right) {
         // Triangle is a special case of trapezoid. Note the repeated center.
         return Fuzzy.Trapezoid(left, center, center, right);
@@ -284,7 +404,7 @@ define(function(require) {
     };
     
     Fuzzy.Trapezoid = Fuzzy.prototype.trapezoid = function(left, first, second, right) {
-        return function FuzzyTrapezoid(value) {
+        var f = function(value) {
             
             if(value < left || value > right) {
                 return 0;
@@ -300,6 +420,13 @@ define(function(require) {
             
             return (1.0 - value - (1.0 - right)) / (right - second)
         };
+		
+		f.left   = left;
+		f.first  = first;
+		f.second = second;
+		f.right  = right;
+		
+		return f;
     };
     
     return Fuzzy;
