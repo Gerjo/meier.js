@@ -148,21 +148,23 @@ define(function(require){
 				var ratiox = this.width / (data.width  || this.width);
 				var ratioy = this.height / (data.height || this.height);
 				
-			
-				this.actions = data.actions.map(function(item) {
-					item.x *= ratiox;
-					item.y *= ratioy;
+				if(data.actions) {
+					this.actions = data.actions.map(function(item) {
+						item.x *= ratiox;
+						item.y *= ratioy;
 					
-					return Action.fromObject(item);
-				});
+						return Action.fromObject(item);
+					});
+				}
 				
-				this.actors = data.actors.map(function(item) {
-					item.x *= ratiox;
-					item.y *= ratioy;
+				if(data.actors) {
+					this.actors = data.actors.map(function(item) {
+						item.x *= ratiox;
+						item.y *= ratioy;
 					
-					return Action.fromObject(item);
-				});
-				
+						return Action.fromObject(item);
+					});
+				}
 				console.log("Loaded " + this.actions.length + " action(s) and " + this.actors.length + " actor(s).");
 			} else {
 				console.log("Malformed localStorage. Try clearing it.");
