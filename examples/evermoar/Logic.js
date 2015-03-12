@@ -20,7 +20,7 @@ define(function(require) {
             "somewhat_violent"   : brain.triangle(0.0, 1/2, 1.0),
             "recent_violent"     : brain.triangle(0.0, 0.0, 1.0)
         });
-		
+	
         brain.define("nearestQuest", 0, 300 /* unbounded? */, {
             "quest_far"        : brain.triangle(0.0, 1.0, 1.0),
             "quest_medium"     : brain.triangle(0.0, 1/2, 1.0),
@@ -45,7 +45,7 @@ define(function(require) {
 			this.log("playing_long");
 		}.bind(this));
 		*/
-		brain.rule("quest_far and never_violent and playing_long", function() {
+		/*brain.rule("quest_far and never_violent and playing_long", function() {
 			this.log("Very bored");
 		}.bind(this));
 		
@@ -56,7 +56,7 @@ define(function(require) {
 		brain.rule("quest_near or recent_violent", function() {
 			this.log("Entertained");
 		}.bind(this));
-		
+		*/
 		this.reset();
 	}
 	
@@ -104,7 +104,7 @@ define(function(require) {
 				} else {
 					return p;
 				}
-			}.bind(this));
+			}.bind(this), null);
 		}
 		
 		var pos = this.location = new Vec2(action.x, action.y);
@@ -149,6 +149,9 @@ define(function(require) {
 				renderer.text(entry.text, entry.pos.x, entry.pos.y, "white", "center", "middle", "100 10px monospace");
 			});
 		}
+		
+		this.brain.draw(renderer, this);
+		
 	};	
 	
 	return Logic;
