@@ -301,8 +301,10 @@ define(function(require) {
 				
 		var font = "10px monospace";
 		
+		
+		var colors = ["red", "green", "blue", "orange", "purple"];
+		
 		this._grouped.forEach(function(group, groupid) {
-						
 			var min   = group.first().min;
 			var max   = group.first().max;
 			var range = max - min;
@@ -327,8 +329,9 @@ define(function(require) {
 			
 
 			
-			renderer.begin();
-			group.forEach(function(term) {
+			
+			group.forEach(function(term, i) {
+				renderer.begin();
 				renderer.line(
 					x + term.shape.left * w - hw,
 					y - hh,
@@ -349,8 +352,9 @@ define(function(require) {
 					x + term.shape.right * w - hw,
 					y - hh
 				);
+				renderer.stroke(colors[i % colors.length]);
 			});
-			renderer.stroke("grey");
+			
 			
 			
 			renderer.begin();
@@ -361,7 +365,8 @@ define(function(require) {
 			
 			
 			group.forEach(function(term, i) {
-				renderer.text(term.name + " " + term.shape(value).toFixed(2), x, y + (i-1) * 15, "green", "center", "middle", font);
+				var color = colors[i % colors.length];
+				renderer.text(term.name + " " + term.shape(value).toFixed(2), x, y + (i-1) * 15, color, "center", "middle", font);
 			});
 			
 			renderer.begin();
