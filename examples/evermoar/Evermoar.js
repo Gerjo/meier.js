@@ -7,6 +7,7 @@ define(function(require){
 	var Action = require("./Action");
 	var Timer  = require("meier/extra/Timer");
 	var Logic  = require("./Logic");
+	var Player = require("./Player");
 	
     Evermoar.prototype = new Game();
 	
@@ -18,6 +19,7 @@ define(function(require){
 		this.add(new Sprite(0, 0, this.width, this.height, "images/background.png"))
 		this.add(this.world = new World(this.width, this.height));
 		this.add(this.logic = new Logic());
+		this.add(this.player = new Player());
 
 		
 		var actions = [
