@@ -30,8 +30,9 @@ define(function(require) {
         brain.define("ticks", 0, 60 /* unbounded? */, {
             "playing_long"        : brain.triangle(0.0, 1.0, 1.0),
             "moderately_long"     : brain.triangle(0.0, 1/2, 1.0),
-            "just_started"        : brain.triangle(0.0, 0.0, 1.0)
+            "just_started"        : brain.triangle(0.0, 0.0, 0.5)
         });
+		
 		/*
 		brain.rule("just_started", function() {
 			this.log("just_started");
@@ -43,20 +44,20 @@ define(function(require) {
 		
 		brain.rule("playing_long", function() {
 			this.log("playing_long");
-		}.bind(this));
-		*/
-		/*brain.rule("quest_far and never_violent and playing_long", function() {
+		}.bind(this));*/
+		
+		brain.rule("(quest_far and never_violent) and not just_started", function() {
 			this.log("Very bored");
 		}.bind(this));
 		
 		brain.rule("quest_medium and not recent_violent", function() {
-			this.log("meh");
+			this.log("somewhat bored");
 		}.bind(this));
 		
-		brain.rule("quest_near or recent_violent", function() {
+		brain.rule("quest_near or recent_violent or just_started", function() {
 			this.log("Entertained");
 		}.bind(this));
-		*/
+		
 		this.reset();
 	}
 	
