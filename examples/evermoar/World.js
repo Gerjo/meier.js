@@ -11,10 +11,11 @@ define(function(require) {
     function World(w, h) {        
         Entity.call(this, 0, 0, w, h);
 		
-		this.size = new Vec2(0, 0);
+		this.bucketsize = new Vec2(0, 0);
+		this.dimensions = new Vec2(0, 0);
 		
 		this.buckets = [];
-		this.bycolor = {};		
+		this.bycolor = {};
 		
 		this.pixelmap = new RawTexture("images/pixelmap.png", function(image) {
 			var colors = image.asMatrix();
@@ -22,30 +23,29 @@ define(function(require) {
 			var h = colors.r.numrows;
 			var w = colors.r.numcolumns;
 			
-			this.size.x = this.width  / w;
-			this.size.y = this.height / h;
+			this.bucketsize.x = this.width  / w;
+			this.bucketsize.y = this.height / h;
 			
 			console.log("Rows: " + colors.r.numrows);
 			console.log("Columns: " + colors.r.numcolumns);
 				
-			var hsize = this.size.clone().scaleScalar(0.5);
+			var hsize = this.bucketsize.clone().scaleScalar(0.5);
 			
 			for(var row = 0; row < colors.r.numrows; ++row) {
-				
 				
 				this.buckets.push([]);
 				
 				for(var col = 0; col < colors.r.numcolumns; ++col) {
 					
-					var r = colors.r.get(row, col);
-					var g = colors.g.get(row, col);
-					var b = colors.b.get(row, col);
+					var r = colors.r.get(colors.r.numrows - row - 1, col);
+					var g = colors.g.get(colors.r.numrows - row - 1, col);
+					var b = colors.b.get(colors.r.numrows - row - 1, col);
 					
 					var color = "rgb(" + r + ", " + g + ", " + b + ")";
 					
 					this.buckets.last().push(new Bucket(
-						col * this.size.x - this.hw + hsize.x,
-						-(row * this.size.y - this.hh + hsize.y),
+						col * this.bucketsize.x - this.hw + hsize.x,
+						(row * this.bucketsize.y - this.hh + hsize.y),
 						color
 					));
 					
@@ -59,6 +59,8 @@ define(function(require) {
 			
 			console.log("Grid size: " + this.buckets.length + "x" + this.buckets[0].length);
 			
+			this.dimensions.x = this.buckets.length;
+			this.dimensions.y = this.buckets[0].length;
 		}.bind(this));
     }
     
@@ -70,7 +72,7 @@ define(function(require) {
     World.prototype.draw = function(renderer) {
         Entity.prototype.draw.call(this, renderer);
         
-		var size = this.size;
+		var size = this.bucketsize;
 		
 		// Render per color layer
 		for(var k in this.bycolor) {
@@ -80,7 +82,7 @@ define(function(require) {
 					renderer.rectangle(bucket.position.x, bucket.position.y, size.x, size.y);
 				});
 				
-				renderer.fill(Color.Alpha(k, 0.8));
+				renderer.fill(Color.Alpha(k, 0.65));
 				renderer.stroke(k);
 			}
 		}
