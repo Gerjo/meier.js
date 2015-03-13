@@ -297,10 +297,8 @@ define(function(require) {
 		
 		var x = -0.5 * renderer.width + hw + wo;
 		var y = -0.5 * renderer.height + hh + ho;
-		
 				
 		var font = "10px monospace";
-		
 		
 		var colors = ["red", "green", "blue", "orange", "purple"];
 		
@@ -324,11 +322,7 @@ define(function(require) {
 			renderer.text(min, x - hw + 0, y - hh - 2, "black", "left", "top", font);
 			renderer.text(max, x + hw - 1, y - hh - 2, "black", "right", "top", font);
 
-			
 			renderer.text(title, x, y + hh + 1, "black", "center", "bottom", font);
-			
-
-			
 			
 			group.forEach(function(term, i) {
 				renderer.begin();
@@ -353,16 +347,13 @@ define(function(require) {
 					y - hh
 				);
 				renderer.stroke(colors[i % colors.length]);
-			});
-			
-			
+			});			
 			
 			renderer.begin();
 			group.forEach(function(term) {
 				renderer.circle(x + value * w - hw, y + term.shape(value) * h - hh, 3);
 			});
 			renderer.fill("red");
-			
 			
 			group.forEach(function(term, i) {
 				var color = colors[i % colors.length];
