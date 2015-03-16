@@ -57,19 +57,19 @@ define(function(require) {
 			this.log("Very bored");
 			
 			return Action.Enemy;
-		}.bind(this));
+		}.bind(this), "Is bored?");
 		
 		brain.rule("quest_medium and not recent_violent", function() {
 			this.log("somewhat bored");
 			
 			return Action.Enemy;
-		}.bind(this));
+		}.bind(this), "Is somewhat bored?");
 		
 		brain.rule("quest_near or recent_violent or just_started", function() {
 			this.log("Entertained");
 			
 			return Action.Nothing;
-		}.bind(this));
+		}.bind(this), "Is entertained?");
 		
 		this.reset();
 	}
