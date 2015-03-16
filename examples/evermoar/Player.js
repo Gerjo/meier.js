@@ -23,7 +23,7 @@ define(function(require) {
 	};
 	
 	Player.prototype.update = function(dt) {
-
+		
 	};
 	
 	/// Emmit actions based on encountered actor.

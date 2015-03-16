@@ -13,6 +13,7 @@ define(function(require) {
 		
 		this.showText = true;
 		this.texts = [];
+		this.deaths = 0;
 		
 		var brain = this.brain = new FuzzyLogic();
 		
@@ -37,23 +38,19 @@ define(function(require) {
         brain.define("ticks", 0, 300 /* unbounded? */, {
             "playing_long"        : brain.triangle(0.0, 1.0, 1.0),
             "moderately_long"     : brain.triangle(0.0, 1/2, 1.0),
-            "just_started"        : brain.triangle(0.0, 0.0, 0.5)
+            "just_started"        : brain.triangle(0.0, 0.0, 0.25)
         });
 		
-		/*
-		brain.rule("just_started", function() {
-			this.log("just_started");
-		}.bind(this));
+        brain.define("deaths", 0, 10 /* unbounded? */, {
+            "many_deaths"       : brain.triangle(0.0, 1.0, 1.0),
+            "semi_died"         : brain.triangle(0.0, 1/2, 1.0),
+            "never_died"        : brain.triangle(0.0, 0.0, 0.5)
+        });
 		
-		brain.rule("moderately_long", function() {
-			this.log("moderately_long");
-		}.bind(this));
 		
-		brain.rule("playing_long", function() {
-			this.log("playing_long");
-		}.bind(this));*/
+		brain.subrule("just_started and never_violent", "is_starter");
 		
-		brain.rule("(quest_far and never_violent) and not just_started", function() {
+		brain.rule("quest_far and never_violent and not is_starter", function() {
 			this.log("Very bored");
 			
 			return Action.Enemy;
