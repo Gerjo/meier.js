@@ -34,7 +34,7 @@ define(function(require) {
             "quest_near"       : brain.triangle(0.0, 0.0, 1.0)
         });
 		
-        brain.define("ticks", 0, 60 /* unbounded? */, {
+        brain.define("ticks", 0, 300 /* unbounded? */, {
             "playing_long"        : brain.triangle(0.0, 1.0, 1.0),
             "moderately_long"     : brain.triangle(0.0, 1/2, 1.0),
             "just_started"        : brain.triangle(0.0, 0.0, 0.5)
@@ -57,7 +57,7 @@ define(function(require) {
 			this.log("Very bored");
 			
 			return Action.Enemy;
-		}.bind(this), "Is bored?");
+		}.bind(this), "Is really bored?");
 		
 		brain.rule("quest_medium and not recent_violent", function() {
 			this.log("somewhat bored");
@@ -87,8 +87,8 @@ define(function(require) {
 	
 	Logic.prototype.nearestQuest = function() {
 				
-		return Infinity; this.actors.reduce(function(nearest, actor) {			
-			if(actor.text == "Side quest") {				
+		return this.game.reactions.reduce(function(nearest, actor) {			
+			if(actor.is(Action.SideQuest)) {				
 				return Math.min(
 					Math.hypot(actor.x - this.location.x, actor.y - this.location.y),
 					nearest

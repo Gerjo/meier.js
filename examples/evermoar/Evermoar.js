@@ -30,17 +30,18 @@ define(function(require){
 		this.tick             = new Timer(500);
 
 		this.actions    = [Action.Nothing];	// Player sourced
-		this.reactions  = [Action.Nothing];	// Level sourced		
+		this.reactions  = [Action.SideQuest.clone(280, -180)];	// Level sourced		
     }
 	
     Evermoar.prototype.iterate = function(dt) {
 		var action   = this.player.getAction(this.reactions);
-		var reaction = this.logic.getReaction(this.actions);
+		this.actions.push(action);
 		
+		var reaction = this.logic.getReaction(this.actions);
+		this.reactions.push(reaction);
+
 		console.log("In: " + action + ", out: " + reaction);
 		
-		this.actions.push(action);
-		this.reactions.push(reaction);
 	};
 	
     Evermoar.prototype.update = function(dt) {
