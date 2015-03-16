@@ -77,12 +77,76 @@ define(function(require) {
         // this.disable = function() { this.isEnabled = false; return this; }
         // this.enable  = function() { this.isEnabled = true;  return this; }
         // this.destroy = function() { this.controller._rules.remove(this); }
+		
+		this.eval = function(terms) {
+            var output   = this._infix.clone();
+            var operands = [];
+        
+            while(output.length > 0) {
+                var token = output.shift();
+            
+				if(token == 'not') {
+					var a = operands.pop();
+					var c = 1 - (isNaN(a) ? terms[a] : a);
+					
+					operands.push(c);
+			
+                } else if(token == 'or' || token == 'and') {
+                    var a = operands.pop();
+                    var b = operands.pop();
+                    var c = null;
+                    
+                    if( isNaN(a) && isNaN(terms[a])) {
+                        throw new Error("Unknown term '" + a + "'.");
+                        break;
+                    }
+                    
+                    if( isNaN(b) && isNaN(terms[b])) {
+                        throw new Error("Unknown term '" + b + "'.");
+                        break;
+                    }
+                
+                    // Use lookup if the variable is not a number.
+                    a = isNaN(a) ? terms[a] : a;
+                    b = isNaN(b) ? terms[b] : b;
+                
+                    // Execute
+                    if(token == 'or') {
+                        c = Math.max(a, b);
+                    } else {
+                        c = Math.min(a, b);
+                    }
+                
+                    // Push back into stack for next iteration.
+                    operands.push(c);
+                } else {
+                    operands.push(token);
+                }
+            }
+            
+			var last = operands.last();
+			
+			// Just incase the rule only has one variable.
+			if(isNaN(last)) {
+				last = terms[last];
+			} 
+			
+			this.history.push(last);
+
+			// Trim to some maximum size. These
+			// values are used for debug drawing.
+			while(this.history.length > 80) {
+				this.history.shift();
+			}
+			
+			return last;
+		};
     }
     
     function Fuzzy() {
         this._rules     = [];
+		this._subrules  = [];
         this._terms     = {};
-		
 		this._grouped   = [];
     }
     
@@ -106,11 +170,30 @@ define(function(require) {
         return this;
     };
     
+	Fuzzy.prototype.subrule = function(rule, variableName) {
+        
+        var r = new Rule(this, rule, variableName, variableName);
+        
+        r._infix = ToInfix(rule);
+
+        this._subrules.push(r);
+
+        return r;
+	};
+	
     /// Create a new fuzzy logic rule.
-    Fuzzy.prototype.rule = function(rule, callback, name) {
+    Fuzzy.prototype.rule = function(rule, callback, debugName) {
         
-        var r = new Rule(this, rule, callback, name || null);
+        var r = new Rule(this, rule, callback, debugName || null);
         
+        r._infix = ToInfix(rule);
+
+        this._rules.push(r);
+
+        return r;
+    };
+    
+	function ToInfix(rule) {
         var stack  = [];
         var output = [];
         
@@ -184,14 +267,10 @@ define(function(require) {
                 output.push(token);
             }
         }
-                
-        r._infix = output;
-
-        this._rules.push(r);
-
-        return r;
-    };
-    
+		
+		return output;
+	}
+	
     /// Retrieve the current value of the linguistic terms.
     Fuzzy.prototype.terms = function(context) {
         var terms = {};
@@ -216,78 +295,20 @@ define(function(require) {
         
         // Compute linguistic terms.
         var terms = this.terms(context);
-        		
+        
+		// Compute subrules, and attach them as-if being a term.
+		this._subrules.forEach(function(rule) {
+			terms[rule.callback] = rule.eval(terms);
+		});
+								
         // Execute each logical rule
         var scores = this._rules.map(function(rule, i) {
-            var output = rule._infix.clone();
-            
-            //console.log("Reasoning about: " + rule.rule);
-            //console.log("infix: " + rule._infix.join());
-            
-            var operands = [];
-        
-            while(output.length > 0) {
-                var token = output.shift();
-            
-				if(token == 'not') {
-					var a = operands.pop();
-					var c = 1 - (isNaN(a) ? terms[a] : a);
-					
-					operands.push(c);
-			
-                } else if(token == 'or' || token == 'and') {
-                    var a = operands.pop();
-                    var b = operands.pop();
-                    var c = null;
-                    
-                    if( isNaN(a) && isNaN(terms[a])) {
-                        throw new Error("Unknown term '" + a + "'.");
-                        break;
-                    }
-                    
-                    if( isNaN(b) && isNaN(terms[b])) {
-                        throw new Error("Unknown term '" + b + "'.");
-                        break;
-                    }
-                
-                    // Use lookup if the variable is not a number.
-                    a = isNaN(a) ? terms[a] : a;
-                    b = isNaN(b) ? terms[b] : b;
-                
-                    // Execute
-                    if(token == 'or') {
-                        c = Math.max(a, b);
-                    } else {
-                        c = Math.min(a, b);
-                    }
-                
-                    // Push back into stack for next iteration.
-                    operands.push(c);
-                } else {
-                    operands.push(token);
-                }
-            }
-            
-			var last = operands.last();
-			
-			// Just incase the rule only has one variable.
-			if(isNaN(last)) {
-				last = terms[last];
-			} 
-			
-			rule.history.push(last);
-
-			// Trim to some maximum size.
-			while(rule.history.length > 80) {
-				rule.history.shift();
-			}
-			
-			return last;
-            
+			return rule.eval(terms);            
         }.bind(this));
         
+		// Defuzzification
         var max = math.ArgMax(scores);
-        		
+        
 		if(max != -1) {
 			return this._rules[max].callback(scores[max]);
 		}
@@ -405,47 +426,48 @@ define(function(require) {
 		var y =  0.5 * renderer.height - hh - padding + posy;
 		
 		
-		this._rules.forEach(function(rule, i) {
-			renderer.begin();
-			renderer.rectangle(x, y, w + padding, h + padding);
-			renderer.fill("white");
-			renderer.stroke("black");
+		[ this._rules, this._subrules ].forEach(function(rules) {
+			rules.forEach(function(rule, i) {
+				renderer.begin();
+				renderer.rectangle(x, y, w + padding, h + padding);
+				renderer.fill("white");
+				renderer.stroke("black");
 			
-			renderer.text(rule.name || rule.rule, x, y + hh + 1, "black", "center", "bottom", font);
+				renderer.text(rule.name || rule.rule, x, y + hh + 1, "black", "center", "bottom", font);
 			
-			// Y labels
-			renderer.text("0", x - hw - 2, y - hh, "black", "right", "bottom", font);
-			renderer.text("1", x - hw - 2, y + hh, "black", "right", "top", font);
+				// Y labels
+				renderer.text("0", x - hw - 2, y - hh, "black", "right", "bottom", font);
+				renderer.text("1", x - hw - 2, y + hh, "black", "right", "top", font);
 	
-			renderer.begin();
-			renderer.line( // left to right
-				x - hw, y - hh,
-				x + hw, y - hh
-			);
-			renderer.line( // top to bottom
-				x - hw, y + hh,
-				x - hw, y - hh
-			);
-			renderer.stroke("black");
-			
-			renderer.begin();
-			
-			var span = w / rule.history.length;
-			
-			for(var i = 1; i < rule.history.length; ++i) { 
-				renderer.line(
-					x + (i - 1) * span - hw,
-					y + rule.history[i - 1] * h - hh,
-					x + i * span - hw,
-					y + rule.history[i] * h - hh
+				renderer.begin();
+				renderer.line( // left to right
+					x - hw, y - hh,
+					x + hw, y - hh
 				);
-			}
+				renderer.line( // top to bottom
+					x - hw, y + hh,
+					x - hw, y - hh
+				);
+				renderer.stroke("black");
 			
-			renderer.stroke("red");
+				renderer.begin();
 			
-			y -= h + padding * 1.5;
+				var span = w / rule.history.length;
+			
+				for(var i = 1; i < rule.history.length; ++i) { 
+					renderer.line(
+						x + (i - 1) * span - hw,
+						y + rule.history[i - 1] * h - hh,
+						x + i * span - hw,
+						y + rule.history[i] * h - hh
+					);
+				}
+			
+				renderer.stroke("red");
+			
+				y -= h + padding * 1.5;
+			});
 		});
-		
 	};
 	
     Fuzzy.Triangle = Fuzzy.prototype.triangle = function(left, center, right) {
