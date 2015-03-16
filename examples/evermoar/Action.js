@@ -3,7 +3,6 @@ define(function(require) {
 	var Texture = require("meier/engine/Texture");
 	
 	function Action(type, text, texture, category, x, y) {
-		console.log(texture);
 		this.type    = type || "unknown";
 		this.x       = x || 0;
 		this.y       = y || 0;
@@ -48,14 +47,14 @@ define(function(require) {
 		new Action("walk",       "Walk", "images/feet.png", "action"),
 		new Action("kill",       "Kill something", "images/skull.png", "action"),
 		new Action("violence",   "Violence", "images/violence.png", "action"),
-		new Action("friendly_talk", "Friendly talk", "images/talk.png", "action"),
-		new Action("violent_talk",  "Violent talk", "images/violenttalk.png", "action"),
+		new Action("friendlyTalk", "Friendly talk", "images/talk.png", "action"),
+		new Action("violentTalk",  "Violent talk", "images/violenttalk.png", "action"),
 		new Action("die",        "Die yourself", "images/cross.png", "action"),
 		new Action("enemy",      "Enemy person", "images/redperson.png", "actor"),
 		new Action("person",     "Some person", "images/blackperson.png", "actor"),
 		new Action("spawn",      "Spawn location", "images/home.png", "actor"),
-		new Action("side_quest", "Side quest", "images/side_quest.png", "actor"),
-		new Action("main_quest", "Main quest", "images/kill_dragon.png", "actor"),
+		new Action("sideQuest", "Side quest", "images/side_quest.png", "actor"),
+		new Action("mainQuest", "Main quest", "images/kill_dragon.png", "actor"),
 		new Action("nothing",    "nothing", null, null),
 		new Action("remove",     "Remove selected", null, null)
 	];	

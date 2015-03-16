@@ -4,6 +4,8 @@ define(function(require) {
 	var Vec2       = require("meier/math/Vec")(2);
 	var Math       = require("meier/math/Math");
 	
+	var Action     = require("./Action");
+	
 	Logic.prototype = new Entity();
 	
 	function Logic() {
@@ -11,7 +13,6 @@ define(function(require) {
 		
 		this.showText = true;
 		this.texts = [];
-		this.actors = [];
 		
 		var brain = this.brain = new FuzzyLogic();
 		
@@ -19,6 +20,12 @@ define(function(require) {
             "never_violent"      : brain.triangle(0.0, 1.0, 1.0),
             "somewhat_violent"   : brain.triangle(0.0, 1/2, 1.0),
             "recent_violent"     : brain.triangle(0.0, 0.0, 1.0)
+        });
+		
+        brain.define("sinceLastFriendlyTalk", 0, 40 /* unbounded? */, {
+            "never_talks"      : brain.triangle(0.0, 1.0, 1.0),
+            "somewhat_talks"   : brain.triangle(0.0, 1/2, 1.0),
+            "recent_talk"      : brain.triangle(0.0, 0.0, 1.0)
         });
 	
         brain.define("nearestQuest", 0, 300 /* unbounded? */, {
@@ -48,29 +55,39 @@ define(function(require) {
 		
 		brain.rule("(quest_far and never_violent) and not just_started", function() {
 			this.log("Very bored");
+			
+			return Action.Enemy;
 		}.bind(this));
 		
 		brain.rule("quest_medium and not recent_violent", function() {
 			this.log("somewhat bored");
+			
+			return Action.Enemy;
 		}.bind(this));
 		
 		brain.rule("quest_near or recent_violent or just_started", function() {
 			this.log("Entertained");
+			
+			return Action.Nothing;
 		}.bind(this));
 		
 		this.reset();
 	}
 	
+	Logic.prototype.sinceLastFriendlyTalk = function() {
+		var type = Action.FriendlyTalk.type;
+		return (type in this.lastEventType) ? (this.ticks - this.lastEventType[type]) : Infinity;
+	};
+	
 	
 	Logic.prototype.sinceLastViolentAction = function() {
-		var a = ("Violence" in this.lastEventType) ? (this.ticks - this.lastEventType["Violence"]) : Infinity;
-		
-		return a;
+		var type = Action.Violence.type;
+		return (type in this.lastEventType) ? (this.ticks - this.lastEventType[type]) : Infinity;
 	};
 	
 	Logic.prototype.nearestQuest = function() {
 				
-		return this.actors.reduce(function(nearest, actor) {			
+		return Infinity; this.actors.reduce(function(nearest, actor) {			
 			if(actor.text == "Side quest") {				
 				return Math.min(
 					Math.hypot(actor.x - this.location.x, actor.y - this.location.y),
@@ -91,15 +108,15 @@ define(function(require) {
 		this.lastEventType     = {};
 	};
 			
-	Logic.prototype.handleAction = function(action, actors) {
+	Logic.prototype.getReaction = function(actions) {
 		
-		this.actors = actors;
+		var action = actions.last();
 		
 		// Advance time
 		this.ticks += 1;
 		
 		if(this.spawn == null) {
-			this.location = this.spawn = actors.reduce(function(p, c) {
+			this.location = this.spawn = actions.reduce(function(p, c) {
 				if(c.is(Action.Spawn)) {
 					return new Vec2(c.x, c.y);
 				} else {
@@ -111,19 +128,20 @@ define(function(require) {
 		var pos = this.location = new Vec2(action.x, action.y);
 		
 		// Record time of last action type
-		this.lastEventType[action.text] = this.ticks;
+		this.lastEventType[action.type] = this.ticks;
 		
-		//console.log(action.text + ": " + this.sinceLastViolentAction());
 		
 		// Handle action specific things
-		switch(action.text) {
-		case "Walk":
+		switch(action.type) {
+		case Action.Walk.type:
 			this.distanceTravelled += this.location.distance(pos);
 			this.location = pos;
 		}
 				
 		// Reason about the current state.
-		this.brain.reason(this);	
+		var out = this.brain.reason(this);
+		
+		return out.clone(pos.x, pos.y);
 	};
 	
 	Logic.prototype.update = function() {
@@ -134,7 +152,7 @@ define(function(require) {
 		if(this.texts.empty() || this.texts.last().text != text) {
 			this.texts.push({
 				text: text,
-				pos: this.location
+				pos:  this.location
 			});
 		}
 	};
@@ -151,7 +169,7 @@ define(function(require) {
 			});
 		}
 		
-		this.brain.draw(renderer, this);
+		this.brain.draw(renderer, { width: 200, height: 40 });
 		
 	};	
 	

@@ -18,6 +18,8 @@ define(function(require) {
 	Player.prototype.onKeyDown = function(input, key) {
 		this.position.x += ((key == Key.RIGHT) - (key == Key.LEFT)) * 10;
 		this.position.y += ((key == Key.UP) - (key == Key.DOWN)) * 10;
+		
+		this.game.iterate();
 	};
 	
 	Player.prototype.update = function(dt) {
@@ -25,16 +27,16 @@ define(function(require) {
 	};
 	
 	/// Emmit actions based on encountered actor.
-	Player.prototype.handleAction = function(event) {
-		
+	Player.prototype.getAction = function(reactions) {
+		var reaction = reactions.last();
 		var response = Action.Nothing;
 		
-		switch(event.type) {
+		switch(reaction.type) {
 			case Action.Enemy.type:
 				response = Action.Violence;
 				break;
 			case Action.Nothing.type:
-				response = Action.Violence;
+				response = Action.Nothing;
 				break;
 		}
 		
@@ -65,7 +67,7 @@ define(function(require) {
 				world.bucketsize.y
 			);
 		
-			renderer.fill("red");
+			renderer.stroke("red");
 		}
 	};
 		
