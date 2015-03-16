@@ -303,11 +303,14 @@ define(function(require) {
 		var hw = w/ 2;
 		var hh = h /2;
 		
+		var posx = opt.x || 0;
+		var posy = opt.y || 0;
+		
 		// Padding
 		var padding = opt.padding || 30;
 
-		var x = -0.5 * renderer.width + hw + padding;
-		var y =  0.5 * renderer.height - hh - padding;
+		var x = -0.5 * renderer.width + hw + padding + posx;
+		var y =  0.5 * renderer.height - hh - padding + posy;
 				
 		var font = "10px monospace";
 		
@@ -398,8 +401,8 @@ define(function(require) {
 		});
 		
 		
-		var x = -0.5 * renderer.width + hw + w + padding * 2.5;
-		var y =  0.5 * renderer.height - hh - padding;
+		var x = -0.5 * renderer.width + hw + w + padding * 2.5 + posx;
+		var y =  0.5 * renderer.height - hh - padding + posy;
 		
 		
 		this._rules.forEach(function(rule, i) {
