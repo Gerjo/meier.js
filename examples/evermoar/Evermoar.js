@@ -22,27 +22,12 @@ define(function(require){
 		this.add(this.player = new Player());
 
 		
-		var actions = [
-			new Action("Walk", "images/feet.png", "action"),
-			new Action("Kill something", "images/skull.png", "action"),
-			new Action("Violence", "images/violence.png", "action"),
-			new Action("Friendly talk", "images/talk.png", "action"),
-			new Action("Violent talk", "images/violenttalk.png", "action"),
-			new Action("Die yourself", "images/cross.png", "action"),
-			new Action("Enemy person", "images/redperson.png", "actor"),
-			new Action("Some person", "images/blackperson.png", "actor"),
-			new Action("Spawn location", "images/home.png", "actor"),
-			new Action("Side quest", "images/side_quest.png", "actor"),
-			new Action("Main quest", "images/kill_dragon.png", "actor"),
-			new Action("Remove selected", null, null)
-		];
-		
-		var dict = this.dict = {};
-		actions.forEach(function(action) {
+		var dict = {};
+		Action.All.forEach(function(action) {
 			dict[action] = action;
 		});
 		
-		this.activeAction = actions.first().toString();
+		this.activeAction = Action.All.first().toString();
 		
 		this.showIndices = false;
 		
@@ -51,28 +36,19 @@ define(function(require){
 	    this.gui.add(this, "activeAction", dict).name("Actions");
 		this.gui.add(this, "removeActions").name("Remove all actions");
 		this.gui.add(this, "removeActors").name("Remove all actors");
-		this.gui.add(this, "startReplay").name("Replay all actions");
-		this.gui.add(this, "showIndices").name("Show indices");
 		this.gui.add(this.logic, "showText").name("Show text baloons");
 		
+		
+		this.lastPlayerAction = Action.Nothing;
+		this.lastLevelAction  = Action.Enemy;
+		this.tick             = new Timer(200);
+
 		this.actions = [];
 		this.actors  = [];
-		this.replay  = [];
-		this.replayInterval = new Timer(200);
 		
 		this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this));
-		
 		this.load();
-		this.startReplay();
     }
-	
-	
-	Evermoar.prototype.startReplay = function() {		
-		this.replay = this.actions.clone();
-		this.logic.reset();
-		this.actions.clear();
-	};
-	
 	
 	Evermoar.prototype.removeActions = function() {
 		if(this.actions.length > 0 && confirm("Remove all actions from the map?")) {
@@ -103,7 +79,7 @@ define(function(require){
 	
 	Evermoar.prototype.onLeftDown = function(input) {
 		
-		if(this.activeAction == "Remove selected") {
+		if(this.type == "remove") {
 			var radius = 15;
 			this.actions = this.actions.filter(function(item) {
 				return ! (Math.hypot(item.x - input.x, item.y - input.y) < 10);
@@ -114,9 +90,9 @@ define(function(require){
 			});
 			
 		} else {
-			var instance = this.dict[this.activeAction].clone(input.x, input.y);
+			var instance = Action.Lookup(this.activeAction).clone(input.x, input.y);
 			
-			if(instance.type == "action") {
+			if(instance.category == "action") {
 				this.handleAction(instance);
 				
 			} else {
@@ -132,8 +108,8 @@ define(function(require){
 		var out = {
 			"actions": this.actions.map(function(item) { return item.toObject(); }),
 			"actors":  this.actors.map(function(item) { return item.toObject(); }),
-			"width": this.width,
-			"height": this.height,
+			"width":   this.width,
+			"height":  this.height,
 		};
 		
 		localStorage.setItem("map", JSON.stringify(out));
@@ -181,11 +157,13 @@ define(function(require){
         Game.prototype.update.call(this, dt);
         
 		this.input.cursor(Input.Cursor.POINTER);
-		
-		if(this.replay.length > 0) {
-			if(this.replayInterval.expired()) {
-				this.handleAction(this.replay.shift(), this.actors.clone());
-			}
+
+		if(this.tick.expired()) {
+			var player = this.player.handleAction(this.lastLevelAction);
+			
+			console.log("In: " , this.lastLevelAction + ", out: " , player);
+			
+			this.actions.push(player);
 		}
 		
     };

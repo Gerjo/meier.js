@@ -100,7 +100,7 @@ define(function(require) {
 		
 		if(this.spawn == null) {
 			this.location = this.spawn = actors.reduce(function(p, c) {
-				if(c.text == "Spawn location") {
+				if(c.is(Action.Spawn)) {
 					return new Vec2(c.x, c.y);
 				} else {
 					return p;

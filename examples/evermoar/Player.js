@@ -4,6 +4,7 @@ define(function(require) {
 	var Vec2       = require("meier/math/Vec")(2);
 	var Input      = require("meier/engine/Input");
 	var Key        = require("meier/engine/Key");
+	var Action     = require("./Action");
 
 	Player.prototype = new Entity();
 	function Player() {
@@ -23,30 +24,49 @@ define(function(require) {
 
 	};
 	
+	/// Emmit actions based on encountered actor.
+	Player.prototype.handleAction = function(event) {
+		
+		var response = Action.Nothing;
+		
+		switch(event.type) {
+			case Action.Enemy.type:
+				response = Action.Violence;
+				break;
+			case Action.Nothing.type:
+				response = Action.Violence;
+				break;
+		}
+		
+		return response.clone(this.position.x, this.position.y);
+	};
+	
 	Player.prototype.draw = function(renderer) {
 		Entity.prototype.draw.call(this, renderer);
 		
 		var world = this.game.world;
 		
-		var quantized = new Vec2(
-			parseInt((this.position.x + this.game.width  * 0.5) / world.bucketsize.x),
-			parseInt((this.position.y + this.game.height * 0.5) / world.bucketsize.y)
-		);
+		if( ! world.buckets.empty()) {
+			
+			var quantized = new Vec2(
+				parseInt((this.position.x + this.game.width  * 0.5) / world.bucketsize.x),
+				parseInt((this.position.y + this.game.height * 0.5) / world.bucketsize.y)
+			);
 		
-		var bucket = world.buckets[quantized.y][quantized.x];		
-		var local  = this.toLocal(bucket.position);
+			var bucket = world.buckets[quantized.y][quantized.x];		
+			var local  = this.toLocal(bucket.position);
 		
-		renderer.begin();
+			renderer.begin();
 		
-		renderer.rectangle(
-			local.x,
-			local.y,
-			world.bucketsize.x,
-			world.bucketsize.y
-		);
+			renderer.rectangle(
+				local.x,
+				local.y,
+				world.bucketsize.x,
+				world.bucketsize.y
+			);
 		
-		renderer.fill("red");
-		
+			renderer.fill("red");
+		}
 	};
 		
 	return Player;	
