@@ -16,7 +16,7 @@ define(function(require){
 		this.logger.hideInternals();
 		
 		
-		this.add(new Sprite(0, 0, this.width, this.height, "images/background.png"))
+		this.add(new Sprite(0, this.height/4, this.width, this.height/2, "images/background.png"))
 		this.add(this.world = new World(this.width, this.height));
 		this.add(this.logic = new Logic());
 		this.add(this.player = new Player());
@@ -30,7 +30,7 @@ define(function(require){
 		this.tick             = new Timer(500);
 
 		this.actions    = [Action.Nothing];	// Player sourced
-		this.reactions  = [Action.SideQuest.clone(280, -180)];	// Level sourced		
+		this.reactions  = [Action.SideQuest.clone(280, this.hh * 0.5 - 180)];	// Level sourced		
     }
 	
     Evermoar.prototype.iterate = function(dt) {
@@ -64,20 +64,25 @@ define(function(require){
 		renderer.styled("<bold><10px><yellow>the <hotpink><Courier New><30px>EVERMOAR<10px><yellow> simulator v1", -this.hw + 10, this.hh - 30, "left", "bottom")
 		
 		this.actions.forEach(function(action, i) {
-			renderer.texture(action.texture, action.x, action.y);
+			if(action.texture) {
+				renderer.texture(action.texture, action.x, action.y);
 			
-			if(showIndices){
-				renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
-				renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+				if(showIndices){
+					renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
+					renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+				}
 			}
 		});
 		
 		this.reactions.forEach(function(action, i) {
-			renderer.texture(action.texture, action.x, action.y);
 			
-			if(showIndices){
-				renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
-				renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+			if(action.texture) {
+				renderer.texture(action.texture, action.x, action.y);
+			
+				if(showIndices){
+					renderer.text(i, action.x+1, action.y-1, "black", "center", "middle", "bold 10px monospace");
+					renderer.text(i, action.x, action.y, "white", "center", "middle", "10px monospace");
+				}
 			}
 		});
     };

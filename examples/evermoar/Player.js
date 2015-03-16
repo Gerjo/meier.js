@@ -8,7 +8,7 @@ define(function(require) {
 
 	Player.prototype = new Entity();
 	function Player() {
-		Entity.call(this, 0, 0);
+		Entity.call(this, 0, 100);
 		
 		this.add(new Sprite(0, 0, 16, 16, "images/tux.png"));
 		
@@ -52,7 +52,7 @@ define(function(require) {
 			
 			var quantized = new Vec2(
 				parseInt((this.position.x + this.game.width  * 0.5) / world.bucketsize.x),
-				parseInt((this.position.y + this.game.height * 0.5) / world.bucketsize.y)
+				parseInt((this.position.y + this.game.height * 0.25) / world.bucketsize.y)
 			);
 		
 			var bucket = world.buckets[quantized.y][quantized.x];		

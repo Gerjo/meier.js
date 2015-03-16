@@ -24,7 +24,7 @@ define(function(require) {
 			var w = colors.r.numcolumns;
 			
 			this.bucketsize.x = this.width  / w;
-			this.bucketsize.y = this.height / h;
+			this.bucketsize.y = this.height / h * 0.5;
 			
 			console.log("Rows: " + colors.r.numrows);
 			console.log("Columns: " + colors.r.numcolumns);
@@ -45,7 +45,7 @@ define(function(require) {
 					
 					this.buckets.last().push(new Bucket(
 						col * this.bucketsize.x - this.hw + hsize.x,
-						(row * this.bucketsize.y - this.hh + hsize.y),
+						(row * this.bucketsize.y  + hsize.y),
 						color
 					));
 					

@@ -53,8 +53,8 @@ define(function(require) {
 		new Action("enemy",      "Enemy person", "images/redperson.png", "actor"),
 		new Action("person",     "Some person", "images/blackperson.png", "actor"),
 		new Action("spawn",      "Spawn location", "images/home.png", "actor"),
-		new Action("sideQuest", "Side quest", "images/side_quest.png", "actor"),
-		new Action("mainQuest", "Main quest", "images/kill_dragon.png", "actor"),
+		new Action("sideQuest",  "Side quest", "images/side_quest.png", "actor"),
+		new Action("mainQuest",  "Main quest", "images/kill_dragon.png", "actor"),
 		new Action("nothing",    "nothing", null, null),
 		new Action("remove",     "Remove selected", null, null)
 	];	

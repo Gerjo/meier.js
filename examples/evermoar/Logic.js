@@ -169,7 +169,7 @@ define(function(require) {
 			});
 		}
 		
-		this.brain.draw(renderer, { width: 200, height: 40 });
+		this.brain.draw(renderer, { width: 200, height: 40, y: -this.game.hh });
 		
 	};	
 	
