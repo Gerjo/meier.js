@@ -109,7 +109,7 @@ define(function(require) {
     /// Create a new fuzzy logic rule.
     Fuzzy.prototype.rule = function(rule, callback, name) {
         
-        var r = new Rule(this, rule, callback, name || "no-name");
+        var r = new Rule(this, rule, callback, name || null);
         
         var stack  = [];
         var output = [];
@@ -200,8 +200,6 @@ define(function(require) {
         for(var k in this._terms) {
             if(this._terms.hasOwnProperty(k)) {
                 terms[k] = this._terms[k].shape(this._terms[k].eval(context));
-                
-                //console.log("Reasoning about: " + k + " = " + terms[k] + " (" + this._terms[k].shape.name + ")");    
             }
         }
         
@@ -277,8 +275,12 @@ define(function(require) {
 				last = terms[last];
 			} 
 			
-			// TODO: fix memory leak.
 			rule.history.push(last);
+
+			// Trim to some maximum size.
+			while(rule.history.length > 80) {
+				rule.history.shift();
+			}
 			
 			return last;
             
@@ -391,6 +393,52 @@ define(function(require) {
 				y + hh
 			);
 			renderer.stroke("red", 1);
+			
+			y += h + padding * 1.5;
+		});
+		
+		
+		var x = 0;//-0.5 * renderer.width + hw + padding;
+		var y = -0.5 * renderer.height + hh + padding;
+		
+		
+		this._rules.forEach(function(rule, i) {
+			renderer.begin();
+			renderer.rectangle(x, y, w + padding, h + padding);
+			renderer.fill("white");
+			renderer.stroke("black");
+			
+			renderer.text(rule.name || rule.rule, x, y + hh + 1, "black", "center", "bottom", font);
+			
+			// Y labels
+			renderer.text("0", x - hw - 2, y - hh, "black", "right", "bottom", font);
+			renderer.text("1", x - hw - 2, y + hh, "black", "right", "top", font);
+	
+			renderer.begin();
+			renderer.line( // left to right
+				x - hw, y - hh,
+				x + hw, y - hh
+			);
+			renderer.line( // top to bottom
+				x - hw, y + hh,
+				x - hw, y - hh
+			);
+			renderer.stroke("black");
+			
+			renderer.begin();
+			
+			var span = w / rule.history.length;
+			
+			for(var i = 1; i < rule.history.length; ++i) { 
+				renderer.line(
+					x + (i - 1) * span - hw,
+					y + rule.history[i - 1] * h - hh,
+					x + i * span - hw,
+					y + rule.history[i] * h - hh
+				);
+			}
+			
+			renderer.stroke("red");
 			
 			y += h + padding * 1.5;
 		});
