@@ -308,7 +308,7 @@ Array.prototype.empty = function() {
 /// @return the first found item, or null if nothing found.
 Array.prototype.find = function(callback) {
     var result = null;
-    
+	
     this.every(function(item) {
         var r = callback(item);
         
