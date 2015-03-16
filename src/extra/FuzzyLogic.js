@@ -307,7 +307,7 @@ define(function(require) {
 		var padding = opt.padding || 30;
 
 		var x = -0.5 * renderer.width + hw + padding;
-		var y = -0.5 * renderer.height + hh + padding;
+		var y =  0.5 * renderer.height - hh - padding;
 				
 		var font = "10px monospace";
 		
@@ -394,12 +394,12 @@ define(function(require) {
 			);
 			renderer.stroke("red", 1);
 			
-			y += h + padding * 1.5;
+			y -= h + padding * 1.5;
 		});
 		
 		
-		var x = 0;//-0.5 * renderer.width + hw + padding;
-		var y = -0.5 * renderer.height + hh + padding;
+		var x = -0.5 * renderer.width + hw + w + padding * 2.5;
+		var y =  0.5 * renderer.height - hh - padding;
 		
 		
 		this._rules.forEach(function(rule, i) {
@@ -440,7 +440,7 @@ define(function(require) {
 			
 			renderer.stroke("red");
 			
-			y += h + padding * 1.5;
+			y -= h + padding * 1.5;
 		});
 		
 	};
