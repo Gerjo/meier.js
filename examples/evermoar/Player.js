@@ -51,8 +51,8 @@ define(function(require) {
 		if( ! world.buckets.empty()) {
 			
 			var quantized = new Vec2(
-				parseInt((this.position.x + this.game.width  * 0.5) / world.bucketsize.x),
-				parseInt((this.position.y + this.game.height * 0.25) / world.bucketsize.y)
+				parseInt((this.position.x + this.game.width  * 0.5)  / world.bucketsize.x),
+				parseInt((this.position.y) / world.bucketsize.y)
 			);
 		
 			var bucket = world.buckets[quantized.y][quantized.x];		
