@@ -6,6 +6,7 @@ define(function(require) {
         this.attribute = attribute.split('.');
         this.min       = min;
         this.max       = max;
+		this.recent    = 0;
 
 		this.shape = shape;
 		
@@ -36,24 +37,26 @@ define(function(require) {
                 
             }, context);
             
+            var denominator = val - this.min;   
+			var normalized  = 0;
+			
             // Avoid a divide-by-zero
-            var denominator = val - this.min;            
-            if(denominator == 0) {
-                return shape(0);
-            }
+            if(denominator != 0) {
+	            // Normalize
+	            normalized = denominator / (this.max - this.min);
             
-            // Normalize
-            var normalized = denominator / (this.max - this.min);
+	            // Clamp range.
+	            if(normalized < 0) {
+	                normalized = 0;
+	            } else if(normalized > 1) {
+	                normalized = 1;
+	            }
             
-            // Clamp range.
-            if(normalized < 0) {
-                normalized = 0;
-            } else if(normalized > 1) {
-                normalized = 1;
-            }
-            
-            // Apply membership function
-            return normalized;//shape(normalized);
+			}
+			
+			this.recent = normalized;
+
+            return normalized;
         }
     }
     
@@ -64,6 +67,7 @@ define(function(require) {
         this.callback    = callback;
         this.name        = name;
         this._infix      = null;
+		this.history     = [];
         
         // Cached copy of the recent most score
         this.recentScore = 0;
@@ -270,8 +274,11 @@ define(function(require) {
 			
 			// Just incase the rule only has one variable.
 			if(isNaN(last)) {
-				return terms[last];
+				last = terms[last];
 			} 
+			
+			// TODO: fix memory leak.
+			rule.history.push(last);
 			
 			return last;
             
@@ -280,23 +287,25 @@ define(function(require) {
         var max = math.ArgMax(scores);
         		
 		if(max != -1) {
-			this._rules[max].callback(scores[max]);
+			return this._rules[max].callback(scores[max]);
 		}
 		
-        return this;
+        return null;
     };
     
-	Fuzzy.prototype.draw = function(renderer, context) {
+	Fuzzy.prototype.draw = function(renderer, opt) {
+
+		var w = opt.width  || 200; 		
+		var h = opt.height || 80;  
 		
-		var h = 80;  var hh = h /2;
-		var w = 200; var hw = w/ 2;
+		var hw = w/ 2;
+		var hh = h /2;
 		
 		// Padding
-		var ho = 30;
-		var wo = 30;
-		
-		var x = -0.5 * renderer.width + hw + wo;
-		var y = -0.5 * renderer.height + hh + ho;
+		var padding = opt.padding || 30;
+
+		var x = -0.5 * renderer.width + hw + padding;
+		var y = -0.5 * renderer.height + hh + padding;
 				
 		var font = "10px monospace";
 		
@@ -307,10 +316,10 @@ define(function(require) {
 			var max   = group.first().max;
 			var range = max - min;
 			var title = group.first().attribute;
-			var value = group.first().eval(context);
+			var value = group.first().recent;
 
 			renderer.begin();
-			renderer.rectangle(x, y, w + wo, h + ho);
+			renderer.rectangle(x, y, w + padding, h + padding);
 			renderer.fill("white");
 			renderer.stroke("black");
 			
@@ -357,7 +366,7 @@ define(function(require) {
 			
 			group.forEach(function(term, i) {
 				var color = colors[i % colors.length];
-				renderer.text(term.name + " " + term.shape(value).toFixed(2), x, y + (i-1) * 15, color, "center", "middle", font);
+				renderer.text(term.name + " " + term.shape(value).toFixed(2), x, y + (i-1) * 12, color, "center", "middle", font);
 			});
 			
 			renderer.begin();
@@ -372,7 +381,7 @@ define(function(require) {
 			renderer.stroke("black");
 			
 			// Value from context:
-			var pos   = Math.round((value - 0.5) * (w));
+			var pos   = Math.round((value - 0.5) * w);
 			
 			renderer.begin();
 			renderer.line(
@@ -383,7 +392,7 @@ define(function(require) {
 			);
 			renderer.stroke("red", 1);
 			
-			y += h + ho + ho*0.5;
+			y += h + padding * 1.5;
 		});
 		
 	};
