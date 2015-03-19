@@ -306,7 +306,7 @@ define(function(require) {
 			return rule.eval(terms);            
         }.bind(this));
         
-		// Defuzzification
+		// Defuzzification (MAX-MIN method)
         var max = math.ArgMax(scores);
         
 		if(max != -1) {
