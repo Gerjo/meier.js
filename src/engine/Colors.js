@@ -240,12 +240,10 @@ define(function(require) {
             
         // By RGBA
         } else if(color.startsWith("RGBA(") || color.startsWith("rgba(")) {
-			// 			var channels = color.substring(4, color.length - 1).split(",");
+			var prefix = color.substring(0, color.lastIndexOf(","));
 
-            rgba = color;
-			
-			throw new Error("TODO: implement Colors.Alpha RGBA()");
-            
+			return prefix + "," + alpha + ")";
+
         // By RGB
         } else if(color.startsWith("RGB(") || color.startsWith("rgb(")) {
 			
