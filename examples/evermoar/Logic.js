@@ -17,6 +17,14 @@ define(function(require) {
 		
 		var brain = this.brain = new FuzzyLogic();
 		
+		
+        brain.define("walkentropy", 0, 1, {
+            "not_lost"       : brain.triangle(1/2, 1.0, 1.0),
+            "semi_lost"      : brain.triangle(0.0, 1/2, 1.0),
+            "very_lost"      : brain.triangle(0.0, 0.0, 2/3)
+        });
+		
+		
         brain.define("sinceLastViolentAction", 0, 40 /* unbounded? */, {
             "never_violent"      : brain.triangle(0.0, 1.0, 1.0),
             "somewhat_violent"   : brain.triangle(0.0, 1/2, 1.0),
@@ -38,7 +46,7 @@ define(function(require) {
         brain.define("ticks", 0, 300 /* unbounded? */, {
             "playing_long"        : brain.triangle(0.0, 1.0, 1.0),
             "moderately_long"     : brain.triangle(0.0, 1/2, 1.0),
-            "just_started"        : brain.triangle(0.0, 0.0, 0.25)
+            "just_started"        : brain.triangle(0.0, 0.0, 0.1)
         });
 		
         brain.define("deaths", 0, 10 /* unbounded? */, {
@@ -47,10 +55,17 @@ define(function(require) {
             "never_died"        : brain.triangle(0.0, 0.0, 0.5)
         });
 		
-		
 		brain.subrule("just_started and never_violent", "is_starter");
 		
-		brain.rule("quest_far and never_violent and not is_starter", function() {
+		brain.rule("never_talks and quest_far and very_lost and not is_starter", function() {
+			this.log("I'm lost :(");
+			
+			// Or some other hint to the player.
+			return Action.Person;
+		}.bind(this), "Is lost?");
+		
+		
+		brain.rule("semi_lost and quest_far and never_violent and not is_starter and not very_lost", function() {
 			this.log("Very bored");
 			
 			return Action.Enemy;
@@ -62,7 +77,7 @@ define(function(require) {
 			return Action.Enemy;
 		}.bind(this), "Is somewhat bored?");
 		
-		brain.rule("quest_near or recent_violent or just_started", function() {
+		brain.rule("quest_near or recent_violent or is_starter", function() {
 			this.log("Entertained");
 			
 			return Action.Nothing;
@@ -71,11 +86,14 @@ define(function(require) {
 		this.reset();
 	}
 	
+	Logic.prototype.walkentropy = function() {
+		return this.game.player.walkentropy();
+	};
+	
 	Logic.prototype.sinceLastFriendlyTalk = function() {
 		var type = Action.FriendlyTalk.type;
 		return (type in this.lastEventType) ? (this.ticks - this.lastEventType[type]) : Infinity;
 	};
-	
 	
 	Logic.prototype.sinceLastViolentAction = function() {
 		var type = Action.Violence.type;
@@ -141,8 +159,11 @@ define(function(require) {
 		return out.clone(pos.x, pos.y);
 	};
 	
-	Logic.prototype.update = function() {
+	Logic.prototype.update = function(dt) {
 		
+		this.texts.forEach(function(entry) {
+			entry.pos.y += dt * 100;
+		});
 	};
 	
 	Logic.prototype.log = function(text) {
@@ -151,6 +172,10 @@ define(function(require) {
 				text: text,
 				pos:  this.location
 			});
+		}
+		
+		while(this.texts.length > 10) {
+			this.texts.shift();
 		}
 	};
 	
@@ -164,9 +189,19 @@ define(function(require) {
 			
 				renderer.text(entry.text, entry.pos.x, entry.pos.y, "white", "center", "middle", "100 10px monospace");
 			});
+			
+			
+			var x = 105;
+			var y = -15;
+			
+			this.texts.forEach(function(entry) {
+				renderer.text(entry.text, x, y, "black", "left");
+				
+				y -= 15;
+			});
 		}
 		
-		this.brain.draw(renderer, { width: 200, height: 40, y: -this.game.hh });
+		this.brain.draw(renderer, { width: 200, height: 35, y: -this.game.hh });
 		
 	};	
 	

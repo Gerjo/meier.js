@@ -80,20 +80,20 @@ define(function(require) {
 		
 		this.eval = function(terms) {
             var output   = this._infix.clone();
-            var operands = [];
+            var operators = [];
         
             while(output.length > 0) {
                 var token = output.shift();
             
 				if(token == 'not') {
-					var a = operands.pop();
-					var c = 1 - (isNaN(a) ? terms[a] : a);
+					var a = operators.pop();
+					var c = this.controller.operators.Negate(isNaN(a) ? terms[a] : a);
 					
-					operands.push(c);
+					operators.push(c);
 			
                 } else if(token == 'or' || token == 'and') {
-                    var a = operands.pop();
-                    var b = operands.pop();
+                    var a = operators.pop();
+                    var b = operators.pop();
                     var c = null;
                     
                     if( isNaN(a) && isNaN(terms[a])) {
@@ -110,21 +110,21 @@ define(function(require) {
                     a = isNaN(a) ? terms[a] : a;
                     b = isNaN(b) ? terms[b] : b;
                 
-                    // Execute
+                    // Execute Zadeh operators
                     if(token == 'or') {
-                        c = Math.max(a, b);
+                        c = this.controller.operators.Or(a, b);
                     } else {
-                        c = Math.min(a, b);
+                        c = this.controller.operators.And(a, b);
                     }
                 
                     // Push back into stack for next iteration.
-                    operands.push(c);
+                    operators.push(c);
                 } else {
-                    operands.push(token);
+                    operators.push(token);
                 }
             }
             
-			var last = operands.last();
+			var last = operators.last();
 			
 			// Just incase the rule only has one variable.
 			if(isNaN(last)) {
@@ -143,11 +143,15 @@ define(function(require) {
 		};
     }
     
-    function Fuzzy() {
+    function Fuzzy(opt) {
         this._rules     = [];
 		this._subrules  = [];
         this._terms     = {};
 		this._grouped   = [];
+		
+		opt = opt || {};
+		
+		this.operators = opt.operators || Fuzzy.Operators.Multiply;
     }
     
     /// Define a linguistic term
@@ -506,6 +510,49 @@ define(function(require) {
 		
 		return f;
     };
-    
+	
+	Fuzzy.Operators = {};
+	Fuzzy.Operators.Zadeh = {
+		And: Math.min,
+		Or: Math.max,
+		Negate: function(arg) {
+			return 1.0 - arg;
+		}
+	};
+	
+	
+	Fuzzy.Operators.Multiply = {
+		// The rationale of using a sigmoid: the logic uses multiplication, once a single
+		// zero hits the math - everything will be zero. the sigmoid avoids this.
+		Sigmoid: function(x) {
+			return 1 / (1 + Math.exp(-(x * 10 - 5)));
+		},
+		And: function(x, y) {
+			return Fuzzy.Operators.Multiply.Sigmoid(x) * Fuzzy.Operators.Multiply.Sigmoid(y);
+		},
+		Or: function(x, y) {
+			return 1 -  Fuzzy.Operators.Multiply.Sigmoid(1 - x) *  Fuzzy.Operators.Multiply.Sigmoid(1 - y)
+		},
+		Negate: function(arg) {
+			return 1.0 - arg;
+		}
+	};
+	
+	/* 
+	// TODO: implement sigmoid approach.
+	// Note: if a sigmoid is applied to all arguments, it'll be a 
+	// linear transform, i.e., is useless?
+	Fuzzy.Operators.Sigmoid = {
+		And: function(a, b) { return; },
+		Or: function(a, b) { return; },
+		Negate: function(arg) {
+			return 1.0 - arg;
+		}
+	};
+    */
+	
     return Fuzzy;
 });
+
+
+// NB: Area of trapesoid: (a + b) / 2 * h
