@@ -14,7 +14,18 @@ define(function(require) {
 	
 	HtmlEntity.prototype.html = function(html) {
 		this._root.innerHTML = html;
-	}
+	};
+	
+	HtmlEntity.prototype.text = function(text) {
+		this._root.innerText = text;
+	};
+	
+	HtmlEntity.prototype._onDelete = function() {
+		
+		this.game.htmlContainer.removeChild(this._root);
+		
+		Entity.prototype._onDelete.call(this);
+	};
 	
 	HtmlEntity.prototype._onAdd = function(game) {
 		Entity.prototype._onAdd.call(this, game);
