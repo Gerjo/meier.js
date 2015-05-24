@@ -467,7 +467,7 @@ define(function(require) {
         /////////////////////////////////////////////////////////////////////
         if(isSquare && rows == 2) {
             M.prototype.determinant = function() {
-                return this._[0].clone().multiply(this._[3]).multiply(this._[1]).multiply(this._[2]); 
+                return this._[0] * this._[3] - this._[1] * this._[2]; 
             };
         } else if(isSquare && rows == 3) {
             M.prototype.determinant = function() {
