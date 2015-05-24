@@ -248,7 +248,7 @@ define(function(require) {
 
 
         if(this.game.showDebug) {        
-            var color = Color.Alpha(Color.Red, 0.4);
+            var color = Color.Alpha(Color.Red, 1.0);
 
             // Draw each waypoint
             renderer.begin();
