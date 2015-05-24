@@ -21,7 +21,7 @@ define(function(require){
         this.setAutoClear(false);
 
         
-        this.setLowFps(10);
+        this.setLowFps(5);
         this.setLowFps(1);
         
         // Function that shall be used
@@ -52,7 +52,7 @@ define(function(require){
         this.gui = new dat.GUI();
         this.gui.width = 300;
         
-        this.classifierName = "qda";
+        this.classifierName = "lda";
     	this.gui.add(this, 'classifierName', ["lda", "qda", "knn (k=1)"]).
                 name("Specify Classifier").
                 onChange(this.onChange.bind(this));
