@@ -152,8 +152,6 @@ define(function(require) {
                     }
                 
                     a = c;
-                    
-                    debugger;
                 }
             
                 renderer.stroke("darkgrey", 1);
