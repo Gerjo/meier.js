@@ -469,27 +469,15 @@ define(function(require) {
             M.prototype.determinant = function() {
                 return this._[0].clone().multiply(this._[3]).multiply(this._[1]).multiply(this._[2]); 
             };
-        } else if(false && isSquare && rows == 3) {
+        } else if(isSquare && rows == 3) {
             M.prototype.determinant = function() {
-                return (
-                        this._[At(0,0)].clone().multiply(this._[At(1,1)]).multiply(this._[At(2,2)])
-                    .add( 
-                        this._[At(0,1)].clone().multiply(this._[At(1,2)]).multiply(this._[At(2,0)]) 
-                    )
-                    .add( 
-                        this._[At(0,2)].clone().multiply(this._[At(1,0)]).multiply(this._[At(2,1)]) 
-                    )
-                    .subtract( 
-                        this._[At(0,2)].clone().multiply(this._[At(1,1)]).multiply(this._[At(2,0)]) 
-                    )
-                    .subtract( 
-                        this._[At(0,1)].clone().multiply(this._[At(1,0)]).multiply(this._[At(2,2)]) 
-                    )
-                    .subtract( 
-                        this._[At(0,0)].clone().multiply(this._[At(1,2)]).multiply(this._[At(2,1)]) 
-                    )
-                );
-            };
+                          return (this._[At(0,0)] * this._[At(1,1)] * this._[At(2,2)]) +
+                                 (this._[At(0,1)] * this._[At(1,2)] * this._[At(2,0)]) +
+                                 (this._[At(0,2)] * this._[At(1,0)] * this._[At(2,1)]) -
+                                 (this._[At(0,2)] * this._[At(1,1)] * this._[At(2,0)]) -
+                                 (this._[At(0,1)] * this._[At(1,0)] * this._[At(2,2)]) -
+                                 (this._[At(0,0)] * this._[At(1,2)] * this._[At(2,1)]);
+                      };
         } else if(isSquare) {
             M.prototype.determinant = function() {
                 
@@ -769,31 +757,17 @@ define(function(require) {
             
             return m;
         };
+
         
         M.prototype.trace = function() {
             if( ! isSquare) {
-                throw new Error("Mat::trace is only defined for n*n square matrices.");
+                throw new Error("Trace is only defined for n*n square matrices.");
             }
             
-            var r = this._[0].identity('+');
+            var r = 0;
             
-            for(var i = this.numrows - 1; i >= 0; --i) {
-                r = r.add(this._[At(i, i)]);
-            }
-            
-            return r;
-        };
-        
-        M.prototype.traceProduct = function() {
-            if( ! isSquare) {
-                throw new Error("Mat::traceProduct is only defined for n*n square matrices.");
-            }
-            
-            
-            var r = this._[0].clone();
-            
-            for(var i = this.numrows - 2; i >= 0; --i) {
-                r = r.multiply(this._[At(i, i)]);
+            for(var i = this.numrows - 1; i > 0; --i) {
+                r += this._[At(i, i)];
             }
             
             return r;
@@ -807,7 +781,7 @@ define(function(require) {
             
             // Works due to equal length
             for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
-                this._[i] = this._[i].add(m._[i]);
+                this._[i] += m._[i];
             }
             
             return this;
@@ -821,35 +795,37 @@ define(function(require) {
             
             // Works due to equal length
             for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
-                this._[i] = this._[i].subtract(m._[i]);
+                this._[i] -= m._[i];
             }
             
             return this;
         };
         
+        
         M.prototype.product = function(o) {
-            
+            //if(this.numrows !== o.numcolumns) {
             if(this.numrows !== o.numrows && o.numrows !== this.numcolumns) {
                 throw new Error("Cannot multiply, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
                 "] and [" + o.numrows + "x" + o.numcolumns + "]");
             }
          
-            var m = Builder(this.numrows, o.numcolumns).Make(this._[0]);
-            
+            var m = new (Builder(this.numrows, o.numcolumns))();
+
             for(var row = 0; row < m.numrows; ++row) {
                 for(var col = 0; col < m.numcolumns; ++col) {
-                    
-                    m._[row * m.numcolumns + col] = this._[0].identity('+');
+                    m._[row * m.numcolumns + col] = 0;
                     
                     for(var k = 0; k < this.numcolumns; ++k) {
+                        m._[row * m.numcolumns + col] += (
+                            this._[At(row, k)] * o.at(k, col)
+                        );
                         
-                        m._[row * m.numcolumns + col] += this._[At(row, k)] * o.at(k, col)
-                                                
-                        // Broken:
-                        //m._[row * m.numcolumns + col].add (
-                            //this._[At(row, k)].clone().multiply( o.at(k, col) )
-                        //);
+                        if(isNaN(m._[row * m.numcolumns + col])) {
+                            //console.log("Error: col:",col, "k:",k);
+                        }
+                        
                     }
+                    
                 }
             }
             
