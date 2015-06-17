@@ -19,12 +19,12 @@ define(function(require) {
         },
 
         /// Radians to multiples of pi.
-        ToPiMultiples:function(radians) {
+        ToPiMultiples: function(radians) {
             return radians / Math.PI;
         },
 
         /// Map a [0..PI, -PI..0] range to [0...2PI]
-        ToAbsoluteRadians:function(a) {
+        ToAbsoluteRadians: function(a) {
             var r = a;
             
             if(r < 0) {
