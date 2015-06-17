@@ -28,11 +28,7 @@ var Meier = (function() {
             if(requireTagAdded === false) {
                 path = arg;
                 
-                // Load my hacks the old fashioned way:
-                //document.write('<script src="' + path + '/aux/JsExtensions.js"></sc' + 'ript>');
-                
-                
-                // Load requireJS slightly more modern:
+                // Load requireJS
                 var script = document.createElement("script");
                 script.src = path + '/contrib/require.js';
             
