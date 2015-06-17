@@ -24,7 +24,7 @@ define(function(require) {
     ///
     function Rectangle(a, b, c, d) {
         
-        if(a._ && a.x && b._ && b.x) {
+        if(a._ && b._) {
             this.min = a;
             this.max = b;
         } else {
