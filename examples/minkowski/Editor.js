@@ -54,9 +54,7 @@ define(function(require){
         
     };
     
-    Editor.prototype.update = function(dt) {        
-        // Cursor stuff is tricky. There are multiple entities
-        // all trying to control the cursor.
+    Editor.prototype.update = function(dt) {
         if(this.containsPoint(this.input)) {
             this.input.cursor(Input.Cursor.FINGER);
         }
