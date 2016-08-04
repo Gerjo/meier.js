@@ -227,7 +227,7 @@ define(function(require) {
             event = event || window.event;
             
             // GUI components take priority.
-            if(event.srcElement.nodeName.toLowerCase() == "input") {
+            if(event.srcElement && event.srcElement.nodeName.toLowerCase() == "input") {
                 return true;
             }
             
@@ -242,7 +242,7 @@ define(function(require) {
             event = event || window.event;
            
             // GUI components take priority.
-            if(event.srcElement.nodeName.toLowerCase() == "input") {
+            if(event.srcElement && event.srcElement.nodeName.toLowerCase() == "input") {
                 return true;
             }
            
