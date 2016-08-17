@@ -113,7 +113,7 @@ define(function(require) {
     /// [Rectangle]
     /// [Number, Number, Number, Number]
     /// [Vector, Number, Number]
-    Renderer.prototype.rectangle = function(a, b, c, d) {
+    Renderer.prototype.rectangle = Renderer.prototype.rect = function(a, b, c, d) {
         
         var x, y, h, w;
         
