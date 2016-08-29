@@ -169,13 +169,14 @@ define(function(require) {
             
             var cotan = 1.0 / Math.tan(fovy / 2.0);
     
-                var m = new M([
-                           cotan / aspect, 0.0, 0.0, 0.0,
-                           0.0, cotan, 0.0, 0.0,
-                           0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,
-                           0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0
-                ]);
-                return m;
+            var m = new M([
+                       cotan / aspect, 0.0, 0.0, 0.0,
+                       0.0, cotan, 0.0, 0.0,
+                       0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,
+                       0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0
+            ]);
+			
+            return m;
             
             /*
             var fn = far - near;
@@ -191,7 +192,6 @@ define(function(require) {
                 0,  0, -b,  0
             ]);
             */
-            return m;
         };
         
         /// Project on an axis.
