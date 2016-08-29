@@ -41,6 +41,12 @@ define(function(require) {
             this.position = new Vector(0, 0);
         }
     }
+	
+	/// Append a new coordinate.
+	Polygon.prototype.add = function(coordinate) {
+		this.vertices.push(coordinate);
+		return this;
+	};
     
     /// Determine if this polygon is concave.
     /// Runs in at most O(n).
