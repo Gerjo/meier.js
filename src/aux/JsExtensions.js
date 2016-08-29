@@ -252,6 +252,18 @@ Array.prototype.flatten = function() {
 
 };
 
+/// Remove certain item from array.
+Array.prototype.remove = function(entry) {
+	
+	for(var k in this) {
+		if(this[k] == entry) {
+			this.splice(k, 1);			
+		}
+	}
+	
+	return this;
+};
+
 /// Merge an array into this array without creating a
 /// copy. Similar to .concat() but without the copy.
 Array.prototype.merge = function(array) {
