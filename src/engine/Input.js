@@ -270,6 +270,7 @@ define(function(require) {
     Input.prototype.updatePosition = function(event) {
         var x, y;
         
+        var x = 0, y = 0;
         // Chrome:
         if(event.x) {
             x = event.x - this._container.offsetLeft + window.pageXOffset;
@@ -296,6 +297,7 @@ define(function(require) {
             //console.error("Input::updatePosition Unable to determine X and Y coordinates.");
         }
         
+		// Align click nicer with cursor.
         x -= 2;
         y -= 2;
     
