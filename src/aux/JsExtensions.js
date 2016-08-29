@@ -134,7 +134,7 @@ if(typeof JSON.parse == "undefined") {
 }
 
 /// Compute the hypotenuse of a right-angled triangle.
-Math.hyp = Math.hyp = function(a, b) {
+Math.hyp = Math.Hyp = function(a, b) {
     return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
 }
 /// Parse JSON strings without silly exceptions that suggest
