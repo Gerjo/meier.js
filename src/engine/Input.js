@@ -268,28 +268,53 @@ define(function(require) {
     };
 
     Input.prototype.updatePosition = function(event) {
-        var x, y;
-        
+		
+		var left = this._container.offsetLeft;
+		var top  = this._container.offsetTop;
+		
+		
+		// Compute absolute offset. 'offsetLeft' property is computed to the nearest
+		// absolute parent. This logic finds those parents and adds their offset.
+		// TODO: contemplate if this should be run just once.
+		for(var node = this._container.parentNode; node; node = node.parentNode) {
+
+			// Early out. Anything higher than body doesn't have sensible computed style.
+			if(node.nodeName == "BODY") {
+				break;
+			}
+			
+			// Access style as defined in external CSS files.
+			var style = window.getComputedStyle(node);
+			
+			if(node.style && style.position == "absolute") {
+				//console.log("Adding: " + left + " + " + node.offsetLeft + " = " + (left + node.offsetLeft));	
+
+				left += node.offsetLeft;
+				top  += node.offsetTop;
+			}
+		}
+		
         var x = 0, y = 0;
+	
         // Chrome:
         if(event.x) {
-            x = event.x - this._container.offsetLeft + window.pageXOffset;
-            y = event.y - this._container.offsetTop  + window.pageYOffset;
-    
-        // Internet Explorer:
-        } else if(event.clientX) {
-            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - this._container.offsetLeft;
-            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - this._container.offsetTop;
+            x = event.x - left + window.pageXOffset;
+            y = event.y - top  + window.pageYOffset;
     
         // Firefox:
         } else if(event.pageX) {
-            x = event.pageX - this._container.offsetLeft;
-            y = event.pageY - this._container.offsetTop;
+            x = event.pageX - left;
+            y = event.pageY - top;
+    
+	    // Internet Explorer:
+        } else if(event.clientX) {
+            x = event.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft) - left;
+            y = event.clientY + (document.body.scrollTop || document.documentElement.scrollTop) - top;
     
         // Android 2.3 browser:
         } else if(event.changedTouches && event.changedTouches[0] && event.changedTouches[0].pageX) {
-            x = event.changedTouches[0].pageX;
-            y = event.changedTouches[0].pageY;
+            x = event.changedTouches[0].pageX - left;
+            y = event.changedTouches[0].pageY - top;
     
         // Either an error, or a coordinate was 0, which evaluates to false.
         } else {
