@@ -35,9 +35,9 @@ define(function(require) {
         this.hh               = this.height * 0.5;
         this._rotation        = 0;
         this._translate       = new Vector(0, 0);
-    
+		    
         canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
-        canvas.style.position = "absolute";
+       // canvas.style.position = "absolute";
     
         container.appendChild(canvas);
     }
