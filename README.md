@@ -1,3 +1,5 @@
+Most cool things are contained in the _broken_ branch. Most development now takes place in a private C++ port. Turns out C++ is better at crunching numbers (well, the optimizer makes more efficient code, in my benchmarks).
+
 meier.js
 ========
 
