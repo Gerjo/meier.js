@@ -274,7 +274,9 @@ define(function(require) {
     Entity.prototype._onAdd = function(game) {
         this.game  = game;
         this.input = game.input;
-        this.parent = game;
+        
+        // Doesn't work due to matrix recursion.
+        //this.parent = game;
 		
         this._registerEvents();
         
