@@ -232,7 +232,8 @@ define(function(require) {
     Entity.prototype._onAdd = function(game) {
         this.game  = game;
         this.input = game.input;
-        
+        this.parent = game;
+		
         this._registerEvents();
         
         // User defined onAdd function:
