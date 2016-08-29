@@ -69,8 +69,9 @@ define(function(require) {
     function Input(container, width, height, isTablet) {
         
         // Always center the initial mouse position.
-        Vector.call(this, width * 0.5, height * 0.5);
+        Vector.call(this, 0, 0);
         
+		
         this.isTablet   = isTablet;
         this._container = container;
         this._size      = new Vector(width, height);
