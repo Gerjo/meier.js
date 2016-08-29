@@ -124,7 +124,7 @@ define(function(require) {
         
         this._numberConnected = 0;
         
-        this.hasSupport = (window.navigator.webkitGamepads || window.navigator.webkitGetGamepads);
+        this.hasSupport = (window.navigator.getGameapads || window.navigator.webkitGamepads || window.navigator.webkitGetGamepads);
     }
     
     /// Shorthand method.
@@ -161,7 +161,7 @@ define(function(require) {
         }
         
         // Re-acquire gamepad state:
-        var pads = window.navigator.webkitGamepads || window.navigator.webkitGetGamepads();
+        var pads = window.navigator.webkitGamepads || window.navigator.getGamepads() || window.navigator.webkitGetGamepads();
         
         this._numberConnected = 0;
         

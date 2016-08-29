@@ -3,6 +3,7 @@ define(function(require) {
     var Angle   = require("meier/math/Angle");
     var M       = require("meier/math/Mat");
     var Vector2 = require("meier/math/Vec")(2);
+    var math    = require("meier/math/Math");
     
     // Some operations require a canvas to create a so-called "ImageData"
     // object. Rather than introducing a dependancy on Renderer, a private
@@ -28,7 +29,7 @@ define(function(require) {
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
         Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
         
-        // The following are gradient based operators
+        // The following are gradient-based operators (come in pairs)
         SobelX: new (M(3,3))([1, 0, -1, 2, 0, -2, 1, 0, -1]),
         SobelY: new (M(3,3))([1, 2, 1, 0, 0, 0, -1, -2, -1]),        
         PrewittX: new (M(3,3))([-1, 0, 1, -1, 0, 1, -1, 0, 1]),
@@ -38,6 +39,36 @@ define(function(require) {
         ScharrX: new (M(3,3))([3, 10, 3, 0, 0, 0, -3, -10, -3]),
         ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3])
     };
+    
+    
+    
+    RawTexture.fromMatrix = RawTexture.FromMatrix = function(r, g, b, a) {
+        
+        var width  = r.numcolumns;
+        var height = r.numrows;
+        
+        if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
+            NOTICE("Creating non power of two texture (" + width + "x" + height + ") using RawTexture.FromMatrix");
+        }
+        
+        var img    = context.createImageData(width, height);
+        
+        for(var i = 0, j = 0; i < img.data.length; i += 4, ++j) {
+            var red = r._[j];
+            
+            img.data[i + 0] = red;
+                        
+            // Use the given channel, or switch to "red" (grey scale)
+            img.data[i + 1] = (g) ? g._[j] : red;
+            img.data[i + 2] = (b) ? b._[j] : red;
+            
+            // Alpha must be present, or "255" (no alpha) is used
+            img.data[i + 3] = (a) ? a._[j] : 255;
+        }
+                
+        return new RawTexture(img, null);
+    };
+    
     
     RawTexture.prototype = new Texture(null);
     function RawTexture(url, callback) {
@@ -56,7 +87,8 @@ define(function(require) {
         if(typeof url == "string") {
             this._getRawByUrl(url);
             
-        } else if(url instanceof ImageData) {
+        // Load from ImageData
+        } else if(url instanceof ImageData) { 
             this._raw      = url;
             this.width     = this._raw.width;
             this.height    = this._raw.height;
@@ -93,7 +125,9 @@ define(function(require) {
         return b;
     };
     
+    /// A not working edge detection method,
     RawTexture.prototype.canny = function(xKernel, yKernel) {
+        NOTICE("RawTexture.canny doesn't work.");
         xKernel = xKernel || RawTexture.Matrices.SobelX;
         yKernel = yKernel || RawTexture.Matrices.SobelY;
         
@@ -225,15 +259,7 @@ define(function(require) {
             data.data[i] = this._raw.data[i];
         }
         
-        var texture = new Texture(null);
-        texture.hw = this.hw;
-        texture.hh = this.hh;
-        texture.height = this.height;
-        texture.width  = this.width;
-        texture._raw = data;
-        texture._isLoaded = true;
-        
-        return texture;
+        return new RawTexture(data);
     };
     
     /// Turn this image into a luminance representation. Leaves alpha
@@ -313,6 +339,12 @@ define(function(require) {
         return this;
     };
     
+    /// Apply a gaussian filter (low-pass) to the current image
+    /// 
+    /// @param {x} the x direction.
+    /// @param {y} the y direction.
+    /// @param {sigma} optional standard deviation. Defaults to 2.
+    /// @return the modified (blurred) image.
     RawTexture.prototype.gaussian = function(x, y, sigma) {
         
         // Create a kernel matrix
@@ -374,6 +406,15 @@ define(function(require) {
         return gradients;
     };
     
+    /// Apply two convolution kernels and determine the magnitude
+    /// of the resulting gradient.
+    ///
+    /// @param {x} first matrix kernel
+    /// @param {y} second matrix kernel
+    /// @see prewitt
+    /// @see sobel
+    /// @see robertsCross
+    /// @see scharr
     RawTexture.prototype.gradientMagnitude = function(x, y) {
         
         // Apply the kernel to each texture
@@ -486,6 +527,9 @@ define(function(require) {
     /// @todo We're using two layers with callbacks, that is quite fragile and
     /// counter-intuitive. Figure a system with less callbacks.
     RawTexture.prototype._getRawByUrl = function(url) {
+        
+        this._url = url;
+        
         var texture = new Texture(url, function(texture) {
             
             // Use the helper canvas
@@ -497,7 +541,7 @@ define(function(require) {
         
             // Retrieve the binary data
             var data = context.getImageData(0, 0, canvas.width, canvas.height);
-                
+            
             // Update internals
             this._raw      = data;
             this.width     = data.width;
@@ -513,6 +557,54 @@ define(function(require) {
         }.bind(this));
     };
     
+    /// Apply a per-channel classification based on an
+    /// optional threshold. The resulting image will have
+    /// either 0 (off) or 254 (on) as value per channel per pixel.
+    ///
+    /// @param {threshold} optional threshold figure. Defaults to 128
+    /// @return the modified image
+    RawTexture.prototype.binary = function(threshold) {
+        threshold = threshold || 128;
+        
+        for(var i = this._raw.data.length-1; i >= 0; --i) {
+            if(this._raw.data[i] > threshold) {
+                this._raw.data[i] = 254;
+            } else {
+                this._raw.data[i] = 0;
+            }
+        }
+        
+        return this;
+    };
+    
+    /// Split this image into 4 matrices, one for each color channel.
+    /// 
+    /// @return An object with 4 matrices as properties (r, g, b, a)
+    RawTexture.prototype.asMatrix = function() {
+
+        var source    = this._raw.data;
+        var width     = this._raw.width;
+        var height    = this._raw.height;
+    
+        var r = new (M(height, width))();
+        var g = new (M(height, width))();
+        var b = new (M(height, width))();
+        var a = new (M(height, width))();
+
+        for(var i = 0, j = 0; i < source.length; i += this._channels, ++j) {
+            r._[j] = source[i + 0];
+            g._[j] = source[i + 1];
+            b._[j] = source[i + 2];
+            a._[j] = source[i + 3];
+        };
+        
+        return {
+            r: r,
+            g: g,
+            b: b,
+            a: a
+        };
+    };
     
     return RawTexture;
 });

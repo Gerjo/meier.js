@@ -70,12 +70,12 @@ define(function(require) {
         
         // Always center the initial mouse position.
         Vector.call(this, 0, 0);
-        
-		
-        this.isTablet   = isTablet;
-        this._container = container;
-        this._size      = new Vector(width, height);
-        this._keystates = {};
+
+        this.isTablet     = isTablet;
+        this._container   = container;
+        this._size        = new Vector(width, height);
+        this._keystates   = {};
+        this._mouseStates = {};
     
         this.gamepads   = new Gamepads(this);
         
@@ -210,6 +210,9 @@ define(function(require) {
             } else if(event.which === 1) {
                 this.trigger(Input.Events.LEFT_DOWN, event);
             }
+            
+            this._mouseStates[event.which] = true;
+            
         }.bind(this);
     
         container.onmouseup = function(event) {
@@ -222,13 +225,17 @@ define(function(require) {
             } else if(event.which === 1) {
                 this.trigger(Input.Events.LEFT_UP, event);
             }
+            
+            this._mouseStates[event.which] = false;
         }.bind(this);
         
         eventContainer.onkeydown = function(event) {
             event = event || window.event;
-            
+			            
             // GUI components take priority.
             if(event.srcElement && event.srcElement.nodeName.toLowerCase() == "input") {
+                return true;
+            } else if(event.target && event.target.nodeName.toLowerCase() == "input") {
                 return true;
             }
             
@@ -244,6 +251,8 @@ define(function(require) {
            
             // GUI components take priority.
             if(event.srcElement && event.srcElement.nodeName.toLowerCase() == "input") {
+                return true;
+            } else if(event.target && event.target.nodeName.toLowerCase() == "input") {
                 return true;
             }
            
@@ -262,6 +271,14 @@ define(function(require) {
         // Restore default cursor, it's up to the application
         // to repeatedly set a different state.
         this.cursor(Input.Cursor.DEFAULT);
+    };
+
+    Input.prototype.isLeftDown = function() {
+        return this._mouseStates[1] === true;
+    };
+    
+    Input.prototype.isRightDown = function() {
+        return this._mouseStates[3] === true;
     };
 
     Input.prototype.cursor = function(cursortype) {
@@ -378,14 +395,15 @@ define(function(require) {
     /// Call back, return false to halt event bubble, e.g., menu blocks game.
     /// priority, higher gets called first. Defaults to highest.
     Input.prototype.subscribe = function(eventtype, callback, priority) {
-        priority = priority || this.highest(eventtype);
     
-        if(eventtype > Input.Events.COUNT) {
+        if(eventtype > Input.Events.COUNT || eventtype < 0 || eventtype === null || eventtype === undefined) {
             throw new Error("Unknown mouse event.");
         }
+
+        priority = priority || this.highest(eventtype);
     
         var callbackBundle = new PriorityCallback(priority, callback, eventtype);
-    
+        
         this.listeners[eventtype].push(callbackBundle);
     
         // Re-sort, descending:

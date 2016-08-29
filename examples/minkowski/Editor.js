@@ -50,17 +50,16 @@ define(function(require){
         
         if(contains != this._containsMouse) {
             this._containsMouse = contains;
-            
-            
-            // Cursor stuff is tricky. There are multiple entities
-            // all trying to control the cursor.
-            if(contains) {
-                input.cursor(Input.Cursor.FINGER);
-            } else {
-                input.cursor(Input.Cursor.DEFAULT);
-            }
         }
         
+    };
+    
+    Editor.prototype.update = function(dt) {        
+        // Cursor stuff is tricky. There are multiple entities
+        // all trying to control the cursor.
+        if(this.containsPoint(this.input)) {
+            this.input.cursor(Input.Cursor.FINGER);
+        }
     };
     
     Editor.prototype.onLeftDown = function(input) {

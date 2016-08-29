@@ -136,7 +136,7 @@ define(function(require){
         if(this._showInternals === true) {
             this.log("FPS", Math.ceil(1 / dt) + "/" + this._game._fps);
             this.log("Clock", Math.floor(this._game.clock.peek() * 0.001));
-            this.log("Listeners", "#" + this._game.input.countListeners());
+            //this.log("Listeners", "#" + this._game.input.countListeners());
     
             // This probably only works in Chrome
             if(window.performance && window.performance.memory) {

@@ -62,6 +62,41 @@ define(function(require) {
         this._entities = [];
     }
     
+    /// Change visibility state
+    Entity.prototype.hide = function() {
+        this.visible = false;
+        
+        return this;
+    };
+    
+    /// Change visibility state
+    Entity.prototype.show = function() {
+        this.visible = true;
+        
+        return this;
+    };
+    
+    /// Retrieve visual visability state
+    Entity.prototype.isVisible = function() {
+        return this.visible;
+    };
+    
+    /// Retrieve a child entity at a given offset.
+    Entity.prototype.get = function(n) {
+        return this._entities[n] || null;
+    };
+    
+    /// Rettrieve first add child entity.
+    Entity.prototype.first = function() {
+        return this._entities.first() || null;
+    };
+    
+    /// Retrieve last added child entity.
+    Entity.prototype.last = function() {
+        return this._entities.last() || null;
+    };
+    
+    /// Add a new child entity
     Entity.prototype.add = function(entity) {
         if(entity instanceof Entity) {
             this._entities.push(entity);
@@ -70,7 +105,7 @@ define(function(require) {
             // Only call when a parent is available. Else it'll be 
             // called later on.
             if(this.game) {
-                entity._onAdd(this);
+                entity._onAdd(this.game);
             }
         } else {
             throw new Error("Game::add is only meant for entities.");
@@ -137,8 +172,14 @@ define(function(require) {
     };
     
     Entity.prototype.containsPoint = function(point) {
-        // TODO: recurse.
-        return PointInObb(point, this.position, this.width * this.scale, this.height * this.scale, this.rotation);
+        //var world = this.toWorld(this.position);
+        var world = this.position;
+        
+        if(this.parent) {
+            world = this.parent.toWorld(world);
+        }
+        
+        return PointInObb(point, world, this.width * this.scale, this.height * this.scale, this.rotation);
     };
     
     Entity.prototype._registerEvents = function() {
@@ -291,6 +332,12 @@ define(function(require) {
     /// 0   1  -t.y  .  sin   cos  1  v.y
     /// 0   0     1     0     0    1    1
     Entity.prototype.toWorld = function(local) {
+        
+        // No argument given, assume position of this entity instead.
+        if( ! local) {
+            local = this.position;
+        }
+        
         var t = this.movingToFixed();
         
         var e = this.parent;
@@ -306,6 +353,27 @@ define(function(require) {
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.movingToFixed = function() {
+        var r, t;
+
+        // No translation
+        var isNull = this.position.isNull();
+
+        // No rotation
+        var noRotation = this.rotation == 0;
+
+        // No transform at all, return identity
+        if(noRotation && isNull) {
+            return Matrix.CreateIdentity();
+
+        // No rotation, just translation
+        } else if(noRotation) {
+            return Matrix.CreateTranslation(this.position);
+            
+        // No translation, just translation
+        } else if(isNull) {
+            return Matrix.CreateXoY(this.rotation);
+        }
+        
         var r = Matrix.CreateXoY(this.rotation);
         var t = Matrix.CreateTranslation(this.position);
         
@@ -315,6 +383,7 @@ define(function(require) {
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.fixedToMoving = function() {
+
         var r = Matrix.CreateXoY(-this.rotation);
         var t = Matrix.CreateTranslation(new Vector(-this.position.x, -this.position.y));
         
@@ -328,9 +397,7 @@ define(function(require) {
         var t = this.fixedToMoving();
         
         var e = this.parent;
-        
-        //console.log(t.pretty());
-        
+                
         while(e) {
             t = t.product(e.fixedToMoving());
             e = e.parent;
@@ -376,6 +443,7 @@ define(function(require) {
         return this.position.x + (this.width * 0.5 * this.scale);
     };
     
+    /// Don't use this unless you know what you are doing.
     Entity.NaiveIntersection = function(entity, b) {
         var ehw = entity.width  * 0.5;
         var ehh = entity.height * 0.5;        

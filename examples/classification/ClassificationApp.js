@@ -1,6 +1,6 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
-    var Color  = require("meier/aux/Colors");
+    var Color  = require("meier/engine/Colors");
     var Random = require("meier/math/Random");
     var Grid   = require("meier/prefab/Grid");
     var dat    = require("meier/contrib/datgui");
@@ -18,7 +18,11 @@ define(function(require){
         this.logger.right().bottom();
         
         // We'll clear the canvas ourselves
-        this.setAutoClear(false).setFps(5);
+        this.setAutoClear(false);
+
+        
+        this.setLowFps(5);
+        this.setLowFps(1);
         
         // Function that shall be used
         this.classifier = null;
@@ -48,7 +52,7 @@ define(function(require){
         this.gui = new dat.GUI();
         this.gui.width = 300;
         
-        this.classifierName = "qda";
+        this.classifierName = "lda";
     	this.gui.add(this, 'classifierName', ["lda", "qda", "knn (k=1)"]).
                 name("Specify Classifier").
                 onChange(this.onChange.bind(this));

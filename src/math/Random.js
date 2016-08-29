@@ -15,9 +15,24 @@ define(function(require) {
     
     function Random(min, max, asFloat) {
         if(asFloat === true) {
-            return Random.FloatInRange(min, max);
+            return mt.nextFloat() * (max - min) + min; //Random.FloatInRange(min, max);
         } else {
-            return Random.IntegerInRange(min, max);
+            
+            if(min > max) {
+                var tmp = max;
+                max = min;
+                min = tmp;
+            }
+            
+            var range = max - min;
+            
+            var max   = Math.floor(Math.pow(2, 32) / range) * range;
+            
+            var n;
+            
+            while((n = mt.nextInteger()) > max);
+            
+            return n % range + min;
         }
     }
     
@@ -38,19 +53,17 @@ define(function(require) {
         return mt.nextBoolean();
     };
     
-    /// Depricated.
-    Random.Range = function(min, max) {
-        console.log("Warning:using severely deprecated method. Use Random(min, max, true); instead.");
-        return mt.nextFloat() * (max - min) + min;
-    };
-    
     /// Depricated. Use Random(min, max, true);
     Random.FloatInRange = function(min, max) {
+        NOTICE("Warning:using severely deprecated 'FloatInRange' method. Use Random(min, max, true); instead.");
+        
         return mt.nextFloat() * (max - min) + min;
     };
 
     /// Depricated. Use Random(min, max);
     Random.IntegerInRange = function(min, max) {
+        NOTICE("Warning:using severely deprecated 'IntegerInRange' method. Use Random(min, max); instead.");
+        
         return Math.round(mt.nextFloat() * (max - min) + min);
     };
     

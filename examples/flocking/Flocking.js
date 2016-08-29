@@ -35,14 +35,11 @@ define(function(require) {
     	this.gui.add(this, 'seperationWeight', 0, 2, 0.01);
     	this.gui.add(this, 'cohesionWeight', 0, 2, 0.01);
     	this.gui.add(this, 'alignmentWeight', 0, 2, 0.01);
-        this.gui.add(this, 'mouseRepel', 0, 2, 0.01);
+        this.gui.add(this, 'mouseRepel', -2, 2, 0.01);
     	this.gui.add(this, 'viewRadius', 0, this.hw);
     	this.gui.add(this, 'mouseRadius', 0, this.hw);
     	this.gui.add(this, 'full360view', 0, 1);
     	this.gui.add(this, 'speed', 0, 10);
-        
-        
-        
         
         
         this.lines = [];
@@ -75,7 +72,7 @@ define(function(require) {
         }
         
         while(c < this.numEntities -1) {
-            this.add(new Boid(Random.Range(-this.hw, this.hw), Random.Range(-this.hh, this.hh)));
+            this.add(new Boid(Random(-this.hw, this.hw), Random(-this.hh, this.hh)));
             ++c;
         }
         
@@ -97,8 +94,6 @@ define(function(require) {
             this._entities.forEach(function(entity) {
                 if(entity !== self) {
                     if(entity.position.distanceSQ(self.position) < range) {
-                        
-                        //var dot = self.velocity.clone().normalize().dot(entity.velocity.clone().normalize());
                         
                         var dot = self.velocity.dot(entity.position.clone().subtract(self.position));
                         

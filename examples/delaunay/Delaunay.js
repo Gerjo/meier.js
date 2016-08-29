@@ -18,7 +18,7 @@ define(function(require) {
         this.setFps(30);
         
         this.showCircumscribedCircle = false;
-        this.showDelaunay    = true;
+        this.showDelaunay    = false;
         this.showVoronoi     = true;
         
         // Debug log alignment:
@@ -43,9 +43,10 @@ define(function(require) {
         this.grid.onLeftDown(new Vector(-10, 10));
         
         this.gui = new dat.GUI();
-        this.gui.add(this, "showCircumscribedCircle").name("Show Circumcircles");
-        this.gui.add(this, "showDelaunay").name("Delaunay Triangulate");
         this.gui.add(this, "showVoronoi").name("Voronoi Diagram");
+        this.gui.add(this, "showDelaunay").name("Delaunay Triangulation");
+        this.gui.add(this, "showCircumscribedCircle").name("Show Circumcircles");
+        this.gui.add(this.grid, "clear").name("Remove Coordinates");
         this.gui.width = 400;
     }
 
@@ -54,6 +55,10 @@ define(function(require) {
         this.coordinates = coordinates;
        
     };
+	
+    DelaunayApp.prototype.update = function(dt) {
+		this.input.cursor(Input.Cursor.POINTER);
+	};
     
     DelaunayApp.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
@@ -90,6 +95,10 @@ define(function(require) {
                     renderer.circle(triangle.center, triangle.radius);
                     renderer.fill("rgba(0, 0, 0, 0.1)");
                     renderer.stroke("rgba(0, 0, 0, 0.2)");
+					
+                    renderer.begin();
+                    renderer.circle(triangle.center, 2);
+                    renderer.fill("black");
                 }
             
             }.bind(this));

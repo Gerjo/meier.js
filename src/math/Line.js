@@ -8,7 +8,7 @@
 define(function(require) {
     var Vector = require("meier/math/Vec")(2);
     var Lerp   = require("meier/math/Lerp");
-    
+    var M22    = require("meier/math/Mat")(2, 2)
     /// Accepts:
     /// [Vector, Vector]
     /// [number, number, number, number]
@@ -72,6 +72,19 @@ define(function(require) {
         return new MeierLineSegment(
             this.a.project(axis),
             this.b.project(axis)
+        );
+    };
+    
+    MeierLineSegment.prototype.rotate = function(theta) {
+        
+        var m = new M22([
+                Math.cos(theta), -Math.sin(theta), 
+                Math.sin(theta),  Math.cos(theta)
+        ]);
+        
+        return new MeierLineSegment(
+            m.transform(this.a),
+            m.transform(this.b)
         );
     };
 

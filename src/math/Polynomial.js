@@ -28,8 +28,9 @@ define(function(require) {
         /// @param d Available options?
         /// @param n Amount selected?
         /// @return float indicating the binomial coefficient
-        BinomialCoefficient: function(d, n) {
-            return Factorial(d) / (Factorial(d - n) * Factorial(n));
+        BinomialCoefficient: function(k, n) {
+            // TODO: optimize factorials.
+            return Factorial(k) / (Factorial(k - n) * Factorial(n));
         },
     
         /// Calculate Bernstein basis polynomials.
@@ -52,7 +53,7 @@ define(function(require) {
         /// performance sensitive, (internally,) the bernstein basis polynomal
         /// computation may be cached.
         ///
-        /// NB: a bézier curve is is simply a basis spline of the highest 
+        /// NB: a bézier curve is simply a basis spline of the highest 
         /// possible degree. (where degree equals the number of control points)
         ///
         /// @param points A collection indicating the control points.
@@ -338,7 +339,91 @@ define(function(require) {
             var R = GaussJordan(AtA, AtB);
         
             return R;
-        }
+        },
+        
+        /// Compute the moving least squares interpolant of a set of points.
+        /// Uses a normal distribution (gaussian curve) internally. MLS is a
+        /// sensible approach to reconstruct a signal that cannot be be 
+        /// computed by a regular least squares method. It doesn't quite
+        /// explode as much compared to fitting a high (n>7) degree polynomial.
+        ///
+        /// @param {points} An array with 2 dimensional vectors
+        /// @param {sigma} Standard deviation as used in a normal distribution.
+        ///                higher values give a wider curve, thus blending more
+        ///                points at once.
+        /// @return An object with all the properties required.
+        MovingLeastSquares: function(points, sigma) {
+            
+            if(isNaN(sigma)) {
+                sigma = 1.2;
+            }
+            
+            var res = {
+                "xMin": Infinity,
+                "xMax": -Infinity,
+                "xRange": 0,
+                "basis": [],
+                "points": points.clone().sort(function(a,b) { return a.x - b.x; }),
+                "f": null
+            };
+ 
+            function MakeGaussian(a, b, c) {
+                // Take the largest distance to ensure overlap.
+                var d = Math.max((a.x - b.x).norm(), (c.x - b.x).norm());
+        
+                if(d == 0) {
+                    // Can't use Number.MIN_VALUE as this gives 1/Number.MIN_VALUE == Infinity
+                    d = 0.0000000001;
+                }
+        
+                var mean  = b.x;
+                var s = d / sigma;
+                
+                return function(t) {
+                    return (1 / (s * Math.sqrt(Math.TwoPI)) * Math.exp(-1/2* Math.pow((t - mean) / s, 2)))
+                };
+            }
+ 
+            for(var i = 0; i < res.points.length; ++i) {
+                // Find extrema
+                res.xMax = Math.max(res.xMax, res.points[i].x);
+                res.xMin = Math.min(res.xMin, res.points[i].x);
+                
+                res.basis.push(
+                    // First and last point are repeated.
+                    MakeGaussian(res.points[i - 1] || res.points[i], res.points[i], res.points[i + 1] || res.points[i])
+                );
+            }
+            
+            res.f = function(t) {
+                // Clamp range. Repeat the signal at domain limits.
+                t = (t > res.xMax) ? res.xMax : t;
+                t = (t < res.xMin) ? res.xMin : t;
+                
+                var ysum = 0;
+                var bsum = 0;
+            
+                for(var i = 0; i < res.basis.length; ++i) {
+                    var p = res.points[i];
+            
+                    // Evaluated guassian basis at time t
+                    var weight = res.basis[i](t);
+                    
+                    // Weighted addition of the y component.
+                    ysum += p.y * weight;
+                    
+                    // Accumulate weights
+                    bsum += weight;
+                }
+            
+                // Normalize (make sure the total weight does not exceed 1)
+                return ysum / bsum;
+            }
+            
+            res.xRange = res.xMax - res.xMin;
+            
+            return res;
+        },
     };
     
     return self;

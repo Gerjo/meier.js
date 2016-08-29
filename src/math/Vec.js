@@ -80,10 +80,21 @@ define(function(require) {
         }
         
         V.prototype.distance = function(o) {
-            return Math.sqrt(this.distanceSQ(o));
+            return Math.sqrt(this.distanceSq(o));
         };
 
+        // Depricated use 'distanceSq'.
         V.prototype.distanceSQ = function(o) {
+            var r = 0;
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                r += Math.pow(this._[i] - o._[i], 2);
+            }
+            
+            return r;
+        };
+        
+        // Better naming convention.
+        V.prototype.distanceSq = function(o) {
             var r = 0;
             for(var i = this.numrows - 1; i >= 0; --i) {
                 r += Math.pow(this._[i] - o._[i], 2);
@@ -127,9 +138,9 @@ define(function(require) {
             };
         }
         
-        V.prototype.trim = function(length) {
+        V.prototype.trim = function(newLength) {
             
-            var l = length / this.length();
+            var l = newLength / this.length();
             
             for(var i = this.numrows - 1; i >= 0; --i) {
                 this._[i] *= l;
@@ -213,6 +224,29 @@ define(function(require) {
             return this;
         }; 
         
+        V.prototype.volume = function() {
+            var volume = this._[0];
+            
+            for(var i = 1; i < this.numrows; ++i) {
+                volume *= this._[i];
+            }
+            
+            return volume;
+        };
+        
+        // Synonym for 2D spaces.
+        V.prototype.area = function() {
+            return this.volume();
+        };
+        
+        
+        V.prototype.divide = function(v) {
+            for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
+                this._[i] /= v._[i];
+            }             
+            return this;
+        };
+        
         V.prototype.scale = function(v) {
             for(var i = Math.min(this.numrows, v.numrows) - 1; i >= 0; --i) {
                 this._[i] *= v._[i];
@@ -250,6 +284,19 @@ define(function(require) {
             
             return r;
         }
+        
+        /// Determine if the vector is a null vector, i.e., all components
+        /// equal zero.
+        V.prototype.isNull = V.prototype.isZero = function() {
+          
+            for(var i = this.numrows - 1; i >= 0; --i) {
+                if(this._[i] !== 0) {
+                    return false;
+                }
+            }
+                        
+            return true;
+        }; 
         
         V.prototype.equals = function(o) {
             
@@ -399,30 +446,33 @@ define(function(require) {
             return this;
         };
         
-        V.prototype.pretty = function() {
-            var out = "", n, l = 6, d = 2;
+        V.prototype.pretty = function(digits) {
+            var out = [];
+            digits  = isNaN(digits) ? 4 : digits;
         
             for(var i = 0, n; i < this.numrows; ++i) {
-                n = Round(this._[i], d) + "";
-            
-                out += n;
-            
-                for(var k = n.length; k < l; ++k) {
-                    out += " ";
-                }
+                out.push(this._[i].toFixed(digits));
             }
         
-            return out;
+            return out.join(", ");
         };
         
         V.prototype.wolfram = function() {
             var r = "{";
         
             for(var i = 0; i < this.numrows; ++i) {
-                r += this._[i] + ", ";
+                var padding = "";
+                
+                // Padding to account for missing "-" sign. Looks prettier
+                // in the debug console. That's all.
+                if(this._[i] >= 0) {
+                    padding = " ";
+                }
+                
+                r += padding + this._[i].toFixed(6) + ", ";
             }
         
-            r = r.trim(", ") + "}";
+            r = r.trim(", ") + " }";
         
             return r;
         };

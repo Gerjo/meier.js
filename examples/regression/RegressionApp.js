@@ -7,10 +7,11 @@ define(function(require) {
     var Disk         = require("meier/math/Disk");
     var Round        = require("meier/math/Math").Round;
     var M            = require("meier/math/Mat");
+    var Noise        = require("meier/extra/Noise");
     var dat          = require("meier/contrib/datgui");
     var LeastSquares = require("meier/math/Polynomial").LeastSquares;
-    var LeastSquareCircle = require("meier/math/Math").LeastSquaresCircle
-    
+    var LeastSquareCircle  = require("meier/math/Math").LeastSquaresCircle
+    var MovingLeastSquares = require("meier/math/Polynomial").MovingLeastSquares;
 
     
     RegressionApp.prototype = new Game();
@@ -18,6 +19,7 @@ define(function(require) {
         Game.call(this, container);
         
         this.logger.right().bottom();
+        
         
         // Will eventually hold the polynomial function of x:
         this.function = null;
@@ -27,7 +29,7 @@ define(function(require) {
         this.coordinates = [];
         
         // Initial degree:
-        this.polynomialDegree = 4;
+        this.polynomialDegree = 7;
         
         // Matrix with polynomial coefficients:
         this.coefficients = null;
@@ -35,16 +37,14 @@ define(function(require) {
         // Least squares circle
         this.disk = new Disk();
         
+        // Moving least squares properties
+        this.mls = null;
+        this.mlsSigma = 12;
+        this.showMls = true;
+        this.showMlsBasis = false;
+        
         this.showPolynomial = true;
-        this.showCircle = true;
-        
-        this.gui = new dat.GUI();
-        this.gui.width = 350;
-        this.gui.add(this, "polynomialDegree", 0, 50).step(1).onChange(this.recompute.bind(this));
-        this.gui.add(this, "showPolynomial");
-        this.gui.add(this, "showCircle");
-        
-        
+        this.showCircle = false;
         
         this.grid = new Grid(0, 0, this.width, this.height);
         this.grid.setRealLabels(true);
@@ -54,19 +54,36 @@ define(function(require) {
         
         
         
-        // Generate a data set:
-        var w = this.width - 100, hw = w * 0.5;
+        this.gui = new dat.GUI();
+        this.gui.width = 350;
         
-        Random.Seed(1);
+        var folder = this.gui.addFolder("Least Squares");
+        folder.add(this, "polynomialDegree", 0, 50).name("Polynomial Degree").step(1).onChange(this.recompute.bind(this));
+        folder.add(this, "showPolynomial").name("Show fitted Polynomial");
+        folder.add(this, "showCircle").name("Show fitted Circle");
         
-        for(var x = -hw; x <= hw; x += Random(20, 50)) {
-            var t = (x + hw) / w * Math.PI;
-            
-            var v = new Vector(x, Math.sin(t) * 100);
-            v.y += Random(-20, 20);
-            this.grid.onLeftDown(v);            
-        }
+        folder = this.gui.addFolder("Moving Least Squares");
+        folder.add(this, "mlsSigma", 0, 50).step(0.01).name("MLS Sigma").onChange(this.recompute.bind(this));
+        folder.add(this, "showMls").name("Show MLS");
+        folder.add(this, "showMlsBasis").name("Show Gaussian Basis");
+        
+        folder = this.gui.addFolder("Randomness");
+        folder.add(this, "randomArc").name("Add Arc");
+        folder.add(this, "randomWave").name("Add Wave");
+        folder.add(this.grid, "clear").name("Clear");
+        
+
+        this.randomWave();
     }
+   
+    RegressionApp.prototype.randomArc = function() {
+        this.grid.addCoordinates(Noise.LargeArc(this.width, this.height));            
+    };
+    
+    RegressionApp.prototype.randomWave = function() {
+        this.grid.addCoordinates(Noise.Wave(this.width, this.height));            
+    };
+    
    
     RegressionApp.prototype.recompute = function(coordinates) {
         //console.log(coordinates);
@@ -105,6 +122,8 @@ define(function(require) {
         }.bind(this);
         
         this.disk = LeastSquareCircle(coordinates);
+        
+        this.mls = MovingLeastSquares(coordinates, this.mlsSigma * 0.1);
     };
     
     RegressionApp.prototype.polynomialName = function(count) {
@@ -118,31 +137,33 @@ define(function(require) {
         Game.prototype.draw.call(this, renderer);
         
         
+        if(this.showMlsBasis && this.mls) {
+            this.mls.basis.forEach(function(basis) {
+                var r = this.mls.xRange * 0.5;
+                
+                renderer.begin();
+            
+                var a = null;
+                for(var t = -r, o = t; t <= r; o = t, t += 1) {
+                    var c = basis(t) * 5000;
+                
+                    if(a !== null) {
+                        renderer.line(o, a, t, c);
+                    }
+                
+                    a = c;
+                }
+            
+                renderer.stroke("darkgrey", 1);
+            }.bind(this));
+        }
+        
         if(this.showPolynomial && this.coefficients) {
-            var name = this.polynomialName(this.coefficients.numrows-1);
-        
-            if(name) {
-                name = " - " + name;
-            } else {
-                name = "";
-            }
-        
-            renderer.text("Polynomial degree: " + (this.coefficients.numrows-1) + name, -this.hw + 10, this.hh - 10, "black", "left");
-        
-            renderer.text("Coefficients:", -this.hw + 10, this.hh - 30, "black", "left");
-        
-            if(this.coefficients) {
-                this.coefficients.eachRow(0, function(val, i) {
-                
-                    // Pretty alignment:
-                    var prefix = val > 0 ? " " : "";
-                
-                    renderer.text("  " + prefix + val.toFixed(10), -this.hw + 10, this.hh - 50 - i * 20, "black", "left");
-                }.bind(this));
-            }
-
-        
             this.plot(renderer, this.function, "red", 2);
+        }
+        
+        if(this.showMls && this.mls) {
+            this.plot(renderer, this.mls.f, "blue", "2");
         }
         
         if(this.showCircle) {
@@ -151,11 +172,10 @@ define(function(require) {
             renderer.fill("rgba(0, 0, 0, 0.3)");
             renderer.stroke("rgba(0, 0, 0, 0.7)");
         }
-
     };
     
     RegressionApp.prototype.plot = function(renderer, f, color, width) {
-        var step = (this.grid.max.x - this.grid.min.x) / 200;
+        var step = (this.grid.max.x - this.grid.min.x) / 300;
         
         var previous = new Vector(
             this.grid.min.x,

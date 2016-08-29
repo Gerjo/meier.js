@@ -31,11 +31,11 @@ define(function(require) {
 		var wl = Config.wallThickness;
 		
 		// door movement
-		var drm = Random.FloatInRange(0.0, 1.0) > 0.5 ?  dr * 0.5 : -dr * 0.5 ;
+		var drm = Random(0.0, 1.0, true) > 0.5 ?  dr * 0.5 : -dr * 0.5 ;
 		
 		// If longer and width is big enough
 		if(w > h && w > Config.minRoomSize) {
-			var split = Random.FloatInRange(w * 0.20, w * 0.80);
+			var split = Random(w * 0.20, w * 0.80, true);
 			//var split = w * 0.5;	 // test
 			var rest = w - split;
 			var lx = x - (w * 0.5) + (rest * 0.5);
@@ -55,7 +55,7 @@ define(function(require) {
             
 			 						
 		} else if(h > Config.minRoomSize) {
-			var split = Random.FloatInRange(h * 0.20, h * 0.80);
+			var split = Random(h * 0.20, h * 0.80, true);
 			//var split = h * 0.5; // test
 			var rest = h - split;
 			var uy = y - (h * 0.5) + (rest * 0.5);
@@ -90,7 +90,7 @@ define(function(require) {
 			} else { 
 				if(ratio < 2) {
                     //big room
-                    this.texture = new Texture( "./images/house" + world.houseStyle + "carpet" + Random.IntegerInRange(1, 3) + ".png" );
+                    this.texture = new Texture( "./images/house" + world.houseStyle + "carpet" + Random(1, 3) + ".png" );
                     
                     if(typeof(world.biggestRoom) == 'undefined') {
                         world.biggestRoom2 = this;
@@ -134,7 +134,7 @@ define(function(require) {
         Game.call(this, container);
         this.setFps(30);
         this.setAutoClear(false);
-        this.logger.top().left();
+        this.logger.top().left().hideInternals();
         
         this.gui = new dat.GUI();
 
@@ -144,8 +144,8 @@ define(function(require) {
         this.gui.add(Config, "minRoomSize",     20,  500).onChange(this.rebuild.bind(this));
  
         
-        this.houseWidth  = this.width - 30;
-        this.houseHeight = this.height - 30;
+        this.houseWidth  = this.width-2;// - 30;
+        this.houseHeight = this.height-2;// - 30;
 
         this.rebuild();
     }
@@ -168,7 +168,7 @@ define(function(require) {
 		this.rootRoom.getRooms(rooms);	
         
         
-        var wallSplit = Random.FloatInRange(0.1, 0.9);
+        var wallSplit = Random(0.1, 0.9, true);
         
 		this.add(new Wall( 
             this.houseWidth * 0.5,
@@ -184,7 +184,7 @@ define(function(require) {
             (1 - wallSplit) * this.houseHeight - (Config.doorSize * 0.5) + Config.wallThickness )
         );
         
-        wallSplit = Random.FloatInRange(0.1, 0.9);
+        wallSplit = Random(0.1, 0.9, true);
         
 		//left
 		this.add(new Wall( 
@@ -201,7 +201,7 @@ define(function(require) {
             (1 - wallSplit) * this.houseHeight - (Config.doorSize * 0.5) + Config.wallThickness )
         );
         
-        wallSplit = Random.FloatInRange(0.1, 0.9);
+        wallSplit = Random(0.1, 0.9, true);
         
 		this.add(new Wall( 
             (this.houseWidth * (1 - wallSplit)) * 0.5 + (Config.doorSize * 0.25), 
@@ -218,7 +218,7 @@ define(function(require) {
         );
         
         //bottom
-        wallSplit = Random.FloatInRange(0.1, 0.9);
+        wallSplit = Random(0.1, 0.9, true);
         
 		this.add(new Wall( 
             (this.houseWidth * (1 - wallSplit)) * 0.5 + (Config.doorSize * 0.25), 

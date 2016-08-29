@@ -4,6 +4,7 @@ define(function(require) {
     var Key       = require("meier/engine/Key");
     var Vector    = require("meier/math/Vec")(2);
     var Nnet      = require("meier/math/Nnet");
+    var dat       = require("meier/contrib/datgui");
 
     var Selector = require("./Selector");
 
@@ -29,6 +30,7 @@ define(function(require) {
         
         // Debug log alignment:
         this.logger.top().right();
+        this.logger.hide();
         
         var w = 400;
         var h = 50;
@@ -37,15 +39,30 @@ define(function(require) {
         
         var lowPriority = -99;
         this.input.subscribe(Input.LEFT_DOWN, this.onLeftDown.bind(this), lowPriority);
-        
         this.input.subscribe(Input.KEY_DOWN, this.onKeyDown.bind(this));
-        
         
         this.trainingClasses = [];
         
-        
         this.restart();
         
+        this.isRunning = true;
+        this.showNetwork = true;
+        
+        this.gui = new dat.GUI();
+        this.gui.add(this, "showNetwork").name("Show Neurons");
+        this.gui.add(this, "restart").name("Restart");
+        this.runButton = this.gui.add(this, "run").name("Stop Running");
+    }
+    
+    NeuralApp.prototype.run = function() {
+        
+        if(this.isRunning) {
+            this.runButton.name("Start Running");
+        } else {
+            this.runButton.name("Stop Running");
+        }
+        
+        this.isRunning = ! this.isRunning;
     }
     
     NeuralApp.prototype.onKeyDown = function(input, key) {
@@ -75,7 +92,6 @@ define(function(require) {
             output.push(out);
         }.bind(this));
         
-        
         this.nnet.train(input, output);
     };
     
@@ -83,17 +99,18 @@ define(function(require) {
         
         this.nnet = new Nnet([
             2,   // Size of input layer 
-            10,  // Size of hidden layer
-            20,  // Size of hidden layer
-            24,  // Size of hidden layer
+            6,  // Size of hidden layer
+            5,  // Size of hidden layer
+            6,  // Size of hidden layer
+            3,  // Size of hidden layer
+            6,  // Size of hidden layer
             this.selector.numOfClasses()    // Size of output layer
         ]);
         
-        this.log.log("Nnet seed", this.nnet.seed);
+        this.log("Nnet seed", this.nnet.seed);
     };
     
     NeuralApp.prototype.onLeftDown = function(input) {
-        
         var addNew = true;
         
         for(var i = this.trainingClasses.length - 1; i >= 0; --i) {
@@ -121,7 +138,10 @@ define(function(require) {
     
     NeuralApp.prototype.update = function(dt) {
         Game.prototype.update.call(this, dt);
-
+        
+        if(this.isRunning) {
+            this.train();
+        }
     };
     
     NeuralApp.prototype.draw = function(renderer) {
@@ -172,7 +192,9 @@ define(function(require) {
             renderer.fill(klass.class.stroke);
         });
         
-        this.nnet.draw(renderer, 0, 0, this.width, this.height);
+        if(this.showNetwork) {
+            this.nnet.draw(renderer, 0, 0, this.width, this.height);
+        }
     };
     
     return NeuralApp;

@@ -16,7 +16,7 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-    }
+    };
     
     return App;
 });

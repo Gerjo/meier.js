@@ -18,7 +18,7 @@
 
 
 define(function(require) {
-    var Stopwatch = require("meier/aux/Stopwatch");
+    var Stopwatch = require("meier/extra/Stopwatch");
     var Renderer  = require("meier/engine/Renderer");
     var Vector    = require("meier/math/Vector");
     var Logger    = require("meier/engine/Logger");
@@ -47,9 +47,10 @@ define(function(require) {
         this.isSlow          = false;
     
         // Update loop related matter:
-        this._frameCounter   = 0;               // frame counter.
         this.clock           = new Stopwatch(); // Wall Clock.
         this._fps            = 15;              // Desired framerate
+        this._lowFps         = null;
+        this._previousFps    = this._fps;
         this._dttimer        = new Stopwatch(); // Delta time counter.
         this.width           = parseInt(container.offsetWidth / 2, 10) * 2;
         this.height          = parseInt(container.offsetHeight / 2, 10) * 2;
@@ -59,31 +60,71 @@ define(function(require) {
         
         this._renderer       = new Renderer(container, this.width, this.height);
         
-        // Debug information:
+        // Debug information.
         this.logger          = new Logger(this, this.width, this.height);
-       
     
-        // Keyboard, touch and mouse events:
+        // Keyboard, touch and mouse events.
         this.input           = new Input(this._renderer.canvas, this.width, this.height, this.isTablet);
     
-        // Cache for the interval id
+        // Cache for the interval id.
         this._intervalId     = null;
         
-        // Default FPS:
-        this.setFps(this._fps);
+        // Default high FPS.
+        this.setHighFps(this._fps);
+        
+        // Default low FPS, run at quarter of the normal speed.
+        this.setLowFps(this._fps * 0.25);
         
         // Build-in entity system. Optional usage.
         this._entities       = [];
         
         // Automatically clear the canvas.
         this._doClear        = true;
+        
+        // TODO: contemplate on which DOM node to capture blur event.
+        window.onblur     = this._onBlur.bind(this);
+        window.onfocus    = this._onFocus.bind(this);
     }
+    
+    Game.prototype._onBlur = function() {
+        //if(this._lowFps !== null) {
+        //    this._applyFps(this._lowFps);
+        //}
+    };
+    
+    /// Retrieve a child entity at a given offset.
+    Game.prototype.get = function(n) {
+        return this._entities[n] || null;
+    };
+    
+    /// Rettrieve first add child entity.
+    Game.prototype.first = function() {
+        return this._entities.first() || null;
+    };
+    
+    /// Retrieve last added child entity.
+    Game.prototype.last = function() {
+        return this._entities.last() || null;
+    };
+    
+    Game.prototype._onFocus = function() {
+        // Restore high FPS
+        //this._applyFps(this._highFps);
+    };
+    
+    Game.prototype.onBlur = function() {
+        // Overload available for your convenience
+    };
+    Game.prototype.onFocus = function() {
+        // Overload available for your convenience
+    };
     
     Game.prototype.log = function(key, value, color) {
         this.logger.log(key, value, color);
     };
     
     Game.prototype.add = function(entity) {
+        
         if(entity instanceof Entity) {
             this._entities.push(entity);
             entity._onAdd(this);
@@ -107,9 +148,7 @@ define(function(require) {
         return this;
     };
     
-    Game.prototype.setFps = function(fps) {
-        this._fps = fps;
-    
+    Game.prototype._applyFps = function(fps) {
         // Remove current loop:
         if(this._intervalId !== null) {
             clearInterval(this._intervalId);
@@ -117,12 +156,27 @@ define(function(require) {
         
         if(fps > 0) {
             // Schedule a new loop
-            this._intervalId = setInterval(this._update.bind(this), 1000 / this._fps);
+            this._intervalId = setInterval(this._update.bind(this), 1000 / fps);
+            
+            //console.log("new fps: ");
         } else {
             // There shall be no new loop
             this._intervalId = null;
         }
-        
+    };
+    
+    // Depricated call. Use "setHighFps" instead.
+    Game.prototype.setFps = function(fps) {
+        return this.setHighFps(fps);
+    };
+    
+    Game.prototype.setHighFps = function(fps) {
+        this._applyFps(this._highFps = fps);
+        return this;
+    };
+    
+    Game.prototype.setLowFps = function(fps) {
+        this._lowFps = fps;
         return this;
     };
 
@@ -156,6 +210,8 @@ define(function(require) {
         
             // Draw from center. A 0.5 offset is given to align the game
             // coordinate frame with canvas coordinate frame.
+            // TODO: Windows platforms seem to disagree with this. Further study is required
+            // to determine optimal platform independend solutions.
             this._renderer.hw + 0.5,
             this._renderer.hh + 0.5);
     
@@ -167,7 +223,6 @@ define(function(require) {
 
     /// Update the game.
     Game.prototype.update = function(dt) {
-        
         this.input.update(dt);
         
         for(var i = 0; i < this._entities.length; i++) {
@@ -199,7 +254,9 @@ define(function(require) {
         
         this._entities.forEach(function(entity) {
             if(entity._delete !== true) {
-                entity._draw(renderer);
+                if(entity.visible === true) {
+                    entity._draw(renderer);
+                }
             }
         });
     };

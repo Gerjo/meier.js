@@ -134,7 +134,7 @@ define(function(require) {
         renderer.text("The following polynomials are shown:", -this.hw + 10, this.hh + 10 - o, "black", "left", "middle", font);
         renderer.text(" Lagrange polynomial", -this.hw + 10, this.hh - 10 - o, "blue", "left", "middle", font);
         renderer.text(" Fitted polynomial (Gauss-Jordan)", -this.hw + 10, this.hh - 30 - o, "red", "left", "middle", font);
-        renderer.text(" Taylor series of fitted polynomial at mouse.x", -this.hw + 10, this.hh - 50 - o, "green", "left", "middle", font);
+        renderer.text(" Taylor series of fitted polynomial at mouse.", -this.hw + 10, this.hh - 50 - o, "green", "left", "middle", font);
         
         
         var errorfn = function(x) {

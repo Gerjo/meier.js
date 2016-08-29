@@ -11,11 +11,13 @@ define(function(require) {
     var Matrix      = require("meier/math/Mat")(3, 3);
     var Vector      = require("meier/math/Vec")(2);
     var Texture     = require("meier/engine/Texture");
+    var Colors      = require("meier/engine/Colors");
     var LineSegment = require("meier/math/Line");
     var Disk        = require("meier/math/Disk");
     var Rectangle   = require("meier/math/Rectangle");
     var Polygon     = require("meier/math/Polygon");
-    
+    var Fonts       = require("meier/engine/Fonts");
+    var math        = require("meier/math/Math");
     
     // Macro to determine if argument is a vector.
     function IsVector(v) {
@@ -78,18 +80,34 @@ define(function(require) {
     };
 
     /// Clear the canvas with a solid fill color:
-    Renderer.prototype.clearTexture = function(texture) {
-        this.context.drawImage(
-                texture.image,  // The image
-                0,              // Source X
-                0,              // Source Y
-                texture.width,  // Source width
-                texture.height, // Source height
-                -this.hw,       // Target X
-                -this.hh,       // Target Y
-                this.width,     // Target width
-                this.height     // Target height
-        );    
+    Renderer.prototype.clearTexture = function(texture, tileImage) {
+        
+        // Image is still loading.
+        if(texture._image === null) {
+            return;
+        }
+        
+        // File image with a pattern:
+        if(tileImage === true) {
+            this.begin();
+            this.rectangle(0, 0, this.width, this.height);
+            this.fill(texture);
+            
+        // Stretch image to fit
+        } else {
+            this.context.drawImage(
+                    texture._image,  // The image
+                    0,              // Source X
+                    0,              // Source Y
+                    texture.width,  // Source width
+                    texture.height, // Source height
+                    -this.hw,       // Target X
+                    -this.hh,       // Target Y
+                    this.width,     // Target width
+                    this.height     // Target height
+            );    
+        }
+        
         return this;
     };
 
@@ -150,16 +168,18 @@ define(function(require) {
     };
 
     /// Draw a texture:
-    /// Accepts:
-    /// [Texture, Number, Number]
-    /// [Texture, Number, Number, Number, Number]
-    Renderer.prototype.texture = function(texture, x, y, width, height) {
+    Renderer.prototype.texture = function(texture, x, y, width, height, top, right, bottom, left) {
     
     	if(IsVector(x)) {
+            // Shift everyhing
+            left   = bottom;
+            bottom = right;
+            right  = top
+            top    = height;
     		height = width;
-    		width = y;
-    		y = x.y;
-    		x = x.x;
+    		width  = y;
+    		y      = x.y;
+    		x      = x.x;
     	}
 	
         if(isNaN(x)) {
@@ -179,6 +199,13 @@ define(function(require) {
         if(isNaN(height)) {
             height = texture.height;
         }
+        
+        // clipping default values
+        top    = top    || 0;
+        right  = right  || 0;
+        bottom = bottom || 0;
+        left   = left   || 0;
+        
  
         if( ! texture._isLoaded) {
             return this;
@@ -187,17 +214,23 @@ define(function(require) {
         // Render an "img" tag onto the canvas.
         if(texture._image !== null) {
             this.context.drawImage(
-                    texture._image,    // The image
-                    0,                 // Source X
-                    0,                 // Source Y
-                    texture.width,     // Source width
-                    texture.height,    // Source height
-                    x - width * 0.5,   // Target X
-                    -y - height * 0.5, // Target Y
-                    width,             // Target width
-                    height             // Target height
+                    texture._image,            // The image
+                    right,                     // Source X
+                    top,                       // Source Y
+                    texture.width + left,      // Source width
+                    texture.height + bottom,   // Source height
+                    x - width * 0.5 + right,   // Target X
+                    -y - height * 0.5 + top,   // Target Y
+                    width,                     // Target width
+                    height                     // Target height
             );
         } else if(texture._raw !== null) {
+            
+            // NPOT doesn't work in all browsers.
+            if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
+                NOTICE("Rendering a non power of two RawTexture (" + width + "x" + height + ").");
+            }
+            
             // TODO: this is free from transformations. Simulate them here?
             //   - scaling
             //   - rotation (ugh!)
@@ -339,6 +372,202 @@ define(function(require) {
         }
     
         return this;
+    };
+    
+    
+    /// Render text formatting according to the stack-based 
+    /// markup language (SBML). Which is something I just
+    /// made up on the fly.
+    ///
+    /// Example: <monospace><10px>grass<> is <#00ff00>green<> and
+    ///          the <yellow>sun<> is <bold>yellow.
+    ///
+    ///
+    ///
+    Renderer.prototype.styled = function(string, x, y, align, valign) {
+        x = x || 0;
+        y = y || 0;
+        align  = align || "center";
+        valgin = valign || "bottom"
+        
+        /// Struct to hold statemachine states
+        function Style(text, size, color, font, style, line, height, measure) {
+            this.text    = text;
+            this.size    = size;
+            this.color   = color;
+            this.font    = font;
+            this.style   = style;
+            this.line    = line;
+            this.width   = null;
+            this.height  = height;
+            this.measure = measure;
+        }
+        
+        var states = [];
+        var events = [];
+        
+        var height = 0;
+        var width  = 0;
+        var baseline = 0;
+        
+        // Default figures:
+        var style = ""; // bold / italic and normal.
+        var font  = "monospace";
+        var color = "white";
+        var size  = 10;
+        var startBracket = null;
+        var startString  = 0;
+        
+        // Adding two brackets makes sure the statemachine terminates.
+        string = string + "<>";
+        
+        // Totals
+        var widths    = [0];
+        var heights   = [0];
+        var baselines = [0];
+        var offsets   = [0];
+        var line   = 0;
+        
+        for(var i = 0, sub; i < string.length; ++i) {
+                            
+            if(string[i] == "<" || string[i] == "\n") {
+                
+                if(startString != i) {
+                    sub = string.substring(startString, i);
+                                    
+                    states.push(new Style(
+                        sub,
+                        size,
+                        color,
+                        font,
+                        style,
+                        line,
+                        parseInt(size, 10),
+                        Fonts.Measure(size + " " + style + " " + font)
+                    ));
+                                        
+                    // Load text style, then measure it.
+                    this.context.font   =  size + " " + font;
+                    states.last().width = this.context.measureText(sub).width,
+                    
+                    // Collect dimensions of each fragment
+                    heights[line]    = Math.max(heights[line],   states.last().measure.height);  
+                    baselines[line]  = Math.max(baselines[line], states.last().measure.baseline);
+                    widths[line]    += states.last().width;
+                    
+                    // Offset to skip a newline or bracket character.
+                    startString = i + 1;
+                }
+                
+                startBracket = i;
+                
+                if(string[i] == "\n") {
+                    ++line;
+                    
+                    // Reset counters for the next line
+                    offsets.push(heights.last() + offsets.last());
+                    widths.push(0);
+                    heights.push(0);
+                    baselines.push(0);
+                }
+                
+            // "command" terminating symbol
+            } else if(string[i] == ">") {
+                sub = string.substring(startBracket + 1, i);
+                
+                // Undo last event
+                if(startBracket + 1 == i) {      
+                    if( ! events.empty()) {       
+                        events.pop()();
+                    }
+                    
+                // It's a number.
+                } else if(parseInt(sub[0]) == sub[0]) {
+                    
+                    events.push(function(old) {
+                        size = old;
+                    }.curry(size));
+                    
+                    size = sub;
+                
+                // Or a color.
+                } else if(Colors.IsColor(sub)) {
+                    events.push(function(old) {
+                        color = old;
+                    }.curry(color));
+                    
+                    color = sub;
+                
+                // Font styling
+                } else if(sub == "bold" || sub == "italic" || sub == "normal" || sub == "italic bold" || sub == "bold italic") {
+                    events.push(function(old) {
+                        style = old;
+                    }.curry(style));
+                    
+                    style = sub;
+                     
+                // Whatever else, it's a font.
+                } else {
+                    events.push(function(old) {
+                        font = old;
+                    }.curry(font));
+                    
+                    font = sub;
+                }
+                
+                startBracket = null;
+                startString  = i + 1;
+            }
+        }
+        
+        var baseX = x;
+        
+        var h = 0;
+        for(var i = 0, yOffset; i < states.length; ++i) {
+            var state = states[i];
+            
+            
+            if(i == 0 || state.line != states[i-1].line) {
+                if(align == "center") {
+                    x = baseX - widths[state.line] / 2;
+                } else if(align == "right") {
+                    x = baseX - widths[state.line];
+                } else {
+                    x = baseX;
+                }
+            }
+            
+            // e.g.,  "bold 14px monospace";
+            this.context.font         = states[i].style + " " + states[i].size + " " + states[i].font;
+            this.context.fillStyle    = states[i].color;
+            this.context.textAlign    = "left";
+            this.context.textBaseline = "bottom";
+            
+            yOffset = 0;
+            
+            if(valign == "center") {
+                this.context.textBaseline = "middle";
+                
+                yOffset = state.measure.baseline * 0.5 - baseline * 0.25;   
+            
+            } else if(valign == "bottom") {
+                this.context.textBaseline = "bottom";
+                
+                yOffset = -state.measure.baseline + baseline * 0.5;   
+            
+            // Unsure how top align should look like.
+            } else if(valign == "top") {
+                throw new Error("Not implemented yet");
+            }
+            
+            this.context.fillText(
+                states[i].text, 
+                x, 
+                -(y + yOffset) + offsets[state.line]);
+                        
+            x += states[i].width;
+        }
+        
     };
 
     Renderer.prototype.text = function(string, x, y, color, align, valign, font) {

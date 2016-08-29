@@ -15,14 +15,6 @@ define(function(require) {
     /// [array<vector>]
     /// []
     ///
-    /// TODO: rotate.
-    /// TODO: triangulate
-    /// TODO: simplex
-    /// TODO: SAT
-    /// TODO: Area
-    /// TODO: isConvex
-    /// TODO: GJK
-    ///
     
     function Polygon(position, vertices) {
         if(position instanceof Vector) {
