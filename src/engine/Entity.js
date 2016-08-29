@@ -226,6 +226,7 @@ define(function(require) {
         this._eventHandlers.clear();
         
         // User defined delete:
+		this.onDestroy(game); // Match updated naming convention.
         this.onDelete(game);
     };
     
@@ -250,8 +251,13 @@ define(function(require) {
         // Overwrite method.
     };
     
-    Entity.prototype.onDelete = function() {
+    Entity.prototype.onDestroy = function() {
         // Overwrite method.
+    };
+	
+    Entity.prototype.onDelete = function() {
+        // Please overwrite "onDestroy". 
+		// "onDelete" is now depricated.
     };
 
     Entity.prototype.update = function(dt) {
