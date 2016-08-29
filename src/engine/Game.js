@@ -31,7 +31,16 @@ define(function(require) {
         // Default contructor, do nothing.
         if( ! container) {
             return;
-        }        
+        }
+		
+		if(typeof container == "string") {
+			container = document.querySelector(container);
+			
+			if( ! container) {
+				throw new Error("HTML Container '" + arguments[0] + "' not found.");
+				return;
+			}
+		}        
 
         // This is mostly a TODO thing
         this.isTablet        = ('ontouchstart' in document.documentElement);
