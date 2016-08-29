@@ -406,7 +406,7 @@ define(function(require) {
             
         } else if(a instanceof Array) {
             // The minimal required minimum for the code not to crash.
-            if(a.length > 0) {
+            if(a.length > 1) {
     
                 this.context.moveTo(a[0].x, -a[0].y);
     
