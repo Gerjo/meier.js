@@ -306,6 +306,13 @@ define(function(require) {
         return this;
     };
     
+	/// Draw an array of points as if being a line-loop.
+	/// Optional parameter allowing a closed-line-loop incase
+	/// it wasn't already.
+	Renderer.prototype.lines = function(array, closeLoop) {
+		return this.polygon(array, ! closeLoop);
+	};
+	
     /// Draw a dashed line.
     ///
     /// @todo optimize internal workings.
@@ -378,7 +385,7 @@ define(function(require) {
     /// [Polygon]
     /// [Array<Vector>]
     /// NB: automatically closes the loop, if not closed.
-    Renderer.prototype.polygon = function(a) {
+    Renderer.prototype.polygon = function(a, doNotClose) {
         
         if(a instanceof Polygon) {
             if(a.vertices.length > 0) {
@@ -397,7 +404,7 @@ define(function(require) {
                 }
 
                 // Close the polygon loop:
-                if( ! a.vertices.first().equals(a.vertices.last())) {
+                if( ! a.vertices.first().equals(a.vertices.last()) && doNotClose !== true) {
                     this.context.lineTo(a.vertices[0].x, -a.vertices[0].y);
                 }
                 
@@ -415,7 +422,7 @@ define(function(require) {
                 }
     
                 // Close the polygon loop:
-                if( ! a.first().equals(a.last())) {
+                if( ! a.first().equals(a.last()) && doNotClose !== true) {
                     this.context.lineTo(a[0].x, -a[0].y);
                 }
             } 
