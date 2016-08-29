@@ -107,7 +107,7 @@ define(function(require) {
                 
                 // Trigger a move event. Allows the user to
                 // update any mouse positions prior to the 
-                // botton event.
+                // button event.
                 if(this.updatePosition(event) === true) {
                     this.trigger(Input.Events.MOUSE_MOVE, event);            
                 }
@@ -132,7 +132,7 @@ define(function(require) {
             container.addEventListener('touchend', function(event) {
                 event.preventDefault();
             
-                // Double -ap requires a small sleep. Only sleep when there are
+                // Double tap requires a small sleep. Only sleep when there are
                 // actual double tab listeners.
                 if(this.listeners[Input.Events.DOUBLE_TAP].length > 0) {
                     this.trigger(Input.Events.LEFT_UP, event);
