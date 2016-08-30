@@ -37,8 +37,9 @@ var NOTICE = (function() {
     }
 }())
 
-/// Assertion to be used for development only.
-///
+/// Assertion to be used for development only. Not just because
+/// that's good practise, it also because the code of this is 
+/// implementation is very brittle.
 function ASSERT(statement) {
     if(statement !== true) {
     
