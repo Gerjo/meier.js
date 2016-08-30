@@ -5,6 +5,7 @@
  !*
  !*/
 
+/// Future note: let's keep this to elementry intersections only.
 define(function(require) {
     var Vector      = require("meier/math/Vec")(2);
     var Line        = require("meier/math/Line");
@@ -17,6 +18,18 @@ define(function(require) {
         // Test-only, returns booleans. Internal math may
         // be optimized.
         Test: {
+			
+			TODO_GenericIntersection: function(a, b) {
+				
+				if(a instanceof Disk && b instanceof Disk) {
+					// return disk vs disk.
+				} else if(true) {
+					// etc.
+				}
+				
+				return false;
+			},
+			
             RectangleLineSegment: function (rectangle, segment) {
                 return CohenSutherlandClipping(segment.a.x, segment.a.y, segment.b.x, segment.b.y, rectangle, true);
             },
