@@ -145,8 +145,6 @@ define(function(require) {
             return m;
         };
         
-        //M.CreatePerspectiveProjection = function(near, far, fieldOfView) {
-        
         M.CreatePerspectiveProjection = function(fovy, aspect, nearZ, farZ) {
             if(rows < 4 || rows < 4) {
                 throw new Error("Perspective only available for [4x4] matrices.");
@@ -165,33 +163,6 @@ define(function(require) {
                 0, 0, near * far * rangeInv * 2, 0
               ]);
             };
-            
-            
-            var cotan = 1.0 / Math.tan(fovy / 2.0);
-    
-            var m = new M([
-                       cotan / aspect, 0.0, 0.0, 0.0,
-                       0.0, cotan, 0.0, 0.0,
-                       0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,
-                       0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0
-            ]);
-			
-            return m;
-            
-            /*
-            var fn = far - near;
-            
-            var a = far / fn;
-            var b = a * near;//f * n / fn;
-            var s = 1 / Math.tan(fieldOfView * 0.5)
-            
-            var m = new M([
-                s,  0,  0,  0,    
-                0,  s,  0,  0,
-                0,  0, -a, -1,
-                0,  0, -b,  0
-            ]);
-            */
         };
         
         /// Project on an axis.
