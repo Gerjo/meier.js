@@ -35,6 +35,8 @@ define(function(require) {
     }
 	
 	/// Append a new coordinate.
+	/// Append a new coordinate. The order of added coordinates 
+	/// does matter. This is not a point cloud.
 	Polygon.prototype.add = function(coordinate) {
 		this.vertices.push(coordinate);
 		return this;
