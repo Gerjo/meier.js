@@ -24,13 +24,12 @@ Math.ln = function(r) {
 };
 
 /// Log TO-DO items that really need DOING. running
-/// TODO() from the console logs all noted entries.
-var TODO = (function(str) {
-	
-	
+/// TO-DO() (barring the hyphen) from the console 
+/// logs all noted entries.
+window["TO" + "DO"] = (function(str) {	
 	var cache = {};
 	
-    return function TODO(str) {
+    return function TOBEDONE(str) {
 		
 		if(arguments.length == 0) {
 			var i = 0;
