@@ -299,7 +299,8 @@ Array.prototype.clear = function() {
 };
 
 /// Test if this array is empty.
-Array.prototype.empty = function() {
+/// Prefer using "isEmpty". "empty" may become depricated.
+Array.prototype.empty = Array.prototype.isEmpty = function() {
     return this.length <= 0;
 };
 
