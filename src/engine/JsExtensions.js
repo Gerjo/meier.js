@@ -33,7 +33,11 @@ var NOTICE = (function() {
             console.log("NOTICE: " + str);
             
             cache[str] = true;
+			
+			return true;
         }
+		
+		return false;
     };
 }());
 
