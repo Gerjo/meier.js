@@ -34,8 +34,8 @@ var NOTICE = (function() {
             
             cache[str] = true;
         }
-    }
-}())
+    };
+}());
 
 /// Assertion to be used for development only. Not just because
 /// that's good practise, it also because the code of this is 
@@ -155,13 +155,14 @@ if(typeof JSON.parse == "undefined") {
     JSON.parse = function(data) {
         // TODO: perhaps bundle an actual parser?
         return eval("(" + data + ")");
-    } 
+    };
 }
 
 /// Compute the hypotenuse of a right-angled triangle.
 Math.hyp = Math.Hyp = function(a, b) {
     return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-}
+};
+
 /// Parse JSON strings without silly exceptions that suggest
 /// your code is broken due to the incorrect line-numbers.
 ///
@@ -323,7 +324,7 @@ Array.prototype.find = function(callback) {
     });
     
     return result;
-}
+};
 
 
 /// Merge all internal array entries in the outer array.
@@ -421,7 +422,7 @@ Array.prototype.filterMap = function(callback) {
 /// Duplicate an array:
 Array.prototype.clone = function() { 
     return this.slice(0); 
-}
+};
 
 /// Kind of like reduce, without reducing.
 ///
@@ -586,7 +587,7 @@ Function.prototype.curry = function() {
         
         return self.apply(self, args);
     }
-}
+};
 
 /// Add support for context binding on older platforms e.g.: the ipad 1 or older ipods.
 ///
