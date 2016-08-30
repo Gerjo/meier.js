@@ -191,6 +191,7 @@ define(function(require) {
         return false;
     }
 
+	// TODO: I wrote this myself. Investigate more efficient methods.
     function lines(p1, d1, p2, d2) {
         // Calculate slope "a" in "y = a * x + b":
         var a_a = (d1.y - p1.y) / (d1.x - p1.x);
