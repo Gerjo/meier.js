@@ -23,6 +23,37 @@ Math.ln = function(r) {
     return Math.log(r);
 };
 
+/// Log TO-DO items that really need DOING. running
+/// TODO() from the console logs all noted entries.
+var TODO = (function(str) {
+	
+	
+	var cache = {};
+	
+    return function TODO(str) {
+		
+		if(arguments.length == 0) {
+			var i = 0;
+			
+			for(var k in cache) {
+				console.log("Item[" + i++ + "] " + k);
+			}
+			
+			return "Items are returned in order of parsing, not priority.";
+		} else if( ! cache.hasOwnProperty(str)) {
+            cache[str] = true;
+			
+			return true; // first-time.
+        }
+		
+		return false; // not first-time.
+    };
+}());
+
+// Irony?
+TODO("Write a separate parser to detect all TODO items, without application run-time overhead. Have this tie into require.js's way of parsing files.");
+
+
 /// Log a message only once to the console.
 var NOTICE = (function() {
     
