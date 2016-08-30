@@ -1,3 +1,11 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2016 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
+/// TODO: extend and test stub functionality.
 define(function(require) {
 	var Entity = require("meier/engine/Entity");
 	
