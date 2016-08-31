@@ -149,6 +149,8 @@ define(function(require) {
     };
     
     Game.prototype._applyFps = function(fps) {
+		TODO("Use request animation frame instead of timeouts when FPS is 60.");
+		
         // Remove current loop:
         if(this._intervalId !== null) {
             clearInterval(this._intervalId);
