@@ -457,7 +457,7 @@ define(function(require) {
             return this;
         };
         
-        V.prototype.pretty = function(digits) {
+        V.prototype.pretty = V.prototype.toPretty = function(digits) {
             var out = [];
             digits  = isNaN(digits) ? 4 : digits;
         
@@ -468,7 +468,7 @@ define(function(require) {
             return out.join(", ");
         };
         
-        V.prototype.wolfram = function() {
+        V.prototype.wolfram = V.prototype.toWolfram = function() {
             var r = "{";
         
             for(var i = 0; i < this.numrows; ++i) {
@@ -487,7 +487,7 @@ define(function(require) {
         
             return r;
         };
-        
+		
         return V;
     };
 });
