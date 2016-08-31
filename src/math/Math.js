@@ -807,7 +807,36 @@ define(function(require) {
     
             return candidate;
         },
-        
+		
+		/// Determine if a number is even. Not quite the same
+		/// as !IsEvent, odd/even numbers are only defined for
+		/// integers. This method, and it's counter-part, return
+		/// false for non-integers.
+		IsOdd: function(number) {
+			
+			if(parseInt(number, 10) == number) {
+				return number % 2 == 1;
+			}
+			
+			// Only well defined for integers.
+			return false;
+		},
+		
+		/// Determine if a number is odd. Not quite the same
+		/// as !IsOdd, odd/even numbers are only defined for
+		/// integers. This method, and it's counter-part, return
+		/// false for non-integers.
+		IsEven: function(number) {
+			
+			if(parseInt(number, 10) == number) {
+				return number % 2 == 0;
+			}
+			
+			// Only well defined for integers.
+			return false;
+		},
+		
+		
     }; // End var self = {}
     
     // Copy "normal" Math objects. This list is exported from my Chrome install at the time.
