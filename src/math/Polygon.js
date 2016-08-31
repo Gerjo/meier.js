@@ -75,6 +75,18 @@ define(function(require) {
         });
         
     };
+	
+    Polygon.prototype.first = function() {
+		return this.vertices.first();
+	};
     
+	Polygon.prototype.last = function() {
+		return this.vertices.last();
+	};
+    
+	Polygon.prototype.isEmpty = function() {
+		return this.vertices.isEmpty();
+	};
+	
     return Polygon;
 });
