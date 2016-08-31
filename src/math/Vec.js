@@ -298,17 +298,28 @@ define(function(require) {
             return true;
         }; 
         
-        V.prototype.equals = function(o) {
+		/// Component wise comparison, with an optional epsilon minimal 
+		/// difference.
+        V.prototype.equals = function(o, epsilon) {
             
             if(o.numrows !== this.numrows) {
                 return false;
             }
             
-            for(var i = this.numrows - 1; i >= 0; --i) {
-                if(this._[i] !== o._[i]) {
-                    return false;
-                }
-            }
+			if(arguments.length > 1) {
+	            for(var i = this.numrows - 1; i >= 0; --i) {
+	                if(Math.abs(this._[i] - o._[i]) > epsilon) {
+						console.log(Math.abs(this._[i] - o._[i]));
+	                    return false;
+	                }
+	            }
+			} else {
+	            for(var i = this.numrows - 1; i >= 0; --i) {
+	                if(this._[i] !== o._[i]) {
+	                    return false;
+	                }
+	            }
+			}
             
             return true;
         };
