@@ -345,7 +345,7 @@ define(function(require) {
                 pen[axis] = 0;
             }
     
-        }.bind(this));
+        });
 
         // Special case: both axis overlap:
         if(pen.y === 0 && pen.x === 0) {
