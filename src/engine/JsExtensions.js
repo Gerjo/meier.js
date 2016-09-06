@@ -64,12 +64,41 @@ var NOTICE = (function() {
             
             cache[str] = true;
 			
+			
+			
 			return true;
         }
 		
 		return false;
     };
 }());
+
+/// Log a message only once to the console.
+var DEPRICATED = (function() {
+    
+    var cache = {};
+    
+    return function DEPRICATED(name, message) {
+		
+		name = name || DEPRICATED.caller;
+		message = message || "";
+		
+		var ident = "DEPRICATED: Function '" + name + "' is deprecated and will be deleted. " + message;
+		
+        if( ! cache.hasOwnProperty(ident)) {
+            console.log(ident);
+            
+            cache[ident] = true;
+			
+			
+			return true;
+        }
+		
+		return false;
+    };
+}());
+
+
 
 /// Assertion to be used for development only. Not just because
 /// that's good practise, it also because the code of this is 
