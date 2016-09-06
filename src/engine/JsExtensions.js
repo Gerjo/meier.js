@@ -492,7 +492,7 @@ Array.prototype.eachPair = function(callback, wraparound) {
 /// @return this array, for method chaining.
 Array.prototype.execute = function(functionName) {
 	this.forEach(function(item) {
-		item[fn]();
+		item[functionName]();
 	});
 	
 	return this;
