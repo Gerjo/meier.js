@@ -453,7 +453,7 @@ Array.prototype.filterMap = function(callback) {
     return this;
 };
 
-/// Duplicate an array:
+/// Duplicate an array, shallow.
 Array.prototype.clone = function() { 
     return this.slice(0); 
 };
