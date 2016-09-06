@@ -6,7 +6,7 @@
  !*/
 
 define(function(require) {
-    var Vector       = require("meier/math/Vector");
+    var Vec2         = require("meier/math/Vec")(2);
     var M            = require("meier/math/Math");
     var Intersection = require("meier/math/Intersection");
     var LineSegment  = require("meier/math/Line");
@@ -19,7 +19,7 @@ define(function(require) {
     /// []
     ///
     function Polygon(position, vertices) {
-        if(position instanceof Vector) {
+        if(position instanceof Vec2) {
             this.position = position;
             
             if(vertices instanceof Array) {
@@ -29,10 +29,10 @@ define(function(require) {
             }
         } else if(position instanceof Array) {
             this.vertices = position;
-            this.position = new Vector(0, 0);
+            this.position = new Vec2(0, 0);
         } else {
             this.vertices = [];
-            this.position = new Vector(0, 0);
+            this.position = new Vec2(0, 0);
         }
     }
 	
