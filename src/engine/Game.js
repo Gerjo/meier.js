@@ -29,7 +29,7 @@ define(function(require) {
     function Game(container) {
 
         // Default contructor, do nothing.
-        if( ! container) {
+        if( arguments.length == 0) {
             return;
         }
 		
@@ -40,7 +40,9 @@ define(function(require) {
 				throw new Error("HTML Container '" + arguments[0] + "' not found.");
 				return;
 			}
-		}        
+		} else if(container === undefined) {
+			container = document.getElementsByTagName("body")[0];
+		}       
 
         // This is mostly a TODO thing
         this.isTablet        = ('ontouchstart' in document.documentElement);
