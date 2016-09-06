@@ -79,7 +79,7 @@ define(function(require) {
             
         }
         
-        V.prototype.distance = function(o) {
+        V.prototype.distance = V.prototype.distanceTo = function(o) {
             return Math.sqrt(this.distanceSq(o));
         };
 
