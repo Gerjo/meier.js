@@ -27,7 +27,7 @@ define(function(require) {
     /// @return An object indicating the height and baseline of a font.
     Fonts.Measure = function(css) {
         
-        if(MeasurementCache[css]) {
+        if(css in MeasurementCache) {
             // Returns a reference, might be unexpected.
             return MeasurementCache[css];
         }
