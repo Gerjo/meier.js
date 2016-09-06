@@ -160,7 +160,11 @@ define(function(require) {
                                 
                 delete this._eventHandlers[event];
             } else {
-                console.log("Cannot disable event id: #", event, "it was never enabled to begin with.");
+				if(this._eventRegisterQueue.contains(event) === false) {
+	                console.log("Cannot disable event id: #", event, "it was never enabled to begin with.");					
+				} else {
+					console.log("Disabling event id: #", event, " before it was event added. This is s. Is the entity added to a parent?");
+				}
             }
         } else {
             throw new Error("Unknown event ID #", event);
