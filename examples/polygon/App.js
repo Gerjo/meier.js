@@ -1,7 +1,7 @@
 define(function(require){
     var Game = require("meier/engine/Game");
     var Input = require("meier/engine/Input");
-    var Freeform = require("meier/extra/Freeform");
+    var Freeform = require("meier/prefab/Freeform");
     var dat     = require("meier/contrib/datgui");
 	
     App.prototype = new Game();
