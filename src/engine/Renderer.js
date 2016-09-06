@@ -413,7 +413,7 @@ define(function(require) {
         // Default figures:
         var style = ""; // bold / italic and normal.
         var font  = "monospace";
-        var color = "white";
+        var color = "cyan"; // Not as nice, but works with white and black backgrounds.
         var size  = 10;
         var startBracket = null;
         var startString  = 0;
