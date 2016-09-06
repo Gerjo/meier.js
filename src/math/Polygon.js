@@ -153,15 +153,24 @@ define(function(require) {
 		sigma = sigma || 1.2;
 		vertices = vertices || 32;
 		
-		var clone = this.clone();
+		TODO("Tie MLS padding coordinate repetition parameter into sigma.");
+		var samplesRepetition = 20; 
 		
-		var vertices = clone.vertices;
+		if(this.vertices.length < samplesRepetition) {
+			samplesRepetition = this.vertices.length;
+		}
 		
-		vertices.push(vertices.first());
+		// Repeat beginning and end coordinates. Polygons are continuous, so
+		// this should be a nice approximation :)
+		var vertices = this.vertices.slice(this.vertices.length-samplesRepetition).concat(this.vertices).concat(this.vertices.slice(0, samplesRepetition));
+		
 		
 		var t = 0;
 		var x = [];
 		var y = [];
+		
+		var sampleStart = 0;
+		var sampleEnd   = 0;
 		
 		for(var i = 0; i < vertices.length; ++i) {
 			var vertex = vertices[i];
@@ -172,6 +181,16 @@ define(function(require) {
 			
 			x.push(new Vec2(t, vertex.x));
 			y.push(new Vec2(t, vertex.y));
+			
+			// Record the padding time
+			if(i == samplesRepetition) {
+				sampleStart = t;
+			}
+			
+			// Record the padding time
+			if(i == vertices.length - samplesRepetition) {
+				sampleEnd = t;
+			}
 		}
 		/*
             var res = {
@@ -189,11 +208,12 @@ define(function(require) {
 		
 		var res = [];
 		
-		var stepsize = a.xMax / (numVertices-1);
+
+		var stepsize = (sampleEnd - sampleStart) / (numVertices-1);
 		
-		console.log(numVertices);
-		
-		for(var j = 0; j <= a.xMax; j += stepsize) {
+		// Some coordinates are repeated. The offset marks
+		// the start (and end) of the "original" series.		
+		for(var j = sampleStart; j < sampleEnd; j += stepsize) {
 			var v = new Vec2(
 				a.f(j),
 				b.f(j)
@@ -202,9 +222,7 @@ define(function(require) {
 			res.push(v);
 		}
 		
-		clone.vertices = res;
-		
-		return clone;
+		return new Polygon(this.position, res);
 	};
 	
     return Polygon;
