@@ -309,7 +309,7 @@ define(function(require) {
 			if(arguments.length > 1) {
 	            for(var i = this.numrows - 1; i >= 0; --i) {
 	                if(Math.abs(this._[i] - o._[i]) > epsilon) {
-						console.log(Math.abs(this._[i] - o._[i]));
+						//console.log(Math.abs(this._[i] - o._[i]));
 	                    return false;
 	                }
 	            }
