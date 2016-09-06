@@ -360,6 +360,14 @@ Array.prototype.find = function(callback) {
     return result;
 };
 
+/// Determine if an item is contained within this array.
+/// Internally relies on "Array.prototype.indexOf" to determine
+/// equivalency.
+/// @param item The item to test for
+/// @param boolean indicating if it was found, or not.
+Array.prototype.contains = Array.prototype.has = function(item) {
+	return this.indexOf(item) !== -1;
+};
 
 /// Merge all internal array entries in the outer array.
 /// In other words, it reduces a multidimensional array
