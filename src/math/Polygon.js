@@ -114,6 +114,8 @@ define(function(require) {
             } else if(c !== sign) {
                 return false;
             }
+			
+			return true;
         });
         
     };
