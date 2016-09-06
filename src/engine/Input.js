@@ -28,6 +28,19 @@ define(function(require) {
 
     // Tablets only.
     Input.DOUBLE_TAP  = Input.Events.DOUBLE_TAP  = Input.Events.COUNT++;
+	
+	function EventIdToDebugName(event) {
+		
+		for(var k in Input.Events) {
+			if(Input.Events.hasOwnProperty(k)) {
+				if(Input.Events[k] == event) {
+					return k;
+				}
+			}
+		}
+		
+		return "unknown";
+	}
 
     InputCursorCount = 0;
     Input.Cursor     = {};
