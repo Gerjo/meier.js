@@ -487,6 +487,17 @@ Array.prototype.eachPair = function(callback, wraparound) {
     return true;
 };
 
+/// Call a given method on each entry.
+/// @param functionName A string representing the method name to be called.
+/// @return this array, for method chaining.
+Array.prototype.execute = function(functionName) {
+	this.forEach(function(item) {
+		item[fn]();
+	});
+	
+	return this;
+};
+
 /// Toggle the key and value properties. The array values become
 /// the new keys and vice versa. If non unique values are present,
 /// only the last is kept.
