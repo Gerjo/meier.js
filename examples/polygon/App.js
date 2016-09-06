@@ -22,7 +22,8 @@ define(function(require){
         var folder = this.gui.addFolder("Moving Least Squares");
 		folder.add(this.mls, "sigma", 0.01, 5, 0.01).onChange(this.smoothen.bind(this));
 		folder.add(this.mls, "vertices", 1, 350, 1).onChange(this.smoothen.bind(this));
-		
+		folder.open();
+		 
     	//folder.add(this, 'numEntities', 1, 50, 0.01);
 		
 		
@@ -66,7 +67,7 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-		if(this.freeforms.empty()) {
+		if(this.freeforms.isEmpty()) {
 			
 			renderer.styled("<black><17px>Hold your left mouse button down, and draw some shape on this canvas.", 0, 0, "center", "center");
 			
