@@ -12,6 +12,7 @@ define(function(require) {
     var LineSegment  = require("meier/math/Line");
     var Line         = require("meier/math/Line");
 	var Math         = require("meier/math/Math");
+    var MLS          = require("meier/math/Polynomial").MovingLeastSquares;
 	
     /// Accepts:
     /// [vector, array<vector>]
@@ -117,16 +118,91 @@ define(function(require) {
         
     };
 	
+    
+	/// Retrieve the first added coordinate.
+	/// @return The first entry, or undefined if empty.
     Polygon.prototype.first = function() {
 		return this.vertices.first();
 	};
     
+	/// Retrieve the last added coordinate.
+	/// @return The last entry, or undefined if empty.
 	Polygon.prototype.last = function() {
 		return this.vertices.last();
 	};
     
+	/// Determine if this polygon is empty. Empty
+	/// is defined as having no coordinates.
 	Polygon.prototype.isEmpty = function() {
 		return this.vertices.isEmpty();
+	};
+	
+	/// Create a deep copy of this polygon.
+	Polygon.prototype.clone = function() {
+		return new Polygon(this.position, this.vertices);
+	};
+	
+	/// Compute a smoothed version of this polygon. 
+	/// @param sigma The sigma value of the gaussian function.
+	/// @param numVertices The desired number of vertices in the new polygon.
+	/// @return A copy represented a smoothed polygon.
+	Polygon.prototype.mls = function(sigma, numVertices) {
+		
+		sigma = sigma || 1.2;
+		vertices = vertices || 32;
+		
+		var clone = this.clone();
+		
+		var vertices = clone.vertices;
+		
+		vertices.push(vertices.first());
+		
+		var t = 0;
+		var x = [];
+		var y = [];
+		
+		for(var i = 0; i < vertices.length; ++i) {
+			var vertex = vertices[i];
+			
+			if(i > 0) {
+				t += vertices[i].distanceTo(vertices[i-1]);
+			}
+			
+			x.push(new Vec2(t, vertex.x));
+			y.push(new Vec2(t, vertex.y));
+		}
+		/*
+            var res = {
+                "xMin": Infinity,
+                "xMax": -Infinity,
+                "xRange": 0,
+                "basis": [],
+                "points": points.clone().sort(function(a,b) { return a.x - b.x; }),
+                "f": null
+            };
+		(*/
+		
+		var a = MLS(x, sigma);
+		var b = MLS(y, sigma);
+		
+		var res = [];
+		
+		var stepsize = a.xMax / (numVertices-1);
+		
+		console.log(numVertices);
+		
+		for(var j = 0; j <= a.xMax; j += stepsize) {
+			var v = new Vec2(
+				a.f(j),
+				b.f(j)
+			);
+						
+			res.push(v);
+		}
+		
+		clone.vertices = res;
+		
+		return clone;
 	};
 	
     return Polygon;
