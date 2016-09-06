@@ -9,6 +9,8 @@ define(function(require){
     function App(container) {        
         Game.call(this, container);
 
+		this.setFps(60);
+
 		this.mls = {
 			sigma: 1.2,
 			vertices: 32
@@ -18,7 +20,7 @@ define(function(require){
         this.gui.width = 300;
         
         var folder = this.gui.addFolder("Moving Least Squares");
-		folder.add(this.mls, "sigma", 0, 5, 0.01).onChange(this.smoothen.bind(this));
+		folder.add(this.mls, "sigma", 0.01, 5, 0.01).onChange(this.smoothen.bind(this));
 		folder.add(this.mls, "vertices", 1, 350, 1).onChange(this.smoothen.bind(this));
 		
     	//folder.add(this, 'numEntities', 1, 50, 0.01);
