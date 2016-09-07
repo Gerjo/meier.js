@@ -197,6 +197,71 @@ define(function(require) {
 		
 		return distance;
 	};
+	
+	
+	/// Create a new polygon by resampling N uniformly spaced
+	/// vertices on the border of this polygon.
+	/// Note that the spacing between vertices on the new border,
+	/// is not nesseccarrily uniform.
+	///
+	/// @param numVertices The desired number of vertices.
+	/// @return A new polygon with specified number of vertices.
+	Polygon.prototype.uniformResample = function(numVertices) {
+	
+		var circumference = this.circumference();
+		var stepsize = circumference / numVertices;
+		
+		var res = [];
+		
+		var traveled = 0;
+		
+		
+		var max = this.vertices.length;
+		
+		if(IsClosed(this)) {
+			max -= 1;
+		}
+		
+		for(var i = 0; i < max; ++i) {
+			var a = this.vertices[(i == 0 ? this.vertices.length : i) - 1].clone();
+			var b = this.vertices[i];
+			var dir = b.direction(a).normalize();
+			
+			var d = a.distanceTo(b);
+			
+			var epsilon = 0.00001;
+			
+			// Did we overshoot?
+			while(traveled + d >= (stepsize-epsilon)) {
+				
+				// Distance traveled on current line segment.
+				var me = stepsize - traveled;
+				
+				// If epsilon was required, then use the actual distance. This
+				// makes sure that "errors" do not accru over the entire
+				// circumference of the polygon.
+				if(traveled + d >= stepsize-epsilon && traveled + d < stepsize) {
+					me = d;
+				}
+				
+				res.push(
+					a.addScaled(dir, me).clone()
+				);
+								
+				d -= me;
+				traveled = 0;
+			}
+			
+			//ASSERT(d < stepsize);
+			
+			traveled += d;
+		}
+		
+		//console.log("Remnant: " + traveled.toFixed(4));
+		//console.log("Step size: " + stepsize.toFixed(4));
+		return new Polygon(this.position, res);
+	};
+	
 	/// Retrieve the first added coordinate.
 	/// @return The first entry, or undefined if empty.
     Polygon.prototype.first = function() {
