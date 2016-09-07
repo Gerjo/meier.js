@@ -836,6 +836,31 @@ define(function(require) {
 			return false;
 		},
 		
+		/// Return the first parameter. Useful as a quick drop in:
+		///  
+	    ///   Math.pow(a, 3)
+		///    into
+		///   Math.ident(a, 4)
+		///
+		/// @param arg Some value
+		/// @return The specified argument arg
+		/// @synonym Identity
+		Ident: function(arg) {
+			return arg;
+		},
+		
+		/// Return the first parameter. Useful as a quick drop in:
+		///  
+	    ///   Math.pow(a, 3)
+		///    into
+		///   Math.Identity(a, 4)
+		///
+		/// @param arg Some value
+		/// @return The specified argument arg
+		/// @synonym Ident
+		Identity: function(arg) {
+			return arg;
+		},
 		
     }; // End var self = {}
     
