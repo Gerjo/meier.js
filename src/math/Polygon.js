@@ -285,6 +285,14 @@ define(function(require) {
 		return new Polygon(this.position, this.vertices.clone());
 	};
 	
+	/// Reset the position and remove vertices of this polygon.
+	Polygon.prototype.clear = function() {
+		this.vertices.clear();
+		this.position.x = 0;
+		this.position.y = 0;
+		return this;
+	};
+	
 	/// Compute a smoothed version of this polygon. 
 	/// @param sigma The sigma value of the gaussian function.
 	/// @param numVertices The desired number of vertices in the new polygon.
