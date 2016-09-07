@@ -32,7 +32,7 @@ define(function(require) {
 		this.config = configuration || Object.create(Configuration);
 		
 		this.polygon = new Polygon();
-		this.isRecording = false;
+		this._isRecording = false;
 		
 		this.interval = 0;
 	}
@@ -40,23 +40,31 @@ define(function(require) {
 	Freeform.prototype.record = Freeform.prototype.start = function() {
 		this.enableEvent(Input.MOUSE_MOVE);
 		
-		this.isRecording = true;		
+		this._isRecording = true;		
 	};
 	
 	Freeform.prototype.stop = Freeform.prototype.pause = function() {
 		this.disableEvent(Input.MOUSE_MOVE);
 		
-		this.isRecording = false;
+		this._isRecording = false;
+	};
+	
+	Freeform.prototype.isRecording = Freeform.prototype.isEditing = function() {
+		return this._isRecording;
 	};
 	
 	Freeform.prototype.reset = Freeform.prototype.restart = function() {
 		this.polygon.vertices.clear();
 	};
 	
+	Freeform.prototype.isEmpty = function() {
+		return this.polygon.isEmpty();
+	};
+	
 	Freeform.prototype.onMouseMove = function(input) {
 		//console.log(this.contains(input));
 		
-		if( ! this.isRecording) {
+		if( ! this._isRecording) {
 			return;
 		}
 		
@@ -94,7 +102,7 @@ define(function(require) {
 	};
 	
 	Freeform.prototype.contains = function(point) {
-		return ! this.isRecording && this.polygon.contains(point);	
+		return ! this._isRecording && this.polygon.contains(point);	
 	};
 	
 	Freeform.prototype.draw = function(renderer) {
@@ -102,7 +110,7 @@ define(function(require) {
 		TODO("Rename configuration entries.");
 		var Preset = this.config;
 		
-		if( ! this.isRecording) {
+		if( ! this._isRecording) {
 			
 			renderer.begin();
 			renderer.polygon(this.polygon);
