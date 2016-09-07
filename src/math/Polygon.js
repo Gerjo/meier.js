@@ -282,7 +282,7 @@ define(function(require) {
 	
 	/// Create a deep copy of this polygon.
 	Polygon.prototype.clone = function() {
-		return new Polygon(this.position, this.vertices);
+		return new Polygon(this.position, this.vertices.clone());
 	};
 	
 	/// Compute a smoothed version of this polygon. 
