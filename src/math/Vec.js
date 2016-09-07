@@ -375,7 +375,7 @@ define(function(require) {
             return Math.sqrt(this.lengthSQ());
         };
         
-        V.prototype.normalize = function() {
+        V.prototype.normalize = V.prototype.normalized = function() {
             var l = this.length();
             
             if(l !== 0) {
