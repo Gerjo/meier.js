@@ -119,7 +119,7 @@ define(function(require) {
 				renderer.rect(p.x, p.y, 4, 4);
 			});
 	
-			renderer.fill(Colors.Alpha(Preset.Finished, 0.5));
+			renderer.fill(Colors.Alpha(Preset.Finished, 0.2));
 			renderer.stroke(Preset.Finished);
 		} else {
 			renderer.begin();
