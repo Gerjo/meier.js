@@ -24,6 +24,7 @@ define(function(require) {
     var Logger    = require("meier/engine/Logger");
     var Input     = require("meier/engine/Input");
     var Entity    = require("meier/engine/Entity");
+	var Average   = require("meier/math/Average");
 
 
     function Game(container) {
@@ -50,7 +51,8 @@ define(function(require) {
     
         // Update loop related matter:
         this.clock           = new Stopwatch(); // Wall Clock.
-        this._fps            = 15;              // Desired framerate
+        this._avgFps         = new Average(30); // Last 30 frames.
+		this._fps            = 15;              // Desired framerate
         this._lowFps         = null;
         this._previousFps    = this._fps;
         this._dttimer        = new Stopwatch(); // Delta time counter.
@@ -189,7 +191,9 @@ define(function(require) {
     Game.prototype._update = function() {
         var dt = this._dttimer.peek() * 0.001;
         this._dttimer.start();
-    
+		
+		this._avgFps.add(1 / dt);
+	
         // Clamp dt:
         if(dt > 0.2) {
             dt = 0.2;

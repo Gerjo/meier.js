@@ -134,7 +134,7 @@ define(function(require){
 
     Logger.prototype.update = function(dt) {
         if(this._showInternals === true) {
-            this.log("FPS", Math.ceil(1 / dt) + "/" + this._game._fps);
+            this.log("avgFPS", Math.ceil(this._game._avgFps.get()) + "/" + this._game._fps);
             this.log("Clock", Math.floor(this._game.clock.peek() * 0.001));
             //this.log("Listeners", "#" + this._game.input.countListeners());
     
