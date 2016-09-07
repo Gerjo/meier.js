@@ -85,6 +85,8 @@ define(function(require) {
 
         // Depricated use 'distanceSq'.
         V.prototype.distanceSQ = function(o) {
+			DEPRICATED("V.prototype.distanceSQ", "Please use distanceSq");
+			
             var r = 0;
             for(var i = this.numrows - 1; i >= 0; --i) {
                 r += Math.pow(this._[i] - o._[i], 2);
