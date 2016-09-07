@@ -25,7 +25,25 @@ define(function(require) {
     var Input     = require("meier/engine/Input");
     var Entity    = require("meier/engine/Entity");
 	var Average   = require("meier/math/Average");
+	
+	var StopAnimationInterval = false;
 
+	function SetAnimationFrameInterval(callback) {
+		
+		StopAnimationInterval = false;
+		
+		function UponNewFrame() {
+			
+			if( ! StopAnimationInterval) {
+				callback();
+			
+				window.requestAnimationFrame(UponNewFrame);
+			}
+		}
+		
+		// Scedule initial call async.
+		window.requestAnimationFrame(UponNewFrame);
+	}
 
     function Game(container) {
 
@@ -153,19 +171,29 @@ define(function(require) {
     };
     
     Game.prototype._applyFps = function(fps) {
-		TODO("Use request animation frame instead of timeouts when FPS is 60.");
-		
 		this._fps = fps;
 		
         // Remove current loop:
         if(this._intervalId !== null) {
             clearInterval(this._intervalId);
         }
+		
+		StopAnimationInterval = true;
         
-        if(fps > 0) {
+		if(fps == 60 && window.requestAnimationFrame) {
+			
+			this._fps = "vsync";
+			
+			NOTICE("Using experimental requestAnimationFrame");
+			
+			SetAnimationFrameInterval(this._update.bind(this));
+						
+		} else if(fps > 0) {
             // Schedule a new loop
             this._intervalId = setInterval(this._update.bind(this), 1000 / fps);
             
+			
+			
             //console.log("new fps: ");
         } else {
             // There shall be no new loop
