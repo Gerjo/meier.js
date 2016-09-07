@@ -14,6 +14,19 @@ define(function(require) {
 	var Math         = require("meier/math/Math");
     var MLS          = require("meier/math/Polynomial").MovingLeastSquares;
 	
+	
+	// Determine if the last coordinate equals the first. Hidden in
+	// private scope because this method may not always make sense.
+	function IsClosed(polygon) {
+		
+		// Open to interpretation...
+		if(polygon.vertices.length <= 2) {
+			return true;
+		}
+		
+		return polygon.vertices.last().equals(polygon.vertices.first());
+	}
+	
     /// Accepts:
     /// [vector, array<vector>]
     /// [array<vector>]
