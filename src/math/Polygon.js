@@ -133,7 +133,70 @@ define(function(require) {
         
     };
 	
-    
+	/// Compute the circumference of this polygon. If the
+	/// polygon has two coordinates, the line length is
+	/// returned.
+	///
+	/// @return The circumference.
+	Polygon.prototype.circumference = function() {
+		
+		// Early out for edge cases.
+		if(this.vertices.length <= 1) {
+			return 0;
+		}
+		
+		var distance = 0;
+		
+		var max = this.vertices.length;
+		
+		// Exclude last coordinate.
+		if(IsClosed(this)) {
+			max -= 1;
+		}
+		
+		for(var i = 1; i < max; ++i) {
+			distance += this.vertices[i - 1].distanceTo(this.vertices[i]);
+		}
+		
+		// Close the loop.
+		distance += this.vertices.first().distanceTo(this.vertices.last());
+		
+		return distance;
+	};
+	
+	/// Compute the squared pience-wise circumference of 
+	/// this polygon. If the polygon has two coordinates, 
+	/// the squared line length is returned.
+	/// 
+	/// Note: dont think that this holds:
+	///   sqrt(circumferenceSq) == circumference
+	///
+	/// @return The circumference.
+	Polygon.prototype.circumferenceSq = function() {
+		
+		// Early out for edge cases.
+		if(this.vertices.length <= 1) {
+			return 0;
+		}
+		
+		var distance = 0;
+		
+		var max = this.vertices.length;
+		
+		// Exclude last coordinate.
+		if(IsClosed(this)) {
+			max -= 1;
+		}
+		
+		for(var i = 1; i < max; ++i) {
+			distance += this.vertices[i - 1].distanceToSq(this.vertices[i]);
+		}
+		
+		// Close the loop.
+		distance += this.vertices.first().distanceToSq(this.vertices.last());
+		
+		return distance;
+	};
 	/// Retrieve the first added coordinate.
 	/// @return The first entry, or undefined if empty.
     Polygon.prototype.first = function() {
