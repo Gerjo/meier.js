@@ -557,6 +557,8 @@ define(function(require) {
             
             // Unsure how top align should look like.
             } else if(valign == "top") {
+                this.context.textBaseline = "top";
+				TODO("Implement baseline top for the renderer typesetter. Pretty hard.");
                 throw new Error("Not implemented yet");
             }
             
