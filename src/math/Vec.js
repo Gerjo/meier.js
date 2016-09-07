@@ -96,7 +96,7 @@ define(function(require) {
         };
         
         // Better naming convention.
-        V.prototype.distanceSq = function(o) {
+        V.prototype.distanceSq = V.prototype.distanceToSq = function(o) {
             var r = 0;
             for(var i = this.numrows - 1; i >= 0; --i) {
                 r += Math.pow(this._[i] - o._[i], 2);
