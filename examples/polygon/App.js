@@ -29,17 +29,17 @@ define(function(require){
         
 		var folder;
         
-		folder = this.gui.addFolder("Original Polygon");
+		folder = this.gui.addFolder("Original Polygon - blue");
 		folder.add(this, "doOriginal").name("Show").onChange(this.smoothen.bind(this));
 		folder.open();
 		
-        folder = this.gui.addFolder("Moving Least Squares");
+        folder = this.gui.addFolder("Moving Least Squares - red");
 		folder.add(this, "doMLS").name("Show").onChange(this.smoothen.bind(this));
 		folder.add(this.mls, "sigma", 0.1, 30, 0.1).name("Gaussian Sigma").onChange(this.smoothen.bind(this));
 		folder.add(this.mls, "vertices", 1, 350, 1).name("# Vertices").onChange(this.smoothen.bind(this));
 		folder.open();
 		
-        folder = this.gui.addFolder("Uniform Resample");
+        folder = this.gui.addFolder("Uniform Resample - green");
 		folder.add(this, "doResample").name("Show").onChange(this.smoothen.bind(this));
 		folder.add(this, "resampleCount", 1, 300, 1).name("# Resamples").onChange(this.smoothen.bind(this));
 		//folder.open();
@@ -107,46 +107,32 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 		
+		function Draw(polygon, color) {
+			renderer.begin();
+			renderer.polygon(polygon);
+			renderer.stroke(color);
+			renderer.fill(Color.Alpha(color, 0.1));
+
+			renderer.begin();				
+			polygon.vertices.forEach(function(v) {
+				renderer.rect(v, 4, 4);
+			});
+			renderer.fill(color);
+		}
+		
 		this.freeforms.forEach(function(freeform) {
 			
 			
 			if(freeform.original && this.doOriginal) {
-				renderer.begin();
-				renderer.polygon(freeform.original);
-				renderer.stroke("blue");
-				renderer.fill(Color.Alpha("blue", 0.1));
-
-				renderer.begin();				
-				freeform.original.vertices.forEach(function(v) {
-					renderer.rect(v, 4, 4);
-				});
-				renderer.fill("blue");
+				Draw(freeform.original, "blue");
 			}
 			
 			if(freeform.mlsversion) {
-				renderer.begin();
-				renderer.polygon(freeform.mlsversion);
-				renderer.stroke("red");
-				renderer.fill(Color.Alpha("red", 0.1));
-				
-				renderer.begin();				
-				freeform.mlsversion.vertices.forEach(function(v) {
-					renderer.rect(v, 4, 4);
-				});
-				renderer.fill("red");
+				Draw(freeform.mlsversion, "red");
 			}
 		
 			if(freeform.resample) {
-				renderer.begin();
-				renderer.polygon(freeform.resample);
-				renderer.stroke("green");
-				renderer.fill(Color.Alpha("green", 0.1));
-				
-				renderer.begin();				
-				freeform.resample.vertices.forEach(function(v) {
-					renderer.rect(v, 4, 4);
-				});
-				renderer.fill("green");
+				Draw(freeform.resample, "green");
 			}
 
 		}.bind(this));
