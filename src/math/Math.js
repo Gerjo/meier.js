@@ -864,12 +864,8 @@ define(function(require) {
 		
     }; // End var self = {}
     
-	for(var k in Math) {
-		console.log(k);
-	}
-	
-	TODO("Copy directly from Math rather than this hardcoded list.");
     // Copy "normal" Math objects. This list is exported from my Chrome install at the time.
+	// NB.: List is required because a for..in loop doesn't work.
     ["E", "LN10", "LN2", "LOG2E", "LOG10E", "PI", "SQRT1_2", "SQRT2", "random", "abs", "acos", "asin", "atan", "ceil", "cos", "exp", "floor", "log", "round", "sin", "sqrt", "tan", "atan2", "pow", "max", "min", "imul", "sign", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "log10", "log2", "hypot", "fround", "clz32", "cbrt", "log1p", "expm1", "ln", "QuarterPI", "TreeQuarterPI", "HalfPI", "TwoPI", "InverseQuarterPI", "InverseTreeQuarterPI", "InverseHalfPI", "InverseTwoPI", "InversePI", "hyp"].forEach(function(k) {
         
         // Name remains as-is (this can be a Math drop-in replacement.)
