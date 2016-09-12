@@ -73,8 +73,8 @@ define(function(require){
         return this;
     };
     
-    Logger.prototype.hideInternals = function(doShow) {
-        this._showInternals = false;
+    Logger.prototype.hideInternals = function(doHide) {
+        this._showInternals = doHide !== true;
         return this;
     };
 
