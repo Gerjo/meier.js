@@ -66,6 +66,8 @@ define(function(require) {
         // This is mostly a TODO thing
         this.isTablet        = ('ontouchstart' in document.documentElement);
         this.isSlow          = false;
+		
+		var computedStyle = window.getComputedStyle ? window.getComputedStyle(container, null) : null;
     
         // Update loop related matter:
         this.clock           = new Stopwatch(); // Wall Clock.
@@ -74,8 +76,18 @@ define(function(require) {
         this._lowFps         = null;
         this._previousFps    = this._fps;
         this._dttimer        = new Stopwatch(); // Delta time counter.
-        this.width           = parseInt(container.offsetWidth / 2, 10) * 2;
-        this.height          = parseInt(container.offsetHeight / 2, 10) * 2;
+        
+		// Support style set via stylesheets.
+		if(computedStyle) {
+			this.width           = parseInt(computedStyle.width, 10);
+        	this.height          = parseInt(computedStyle.height, 10);
+			
+		// Default dimensional properties.
+		} else {
+			this.width           = parseInt(container.offsetWidth, 10);
+        	this.height          = parseInt(container.offsetHeight, 10);		
+		}
+		
         this.hw              = this.width  * 0.5;
         this.hh              = this.height * 0.5;    
         this.htmlContainer   = container;
