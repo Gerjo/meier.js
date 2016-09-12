@@ -145,7 +145,7 @@ define(function(require){
 		} else {
 			
 			if( ! this.freeforms.last().isRecording()) {
-				renderer.styled("<black><14px>Click & drag anywhere to draw again.", 0, this.hh-10, "center", "bottom");			
+				renderer.styled("<black><14px>Click & drag anywhere to draw again.", 0, -this.hh+20, "center", "bottom");			
 			}
 		}		
     };
