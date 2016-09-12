@@ -34,6 +34,15 @@ define(function(require) {
         return node.addEventListener(eventName, fn, false);
     };
 	
+    self.OnHover = function(selector, fn) {
+        
+		var node = self.Find(selector);
+		
+        var eventName = ("ontouchstart" in window) ? "touchbegin" : "onmouseover";
+    
+        return node.addEventListener(eventName, fn, false);
+    };
+	
 	self.Remove = function(selector) {
 		selector = self.Find(selector);
 		
