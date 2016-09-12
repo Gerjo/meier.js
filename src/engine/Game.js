@@ -63,6 +63,13 @@ define(function(require) {
 			container = document.getElementsByTagName("body")[0];
 		}       
 
+		// Hide canvas that doesn't fit in the container. Recently iframe 
+		// parents have some issues by adding padding to the bottom. This  
+		// hides that padding.
+		if( ! container.style.overflow) {
+			container.style.overflow = "hidden";
+		}
+		
         // This is mostly a TODO thing
         this.isTablet        = ('ontouchstart' in document.documentElement);
         this.isSlow          = false;
