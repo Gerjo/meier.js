@@ -13,7 +13,7 @@ define(function(require) {
     var Line         = require("meier/math/Line");
 	var Math         = require("meier/math/Math");
     var MLS          = require("meier/math/Polynomial").MovingLeastSquares;
-	
+	var Rectangle    = require("meier/math/Rectangle");
 	
 	// Determine if the last coordinate equals the first. Hidden in
 	// private scope because this method may not always make sense.
@@ -316,6 +316,40 @@ define(function(require) {
 		this.position.x = 0;
 		this.position.y = 0;
 		return this;
+	};
+
+	/// Compute minimum fitting axis aligned rectangle.
+	Polygon.prototype.boundingRect = function() {
+		var r;
+		
+		if(this.vertices.length == 0) {
+			r = new Rectangle(0, 0, 0, 0);
+		} else {
+			r = new Rectangle(this.vertices[0].clone(), this.vertices[0].clone());
+		}
+		
+		this.vertices.forEach(function(v, i) {
+			if(v.x < r.min.x) {
+				r.min.x = v.x;
+			}
+			
+			if(v.y < r.min.y) {
+				r.min.y = v.y;
+			}
+			
+			if(v.x > r.max.x) {
+				r.max.x = v.x;
+			}
+			
+			if(v.y > r.max.y) {
+				r.max.y = v.y;
+			}
+		});
+		
+		r.min.add(this.position);
+		r.max.add(this.position);
+		
+		return r;
 	};
 	
 	/// Compute a smoothed version of this polygon. 
