@@ -88,8 +88,8 @@ define(function(require){
         return this;
     };
 
-    Logger.prototype.setColor = function(_color) {
-        this._color = _color;
+    Logger.prototype.setColor = function(color) {
+        this._color = color;
         return this;
     };
 
