@@ -90,6 +90,15 @@ define(function(require) {
 		return false;
 	};
 	
+	/// Compute similarity to another polygon.
+	///
+	///
+	Polygon.prototype.similarity = function(other) {
+		TODO("Implement this.");
+	
+		return 0;
+	};
+	
 	/// Append a new coordinate. The order of added coordinates 
 	/// does matter. This is not a point cloud.
 	Polygon.prototype.add = function(coordinate) {
@@ -284,6 +293,22 @@ define(function(require) {
 	Polygon.prototype.clone = function() {
 		return new Polygon(this.position, this.vertices.clone());
 	};
+	
+	Polygon.prototype.average = function() {
+		
+		if(this.vertices.length == 0) {
+			return new Vec2(0, 0);
+		}
+		
+		var x = 0, y = 0;
+		
+		this.vertices.forEach(function(v) {
+			x += v.x;
+			y += v.y;
+		});
+		
+		return new Vec2(x / this.vertices.length, y / this.vertices.length);
+	}
 	
 	/// Reset the position and remove vertices of this polygon.
 	Polygon.prototype.clear = function() {
