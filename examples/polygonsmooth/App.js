@@ -5,12 +5,15 @@ define(function(require){
     var Freeform = require("meier/prefab/Freeform");
     var dat      = require("meier/contrib/datgui");
 	var Math     = require("meier/math/Math");
-	var Average     = require("meier/math/Average");
+	var Average  = require("meier/math/Average");
+	var Grid     = require("meier/prefab/Grid");
 	
     App.prototype = new Game();
     
     function App(container) {        
         Game.call(this, container);
+		
+		this.add(this.grid = new Grid(0, 0, this.width, this.height));
 
 		this.setFps(30);
 
