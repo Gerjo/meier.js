@@ -140,19 +140,14 @@ define(function(require){
 
 		}.bind(this));
 		
-		var h = -this.hh+10;
-        
 		if(this.freeforms.isEmpty()) {
-			renderer.styled("<black><14px>Hold your left mouse button down, and draw some shape on this canvas.", 0, h, "center", "bottom");
+			renderer.styled("<black><14px>Hold your left mouse button down, and draw some shape on this canvas.", 0, -40, "center", "bottom");
 		} else {
 			
 			if( ! this.freeforms.last().isRecording()) {
-				renderer.styled("<black><14px>Click & drag anywhere to draw again.", 0, h, "center", "bottom");			
+				renderer.styled("<black><14px>Click & drag anywhere to draw again.", 0, this.hh-10, "center", "bottom");			
 			}
-		}
-		
-		
-		
+		}		
     };
     
     return App;
