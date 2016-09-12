@@ -27,9 +27,12 @@ define(function(require) {
 	
 	function Freeform(configuration) {
 	    Entity.call(this, 0, 0, 40, 40);
-		
-		TODO("Merge with existing configuration. Possible create global object Merge method.");
-		this.config = configuration || Object.create(Configuration);
+				
+		if(configuration) {
+			this.config = Object.assign(Object.create(Configuration), configuration);
+		} else {
+			this.config = Object.create(Configuration);
+		}
 		
 		this.polygon = new Polygon();
 		this._isRecording = false;
