@@ -8,14 +8,14 @@
 /// TODO: extend and test stub functionality.
 define(function(require) {
 	var Entity = require("meier/engine/Entity");
-	
+	var Doc    = require("meier/engine/Document");
 	
 	HtmlEntity.prototype = new Entity();
 	function HtmlEntity(x, y, w, h) {
 		Entity.call(this, x || 0, y || 0, w || 0, h || 0);
 		
 		
-		this._root = document.createElement("div");
+		this._root = Doc.Create("div");
 		this._root.style.border = "1px solid red";
 		this._root.style.position = "absolute";
 	}
