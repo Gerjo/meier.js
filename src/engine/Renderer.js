@@ -278,7 +278,8 @@ define(function(require) {
             // TODO: this is free from transformations. Simulate them here?
             //   - scaling
             //   - rotation (ugh!)
-            this.context.putImageData(
+            //   - alpha blending
+			this.context.putImageData(
                 texture._raw, 
                 x - width * 0.5 + this.hw,
                 -y - height * 0.5 + this.hh, 
@@ -783,5 +784,6 @@ define(function(require) {
         );
         return this;
     };
+	
     return Renderer;
 });
