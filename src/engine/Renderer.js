@@ -28,6 +28,18 @@ define(function(require) {
     /// Canvas wrapper. Lateron I'll add WebGL as a drop-in replacement.
     function Renderer(container, width, height) {
     
+		// Permit optional container parameter.
+		if( ! isNaN(container)) {
+			height    = width;
+			width     = container;
+			container = null;
+		}
+	
+		// Allow a game instance instead of some HTML wrapper.
+		if(container && container.htmlContainer) {
+			container = container.htmlContainer;
+		}
+	
         // Create canvas element:
         var canvas            = this.canvas   = document.createElement("canvas");
         var context           = this.context  = this.canvas.getContext("2d");
@@ -41,7 +53,20 @@ define(function(require) {
         canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
        // canvas.style.position = "absolute";
     
-        container.appendChild(canvas);
+	
+	   if(container) {
+			// This is weird. Multiple root renderers. Adjust CSS to atleast
+		    // show the canvas, and thus the error in one's ways.
+			if(container.firstChild) {
+		        canvas.style.position = "absolute";
+			}
+		
+	        container.appendChild(canvas);
+		} else {
+	        //canvas.style.position = "absolute";
+			//document.getElementsByTagName("body")[0].appendChild(canvas);
+		}
+		
     }
 
     /// Save the current rotation/translation state.
