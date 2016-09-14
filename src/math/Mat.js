@@ -1521,7 +1521,8 @@ define(function(require) {
         return M;
     };
     
-    Builder.fromArrays = function(arrays) {
+	
+    Builder.fromArrays = Builder.FromArrays = function(arrays) {
         
         if( ! (arrays instanceof Array && arrays.length > 0)) {
             throw new Error("Cannot create Matrix from array. Not enough dimensions given.");
@@ -1542,7 +1543,7 @@ define(function(require) {
         return m;
     };
     
-    Builder.diagonal = function(entries) {
+    Builder.diagonal = Builder.Diagonal = function(entries) {
         var m = new (Builder(entries.length, entries.length))();
         
         for(var i = 0; i < entries.length; ++i) {
