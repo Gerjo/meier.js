@@ -308,7 +308,7 @@ define(function(require) {
 		});
 		
 		return new Vec2(x / this.vertices.length, y / this.vertices.length);
-	}
+	};
 	
 	/// Reset the position and remove vertices of this polygon.
 	Polygon.prototype.clear = function() {
@@ -316,6 +316,55 @@ define(function(require) {
 		this.position.x = 0;
 		this.position.y = 0;
 		return this;
+	};
+	
+	Polygon.prototype.aligned = function() {
+
+		var min = this.min();
+		var res = new Polygon(min);
+		
+		this.vertices.forEach(function(v) {
+			res.add(new Vec2(
+				v.x - min.x,
+				v.y - min.y
+			));
+		});		
+		
+		return res;
+	};
+	
+	Polygon.prototype.min = function() {
+		var res = new Vec2();
+		
+		this.vertices.forEach(function(v, i) {
+			
+			if(v.x < res.x || i == 0) {
+				res.x = v.x;
+			}
+			
+			if(v.y < res.y || i == 0) {
+				res.y = v.y;
+			}
+		});
+		
+		return res.add(this.position);
+	};
+	
+	Polygon.prototype.max = function() {
+		var res = new Vec2();
+		
+		this.vertices.forEach(function(v, i) {
+			
+			if(v.x > res.x || i == 0) {
+				res.x = v.x;
+			}
+			
+			if(v.y > res.y || i == 0) {
+				res.y = v.y;
+			}
+		});
+		
+		return es.add(this.position);
 	};
 
 	/// Compute minimum fitting axis aligned rectangle.
