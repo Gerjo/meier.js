@@ -1086,7 +1086,7 @@ define(function(require) {
 
             var n = u[0].length;
 
-            if (m < n) throw "Need more rows than columns"
+            if (m < n) throw new Error("Need more rows than columns")
 
             var e = new Array(n);
             var q = new Array(n);
