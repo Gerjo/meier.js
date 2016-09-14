@@ -256,22 +256,6 @@ define(function(require) {
     };
 
     Game.prototype._draw = function() {
-        /// Reset the transform to an identity matrix:
-        /// We can tweak the letters in:
-        /// a b 0
-        /// c d 0
-        /// e f 1
-        this._renderer.context.setTransform(
-            1,  0, 
-            0,  1, 
-        
-            // Draw from center. A 0.5 offset is given to align the game
-            // coordinate frame with canvas coordinate frame.
-            // TODO: Windows platforms seem to disagree with this. Further study is required
-            // to determine optimal platform independend solutions.
-            this._renderer.hw + 0.5,
-            this._renderer.hh + 0.5);
-    
         // User defined draw loop:
         this.draw(this._renderer);
     

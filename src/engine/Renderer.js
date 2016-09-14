@@ -64,7 +64,25 @@ define(function(require) {
 
     /// Transparently clear the canvas:
     Renderer.prototype.clear = function() {
-        this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
+        
+        /// Reset the transform to an identity matrix:
+        /// We can tweak the letters in:
+        /// a b 0
+        /// c d 0
+        /// e f 1
+        this.context.setTransform(
+            1,  0, 
+            0,  1, 
+        
+            // Draw from center. A 0.5 offset is given to align the game
+            // coordinate frame with canvas coordinate frame.
+            // TODO: Windows platforms seem to disagree with this. Further study is required
+            // to determine optimal platform independend solutions.
+            this.hw + 0.5,
+            this.hh + 0.5);
+		
+		this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
+		
         return this;
     };
 
