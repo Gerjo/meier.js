@@ -73,6 +73,26 @@ var NOTICE = (function() {
     };
 }());
 
+/// Log an untested warning only once to the console.
+var UNTESTED = (function() {
+    
+    var cache = {};
+    
+    return function UNTESTED(method) {
+        if( ! cache.hasOwnProperty(str)) {
+            console.log("UNTESTED: " + method + ", hasn't been tested. If it works, remove this annotation.");
+            
+            cache[str] = true;
+			
+			
+			
+			return true;
+        }
+		
+		return false;
+    };
+}());
+
 /// Log a message only once to the console.
 var DEPRICATED = (function() {
     
