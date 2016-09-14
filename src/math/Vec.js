@@ -85,6 +85,28 @@ define(function(require) {
             }
             
         }
+		
+		/// Set a given value for all dimensions. If the value
+		/// has a clone method, this will be used.
+		/// @param value The value which should fill this vector.
+		/// @return A refence to this matrix.
+		V.prototype.fill = function(value) {
+		
+			// Wouldn't want to replicate all dims by refence.
+			if(typeof value.clone == "function") {
+	            for(var i = this.numrows - 1; i >= 0; --i) {
+	                this._[i] = value.clone();
+	            }
+				
+			// Great for immutable
+			} else {
+	            for(var i = this.numrows - 1; i >= 0; --i) {
+	                this._[i] = value;
+	            }
+			}
+			
+			return this;
+		};
         
         V.prototype.distance = V.prototype.distanceTo = function(o) {
             return Math.sqrt(this.distanceSq(o));
