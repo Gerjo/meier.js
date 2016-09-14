@@ -1,10 +1,12 @@
 define(function(require) {
-    var Texture = require("meier/engine/Texture");
-    var Angle   = require("meier/math/Angle");
-    var M       = require("meier/math/Mat");
-    var Vector2 = require("meier/math/Vec")(2);
-    var math    = require("meier/math/Math");
-    
+    var Texture  = require("meier/engine/Texture");
+    var Angle    = require("meier/math/Angle");
+    var M        = require("meier/math/Mat");
+    var V        = require("meier/math/Vec");
+    var Vector2  = require("meier/math/Vec")(2);
+    var math     = require("meier/math/Math");
+    var Renderer = require("meier/engine/Renderer");
+	
     // Some operations require a canvas to create a so-called "ImageData"
     // object. Rather than introducing a dependancy on Renderer, a private
     // hidden canvas is created to handle this.
@@ -74,6 +76,11 @@ define(function(require) {
     function RawTexture(url, callback) {
         Texture.call(this, null, null);
         
+		if(url instanceof Renderer) {
+			UNTESTED("RawTexture from canvas");
+			url = url.context.getImageData(0, 0, url.width, url.height);
+		}
+		
         // Will hold the "ImageData" object.
         this._raw          = null;
         
