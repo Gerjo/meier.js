@@ -18,7 +18,7 @@ define(function(require) {
     var Polygon     = require("meier/math/Polygon");
     var Fonts       = require("meier/engine/Fonts");
     var math        = require("meier/math/Math");
-    
+	
     // Macro to determine if argument is a vector.
     function IsVector(v) {
         // Nice duck typing. If it has x & y, it must be a vector.
@@ -249,26 +249,31 @@ define(function(require) {
         right  = right  || 0;
         bottom = bottom || 0;
         left   = left   || 0;
-        
  
-        if( ! texture._isLoaded) {
+        if( ! texture._isLoaded && ! texture.canvas) {
             return this;
         }
         
         // Render an "img" tag onto the canvas.
-        if(texture._image !== null) {
+        if(texture._image || texture.canvas) {
+			
+			// Don't bother with this.
+			if(width == 0 || height == 0) {
+				return this;
+			}
+			
             this.context.drawImage(
-                    texture._image,            // The image
-                    right,                     // Source X
-                    top,                       // Source Y
-                    texture.width + left,      // Source width
-                    texture.height + bottom,   // Source height
-                    x - width * 0.5 + right,   // Target X
-                    -y - height * 0.5 + top,   // Target Y
-                    width,                     // Target width
-                    height                     // Target height
+                    texture._image || texture.canvas,  // The image
+                    right,                             // Source X
+                    top,                               // Source Y
+                    texture.width + left,              // Source width
+                    texture.height + bottom,           // Source height
+                    x - width * 0.5 + right,           // Target X
+                    -y - height * 0.5 + top,           // Target Y
+                    width,                             // Target width
+                    height                             // Target height
             );
-        } else if(texture._raw !== null) {
+		} else if(texture._raw !== null) {
             
             // NPOT doesn't work in all browsers.
             if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
