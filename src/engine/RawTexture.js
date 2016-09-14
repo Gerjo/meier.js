@@ -129,7 +129,7 @@ define(function(require) {
         return b;
     };
     
-    /// A not working edge detection method,
+    /// A not working edge detection method.
     RawTexture.prototype.canny = function(xKernel, yKernel) {
         NOTICE("RawTexture.canny doesn't work.");
         xKernel = xKernel || RawTexture.Matrices.SobelX;
