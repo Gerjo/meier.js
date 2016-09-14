@@ -67,6 +67,7 @@ define(function(require) {
 			//document.getElementsByTagName("body")[0].appendChild(canvas);
 		}
 		
+		this.clear();
     }
 
     /// Save the current rotation/translation state.
