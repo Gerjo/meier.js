@@ -95,6 +95,10 @@ define(function(require) {
             this.hw        = this.width * 0.5;
             this.hh        = this.height * 0.5;
             this._isLoaded = true;
+			
+			if(typeof this._rawCallback == "function") {
+				this._rawCallback(this);
+			}
         }
     }
     
