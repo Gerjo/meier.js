@@ -158,10 +158,27 @@ define(function(require) {
     };
     
     function HexToRGBA(hex) {
+		
+		/// RGBA 
+		if(hex.length == 9) {
+	        return "RGBA(" +
+	            parseInt(hex.substring(1, 3), 16) + "," +
+	            parseInt(hex.substring(3, 5), 16) + "," +
+	            parseInt(hex.substring(5, 7), 16) + "," + 
+		        (parseInt(hex.substring(7, 9), 16) / 256) + ")"; 
+		
+		// Intensity / gray-scale
+		} else if(hex.length == 3) {
+			var i = parseInt(hex.substring(1, 3), 16);
+			
+			return "RGBA(" + i + "," + i + "," + i + ", 1)";
+		}
+		
+		/// RGB
         return "RGBA(" +
             parseInt(hex.substring(1, 3), 16) + "," +
             parseInt(hex.substring(3, 5), 16) + "," +
-            parseInt(hex.substring(5, 7), 16) + ",1)";
+            parseInt(hex.substring(5, 7), 16) + ", 1)";
     }
     
     var allColors = [];
