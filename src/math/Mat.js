@@ -1444,6 +1444,36 @@ define(function(require) {
             return DilationErodeHelper(this, kernel, true);
         };
         
+		/// Use a given matrix as a blitting mask. Keeps all
+		/// values as indicated by the mask.
+		///
+		/// @param mask Some blitting mask
+		/// @returns A new matrix blitted accoringly
+		M.prototype.blit = function(mask) {
+		
+            if(this.numrows !== mask.numrows && mask.numrows !== this.numcolumns) {
+                throw new Error("Cannot blit, incorrect matrix sizes: [" + this.numrows + "x" + this.numcolumns + 
+                "] and [" + mask.numrows + "x" + mask.numcolumns + "] - they're not the same!");
+            }
+			
+			var res = new M();
+			
+            for(var row = 0; row < this.numrows; ++row) {
+                for(var col = 0; col < this.numcolumns; ++col) {
+					
+					var enabled = mask.at(row, col);
+					
+					if( ! enabled) {
+						// Copy falsey value :)
+						res.set(row, col, enabled);
+					} else {
+						res.set(row, col, this.at(row, col));
+					}
+				}
+			}			
+			
+			return res;
+		};
     
         /// Zoom in or out. Makes most sense if the matrix is an image.
         ///
