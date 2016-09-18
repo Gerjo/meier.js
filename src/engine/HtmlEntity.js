@@ -66,6 +66,11 @@ define(function(require) {
 		return this;
 	};
 	
+	HtmlEntity.prototype.append = function(html) {
+		this._root.innerHTML += (html);
+		return this;
+	};
+	
 	HtmlEntity.prototype.text = function(text) {
 		this._root.innerText = text;
 		return this;
