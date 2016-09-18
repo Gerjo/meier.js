@@ -617,6 +617,36 @@ define(function(require) {
 			);
 	    }
 	};
+	
+	/// Create a one dimensional matrix by averaging all channels.
+	///
+	/// @param dims Optional desired number of resulting dimensions.
+	/// @returns A new matrix with average colors.
+    RawTexture.prototype.average = function(dims) {
+		UNTESTED("RawTexture.prototype.average", "has been written, but not tested.");
+		
+		var Vec = V(dims); 
+        var matrix = new (M(x, y))();
+		
+		var oneOverThree = 1.0 / 3.0;
+		
+        for(var i = 0, j = 0; i < this._raw.data.length; i += this._channels, ++j) {
+			
+			var avg = (this._raw.data[i + 0] +        // r 
+			           this._raw.data[i + 1] +        // g
+	         		   this._raw.data[i + 2]) / 3.0;  // b
+					   
+			if(dims === 1) {
+				matrix._[j] = avg;
+			} else {
+				matrix._[j] = (new Vec()).fill(avg);
+			}
+			
+		}
+		
+		return matrix;
+	};
+	
     /// Split this image into 4 matrices, one for each color channel.
     /// 
     /// @return An object with 4 matrices as properties (r, g, b, a)
