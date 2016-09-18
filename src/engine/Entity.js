@@ -359,8 +359,6 @@ define(function(require) {
     /// Create a matrix that transforms local coordinates
     /// to world coordinates.
     Entity.prototype.movingToFixed = function() {
-        var r, t;
-
         // No translation
         var isNull = this.position.isNull();
 
