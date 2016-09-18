@@ -29,6 +29,13 @@ define(function(require) {
 		
 		
 		this.add(this.ui = new Html(0, -this.hh + 20));
+		this.add(this.uitop = new Html(this.hh * 0.5, this.hh - 20));
+		
+		this.uitop.append('<button id="undo">undo</button>');
+		this.uitop.append('<button id="redo">redo</button>');
+		this.uitop.click("#redo", this.redo.bind(this)); 
+		this.uitop.click("#undo", this.undo.bind(this)); 
+		
 		TODO("Figure out why the order of adding ui and freeform matters.");
 		this.add(this.freeform = new Freeform());
 
@@ -47,6 +54,11 @@ define(function(require) {
 		}.bind(this)); 
 		
 		this.ui.click("#clear", function() {
+			
+			if( ! this.freeform.isEmpty()) {
+				this._undo.push(this.freeform.polygon.clone());
+			}
+			
 			this.freeform.clear();
 			
 			this.configureHtml();
@@ -62,11 +74,42 @@ define(function(require) {
 			}.bind(this)); 
 		}
 	
-		this.configureHtml();
 		this.enableEvent(Input.MOUSE_MOVE, Input.LEFT_DOWN, Input.LEFT_UP);
 		
+		
+		this._undo = [];
+		this._redo = [];
+		
+		
+		// These must be the last call in the ctor.
+		this.configureHtml();
 		this.randomize();
 	}
+	
+	Designer.prototype.undo = function() {
+		if( ! this._undo.isEmpty()) {
+			if( ! this.freeform.isEmpty()) {
+				this._redo.push(this.freeform.polygon.clone());
+			}
+			
+			this.freeform.polygon = this._undo.pop();
+			this.freeform.change.notify();
+			this.configureHtml();
+		}		
+	};
+	
+	Designer.prototype.redo = function() {
+		if( ! this._redo.isEmpty()) {
+			if( ! this.freeform.isEmpty()) {
+				this._undo.push(this.freeform.polygon.clone());
+			}
+			
+			this.freeform.polygon = this._redo.pop();
+			this.freeform.change.notify();
+		
+			this.configureHtml();
+		}		
+	};
 	
 	Designer.prototype.randomize = function() {
 		var poly = new Polygon();
@@ -77,12 +120,20 @@ define(function(require) {
 			poly.add(new Vec2(Random(-max, max), Random(-max, max)));
 		}
 		
+		if( ! this.freeform.isEmpty()) {
+			this._undo.push(this.freeform.polygon.clone());
+		}
+		
 		this.freeform.polygon = poly.hull();
 		this.freeform.change.notify();
 	};
 	
 	Designer.prototype.onLeftDown = function(input) {
 		this.isLeftdown = true;
+		
+		if( ! this.freeform.isEmpty()) {
+			this._undo.push(this.freeform.polygon.clone());
+		}
 		
 		this.freeform.clear();
 		this.freeform.record();
@@ -94,6 +145,9 @@ define(function(require) {
 		
 		if(this.isLeftdown) {
 			this.freeform.stop();
+			
+			
+			this.configureHtml();
 		}
 		
 		this.isLeftdown = false;
@@ -115,6 +169,11 @@ define(function(require) {
 		} else {
 			Doc.Text(this.ui.find("#toggle"), "Show Polygon " + Letter(1 - this.id) + "");
 		}
+		
+		this.uitop.setEnabled("#undo", ! this._undo.isEmpty());
+		this.uitop.setEnabled("#redo", ! this._redo.isEmpty());
+		
+		this.ui.setEnabled("#clear", ! this.freeform.isEmpty());
 	};
 	
 	Designer.prototype.onAdd = function(parent) {

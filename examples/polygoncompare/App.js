@@ -1,5 +1,6 @@
 define(function(require){
     var Game     = require("meier/engine/Game");
+    var Vec2     = require("meier/math/Vec")(2);
     var Renderer = require("meier/engine/Renderer");
     var RawTex   = require("meier/engine/RawTexture");
     var Colors   = require("meier/engine/Colors");
@@ -35,7 +36,24 @@ define(function(require){
     };
 	
 	App.prototype.doCompute = function(a, b) {
-		var renderer = new Renderer(this.designers[0].width, this.designers[0].height);
+		
+		var u = a.boundingRect();
+		var v = b.boundingRect();
+		
+		// Optimize the renderer size. Increases speed due
+		// to a per pixel time complexity.
+		var min = new Vec2(Math.min(u.min.x, v.min.x), Math.min(u.min.y, v.min.y));
+		var max = new Vec2(Math.max(u.max.x, v.max.x), Math.min(u.max.y, v.max.y));
+		var w = Math.abs(max.x - min.x);
+		var h = Math.abs(max.y - min.y);
+		
+		// Avoid errors with empty renderer.
+		if(w == h && w == 0) {
+			this.similarity = 0;
+			return;
+		}
+
+		var renderer = new Renderer(w, h);
 		
 		renderer.begin();
 		renderer.polygon(a);
@@ -52,15 +70,13 @@ define(function(require){
 		var obj = {};
 		
 		tex.forEach(function(r, g, b, a) {
-			
 			if(r != 0) { r = 255; }
 			if(b != 0) { b = 255; }
 			if(g != 0) { g = 255; }
 			
+			TODO("Rework string based logic.");			
 			var c = "#" + r.toString(16).padLeft("0", 2) + g.toString(16).padLeft("0", 2) + b.toString(16).padLeft("0", 2);
-			
-			//console.log(r, g, b, a);
-			
+						
 			if( ! (c in obj)) {
 				obj[c] = 0;
 			}
@@ -68,15 +84,15 @@ define(function(require){
 			++obj[c];
 		});
 		
-		var n  = obj["#000000"] || 0;
-		var a  = obj["#ff0000"] || 0;
-		var b  = obj["#00ff00"] || 0;
-		var ab = obj["#ffff00"] || 0;
+		var n  = obj["#000000"] || 0; // Success, bon't care.
+		var a  = obj["#ff0000"] || 0; // Error
+		var b  = obj["#00ff00"] || 0; // Error
+		var ab = obj["#ffff00"] || 0; // Success, care.
 		
 		var total = a + b + ab;
 		
-		this.similarity = (a + b) / ab;
-		
+		var w = 2/3; // Weight of an error.
+		this.similarity = Math.pow(a + b, w) / Math.pow(total, w) * 100;
 
 		//this.debug = renderer;
 	};
@@ -84,7 +100,9 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-		renderer.styled("<20px><black>Similarity between A and B: <bold>" + this.similarity.toFixed(2) + "<>\n<15px>lower is more similar", 0, this.hh - 20,  "center", "bottom");
+		var sim = this.similarity;
+		
+		renderer.styled("<20px><black>Similarity between A and B: <bold>" + sim + "<>\n<15px><italic>lower is more similar", 0, this.hh - 20,  "center", "bottom");
 		
 		if( ! this.designers[0].freeform.isRecording()) {
 			if( ! this.designers[1].freeform.isRecording()) {
