@@ -605,7 +605,18 @@ define(function(require) {
         
         return this;
     };
-    
+	
+	RawTexture.prototype.forEach = function(fn) {	
+	    for(var i = 0; i < this._raw.data.length; i += this._channels) {
+	    	fn(
+				this._raw.data[i + 0],
+				this._raw.data[i + 1],
+				this._raw.data[i + 2],
+				this._raw.data[i + 3],
+				i // Pixel number.
+			);
+	    }
+	};
     /// Split this image into 4 matrices, one for each color channel.
     /// 
     /// @return An object with 4 matrices as properties (r, g, b, a)
