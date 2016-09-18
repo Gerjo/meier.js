@@ -50,7 +50,7 @@ define(function(require) {
 		
 		tex._loadFromMatrix(r, g, b, a);
 		
-        return text;
+        return tex;
     };
     
     
@@ -75,15 +75,11 @@ define(function(require) {
         if(typeof url == "string") {
             this._getRawByUrl(url);
           
-		} else if(url.numrows && url.numcolumns) { 
+		} else if(url && url.numrows && url.numcolumns) { 
 		    this._loadFromMatrix(url);
 			
-            this.hw        = this.width * 0.5;
-            this.hh        = this.height * 0.5;
-            this._isLoaded = true;
-			
 			if(typeof this._rawCallback == "function") {
-				this._rawCallback(this);
+				callback(this);
 			}
 			
         // Load from ImageData
@@ -96,7 +92,7 @@ define(function(require) {
             this._isLoaded = true;
 			
 			if(typeof this._rawCallback == "function") {
-				this._rawCallback(this);
+				callback(this);
 			}
         }
     }
@@ -106,6 +102,11 @@ define(function(require) {
         var width  = this.width = r.numcolumns;
         var height = this.height = r.numrows;
         
+		
+        this.hw        = this.width * 0.5;
+        this.hh        = this.height * 0.5;
+        this._isLoaded = true;
+		
         if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
             NOTICE("Creating non power of two texture (" + width + "x" + height + ") using RawTexture.FromMatrix");
         }
