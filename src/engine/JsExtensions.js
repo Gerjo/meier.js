@@ -640,6 +640,22 @@ String.prototype.trim = function(string) {
     return r;
 };
 
+String.prototype.padLeft = function(char, length) {
+	TODO("Optimize String.prototype.padLeft");
+	
+	if(arguments.length != 2) {
+		throw new Error("Requires two arguments at all times.");
+	}
+	
+	var res = this;
+	
+	while(res.length < length) {
+		res = char + res;
+	}
+
+	return res;
+};
+
 /// Apply US style number formatting. Truncates any decimals.
 Number.prototype.pretty = function() {
   
