@@ -76,6 +76,13 @@ define(function(require) {
 		return this;
 	};
 	
+	HtmlEntity.prototype.setEnabled = function(selector, state) {
+		
+		this.find(selector).disabled = !state;
+		
+		return this;
+	};
+	
 	TODO("floating coordinates for Html Entities");
 	HtmlEntity.prototype.float = function(wherea, whereb) {
 		
@@ -134,9 +141,9 @@ define(function(require) {
 	} 
 	
 	HtmlEntity.prototype.draw = function(renderer) {
-		renderer.begin();
-		renderer.rect(0, 0, 10, 10);
-		renderer.fill("red");
+		//renderer.begin();
+		//renderer.rect(0, 0, 10, 10);
+		//renderer.fill("red");
 	};
 	
 	return HtmlEntity;
