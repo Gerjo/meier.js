@@ -197,6 +197,10 @@ define(function(require) {
 			renderer.polygon(other.freeform.polygon);
 			renderer.fill(Colors.Alpha("black", 0.2));
 		}
+		
+		if(this.contains(this.input)) {
+			this.input.cursor(Input.Cursor.CROSSHAIR);
+		}
 	};
 	
 	return Designer;
