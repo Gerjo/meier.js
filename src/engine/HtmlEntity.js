@@ -23,7 +23,7 @@ define(function(require) {
 		++LastUsedId;
 		
 		this._root = Doc.Create("div");
-		this._root.style.border = "1px solid red";
+		//this._root.style.border = "1px solid red";
 		this._root.style.position = "absolute";
 		this._root.id = "meier_html_entity_container_" + LastUsedId;
 		
@@ -38,8 +38,15 @@ define(function(require) {
 		game.htmlContainer.appendChild(this._root);
 	};
 	
+	HtmlEntity.prototype._onDelete = function() {
+		
+		this.game.htmlContainer.removeChild(this._root);
+		
+		Entity.prototype._onDelete.call(this);
+	};
+	
 	HtmlEntity.prototype.find = function(selector) {
-		return this._root.querySelector("#" + this._root.id + " " + selector);
+		return this._root.querySelector(selector);
 	};
 	
 	HtmlEntity.prototype.click = function(selector, fn) {
@@ -64,13 +71,6 @@ define(function(require) {
 		return this;
 	};
 	
-	HtmlEntity.prototype._onDelete = function() {
-		
-		this.game.htmlContainer.removeChild(this._root);
-		
-		Entity.prototype._onDelete.call(this);
-	};
-	
 	TODO("floating coordinates for Html Entities");
 	HtmlEntity.prototype.float = function(wherea, whereb) {
 		
@@ -89,8 +89,6 @@ define(function(require) {
 	
 	HtmlEntity.prototype.update = function(dt) {
 		Entity.prototype.update.call(this, dt);
-		
-		
 		
 		//console.log(width, height);
 		
