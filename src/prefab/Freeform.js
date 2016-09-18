@@ -7,18 +7,21 @@
 
 define(function(require) {
 	
-    var Entity  = require("meier/engine/Entity");
-    var Colors  = require("meier/engine/Colors");
-    var Input   = require("meier/engine/Input");
-	var Polygon = require("meier/math/Polygon");
-	var Vec2    = require("meier/math/Vec")(2);
-	var Doc     = require("meier/engine/Document");
+    var Entity   = require("meier/engine/Entity");
+    var Colors   = require("meier/engine/Colors");
+    var Input    = require("meier/engine/Input");
+	var Polygon  = require("meier/math/Polygon");
+	var Vec2     = require("meier/math/Vec")(2);
+	var Doc      = require("meier/engine/Document");
+	var Notifier = require("meier/engine/Notifier");
 	
 	var Configuration = {
 		Drawing: "blue",
 		Finished: "red",
 		Hover: "yellow", // perhaps just reduce opacity?
 		
+		autofill: true,
+		autofillDistance: 1, // in pixels
 		Interval: 0.0000001,
 		MaxRecordedPoints: 1000,
 	};
@@ -38,6 +41,8 @@ define(function(require) {
 		this._isRecording = false;
 		
 		this.interval = 0;
+		
+		this.change = new Notifier();
 	}
 	
 	Freeform.prototype.record = Freeform.prototype.start = function() {
@@ -56,7 +61,7 @@ define(function(require) {
 		return this._isRecording;
 	};
 	
-	Freeform.prototype.reset = Freeform.prototype.restart = function() {
+	Freeform.prototype.reset = Freeform.prototype.restart = Freeform.prototype.clear = function() {
 		this.polygon.vertices.clear();
 	};
 	
@@ -81,12 +86,14 @@ define(function(require) {
 		}
 		
 		if(this.interval > this.config.Interval) {
+			this.interval = 0;
 		
 			if(this.polygon.vertices.length < this.config.MaxRecordedPoints) {
-				this.polygon.add(this.input.clone());
+				var local = this.toLocal(this.input);
+				this.polygon.add(local);
+				
+				this.change.notify();
 			}
-		
-			this.interval = 0;
 		}
 		
 	};
