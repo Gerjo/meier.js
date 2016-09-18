@@ -341,7 +341,7 @@ define(function(require) {
         
         // No argument given, assume position of this entity instead.
         if( ! local) {
-            local = this.position;
+            local = new Vector(0, 0);
         }
         
         var t = this.movingToFixed();
