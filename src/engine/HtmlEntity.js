@@ -16,6 +16,30 @@ define(function(require) {
 	
 	var LastUsedId = -1;
 	
+	TODO("Add styles with Document.js");
+	var rules = [
+		"button { cursor: pointer; }",
+		"button:disabled { cursor: default; }"
+	];
+	
+	// Going by: https://davidwalsh.name/add-rules-stylesheets
+	var style = Doc.Create("style");
+	style.appendChild(document.createTextNode(""));
+	document.getElementsByTagName("head")[0].appendChild(style);
+	
+	if(style.sheet) {
+		rules.forEach(function(rule, i) {
+			if(style.sheet.insertRule) {
+				style.sheet.insertRule(rule, i);
+			} else if(style.sheet.addRule) {
+				style.sheet.addRule(rule);
+			} else {
+				NOTICE("Can't add style sheets with javascript. No worries, this is a minor cosmetic detail.");
+			}
+		});
+	}
+	
+			
 	HtmlEntity.prototype = new Entity();
 	function HtmlEntity(x, y, w, h) {
 		Entity.call(this, x || 0, y || 0, w || 0, h || 0);
