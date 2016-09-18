@@ -597,7 +597,7 @@ define(function(require) {
         
         for(var i = this._raw.data.length-1; i >= 0; --i) {
             if(this._raw.data[i] > threshold) {
-                this._raw.data[i] = 254;
+                this._raw.data[i] = 255;
             } else {
                 this._raw.data[i] = 0;
             }
