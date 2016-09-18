@@ -77,7 +77,6 @@ define(function(require) {
         Texture.call(this, null, null);
         
 		if(url instanceof Renderer) {
-			UNTESTED("RawTexture from canvas");
 			url = url.context.getImageData(0, 0, url.width, url.height);
 		}
 		
