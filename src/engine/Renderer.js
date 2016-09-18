@@ -89,7 +89,7 @@ define(function(require) {
     };
 
     /// Transparently clear the canvas:
-    Renderer.prototype.clear = function() {
+    Renderer.prototype.clear = function(color) {
         
         /// Reset the transform to an identity matrix:
         /// We can tweak the letters in:
@@ -107,7 +107,13 @@ define(function(require) {
             this.hw + 0.5,
             this.hh + 0.5);
 		
-		this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
+		if(color) {
+			this.begin();
+			this.context.rect(-this.hw, -this.hh, this.width, this.height);
+			this.fill(color);
+		} else {
+			this.context.clearRect(-this.hw, -this.hh, this.width, this.height);
+		}
 		
         return this;
     };
