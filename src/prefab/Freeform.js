@@ -63,6 +63,7 @@ define(function(require) {
 	
 	Freeform.prototype.reset = Freeform.prototype.restart = Freeform.prototype.clear = function() {
 		this.polygon.vertices.clear();
+		this.change.notify();
 	};
 	
 	Freeform.prototype.isEmpty = function() {
