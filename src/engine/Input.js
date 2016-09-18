@@ -42,7 +42,6 @@ define(function(require) {
 		return "unknown";
 	}
 
-    InputCursorCount = 0;
     Input.Cursor     = {};
     Input.Cursor.FINGER = "pointer";
     Input.Cursor.DEFAULT = "default";
