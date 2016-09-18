@@ -1,3 +1,10 @@
+/**
+ !* Part of meier.js - a game and math prototype library.
+ !*  Copyright (C) 2016 Gerard J. Meier <gerjoo@gmail.com>
+ !*
+ !*
+ !*/
+
 define(function(require) {
 	
 	
@@ -8,9 +15,19 @@ define(function(require) {
 	self.Find = function(selector) {
 			if(selector instanceof HTMLElement) {
 				return selector;
+			} else if(selector && selector._root) {
+				return selector._root;
 			}
 			
 			return document.querySelector(selector);
+	};
+	
+	self.Text = function(e, text) {
+		self.Find(e).innerText = text;
+	};
+	
+	self.Html = function(e, html) {
+		self.Find(e).innerHTML = html;
 	};
 		
 	self.Visible = function(e, isVisible) {
