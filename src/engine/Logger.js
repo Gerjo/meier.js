@@ -74,7 +74,7 @@ define(function(require){
     };
     
     Logger.prototype.hideInternals = function(doHide) {
-        this._showInternals = doHide !== true;
+        this._showInternals = !! doHide;
         return this;
     };
 
