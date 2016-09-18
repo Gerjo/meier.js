@@ -728,6 +728,7 @@ define(function(require) {
 			var pattern = this.context.createPattern(color._image, 'repeat');
 	        this.context.fillStyle = pattern;
 		} else {
+			TODO("Support fancy hex colors for renderer.fill and renderer.stroke");
 	        this.context.fillStyle = color;
 		}
         this.context.fill();
