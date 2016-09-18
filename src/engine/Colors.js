@@ -209,10 +209,10 @@ define(function(require) {
         
         return r;
     };
-    
+	
     /// Determine if the given argument is a color.
     Colors.IsColor = function(color) {
-        if(color.charAt(1) == "#") {
+        if(color.charAt(0) == "#") {
             return true;
             
         } if(color.startsWith("RGBA(") || color.startsWith("rgba(")) {
@@ -235,7 +235,7 @@ define(function(require) {
         var rgba = false;
         
         // By hex
-        if(color.charAt(1) == "#") {
+        if(color.charAt(0) == "#") {
             rgba = HexToRGBA(color);
             
         // By RGBA
