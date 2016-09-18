@@ -38,7 +38,7 @@ define(function(require) {
         
 		var node = self.Find(selector);
 		
-        var eventName = ("ontouchstart" in window) ? "touchbegin" : "onmouseover";
+        var eventName = ("ontouchstart" in window) ? "touchbegin" : "mouseover";
     
         return node.addEventListener(eventName, fn, false);
     };
