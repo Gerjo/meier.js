@@ -46,29 +46,11 @@ define(function(require) {
     
     RawTexture.fromMatrix = RawTexture.FromMatrix = function(r, g, b, a) {
         
-        var width  = r.numcolumns;
-        var height = r.numrows;
-        
-        if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
-            NOTICE("Creating non power of two texture (" + width + "x" + height + ") using RawTexture.FromMatrix");
-        }
-        
-        var img    = context.createImageData(width, height);
-        
-        for(var i = 0, j = 0; i < img.data.length; i += 4, ++j) {
-            var red = r._[j];
-            
-            img.data[i + 0] = red;
-                        
-            // Use the given channel, or switch to "red" (grey scale)
-            img.data[i + 1] = (g) ? g._[j] : red;
-            img.data[i + 2] = (b) ? b._[j] : red;
-            
-            // Alpha must be present, or "255" (no alpha) is used
-            img.data[i + 3] = (a) ? a._[j] : 255;
-        }
-                
-        return new RawTexture(img, null);
+		var tex = new RawTexture();
+		
+		tex._loadFromMatrix(r, g, b, a);
+		
+        return text;
     };
     
     
@@ -92,7 +74,18 @@ define(function(require) {
         // Proceed to load the image from a URL.
         if(typeof url == "string") {
             this._getRawByUrl(url);
-            
+          
+		} else if(url.numrows && url.numcolumns) { 
+		    this._loadFromMatrix(url);
+			
+            this.hw        = this.width * 0.5;
+            this.hh        = this.height * 0.5;
+            this._isLoaded = true;
+			
+			if(typeof this._rawCallback == "function") {
+				this._rawCallback(this);
+			}
+			
         // Load from ImageData
         } else if(url instanceof ImageData) { 
             this._raw      = url;
@@ -108,6 +101,31 @@ define(function(require) {
         }
     }
     
+	RawTexture.prototype._loadFromMatrix = function(r, g, b, a) {
+        
+        var width  = this.width = r.numcolumns;
+        var height = this.height = r.numrows;
+        
+        if( ! math.IsPowerOfTwo(width) || ! math.IsPowerOfTwo(height)) {
+            NOTICE("Creating non power of two texture (" + width + "x" + height + ") using RawTexture.FromMatrix");
+        }
+        
+        this._raw = context.createImageData(width, height);
+        
+        for(var i = 0, j = 0; i < this._raw.data.length; i += 4, ++j) {
+            var red = r._[j];
+            
+            this._raw.data[i + 0] = red;
+                        
+            // Use the given channel, or switch to "red" (grey scale)
+            this._raw.data[i + 1] = (g) ? g._[j] : red;
+            this._raw.data[i + 2] = (b) ? b._[j] : red;
+            
+            // Alpha must be present, or "255" (no alpha) is used
+            this._raw.data[i + 3] = (a) ? a._[j] : 255;
+        }		
+	};
+	
     RawTexture.prototype.differenceOfGaussian = function() {
         
         // Selected these arbitrary, just to test what works.
