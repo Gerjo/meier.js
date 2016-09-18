@@ -10,6 +10,7 @@ define(function(require) {
     var Key     = require("meier/engine/Key");
     var Gamepads = require("meier/engine/Gamepads");
 
+	TODO("Input.Events to use ENUM");
     Input.Events       = {};
     Input.Events.COUNT = 0;
 
@@ -18,7 +19,8 @@ define(function(require) {
     Input.LEFT_DOWN   = Input.Events.LEFT_DOWN   = Input.Events.COUNT++;
     Input.LEFT_UP     = Input.Events.LEFT_UP     = Input.Events.COUNT++; 
     Input.MOUSE_MOVE  = Input.Events.MOUSE_MOVE  = Input.Events.COUNT++;
-
+	TODO("Input.MOUSE_ENTER and Input.MOUSE_LEAVE events.");
+	
     // Computers only:
     Input.RIGHT_DOWN  = Input.Events.RIGHT_DOWN  = Input.Events.COUNT++;
     Input.RIGHT_UP    = Input.Events.RIGHT_UP    = Input.Events.COUNT++;
@@ -42,6 +44,7 @@ define(function(require) {
 		return "unknown";
 	}
 
+	TODO("Input.Cursor to use ENUM");
     Input.Cursor     = {};
     Input.Cursor.FINGER = "pointer";
     Input.Cursor.DEFAULT = "default";
