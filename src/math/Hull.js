@@ -13,7 +13,8 @@ define(function(require) {
     var self = {
         
         /// Compute a convex hull of the given coordinates. This method is future proof as
-        /// it will always use the fastest implementations.
+        /// it will always use the fastest available implementation. Currently it's not
+		/// too fast.
         Convex: function(coordinates) {
             return self.GiftWrap(coordinates);
         },
@@ -65,7 +66,7 @@ define(function(require) {
                     return previous;
                 }, coordinates.first());
 
-                var pointOnHull = left, endpoint, timeout = 100; 
+                var pointOnHull = left, endpoint, timeout = 10000; 
 
                 do {
     
