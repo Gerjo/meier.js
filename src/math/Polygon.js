@@ -14,6 +14,7 @@ define(function(require) {
 	var Math         = require("meier/math/Math");
     var MLS          = require("meier/math/Polynomial").MovingLeastSquares;
 	var Rectangle    = require("meier/math/Rectangle");
+	var Hull         = require("meier/math/Hull");
 	
 	// Determine if the last coordinate equals the first. Hidden in
 	// private scope because this method may not always make sense.
@@ -480,6 +481,14 @@ define(function(require) {
 		}
 		
 		return new Polygon(this.position, res);
+	};
+	
+	/// Compute the convex hull of this polygon.
+	/// @return A new polygon representing the convex hull.
+	Polygon.prototype.hull = function() {
+		var hull = Hull.Convex(this.vertices);
+		
+		return new Polygon(this.position, hull);
 	};
 	
     return Polygon;
