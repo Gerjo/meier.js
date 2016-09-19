@@ -4,7 +4,8 @@ define(function(require){
     var Renderer = require("meier/engine/Renderer");
     var RawTex   = require("meier/engine/RawTexture");
     var Colors   = require("meier/engine/Colors");
-
+    var Html     = require("meier/engine/HtmlEntity");
+	
 	var Designer = require("./Designer");
 	
     App.prototype = new Game();
@@ -18,11 +19,20 @@ define(function(require){
 		var p = 10;
 		var w = this.hw;
 
+		this.showDebug = false;
+
 		this.designers = [];
 		this.designers.push(new Designer(-w + w*0.5, 0, w - p * 2, w));
 		this.designers.push(new Designer(+w - w*0.5, 0, w - p * 2, w));
 	
 
+		this.ui = new Html(this.hw - 100, -this.hh + 20);
+		this.ui.append("<button>Toggle canvas raster</button>");
+		this.ui.click("button", function() {
+			this.showDebug = ! this.showDebug;
+		}.bind(this));
+		this.add(this.ui);
+		
 		this.designers.forEach(this.add.bind(this));
 		
 		// normal, weighted
@@ -40,15 +50,25 @@ define(function(require){
 	
 	App.prototype.doCompute = function(a, b) {
 		
+		// Align to touch the x and y axis.
+		a = a.aligned(); 
+		b = b.aligned();
+		
 		var u = a.boundingRect();
 		var v = b.boundingRect();
+
+		// Center onto canvas
+		a.position.x = u.width() * -0.5;
+		a.position.y = u.height() * -0.5;
+		b.position.x = v.width() * -0.5;
+		b.position.y = v.height() * -0.5;
+		
 		
 		// Optimize the renderer size. Increases speed due
-		// to a per pixel time complexity.
-		var min = new Vec2(Math.min(u.min.x, v.min.x), Math.min(u.min.y, v.min.y));
-		var max = new Vec2(Math.max(u.max.x, v.max.x), Math.min(u.max.y, v.max.y));
-		var w = Math.abs(max.x - min.x);
-		var h = Math.abs(max.y - min.y);
+		// to a per pixel time complexity. Add a few bonus
+		// pixels to account for out-of-screen anti-aliasing
+		var w = Math.max(a.width(), b.width()) + 5;
+		var h = Math.max(a.height(), b.height()) + 5;
 		
 		// Avoid errors with empty renderer.
 		if(w == h && w == 0) {
@@ -65,6 +85,8 @@ define(function(require){
 		renderer.begin();
 		renderer.polygon(b);
 		renderer.fill(Colors.Alpha("#00ff00", 0.5));
+		
+		this.debug = renderer;
 		
 		// Convert to raw texture to permit operations
 		var tex = new RawTex(renderer);
@@ -93,8 +115,7 @@ define(function(require){
 		var ab = obj["#ffff00"] || 0; // Success, care.
 		
 		var total = a + b + ab;
-		
-		
+				
 		var w = this.weights; // Weight of an error.
 		
 		this.similarity[0] = ab / (a + b + ab);
@@ -132,8 +153,14 @@ define(function(require){
 		}
 		
 		
-		if(this.debug) {
+		if(this.showDebug && this.debug) {
+			renderer.begin();
+			renderer.rect(0, 0, this.debug.width + 20, this.debug.height + 20);
+			renderer.fill("gray");
+			
 			renderer.texture(this.debug);
+			
+			renderer.styled("<black><15px>Polygons overlapped and rasterized", 1, this.debug.hh-1, "center", "bottom");			
 		}
 		
     };
