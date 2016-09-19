@@ -40,7 +40,7 @@ define(function(require) {
 		this.add(this.freeform = new Freeform());
 
 		this.ui.append('<button id="clear">Clear</button>');
-		//this.ui.append('<button id="clone">Clone Polygon ' + Letter(1 - this.id) + '</button>');
+		this.ui.append('<button id="clone">Clone ' + Letter(1 - this.id) + '</button>');
 		//this.ui.append('<br>');
 		this.ui.append('<button id="randomize">Randomize</button>');
 		this.ui.append('<button id="toggle">Show Polygon ' + Letter(1 - this.id) + '</button>');

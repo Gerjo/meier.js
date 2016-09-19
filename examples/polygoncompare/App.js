@@ -25,8 +25,11 @@ define(function(require){
 
 		this.designers.forEach(this.add.bind(this));
 		
-		this.similarity = 0;
+		// normal, weighted
+		this.similarity = [0, 0];
 		
+		//              !A   !B 
+		this.weights = [3/6, 4/6];
 		this.debug = null;
     }
 	
@@ -91,8 +94,16 @@ define(function(require){
 		
 		var total = a + b + ab;
 		
-		var w = 2/3; // Weight of an error.
-		this.similarity = Math.pow(a + b, w) / Math.pow(total, w) * 100;
+		
+		var w = this.weights; // Weight of an error.
+		
+		this.similarity[0] = ab / (a + b + ab);
+		//console.log("not     : " + this.similarity);
+		
+		var Pow = Math.pow;
+
+		this.similarity[1] = Pow(ab, Math.min(w[0])) / ( Pow(a, w[0]) + Pow(b, w[1]) + Pow(ab, Math.min(w[0])));
+		//console.log("weighted: " + this.similarity);
 
 		//this.debug = renderer;
 	};
@@ -100,9 +111,14 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
         
-		var sim = this.similarity;
+		var sim = (this.similarity[1] * 100).toFixed(0) + "%";
 		
-		renderer.styled("<20px><black>Similarity between A and B: <bold>" + sim + "<>\n<15px><italic>lower is more similar", 0, this.hh - 20,  "center", "bottom");
+		renderer.styled("<20px><black>Similarity between A and B: <bold>" + sim + "<>\n<12px><italic>try drawing something on the two canvases below", 0, this.hh - 20,  "center", "bottom");
+
+		renderer.styled("<15px><black>Jaccard Index<10px> normal  <>: " + this.similarity[0].toFixed(2) + "\n" +
+		"<15px><black>Jaccard Index<10px> weighted<>: " + this.similarity[1].toFixed(2) + " <10px>w<8px>1<> = " + this.weights[0].toFixed(1) + ", w<8px>1<> = " + this.weights[1].toFixed(1)
+		, -this.hw+10, -this.hh + 30,  "left", "bottom");
+
 		
 		if( ! this.designers[0].freeform.isRecording()) {
 			if( ! this.designers[1].freeform.isRecording()) {
