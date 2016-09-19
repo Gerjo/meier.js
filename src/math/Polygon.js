@@ -367,6 +367,18 @@ define(function(require) {
 		
 		return es.add(this.position);
 	};
+	
+	Polygon.prototype.width = function() {
+		var rect = this.boundingRect();
+		
+		return rect.max.x - rect.min.x
+	};
+	
+	Polygon.prototype.height = function() {
+		var rect = this.boundingRect();
+		
+		return rect.max.y - rect.min.y
+	};
 
 	/// Compute minimum fitting axis aligned rectangle.
 	Polygon.prototype.boundingRect = function() {
