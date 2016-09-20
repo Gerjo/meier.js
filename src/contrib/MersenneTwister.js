@@ -55,7 +55,7 @@ define(function(require) {
  * 	var randomNumber = mt.nextInteger();
  * }
  */
-function class__MersenneTwister__(window)
+function class__MersenneTwister__()
 {
 	var className = "MersenneTwister";
 
@@ -270,7 +270,7 @@ function class__MersenneTwister__(window)
     return F;
 } 
 
-    return class__MersenneTwister__(window);
+    return class__MersenneTwister__();
 
 
 
