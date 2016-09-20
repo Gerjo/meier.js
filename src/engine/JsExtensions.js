@@ -23,13 +23,18 @@ Math.ln = function(r) {
     return Math.log(r);
 };
 
+
 /// Log TO-DO items that really need DOING. running
 /// TO-DO() (barring the hyphen) from the console 
 /// logs all noted entries.
-window["TO" + "DO"] = (function(str) {	
+(function(str) {	
+
 	var cache = {};
-	
-    return function TOBEDONE(str) {
+
+	// Node.js uses "global".
+	var scope = (typeof window == "object") ? window : global;
+
+	scope["TO" + "DO"] = function TOBEDONE(str) {
 		
 		if(arguments.length == 0) {
 			var i = 0;
