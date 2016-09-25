@@ -16,20 +16,48 @@ define(function(require) {
 		
 		for(var i = 0; i < args.length; ++i) {
 			
-			var value = new Number(i);
+			var key, value;
 			
-			// Support all sensible keys.
-			e[arguments[i]] = value;
-			e[arguments[i].ucFirst()] = value;
-			e[arguments[i].toUpperCase()] = value;
-			e[arguments[i].toLowerCase()] = value;
+			if(args[i] instanceof Array) {
+				key   = args[i][0];
+				value = args[i][1];
+			} else {
+				key   = args[i];
+				value = args[i];
+			}
+			
+			var ident = new String("Enum." + key);
+			
+			(function(key, value, ident) {
+			
+				/*value.valueOf = function() {
+					return "Enum." + key.ucFirst();
+				};
+				*/
+					
+				//ident.toString = function() {
+				//	return key; // Makes sure "Foo" == Enum.Foo :)
+				//};
+				
+				ident.value = function() {
+					return value;
+				};
+			
+				// Support all sensible keys.
+				e[key] = ident;
+				e[key.ucFirst()] = ident;
+				e[key.toUpperCase()] = ident;
+				e[key.toLowerCase()] = ident;
+				e[ident.toString()] = ident; // has the enum prefix.
+			}(key, value, ident))
 		}
 		
 		e.Parse = function(key) {
-			return e[key.toUpperCase()];
+			return e[key] || e[key.toUpperCase()];
 		};
 		
 		e.TryParse = function(key) {
+			// Try normalized
 			var upper = key.toUpperCase();
 			
 			if(upper in e) {
@@ -38,6 +66,10 @@ define(function(require) {
 			
 			throw Error("Could not parse enum key '" + key + " into enum value'.");
 		};
+		
+		if(Object.freeze) {
+			Object.freeze(e);
+		}
 		
 		return e;
 	};
