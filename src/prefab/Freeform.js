@@ -51,6 +51,10 @@ define(function(require) {
 		this._isRecording = true;		
 	};
 	
+	Freeform.prototype.setConfig = function(config) {
+		this.config = Object.assign(this.config, config);
+	};
+	
 	Freeform.prototype.stop = Freeform.prototype.pause = function() {
 		this.disableEvent(Input.MOUSE_MOVE);
 		
