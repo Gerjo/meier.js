@@ -105,6 +105,25 @@ define(function(require) {
 		return this;
 	};
 	
+	self.ForEach = function(selector, callback) {
+		
+		if(selector instanceof HTMLElement) {
+			callback(selector);
+			return this;
+		} else if(selector && selector._root) {
+			callback(selector._root);
+			return this;
+		}
+		
+		var res = document.querySelectorAll(selector);
+		
+		for(var i = 0; i < res.length; ++i) {
+			callback(res[i], i, res);
+		}
+		
+		return this;
+	};
+	
 	return self;
 	
 });
