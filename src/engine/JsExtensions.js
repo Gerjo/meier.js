@@ -59,17 +59,17 @@ TODO("Write a separate parser to detect all TODO items, without application run-
 
 
 /// Log a message only once to the console.
-var NOTICE = (function() {
+(function() {
     
+	var scope = (typeof window == "object") ? window : global;
+	
     var cache = {};
     
-    return function NOTICE(str) {
+    scope["NOTICE"] = function NOTICE(str) {
         if( ! cache.hasOwnProperty(str)) {
             console.log("NOTICE: " + str);
             
             cache[str] = true;
-			
-			
 			
 			return true;
         }
@@ -79,17 +79,17 @@ var NOTICE = (function() {
 }());
 
 /// Log an untested warning only once to the console.
-var UNTESTED = (function() {
+(function() {
     
+	var scope = (typeof window == "object") ? window : global;
+	
     var cache = {};
     
-    return function UNTESTED(method) {
-        if( ! cache.hasOwnProperty(method)) {
+    scope["UNTESTED"] = function UNTESTED(method) {
+        if( ! cache.hasOwnProperty(str)) {
             console.log("UNTESTED: " + method + ", hasn't been tested. If it works, remove this annotation.");
             
-            cache[method] = true;
-			
-			
+            cache[str] = true;
 			
 			return true;
         }
@@ -98,12 +98,15 @@ var UNTESTED = (function() {
     };
 }());
 
+
 /// Log a message only once to the console.
-var DEPRICATED = (function() {
+(function() {
     
+	var scope = (typeof window == "object") ? window : global;
+	
     var cache = {};
     
-    return function DEPRICATED(name, message) {
+    scope["DEPRICATED"] = function DEPRICATED(name, message) {
 		
 		name = name || DEPRICATED.caller;
 		message = message || "";
@@ -122,8 +125,6 @@ var DEPRICATED = (function() {
 		return false;
     };
 }());
-
-
 
 /// Assertion to be used for development only. Not just because
 /// that's good practise, it also because the code of this is 
