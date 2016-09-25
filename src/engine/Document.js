@@ -51,11 +51,29 @@ define(function(require) {
         return node.addEventListener(eventName, fn, false);
     };
 	
-    self.OnHover = function(selector, fn) {
+    self.OnMouseMove = function(selector, fn) {
         
 		var node = self.Find(selector);
 		
-        var eventName = ("ontouchstart" in window) ? "touchbegin" : "mouseover";
+        var eventName = ("ontouchstart" in window) ? "touchstart" : "mousemove";
+    
+        return node.addEventListener(eventName, fn, false);
+    };
+	
+    self.OnMouseEnter = function(selector, fn) {
+        
+		var node = self.Find(selector);
+		
+        var eventName = ("ontouchstart" in window) ? "touchstart" : "mouseenter";
+    
+        return node.addEventListener(eventName, fn, false);
+    };
+	
+    self.OnMouseLeave = function(selector, fn) {
+        
+		var node = self.Find(selector);
+		
+        var eventName = ("ontouchstart" in window) ? "touchend" : "mouseleave";
     
         return node.addEventListener(eventName, fn, false);
     };
