@@ -80,6 +80,12 @@ define(function(require) {
 		return e;
 	};
 
+	self.SetEnabled = function(selector, state) {
+		
+		self.Find(selector).disabled = !state;
+		
+		return this;
+	};
 	
 	return self;
 	
