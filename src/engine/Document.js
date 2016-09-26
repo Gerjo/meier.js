@@ -124,6 +124,34 @@ define(function(require) {
 		return this;
 	};
 	
+	self.Append = function(selector, child, index) {
+		var parent = self.Find(selector);
+		
+		if(arguments.length > 2) {
+			var length = parent.children.length;
+			
+			console.log(parent.children);
+			
+			if(index < 0) {
+				index = length - index - 1;
+			}
+			
+			if(index > length) {
+				index = length;
+			}
+			
+			//console.log(index + "/" + length);
+			
+			parent.insertBefore(child, parent.childNodes[index] || null);
+			
+		} else {
+			// Simple append.
+			parent.appendChild(child);
+		}
+		
+		
+	};
+	
 	return self;
 	
 });
