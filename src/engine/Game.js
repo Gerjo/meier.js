@@ -274,7 +274,8 @@ define(function(require) {
             
             // Remove the entity:
             if(this._entities[i]._delete === true) {
-                this._entities[i]._onDelete(this);
+				this._entities[i]._delete = false; // Allow re-adding in future.
+				this._entities[i]._onDelete(this);
                 this._entities.splice(i--, 1);
             }
         }
