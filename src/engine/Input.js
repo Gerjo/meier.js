@@ -394,7 +394,14 @@ define(function(require) {
             // use.
             return priorityCallback.callback(
                 this,
-                key
+                key,
+				{
+					// Wrap in custom object. 
+					ctrlKey:  event.ctrlKey,
+					metaKey:  event.metaKey,
+					shiftKey: event.shiftKey
+					
+				}
             );
         }.bind(this));
     };
