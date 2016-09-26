@@ -100,6 +100,9 @@ define(function(require) {
     MakeKey(91, "LEFT_COMMAND");
     MakeKey(93, "RIGHT_COMMAND");
 
+	// apparently different per browser.
+    //MakeKey(224, "APPLE_KEY");
+ 
     
     return Key;
 });

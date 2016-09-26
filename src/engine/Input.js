@@ -383,6 +383,8 @@ define(function(require) {
         }.bind(this));
     };
 
+
+	TODO("Use event.code instead of event.keyCode for cross platform support");
     Input.prototype.triggerKeyboard = function(eventtype, event) {
         this.listeners[eventtype].every(function (priorityCallback) {
             
