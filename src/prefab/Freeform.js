@@ -16,8 +16,13 @@ define(function(require) {
 	var Notifier = require("meier/engine/Notifier");
 	
 	var Configuration = {
-		Drawing: "blue",
-		Finished: "red",
+		Drawing: "#c85555",
+		DrawingFill: "rgba(255, 0, 0, 0.4)",
+		
+		Finished: "#237cb0",
+		FinishedFill: "rgba(255, 255, 255, 0.7)",
+		FinishedShape: "rgba(107, 107, 181, 0.2)",
+
 		Hover: "yellow", // perhaps just reduce opacity?
 		
 		autofill: true,
@@ -127,28 +132,33 @@ define(function(require) {
 		
 		if( ! this._isRecording) {
 			
+			if(Preset.FinishedShape) {
+				renderer.begin();
+				renderer.polygon(this.polygon);
+				renderer.fill(Preset.FinishedShape);
+				renderer.stroke(Preset.Finished);
+			}
+			
 			renderer.begin();
-			renderer.polygon(this.polygon);
-	
+			
 			this.polygon.vertices.forEach(function(p) {
 				renderer.rect(p.x, p.y, 4, 4);
 			});
 	
-			renderer.fill(Colors.Alpha(Preset.Finished, 0.2));
+			renderer.fill(Preset.FinishedFill);
 			renderer.stroke(Preset.Finished);
 		} else {
-			renderer.begin();
-		
-			this.polygon.vertices.forEach(function(p) {
-				renderer.rect(p.x, p.y, 4, 4);
-			});
-				
-			renderer.fill(Preset.Drawing);
-			renderer.begin();
 			
 			renderer.begin();
 			renderer.lines(this.polygon);
-			renderer.stroke(Preset.Drawing);			
+			renderer.stroke(Preset.Drawing);
+			
+			renderer.begin();
+			this.polygon.vertices.forEach(function(p) {
+				renderer.rect(p.x, p.y, 4, 4);
+			});
+			renderer.fill(Preset.DrawingFill);
+			renderer.stroke(Preset.Drawing);
 		}
 	};
 
