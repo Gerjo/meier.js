@@ -244,7 +244,10 @@ define(function(require) {
             this._mouseStates[event.which] = false;
         }.bind(this);
         
-        eventContainer.onkeydown = function(event) {
+		// Capturing on body level solves "focus" issues.
+		var body = document.getElementsByTagName("body")[0];
+		
+        body.onkeydown = function(event) {
             event = event || window.event;
 			            
             // GUI components take priority.
@@ -256,12 +259,12 @@ define(function(require) {
             
             this._keystates[event.keyCode] = true;
             this.triggerKeyboard(Input.Events.KEY_DOWN, event);
-            
+
             // This may block all other HTML inputfields.
             event.preventDefault();
         }.bind(this);
     
-        eventContainer.onkeyup = function(event) {
+        body.onkeyup = function(event) {
             event = event || window.event;
            
             // GUI components take priority.
