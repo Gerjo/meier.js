@@ -45,6 +45,8 @@ define(function(require) {
 		window.requestAnimationFrame(UponNewFrame);
 	}
 
+	TODO("Re use entity system between Game and Entity. Inheritance? Mix-in?");
+
     function Game(container) {
 
         // Default contructor, do nothing.

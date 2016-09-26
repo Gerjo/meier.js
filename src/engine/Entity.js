@@ -276,7 +276,7 @@ define(function(require) {
     };
     
     Entity.prototype._onAdd = function(game) {
-        this.game  = game;
+		this.game  = game;
         this.input = game.input;
         
         // Doesn't work due to matrix recursion.
@@ -291,7 +291,6 @@ define(function(require) {
         this._entities.forEach(function(child) {
             child._onAdd(game);
         });
-        
     };
     
     Entity.prototype.onAdd = function(game) {
