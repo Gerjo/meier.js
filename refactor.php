@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-
+exit("File disabled. Edit source.");
 refactor(".");
 
 function refactor($dir) {
