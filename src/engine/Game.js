@@ -65,6 +65,17 @@ define(function(require) {
 			container = document.getElementsByTagName("body")[0];
 		}       
 
+		
+		if(container.nodeName == "BODY") {
+			var html = document.documentElement;
+			html.style.height = container.style.height = "100%";
+			html.style.width = container.style.width = "100%";
+			html.style.margin = container.style.margin = "0px";
+			html.style.padding = container.style.padding = "0px";
+			
+			console.log("[engine] Detected document.body as root. Adding CSS properties to set window width/height.");
+		}
+
 		// Hide canvas that doesn't fit in the container. Recently iframe 
 		// parents have some issues by adding padding to the bottom. This  
 		// hides that padding.
