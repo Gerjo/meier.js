@@ -586,10 +586,10 @@ define(function(require) {
 		
 			res.raster = renderer;
 		
-			res.intersection = obj[R | G] || 0; 
-			res.outer        = obj[0] || 0;
-			res.a            = obj[R] || 0;
-			res.b            = obj[G] || 0;
+			res.intersection = obj[R | G]; 
+			res.outer        = obj[0];
+			res.a            = obj[R];
+			res.b            = obj[G];
 			res.union        = res.intersection + res.a + res.b;
 			
 			res.total        = res.union + res.outer + res.a + res.b;
