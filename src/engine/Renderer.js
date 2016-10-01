@@ -88,6 +88,11 @@ define(function(require) {
 		
 		this.clear();
     }
+	
+	Renderer.prototype.setSmoothing = function(doSmooth) {
+		this.context.imageSmoothingEnabled = doSmooth;
+		return this;
+	};
 
     /// Save the current rotation/translation state.
     Renderer.prototype.save = function() {
