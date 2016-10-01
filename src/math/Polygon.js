@@ -503,5 +503,100 @@ define(function(require) {
 		return new Polygon(this.position, hull);
 	};
 	
+	/// Compute the overlap between polygons using a raster.
+	/// @param other Some other polygon
+	/// @return An object with union, intersection and 
+	/// other properties
+	Polygon.prototype.rasterCompare = function(other) {
+		var Renderer = require("meier/engine/Renderer");
+		
+		
+		var a = this.aligned(); 
+		var b = other.aligned();
+		
+		var u = a.boundingRect();
+		var v = b.boundingRect();
+
+		// Center onto canvas
+		a.position.x = u.width() * -0.5;
+		a.position.y = u.height() * -0.5;
+		b.position.x = v.width() * -0.5;
+		b.position.y = v.height() * -0.5;
+		
+		// Optimize the renderer size. Increases speed due
+		// to a per pixel time complexity. Add a few bonus
+		// pixels to account for out-of-screen anti-aliasing
+		var w = Math.max(a.width(), b.width()) + 5;
+		var h = Math.max(a.height(), b.height()) + 5;
+
+		var res = {
+			raster: null,
+			
+			outer: 0,
+			union: 0,
+			a: 0,
+			b: 0
+		};
+		
+		
+		if(w != 0 && h != 0) {
+			var renderer = new Renderer(w, h);
+			
+			renderer.setSmoothing(false);
+			renderer.begin();
+			renderer.polygon(a);
+			renderer.fill("RGBA(255, 0, 0, 0.5)");
+			renderer.begin();
+			renderer.polygon(b);
+			renderer.fill("RGBA(0, 255, 0, 0.5)");
+		
+			var imdata = renderer.context.getImageData(0, 0, renderer.width, renderer.height);
+		
+			
+			var R = 1 << 0;
+			var G = 1 << 1;
+			var B = 1 << 2;
+			
+			var obj = { };
+			obj[0] = 0;
+			obj[R] = 0;
+			obj[G] = 0;
+			obj[B] = 0;
+			
+			obj[R | G]     = 0;
+			obj[R | G | B] = 0;
+			obj[G | B]     = 0;
+			obj[R | B]     = 0;
+
+			for(var i = 0; i < imdata.data.length; i += 4) {
+				var bits = 0;
+				
+				if(imdata.data[i + 0] > 0) {
+					bits |= R;
+				}
+				if(imdata.data[i + 1] > 0) {
+					bits |= G;
+				}
+				if(imdata.data[i + 2] > 0) {
+					bits |= B;
+				}
+			
+				++obj[bits];
+			}
+		
+			res.raster = renderer;
+		
+			res.intersection = obj[R | G] || 0; 
+			res.outer        = obj[0] || 0;
+			res.a            = obj[R] || 0;
+			res.b            = obj[G] || 0;
+			res.union        = res.intersection + res.a + res.b;
+			
+			res.total        = res.union + res.outer + res.a + res.b;
+		}
+				
+		return res;
+	};
+	
     return Polygon;
 });
