@@ -19,6 +19,21 @@ define(function(require) {
     var Fonts       = require("meier/engine/Fonts");
     var math        = require("meier/math/Math");
 	
+	var UseCairo    = typeof document == "undefined";
+	var Cario       = null;
+	//var Image;
+	
+	if(UseCairo) {
+		// By pass requireJS include system. (it scans files for
+		// string literals)
+		var req = require;
+		Cairo = req("canvas");
+		//Image = req("image");
+		
+		
+		console.log("No document detected. Loading Cairo bindings instead.");
+	}
+	
     // Macro to determine if argument is a vector.
     function IsVector(v) {
         // Nice duck typing. If it has x & y, it must be a vector.
@@ -40,28 +55,32 @@ define(function(require) {
 			container = container.htmlContainer;
 		}
 	
-        // Create canvas element:
-        var canvas            = this.canvas   = document.createElement("canvas");
-        var context           = this.context  = this.canvas.getContext("2d");
-        this.width            = canvas.width  = width;
-        this.height           = canvas.height = height;
+		if(UseCairo) {
+			this.canvas = new Cairo(width, height);
+			this.context = this.canvas.getContext("2d");
+			
+		} else {
+	        // Create canvas element:
+			this.canvas   = document.createElement("canvas");
+			this.context  = this.canvas.getContext("2d");
+	        this.canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
+		}
+       
+        this.width            = this.canvas.width  = width;
+        this.height           = this.canvas.height = height;
         this.hw               = this.width * 0.5
         this.hh               = this.height * 0.5;
         this._rotation        = 0;
         this._translate       = new Vector(0, 0);
-		    
-        canvas.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
-       // canvas.style.position = "absolute";
-    
-	
-	   if(container) {
+		
+		if(container) {
 			// This is weird. Multiple root renderers. Adjust CSS to atleast
 		    // show the canvas, and thus the error in one's ways.
 			if(container.firstChild) {
-		        canvas.style.position = "absolute";
+		        this.canvas.style.position = "absolute";
 			}
 		
-	        container.appendChild(canvas);
+	        container.appendChild(this.canvas);
 		} else {
 	        //canvas.style.position = "absolute";
 			//document.getElementsByTagName("body")[0].appendChild(canvas);
@@ -796,6 +815,28 @@ define(function(require) {
         );
         return this;
     };
+	
+	/// Export canvas to PNG format.
+	Renderer.prototype.toPng = function() {
+
+		if(UseCairo) {
+			return this.canvas.pngStream();
+		}
+
+		// ... it's something.
+		return this.canvas.toDataURL("image/png");
+	};
+	
+	/// Export canvas contents to given file.
+	Renderer.prototype.toFile = function(file) {
+		if(UseCairo) {
+			var stream = this.toPng();
+			
+			stream.on("data", function(chunk) {
+			  file.write(chunk);
+			});
+		}
+	};
 	
     return Renderer;
 });
