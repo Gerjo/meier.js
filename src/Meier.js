@@ -5,23 +5,48 @@
  !*
  !*/
 
-var Meier = (function() {
+var Meier;
+
+if(typeof define != "function") {
+	define = function(fn) {
+		Meier = fn(null);
+	};
+}
+
+define(function(req) {
     
-    var requireTagAdded = false;
-    var requireJsLoaded = false;
+    var requireTagAdded = typeof req == "function";
+    var requireJsLoaded = requireTagAdded;
     var loadfn          = null;
     
     // Path where meier.js files are located:
     var path            = "";
 
+	// Make sure require.js actually loads.
+	if( ! requireTagAdded) {
+		define = undefined;
+	}
+	
+	var OnLoad = function() {
+	
+        // Firstly load my javascript extentions, then start loading everything else.
+        require(["meier/engine/JsExtensions"], function(Extentions) {
+            // Call initializer, if available:
+            if(loadfn) {
+                loadfn(require);
+            }
+        });
+		
+	};
+	
     var Meier = function(arg) {
         
         if(typeof arg == "function") {
             loadfn = arg;
-            
+			
             // RequireJS was already loaded:
-            if(requireJsLoaded === true) {
-                loadfn();
+            if(requireJsLoaded === true) {				
+				OnLoad();
             }
             
         } else if(typeof arg === "string") {
@@ -31,7 +56,7 @@ var Meier = (function() {
                 // Load requireJS
                 var script = document.createElement("script");
                 script.src = path + '/contrib/require.js';
-            
+				
                 script.onload = function() {
                     requireJsLoaded = true;
                     
@@ -44,16 +69,9 @@ var Meier = (function() {
                         urlArgs: "v=" + (new Date()).getTime()
                         
                     });
+					
+					OnLoad();
                     
-                    // Firstly load my javascript extentions, then start loading everything else.
-                    require(["meier/engine/JsExtensions"], function(Extentions) {
-                        // Nothing to be done. Including file suffices.
-                    });
-                                        
-                    // Call initializer, if available:
-                    if(loadfn) {
-                        loadfn();
-                    }
                 };
             
                 script.onerror = function() {
@@ -76,5 +94,4 @@ var Meier = (function() {
     };
     
     return Meier;
-
-})();
+});
