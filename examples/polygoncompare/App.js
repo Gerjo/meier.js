@@ -50,83 +50,18 @@ define(function(require){
 	
 	App.prototype.doCompute = function(a, b) {
 		
-		// Align to touch the x and y axis.
-		a = a.aligned(); 
-		b = b.aligned();
-		
-		var u = a.boundingRect();
-		var v = b.boundingRect();
-
-		// Center onto canvas
-		a.position.x = u.width() * -0.5;
-		a.position.y = u.height() * -0.5;
-		b.position.x = v.width() * -0.5;
-		b.position.y = v.height() * -0.5;
-		
-		
-		// Optimize the renderer size. Increases speed due
-		// to a per pixel time complexity. Add a few bonus
-		// pixels to account for out-of-screen anti-aliasing
-		var w = Math.max(a.width(), b.width()) + 5;
-		var h = Math.max(a.height(), b.height()) + 5;
-		
-		// Avoid errors with empty renderer.
-		if(w == h && w == 0) {
-			this.similarity = 0;
-			return;
-		}
-
-		var renderer = new Renderer(w, h);
-		
-		renderer.begin();
-		renderer.polygon(a);
-		renderer.fill(Colors.Alpha("#ff0000", 0.5));
-
-		renderer.begin();
-		renderer.polygon(b);
-		renderer.fill(Colors.Alpha("#00ff00", 0.5));
-		
-		this.debug = renderer;
-		
-		// Convert to raw texture to permit operations
-		var tex = new RawTex(renderer);
-		
-		
-		var obj = {};
-		
-		tex.forEach(function(r, g, b, a) {
-			if(r != 0) { r = 255; }
-			if(b != 0) { b = 255; }
-			if(g != 0) { g = 255; }
-			
-			TODO("Rework string based logic.");			
-			var c = "#" + r.toString(16).padLeft("0", 2) + g.toString(16).padLeft("0", 2) + b.toString(16).padLeft("0", 2);
-						
-			if( ! (c in obj)) {
-				obj[c] = 0;
-			}
-			
-			++obj[c];
-		});
-		
-		var n  = obj["#000000"] || 0; // Success, bon't care.
-		var a  = obj["#ff0000"] || 0; // Error
-		var b  = obj["#00ff00"] || 0; // Error
-		var ab = obj["#ffff00"] || 0; // Success, care.
-		
-		var total = a + b + ab;
+		var res = a.rasterCompare(b);
 				
 		var w = this.weights; // Weight of an error.
 		
-		this.similarity[0] = ab / (a + b + ab);
-		//console.log("not     : " + this.similarity);
+		this.similarity[0] = res.intersection / res.union;
 		
 		var Pow = Math.pow;
 
-		this.similarity[1] = Pow(ab, Math.min(w[0])) / ( Pow(a, w[0]) + Pow(b, w[1]) + Pow(ab, Math.min(w[0])));
+		this.similarity[1] = Pow(res.intersection, Math.min(w[0])) / ( Pow(res.a, w[0]) + Pow(res.b, w[1]) + Pow(res.intersection, Math.min(w[0])));
 		//console.log("weighted: " + this.similarity);
 
-		//this.debug = renderer;
+		this.debug = res.raster;
 	};
     
     App.prototype.draw = function(renderer) {
@@ -144,6 +79,9 @@ define(function(require){
 		if( ! this.designers[0].freeform.isRecording()) {
 			if( ! this.designers[1].freeform.isRecording()) {
 				if(this.designers[0].freeform.change.notified("main") || this.designers[1].freeform.change.notified("main")) {
+					
+					
+					
 					this.doCompute(
 						this.designers[0].freeform.polygon,
 						this.designers[1].freeform.polygon
