@@ -740,6 +740,20 @@ define(function(require) {
             a: a
         };
     };
+	
+	RawTexture.prototype.set = function(x, y, r, g, b, a) {
+		r = r || 0;
+		g = isNaN(g) ? r : g;
+		b = isNaN(b) ? r : b;
+		a = isNaN(a) ? 255 : a;
+		
+		var i = y * this._channels * this.width + x * this._channels;
+				
+        this._raw.data[i + 0] = r;
+        this._raw.data[i + 1] = g;
+        this._raw.data[i + 2] = b;
+        this._raw.data[i + 3] = a;
+	};
     
     return RawTexture;
 });
