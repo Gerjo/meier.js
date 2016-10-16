@@ -106,7 +106,7 @@ define(function(require) {
         return this;
     };
     
-    /// Transparently clear the canvas:
+    /// Set the opacity for any future drawing action.
     Renderer.prototype.opacity = function(level) {
         this.context.globalAlpha = level;
         return this;
