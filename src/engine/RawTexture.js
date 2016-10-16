@@ -653,6 +653,65 @@ define(function(require) {
 		return matrix;
 	};
 	
+	RawTexture.prototype.window = function(x, y, size) {
+		
+        var source    = this._raw.data;
+        var width     = this._raw.width;
+        var height    = this._raw.height;
+		var channels  = this._channels;
+
+        // The pixel range is clamped to an edge        
+        function Index(x, y) {
+            if(x < 0) {
+                x = 0;
+            }
+            
+            if(y < 0) {
+                y = 0;
+            }
+            
+            if(x > width - 1) {
+                x = width - 1;
+            }
+            
+            if(y > height - 1) {
+                y = height - 1;
+            }
+            
+            return y * channels * width + x * channels;
+        }
+		    
+		var pixels = [];
+		
+		var i = Index(x, y);
+		var pixel  = [
+			source[i + 0],
+			source[i + 1],
+			source[i + 2],
+			source[i + 3]
+		];
+		
+        // Get pixels in window
+        for(var row = -size; row <= size; ++row) {
+            for(var col = -size; col <= size; ++col) {
+                
+                var px = x + col;
+                var py = y + row;
+                
+                var index = Index(px, py);
+                
+				pixels.push([
+					source[index + 0],
+					source[index + 1],
+					source[index + 2],
+					source[index + 3]
+				]);
+            }
+        }
+		
+		return pixels;
+	};
+	
     /// Split this image into 4 matrices, one for each color channel.
     /// 
     /// @return An object with 4 matrices as properties (r, g, b, a)
