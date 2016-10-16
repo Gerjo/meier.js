@@ -421,7 +421,7 @@ define(function(require) {
 	Polygon.prototype.mls = function(sigma, numVertices) {
 		
 		sigma = sigma || 1.2;
-		vertices = vertices || 32;
+		numVertices = numVertices || 32;
 		
 		TODO("Tie MLS padding coordinate repetition parameter into sigma.");
 		var samplesRepetition = 20; 
