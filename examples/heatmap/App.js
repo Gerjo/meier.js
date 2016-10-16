@@ -35,7 +35,7 @@ define(function(require){
 			"venus-and-cupid-1509.jpg",
 			"venus-and-cupid-1525.jpg",
 			"vgg.png",
-			"all hands.png",
+			//"all hands.png",
 			"VOC2007_325.jpg",
 			"VOC2007_326.jpg",
 			"VOC2007_327.jpg",
