@@ -148,9 +148,8 @@ define(function(require) {
 
     /// Clear the canvas with a solid fill color:
     Renderer.prototype.clearSolid = function(color) {
-        this.context.fillStyle = color;
-        this.context.fillRect(-this.hw, -this.hh, this.width, this.height);  
-        return this;  
+		this.clear(color);
+		return this;  
     };
 
     /// Clear the canvas with a solid fill color:
