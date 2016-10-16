@@ -112,9 +112,21 @@ define(function(require) {
         return this;
     };
 
+	Renderer.prototype.blend = function(mode) {
+
+		if( ! mode || mode == "default") {
+			mode = "source-over";
+		}
+
+		this.context.globalCompositeOperation = mode;
+		return this;
+	};
+
     /// Transparently clear the canvas:
     Renderer.prototype.clear = function(color) {
         
+		this.context.globalCompositeOperation = "source-over";
+		
         /// Reset the transform to an identity matrix:
         /// We can tweak the letters in:
         /// a b 0
@@ -155,6 +167,10 @@ define(function(require) {
     /// Clear the canvas with a solid fill color:
     Renderer.prototype.clearTexture = function(texture, tileImage) {
         
+		// Lines copied from Renderer.prototype.clear();
+		this.context.globalCompositeOperation = "source-over";
+        this.context.setTransform(1,  0,  0,  1, this.hw + 0.5, this.hh + 0.5);
+		
         // Image is still loading.
         if(texture._image === null) {
             return;
