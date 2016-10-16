@@ -86,10 +86,10 @@ TODO("Write a separate parser to detect all TODO items, without application run-
     var cache = {};
     
     scope["UNTESTED"] = function UNTESTED(method) {
-        if( ! cache.hasOwnProperty(str)) {
+        if( ! cache.hasOwnProperty(method)) {
             console.log("UNTESTED: " + method + ", hasn't been tested. If it works, remove this annotation.");
             
-            cache[str] = true;
+            cache[method] = true;
 			
 			return true;
         }
