@@ -400,9 +400,10 @@ Array.prototype.empty = Array.prototype.isEmpty = function() {
 /// @return the first found item, or null if nothing found.
 Array.prototype.find = function(callback) {
     var result = null;
+	var i = 0;
 	
     this.every(function(item) {
-        var r = callback(item);
+        var r = callback(item, i++);
         
         if(r) {
             result = item;
