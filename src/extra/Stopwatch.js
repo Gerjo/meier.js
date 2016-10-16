@@ -29,7 +29,7 @@ define(function(require) {
         return new Date().getTime() - this.startTime;
     };
 
-    Stopwatch.prototype.peek = function() {
+    Stopwatch.prototype.peek = Stopwatch.prototype.elapsed = function() {
         return new Date().getTime() - this.startTime;
     };
     
