@@ -33,6 +33,14 @@ define(function(require) {
         return new Date().getTime() - this.startTime;
     };
     
+    Stopwatch.prototype.seconds = function() {
+		return this.peek() * 0.001;
+	};
+	
+    Stopwatch.prototype.millies = function() {
+		return this.peek();
+	};
+	
     return Stopwatch;
 });
 
