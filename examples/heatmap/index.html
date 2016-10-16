@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<script src="../../src/Meier.js"></script>
+
+<script>
+
+
+Meier("../../src");
+Meier(function() {
+    require(["./App"], function(App) {
+        var App = new App();
+    });
+});
+
+</script>
+
+</head>
+<body>
+</body>
+</html>
