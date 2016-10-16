@@ -75,6 +75,12 @@ define(function(require) {
         if(typeof url == "string") {
             this._getRawByUrl(url);
           
+		} else if(typeof url == "number" && typeof callback == "number") {
+		  
+	        var raw = context.createImageData(url, callback);
+		  	
+			RawTexture.call(this, raw, arguments[2]);
+		    return;
 		} else if(url && url.numrows && url.numcolumns) { 
 		    this._loadFromMatrix(url);
 			
