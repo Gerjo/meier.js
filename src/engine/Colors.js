@@ -180,7 +180,7 @@ define(function(require) {
             parseInt(hex.substring(3, 5), 16) + "," +
             parseInt(hex.substring(5, 7), 16) + ", 1)";
     }
-    
+	
     var allColors = [];
    
     // Loop and add colors. I didn't feel like doing this by hand.
@@ -308,6 +308,137 @@ define(function(require) {
         
         return HeatColors[index];
     };
+	
+	Colors.RGBToXYZ = function(r, g, b) {
+		UNTESTED("RGBToHSV");
+		return [
+			r * 0.4124 + g * 0.3576 + b * 0.1805,
+			r * 0.2126 + g * 0.7152 + b * 0.0722,
+			r * 0.0193 + g * 0.1192 + b * 0.9505
+		];
+	};
+	
+	Colors.XYZToCieLab = function(x, y, z) {
+		UNTESTED("XYZToCieLab");
+		
+	    var var_X = x / 95.047;          //ref_X =  95.047   Observer= 2°, Illuminant= D65
+	    var var_Y = y / 100.000;          //ref_Y = 100.000
+	    var var_Z = z / 108.883;          //ref_Z = 108.883
+    
+	    if(var_X > 0.008856 ) {
+	        var_X = Math.pow(var_X, 1.0/3.0);
+	    } else {
+	        var_X = ( 7.787 * var_X ) + ( 16.0 / 116.0 );
+	    }
+    
+	    if( var_Y > 0.008856 ) {
+	        var_Y = Math.pow(var_Y, 1.0/3.0);
+	    } else {
+	        var_Y = ( 7.787 * var_Y ) + ( 16.0 / 116.0 );
+	    }
+    
+	    if( var_Z > 0.008856 ) {
+	        var_Z = Math.pow(var_Z, 1.0/3.0);
+	    } else {
+	        var_Z = ( 7.787 * var_Z ) + ( 16.0 / 116.0 );
+	    }
+    
+	    var r = [
+	                (116.0 * var_Y ) - 16.0,
+	                500.0 * ( var_X - var_Y ),
+	                200.0 * ( var_Y - var_Z )
+	             ];
+    
+	    // x = 0 to 9
+	    // y = -39 to 41
+	    // z = -14.242504 to 15.446088
+    
+	    return [
+	        r[0] / 9.0,
+	        (r[1] + 39.0) / 80.0,
+	        (r[2] + 15.0) / 31.0
+		];
+	};
+	
+	Colors.RGBToHSV = function(r, g ,b) {
+	    var out = [0, 0, 0];
+    
+	    //http://www.cs.rit.edu/~ncs/color/t_convert.html
+
+	    var min = Math.min(r, Math.min(g, b));
+	    var max = Math.max(r, Math.max(g, b));
+
+	    out[2] = max;
+
+	    var delta = max - min;
+    
+	    if(max != 0.0) {
+	        out[1] = delta / max;		// s
+	    } else {
+	        // r = g = b = 0		// s = 0, v is undefined
+	        out[1] = 0.0;
+	        out[0] = 0.0;
+	        return out;
+	    }
+    
+	    //MEIER_ASSERT(delta != 0.0f, "it is white");
+    
+	    if(delta == 0.0) {
+	        out[0] = 0.0;
+	    } else if(r == max) {
+	        out[0] = (g - b) / delta;		// between yellow & magenta
+	    } else if(g == max) {
+	        out[0] = 2 + (b - r) / delta;	// between cyan & yellow
+	    } else {
+	        out[0] = 4 + (r - g) / delta;	// between magenta & cyan
+	    }
+    
+	    out[0] *= 60.0;				// degrees
+	    if( out[0] < 0.0) {
+	        out[0] += 360.0;
+	    }
+    
+	    out[0] /= 360.0;
+    
+	    return out;
+	};
+	
+	
+	Colors.HSVToRGB = function(inh, ins, inv) {
+
+	    //http://www.cs.rit.edu/~ncs/color/t_convert.html
+
+	    if(s == 0.0) {
+	        // achromatic (grey)
+	        return [v, v, v];
+	    }
+    
+	    var h = inh * Math.TwoPi; // sector 0 to 5
+	    var i = Math.floor(h);
+	    var f = h - i;			// factorial part of h
+	    var p = inv * (1.0 - ins);
+	    var q = inv * (1.0 - ins * f);
+	    var t = inv * (1.0 - ins * (10 - f));
+    
+	    switch( i ) {
+	        case 0:
+	            return [inv, t, p];
+	        case 1:
+	            return [q, inv, p];
+	        case 2:
+				return [p, inv, t];
+	        case 3:
+				return [p, q, inv];
+	        case 4:
+				return [t, p, inv];
+	            break;
+	        default:		// case 5:
+				return [inv, p, q];
+	    }
+
+	    return out;
+	};
+	
     
     return Colors;
 });
