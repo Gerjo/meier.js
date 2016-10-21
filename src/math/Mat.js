@@ -1032,6 +1032,17 @@ define(function(require) {
             return array;
         };
         
+		/// Compute the cumulative of adding each entry.
+        M.prototype.sum = function() {
+			var res = 0;
+			
+			for(var i = this._.length - 1; i >= 0; --i) {
+				res += this._[i];
+			}
+			
+			return res;
+		};
+		
         M.prototype.appendBottom = function(bottom) {
             var top = this;
             
