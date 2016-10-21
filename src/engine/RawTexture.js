@@ -25,8 +25,8 @@ define(function(require) {
         // The following ae from wikipedia: http://en.wikipedia.org/wiki/Kernel_(image_processing)
         Original:    new (M(3,3))([0, 0, 0, 0, 1, 0, 0, 0, 0]),
         EdgeDetect1: new (M(3,3))([1, 0, -1, 0, 0, 0, -1, 0, 1]),
-        EdgeDetect2: new (M(3,3))([0, 1, 0, 1, -4, 1, 0, 1, 0]),
-        EdgeDetect3: new (M(3,3))([-1, -1, -1, -1, 8, -1, -1, -1, -1]),
+        EdgeDetect2: new (M(3,3))([0, 1, 0, 1, -4, 1, 0, 1, 0]), // LoG
+        EdgeDetect3: new (M(3,3))([-1, -1, -1, -1, 8, -1, -1, -1, -1]), // LoG
         Sharpen:     new (M(3,3))([0, -1, 0, -1, 5, -1, 0, -1, 0]),
         Blur1:       new (M(3,3))([1, 2, 1, 2, 4, 2, 1, 2, 1]),
         Blur2:       new (M(3,3))([1, 1, 1, 1, 1, 1, 1, 1, 1]),
@@ -39,7 +39,13 @@ define(function(require) {
         RobertsCrossX: new (M(2,2))([1, 0, 0, -1]),
         RobertsCrossY: new (M(2,2))([0, 1, -1, 0]),
         ScharrX: new (M(3,3))([3, 10, 3, 0, 0, 0, -3, -10, -3]),
-        ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3])
+        ScharrY: new (M(3,3))([3, 0, -3, 10, 0, -10, 3, 0, -3]),
+		
+		// http://fourier.eng.hmc.edu/e161/lectures/gradient/node8.html
+		LoG5: new (M(5, 5))([0, 0, 1, 0, 0, 0, 1, 2, 1, 0, 1, 2, -16, 2, 1, 0, 1, 2, 1, 0, 0, 0, 1, 0, 0]),
+	
+		// http://homepages.inf.ed.ac.uk/rbf/HIPR2/log.htm
+		LoG9: new (M(9, 9))([0,1,1,2,2,2,1,1,0, 1,2,4,5,5,5,3,2,1, 1,4,5,3,0,3,5,4,1, 2,5,3,-12,-24,-12,3,5,2, 2,5,0,-24,-40,-24,0,5,2, 2,5,3,-12,-24,-12,3,5,2, 1,4,5,3,0,3,5,4,1, 1,2,4,5,5,5,3,2,1, 0,1,1,2,2,2,1,1,0]),
     };
     
     
