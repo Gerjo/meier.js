@@ -393,6 +393,59 @@ define(function(require) {
             // Normalize here, more efficient than inside the convolute method
             return matrix.multiply(1 / sum);
         };
+		
+		/// Create descrete approximation of Laplacian of Gaussian. Method
+		/// is only well defined for uneven matrices - i.e., the center needs
+		/// to sample the LoG's extrema.
+		M.CreateLoG = function(sigma) {
+			
+            // Default sigma
+            sigma = isNaN(sigma) ? 1.0 : sigma;
+			
+            var matrix = new M();
+			var hr     = (matrix.numrows - 1) * 0.5;
+            var hc     = (matrix.numcolumns - 1) * 0.5;
+			var sum    = 0;
+			
+			// Apply a general upscaling of numbers. Tiny floats
+			// aren't convinient to math with.
+			var scale = 4;
+            
+            for(var row = 0; row < matrix.numrows; ++row) {
+                for(var col = 0; col < matrix.numcolumns; ++col) {
+                
+                    // Center the kernel
+                    var y = row - hr;
+                    var x = col - hc;
+              
+					// Kindly taken from http://homepages.inf.ed.ac.uk/rbf/HIPR2/log.htm
+					var a = -1 / (Math.PI * Math.pow(sigma, 4));
+					var b = (Math.pow(x,2) + Math.pow(y,2)) / (2 * Math.pow(sigma, 2));
+					var c = Math.exp(-b);
+
+					var v = a * (1 - b) * c * scale;
+			  
+                    sum += v;
+                
+                    matrix.set(row, col, v);
+				}
+			}
+
+			// Attempt to normalize such that area under the curve is 0, i.e.,
+			// sum(matrix * image) = 0 when 'image' holds a single unique value
+			// for each pixel.
+			var redist = sum / length;
+
+            for(var row = 0; row < matrix.numrows; ++row) {
+                for(var col = 0; col < matrix.numcolumns; ++col) {
+					matrix.set(row, col, matrix.get(row, col) - redist);
+				}
+			}
+			
+			// e.g.,  matrix.sum() == 0; // approximately. 
+			
+			return matrix;
+		};
         
         function M(data) {
             this.numrows    = rows;
