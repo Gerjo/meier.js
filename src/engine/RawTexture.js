@@ -760,6 +760,127 @@ define(function(require) {
         this._raw.data[i + 2] = b;
         this._raw.data[i + 3] = a;
 	};
+	
+	/// Compute the local maxima according to some threshold value. 
+	/// Could be used to find zero crossings when theshold == 0. However,
+	/// internally negative values cannot be represented, so theshold == 1
+	/// would be a good alternative.
+	/// 
+	/// Searches horizontal, vertical and diagonal (2x).
+	///
+	/// @param saddle The threshold. Defaults to 1
+	/// @param A new binary texture with a white color (255) where
+	/// inflection points about the threshold are.
+	///
+    RawTexture.prototype.inflection = function(saddle) {
+		saddle = isNaN(saddle) ? 1 : saddle;
+		
+		var source = this._raw.data;
+		var channels = this._channels;
+		var height = this._raw.height;
+		var width = this._raw.width;
+
+        var newraw = context.createImageData(width, height);
+        var destination = newraw.data;
+		
+		TODO("Create method for Index function inside RawTexture. It's copied about 3 times.");
+        // The pixel range is clamped to an edge        
+        function Index(x, y) {
+            if(x < 0) {
+                x = 0;
+            }
+            
+            if(y < 0) {
+                y = 0;
+            }
+            
+            if(x > width - 1) {
+                x = width - 1;
+            }
+            
+            if(y > height - 1) {
+                y = height - 1;
+            }
+            
+            return y * channels * width + x * channels;
+        }
+		
+        for(var i = 0, x = 0, y = 0; i < source.length; i += channels) {
+        	
+			var horizontal = [
+				Index(x-1, y),
+				i,
+				Index(x+1, y)
+			];
+			var vertical = [
+				Index(x, y-1),
+				i,
+				Index(x, y+1)
+			];
+			
+			var diagonal1 = [
+				Index(x-1, y-1),
+				i,
+				Index(x+1, y+1)
+			];
+			
+			var diagonal2 = [
+				Index(x+1, y+1),
+				i,
+				Index(x-1, y-1)
+			];
+			
+			// Run for each direction. Could add diagonal.
+			[horizontal, vertical, diagonal1, diagonal2].forEach(function(a) {
+						
+				// Run for each color channel
+				for(var c = 0; c < 3; ++c) {
+				
+					// Look up colors for channel
+					var u = source[a[0] + c];
+					var v = source[a[1] + c];
+					var w = source[a[2] + c];
+					
+					// Local maxima
+					if(v > saddle) {
+						if(u < saddle || w < saddle) {
+							isOn = true;
+							destination[a[1] + c] = 255;
+							
+							// Alternative implementation. Keep the source
+							// value at infliction points.
+							//destination[a[1] + c] = v;
+						}
+					}	
+					
+					/*
+					// Local minima. Disabled because it would return
+					// double crossings.
+					if(v < saddle) {
+						if(u > saddle || w > saddle) {
+							isOn = true;
+							destination[a[1] + c] = 255;
+							
+							// Alternative implementation. Keep the source
+							// value at infliction points.
+							//destination[a[1] + c] = v;
+						}
+					}*/				
+				}						
+			});
+			
+			// Inherit alpha directly
+			destination[i + 3] = source[i + 3];
+			
+	        // Counters to keep track of x / y pixel coordinates
+	        if(++x === width) {
+	            x = 0;
+	            ++y;
+	        }
+		}
+
+		return new RawTexture(newraw, null);
+	};
     
     return RawTexture;
 });
