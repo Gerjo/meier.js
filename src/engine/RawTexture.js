@@ -767,6 +767,9 @@ define(function(require) {
 	/// would be a good alternative.
 	/// 
 	/// Searches horizontal, vertical and diagonal (2x).
+	/// Inspired by an algorithm from: "On the discrete representation
+	/// of the Laplacian of Gaussian"
+	/// http://dev.ipol.im/~reyotero/bib/bib_all/1998_Gunn_discr_repres_LoG.pdf
 	///
 	/// @param saddle The threshold. Defaults to 1
 	/// @param A new binary texture with a white color (255) where
