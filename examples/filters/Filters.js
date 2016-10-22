@@ -2,6 +2,7 @@ define(function(require){
     var Game       = require("meier/engine/Game");
     var RawTexture = require("meier/engine/RawTexture");
     var dat        = require("meier/contrib/datgui");
+    var M          = require("meier/math/Mat");
     
     Filters.prototype = new Game();
     
@@ -75,7 +76,45 @@ define(function(require){
             },
             "Diff Of Gaussian": function(texture) {
                 return texture.differenceOfGaussian();
-            }
+            },
+            "Binary": function(texture) {
+                return texture.binary();
+            },
+            "Inflection": function(texture) {
+                return texture.inflection(1);
+            },
+            "Erode": function(texture) {
+				
+				var kernel = new (M(3, 3))([
+					1, 1, 1,
+					1, 1, 1,
+					1, 1, 1
+				]);
+				
+				var colors = texture.asMatrix();
+				
+				colors.r = colors.r.erode(kernel);
+				colors.g = colors.g.erode(kernel);
+				colors.b = colors.b.erode(kernel);
+				
+                return RawTexture.FromMatrix(colors.r, colors.g, colors.b);
+            },
+            "dilate": function(texture) {
+				
+				var kernel = new (M(3, 3))([
+					1, 1, 1,
+					1, 1, 1,
+					1, 1, 1
+				]);
+				
+				var colors = texture.asMatrix();
+				
+				colors.r = colors.r.dilate(kernel);
+				colors.g = colors.g.dilate(kernel);
+				colors.b = colors.b.dilate(kernel);
+				
+                return RawTexture.FromMatrix(colors.r, colors.g, colors.b);
+            },
         };
         
         // Defaults
