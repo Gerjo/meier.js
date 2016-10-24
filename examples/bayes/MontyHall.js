@@ -9,9 +9,12 @@ define(function(require){
     var Input   = require("meier/engine/Input");
     var Timer   = require("meier/extra/Timer");
     
+	// Or all at the same time?
+	TODO("Add automatic mode. With 3 tactics. stand/switch/randomize.");
     
     MontyHall.prototype = new Game();
     
+	TODO("Enum MontyHall state.")
     MontyHall.State = { Count: 0 };
     MontyHall.State.Initial           = ++MontyHall.State.Count;
     MontyHall.State.PrePickDoor       = ++MontyHall.State.Count;
