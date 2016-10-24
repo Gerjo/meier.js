@@ -761,6 +761,34 @@ define(function(require) {
         this._raw.data[i + 3] = a;
 	};
 	
+	
+	/// Extract the pixel partaining to the inside of a
+	/// polygon.
+	/// @return A RawTexture instance representing the cut-out. Pixels 
+	/// falling outside the polygon, but inside the rectangle, are set
+	/// to black. It is adviced to remove black pixels before hand, if
+	/// histograms are generated.
+	RawTexture.prototype.extractPolygon = function(polygon) {
+		var aligned = polygon.aligned();
+		var box = aligned.boundingRect();
+		
+		var t = aligned.position.clone();
+		aligned.position.x = -box.width() * 0.5;
+		aligned.position.y = -box.height() * 0.5;
+				
+		var renderer = new Renderer(box.width(), box.height());
+		
+		renderer.texture(this, -t.x - renderer.width * 0.5, -t.y - renderer.height * 0.5);
+		
+		renderer.blend("destination-in");
+		renderer.begin();
+		renderer.setSmoothing(false);
+		renderer.polygon(aligned);
+		renderer.fill("rgba(255, 255, 255, 1.0)");
+		
+		return new RawTexture(renderer);
+	};
+	
 	/// Compute the local maxima according to some threshold value. 
 	/// Could be used to find zero crossings when theshold == 0. However,
 	/// internally negative values cannot be represented, so theshold == 1

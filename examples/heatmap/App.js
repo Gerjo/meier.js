@@ -98,24 +98,7 @@ define(function(require){
 		};
 		
 		var foo = function(painting, polygon) {
-			var aligned = polygon.aligned();
-			var box = aligned.boundingRect();
-			
-			var t = aligned.position.clone();
-			aligned.position.x = -box.width() * 0.5;
-			aligned.position.y = -box.height() * 0.5;
-			
-			var renderer = new Renderer(box.width(), box.height());
-			
-			renderer.texture(painting, -t.x - renderer.width * 0.5, -t.y - renderer.height * 0.5);
-			
-			renderer.blend("destination-in");
-			renderer.begin();
-			renderer.setSmoothing(false);
-			renderer.polygon(aligned);
-			renderer.fill("rgba(255, 255, 255, 1.0)");
-			
-			var pixels = new RawTex(renderer);
+			var pixels = painting.extractPolygon(polygon);
 			var histogram = new Histogram();
 			
 			// Create model.
