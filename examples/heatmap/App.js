@@ -88,7 +88,7 @@ define(function(require){
 		this.freeform.stop();
 		this.freeform.polygon = this.freeform.polygon.mls(3.2, this.freeform.polygon.circumference() / 5);
 		
-		var ident = function(r, g, b) {
+		var hash = function(r, g, b) {
 			var f = Colors.RGBToXYZ(r/255, g/255, b/255);
 			var l = Colors.XYZToCieLab(f[0], f[1], f[2]);
 			
@@ -104,7 +104,7 @@ define(function(require){
 			// Create model.
 			pixels.forEach(function(r, g, b, a, x, y) {
 				if(! (r == g && r == b && r == 0)) {
-					histogram.push(ident(r, g, b));
+					histogram.push(hash(r, g, b));
 				}
 			});
 			
@@ -125,7 +125,7 @@ define(function(require){
 			var histogram = new Histogram();
 
 			this.painting.window(x, y, 4).forEach(function(pixel) {
-				histogram.add(ident(pixel[0], pixel[1], pixel[2]));				
+				histogram.add(hash(pixel[0], pixel[1], pixel[2]));				
 			});
 
 			var v = histogram.toVector().normalize();
