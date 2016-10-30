@@ -49,7 +49,7 @@ define(function(require) {
 			}
 		};
 		
-		Histogram.prototype.toVector = function(normalize) {
+		Histogram.prototype.toVector = Histogram.prototype.asVector = function(normalize) {
 			var v = new VecN();
 			var sum = this._sum;
 			
