@@ -53,6 +53,10 @@ define(function(require) {
 			var v = new VecN();
 			var sum = this._sum;
 			
+			if(sum == 0) {
+				return v;
+			}
+			
 			if(normalize === true) {
 				this._.forEach(function(b, i) {
 					v.set(i, b / sum);
