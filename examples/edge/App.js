@@ -20,7 +20,7 @@ define(function(require){
 
 		this.sigma = 8.2;
 		this.size = 5;
-		
+		this.showContext = true;
 		this.images = [
 			"images/an-interesting-story.jpg",
 			//"images/alfonso-d-este.jpg",
@@ -41,6 +41,7 @@ define(function(require){
      
 	 	this.gui.add(this, "sigma", 0, 20).step(0.1).onChange(this.onChange.bind(this));
 	 	this.gui.add(this, "size", 1, 10).step(1).onChange(this.onChange.bind(this));
+		this.gui.add(this, "showContext");
 		
 		this.original = new RawTex(this.images.first(), this.onChange.bind(this));
 		
@@ -84,7 +85,7 @@ define(function(require){
 		    }
 		});
 		
-		var model = ShapeContext(pixels, 5, 6);
+		var model = ShapeContext(10, 12, pixels);
 		this.shape = model;
 		
 		var vec = model.histogram.asVector(true);
@@ -92,8 +93,11 @@ define(function(require){
 		this.heatmap = new RawTex(this.painting.width, this.painting.height);
 		
 		var x = 0, y = 0;
+		
+		var increment = 10;
+		
 		this.task.set(function(i, g) {
-			var size = 4;
+			var size = 15;
 
 			var pixels = [];
 			
@@ -110,25 +114,27 @@ define(function(require){
 					));
 				}
 			});
-			
-			
-			
-			var local = ShapeContext(pixels, 5, 6);
+
+			var local = ShapeContext(10, 12, pixels);
 
 			//var w = Distance.Cosine(local, model.histogram);
 			var w = vec.dot(local.histogram.asVector(true));
 
-			this.heatmap.set(x, y, w * 255 * 10);
+            for(var u = 0; u < increment; ++u) {
+	            for(var v = 0; v < increment; ++v) {
+					this.heatmap.set(x + u, y + v, w * 255 * 10);
+				}
+			}
 			
 			//if(g == 0) {
 				console.log(pixels.length, w * 255);
 				//}
 
-			++x;
+			x += increment;
 			
 			if(x >= this.painting.width) {
 				x = 0;
-				++y;
+				y += increment;
 			}
 			
 			return y < this.painting.height;
@@ -153,7 +159,7 @@ define(function(require){
 				
         Game.prototype.draw.call(this, renderer);
 		
-		if(this.shape) {
+		if(this.shape && this.showContext) {
 		    renderer.grid(0, 160, 220, 160, this.shape.matrix);
 	    }
     };
