@@ -616,7 +616,7 @@ define(function(require) {
     
     /// Apply a per-channel classification based on an
     /// optional threshold. The resulting image will have
-    /// either 0 (off) or 254 (on) as value per channel per pixel.
+    /// either 0 (off) or 255 (on) as value per channel per pixel.
     ///
     /// @param {threshold} optional threshold figure. Defaults to 128
     /// @return the modified image
