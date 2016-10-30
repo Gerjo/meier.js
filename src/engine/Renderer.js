@@ -858,5 +858,50 @@ define(function(require) {
 		}
 	};
 	
+	Renderer.prototype.grid = function(x, y, w, h, matrix) {
+		
+		var max = -Infinity;
+		var min = +Infinity;
+		
+		// Find extrema
+		for(var i = matrix._.length; i >= 0; --i) {
+			if(matrix._[i] > max) {
+				max = matrix._[i];
+			}
+			if(matrix._[i] < min) {
+				min = matrix._[i];
+			}
+		}
+		
+		// Grid itemsize
+		var size = {
+			w: w / matrix.numcolumns,
+			h: h / matrix.numrows
+		};
+		
+		var offset = {
+			w: w * 0.5 - size.w * 0.5,
+			h: h * 0.5 - size.h * 0.5
+		};
+		
+		this.begin();
+		this.rect(x, y, w, h);
+		this.fill("white");
+		
+		for(var r = 0; r < matrix.numrows; ++r) {
+			for(var c = 0; c < matrix.numcolumns; ++c) {
+				var v = matrix.get(matrix.numrows - 1 - r, c);
+				var a = Math.pow((v - min) / max, 1/3);
+				
+				this.begin();
+			    this.rect(x + c * size.w - offset.w, y + r * size.h - offset.h, size.w, size.h);
+				this.fill("rgba(0, 0, 0, " + a + ")");
+				this.stroke("black");
+			}
+		}
+		
+		return this;
+	};
+	
     return Renderer;
 });
