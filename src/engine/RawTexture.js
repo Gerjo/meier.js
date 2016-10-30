@@ -328,6 +328,22 @@ define(function(require) {
         return this;
     };
     
+	/// Only keep pixels that are white. Others
+	/// are set to black. Alpha untouched.
+    RawTexture.prototype.keepWhite = function() {
+        var data = this._raw.data;
+		
+        for(var i = 0; i < data.length; i += this._channels) {    
+			if( ! (data[i + 0] == data[i + 1] && data[i + 0] == data[i + 2] && data[i + 0] == 255)) {
+		        data[i + 0] = 0;
+	            data[i + 1] = 0;
+	            data[i + 2] = 0;
+			}
+        }
+        
+        return this;
+    };
+	
     RawTexture.prototype.prewitt = function() {
         return this.gradientMagnitude(RawTexture.Matrices.PrewittX, RawTexture.Matrices.PrewittY);
     };
