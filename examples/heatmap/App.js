@@ -102,7 +102,7 @@ define(function(require){
 			var histogram = new Histogram();
 			
 			// Create model.
-			pixels.forEach(function(r, g, b, a, i) {
+			pixels.forEach(function(r, g, b, a, x, y) {
 				if(! (r == g && r == b && r == 0)) {
 					histogram.push(ident(r, g, b));
 				}
