@@ -23,12 +23,12 @@ define(function(require) {
 		}
 		
 		Histogram.prototype.clear = Histogram.prototype.reset = function() {
-			this.buckets = [];
+			this._ = [];
 			this._sum = 0;
 			this._max = 0;
 			
 			for(var i = 0; i < buckets; ++i) {
-				this.buckets[i] = 0;
+				this._[i] = 0;
 			}
 		};
 		
@@ -39,10 +39,10 @@ define(function(require) {
 			} else {		
 				var index = Index(item);
 				
-				++this.buckets[index];
+				++this._[index];
 				
-				if(this.buckets[index] > this._max) {
-					this._max = this.buckets[index];
+				if(this._[index] > this._max) {
+					this._max = this._[index];
 				}
 				
 				++this._sum;
@@ -54,11 +54,11 @@ define(function(require) {
 			var sum = this._sum;
 			
 			if(normalize === true) {
-				this.buckets.forEach(function(b, i) {
+				this._.forEach(function(b, i) {
 					v.set(i, b / sum);
 				});
 			} else {
-				this.buckets.forEach(function(b, i) {
+				this._.forEach(function(b, i) {
 					v.set(i, b);
 				});
 			}
@@ -75,7 +75,7 @@ define(function(require) {
 			var sum = this._sum;
 			var res = "";
 			
-			this.buckets.forEach(function(b, i) {
+			this._.forEach(function(b, i) {
 				res += "bucket[" + i + "] = " + b + " (" + (b / sum).toFixed(2) + ")\n";
 			});
 			
