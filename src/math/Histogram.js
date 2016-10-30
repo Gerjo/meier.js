@@ -70,13 +70,17 @@ define(function(require) {
 			return this._sum;
 		};
 		
-		Histogram.prototype.pretty = function() {
+		Histogram.prototype.pretty = function(digits) {
+			
+			if(isNaN(digits)) {
+				digits = 2;
+			}
 			
 			var sum = this._sum;
 			var res = "";
 			
 			this._.forEach(function(b, i) {
-				res += "bucket[" + i + "] = " + b + " (" + (b / sum).toFixed(2) + ")\n";
+				res += "bucket[" + i + "] = " + b + " (" + (b / sum).toFixed(digits) + ")\n";
 			});
 			
 			return res;
