@@ -619,14 +619,23 @@ define(function(require) {
     };
 	
 	RawTexture.prototype.forEach = function(fn) {	
+		
+		var y = 0;
+		var x = 0;
 	    for(var i = 0; i < this._raw.data.length; i += this._channels) {
 	    	fn(
 				this._raw.data[i + 0],
 				this._raw.data[i + 1],
 				this._raw.data[i + 2],
 				this._raw.data[i + 3],
-				i // Pixel number.
+				x,
+				y
 			);
+			
+			if(++x == this.width) {
+				x = 0;
+				++y;
+			}
 	    }
 	};
 	
