@@ -658,6 +658,30 @@ define(function(require) {
         return this;
     };
 	
+    /// Apply a per-channel classification based on an
+    /// optional threshold. The resulting image will have
+    /// either 0 (off) or 255 (on) as value per channel per pixel.
+    ///
+    /// @param {threshold} optional threshold figure. Defaults to 128
+    /// @return the modified image
+    RawTexture.prototype.binaryTuple = function(threshold) {
+        threshold = threshold || 128;
+        
+        for(var i = 0; i < this._raw.data.length; i += 4) {
+            if(this._raw.data[i+0] > threshold) {
+                this._raw.data[i+0] = 255;
+                this._raw.data[i+1] = 255;
+                this._raw.data[i+2] = 255;
+            } else {
+                this._raw.data[i+0] = 0;
+                this._raw.data[i+1] = 0;
+                this._raw.data[i+2] = 0;
+            }
+        }
+        
+        return this;
+    };
+	
 	RawTexture.prototype.forEach = function(fn) {	
 		
 		var y = 0;
