@@ -344,6 +344,30 @@ define(function(require) {
         return this;
     };
 	
+	/// Coordinates of non black pixels.
+    RawTexture.prototype.coordinatesNonBlackPixels = function() {
+        var data = this._raw.data;
+		
+		var x = 0, y = 0;
+		
+		var res = [];
+		
+        for(var i = 0; i < data.length; i += this._channels) {    
+			if( ! (data[i + 0] == data[i + 1] && data[i + 0] == data[i + 2] && data[i + 0] == 0)) {
+		        res.push(new Vector2(x, y));
+			}
+			
+			++x;
+			
+			if(x == this.width) {
+				++y;
+				x = 0;
+			}
+        }
+        
+        return res;
+    };
+	
     RawTexture.prototype.prewitt = function() {
         return this.gradientMagnitude(RawTexture.Matrices.PrewittX, RawTexture.Matrices.PrewittY);
     };
