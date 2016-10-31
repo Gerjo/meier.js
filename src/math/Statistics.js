@@ -7,7 +7,7 @@
 
 define(function(require) {
 
-    return {
+    var self = {
 
         /// Calculate the mean (average) of a collection.
         Mean: function (data) {
@@ -84,8 +84,8 @@ define(function(require) {
                 throw new Error("Ranges not of equal length.");
             }
     
-            var u1  = Mean(data1);
-            var u2  = Mean(data2);
+            var u1  = self.Mean(data1);
+            var u2  = self.Mean(data2);
     
             var xy  = 0;
         
@@ -100,16 +100,16 @@ define(function(require) {
         },
 
         Correlation: function (data1, data2) {
-            var v1  = UnbiasedVariance(data1);
-            var v2  = UnbiasedVariance(data2);
+            var v1  = self.UnbiasedVariance(data1);
+            var v2  = self.UnbiasedVariance(data2);
         
-            var cov = UnbiasedCovariance(data1, data2);
+            var cov = self.UnbiasedCovariance(data1, data2);
         
             return cov / Math.sqrt(v1 * v2);
         },
 
         Variance: function (data) {
-            var u     = Mean(data);
+            var u     = self.Mean(data);
             var sigma = 0;
             var n     = data.length;
     
@@ -121,7 +121,7 @@ define(function(require) {
         },
 
         UnbiasedVariance: function (data) {
-            var u     = Mean(data);
+            var u     = self.Mean(data);
             var sigma = 0;
             var n     = data.length - 1;
     
@@ -133,7 +133,7 @@ define(function(require) {
         },
 
         StandardDeviation: function (data) {
-            return Math.sqrt(Variance(data));
+            return Math.sqrt(self.Variance(data));
         },
 
         /// Determine the skew of a dataset.
@@ -142,8 +142,8 @@ define(function(require) {
         ///   0 = symmetric
         ///   1 = right skew
         Skew: function (data) {
-            var u = Mean(data);
-            var m = Median(data);
+            var u = self.Mean(data);
+            var m = self.Median(data);
     
             if(u == m) {
                 return 0;
@@ -155,7 +155,7 @@ define(function(require) {
 
         /// Pick n items from a group of k. 
         /// How many variations are possible?
-        Combinations: function (n, k) {
+        /*Combinations: function (n, k) {
             return Factorial(n) / (Factorial(k) * Factorial(n - k));
         },
 
@@ -169,7 +169,7 @@ define(function(require) {
 
         RepeatingVariations: function (n, k) {
             return Math.pow(n, k);
-        },
+        },*/
 
         /// Determine the Chebyshev's inequality.
         /// E.g., At least 75% of the measurements differ from the 
@@ -191,8 +191,8 @@ define(function(require) {
         /// indicating whether the rule holds.
         ChebyshevInequality: function(data, k) {
     
-            var s = StandardDeviation(data);
-            var u = Mean(data);
+            var s = self.StandardDeviation(data);
+            var u = self.Mean(data);
     
             var rule = 1 - 1 / Math.pow(k, 2);
     
@@ -280,8 +280,8 @@ define(function(require) {
                 return number;
             }
     
-            var u = Mean(data);
-            var s = StandardDeviation(data);
+            var u = self.Mean(data);
+            var s = self.StandardDeviation(data);
     
             return (number - u) / s;
         },
@@ -348,5 +348,8 @@ define(function(require) {
             }
         },
 
-    }; // End returned functions.
+    };
+	
+	return self;
+	
 }); // End define.
