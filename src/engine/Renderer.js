@@ -896,7 +896,7 @@ define(function(require) {
 				this.begin();
 			    this.rect(x + c * size.w - offset.w, y + r * size.h - offset.h, size.w, size.h);
 				this.fill("rgba(0, 0, 0, " + a + ")");
-				this.stroke("black");
+				//this.stroke("black");
 			}
 		}
 		
