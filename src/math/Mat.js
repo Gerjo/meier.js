@@ -1539,6 +1539,40 @@ define(function(require) {
 			return res;
 		};
     
+		M.prototype.normalize = function() {
+			var stats = this.stats();
+			
+            for(var i = this.num - 1; i >= 0; --i) {
+                this._[i] = (this._[i] - stats.min) / stats.range;
+			}
+			
+			return this;
+		};
+		
+		
+		M.prototype.stats = function() {
+			
+			var res = {
+				min: +Infinity,
+				max: -Infinity,
+				range: 0
+			};
+			
+            for(var i = this.num - 1; i >= 0; --i) {
+                if(this._[i] > res.max) {
+                	res.max = this._[i];
+                }
+				
+                if(this._[i] < res.min) {
+                	res.min = this._[i];
+                }
+            }
+			
+			res.range = res.max - res.min;
+			
+			return res;
+		};
+	
         /// Zoom in or out. Makes most sense if the matrix is an image.
         ///
         ///
