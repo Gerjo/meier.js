@@ -96,7 +96,25 @@ define(function(require) {
 		},
 		
 		ChiSquared: function(a, b) {
+			a = GetArray(a);
+			b = GetArray(b);
 			
+			if(a.length != b.length) {
+				throw new Error("Incorrect array length.");
+			}
+			
+			var c = 0;
+			
+			for(var i = 0; i < a.length; ++i) {
+				
+				// Expected value: (could also take max(a,b) or min(a,b)).
+				var sum = (a[i] + b[i]) * 0.5;
+				
+				if(sum != 0)
+					c += Math.pow(a[i] - b[i], 2) / sum;
+			}
+			
+			return c;
 		},
 		
 		/// https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
