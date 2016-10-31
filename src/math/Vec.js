@@ -449,6 +449,9 @@ define(function(require) {
             return r;
         };
         
+		V.prototype.forEach = function(callback) {
+			return this._.forEach(callback);
+		};
         ///////////////////////////////////////////////////////////////////////
         // CROSS PRODUCT specialisation:
         ///////////////////////////////////////////////////////////////////////
