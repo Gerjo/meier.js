@@ -1,4 +1,5 @@
 define(function(require) {
+	var Statistics = require("meier/math/Statistics");
 	
 	function IsArray(arr) {
 	  return (
@@ -37,7 +38,7 @@ define(function(require) {
 		/// 1 = dissimilar
 		Cosine: function(a, b) {
 			a = GetArray(a);
-			b = GetArray(a);
+			b = GetArray(b);
 			
 			if(a.length != b.length) {
 				throw new Error("Incorrect array length.");
@@ -58,15 +59,15 @@ define(function(require) {
 			var denom = Math.sqrt(u * v)
 			
 			if(denom != 0) {
-				return dot;
+				return dot / denom;
 			}
 			
 			return 1;
 		},
 		
-		Minkowski: function(a, b, power) {
+		Minkowski: function(power, a, b) {
 			a = GetArray(a);
-			b = GetArray(a);
+			b = GetArray(b);
 			
 			if(a.length != b.length) {
 				throw new Error("Incorrect array length.");
@@ -88,11 +89,11 @@ define(function(require) {
 		},
 		
 		Euclidian: function(a, b) {
-			return self.Minkoski(a, b, 2);
+			return self.Minkoski(2, a, b);
 		},
 	
 		Manhattan: function(a, b) {
-			return self.Minkoski(a, b, 1);
+			return self.Minkoski(1, a, b);
 		},
 		
 		ChiSquared: function(a, b) {
@@ -119,7 +120,7 @@ define(function(require) {
 		
 		/// https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
 		Pearson: function(a, b) {
-			
+			return Statistics.Correlation(GetArray(a), GetArray(b));
 		},
 		
 		/// Spearman Rank Correlation. When two distributions
