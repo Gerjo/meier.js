@@ -46,7 +46,7 @@ define(function(require) {
 				var base = 0;
 				var n = 0;
 				for(var base = 0; base < distanceBuckets; ++base) {
-					if(v < 0.1250 * Math.pow(2, base)) {
+					if(v < 0.1250 * Math.pow(1.5, base)) {
 						++n;
 					}
 				}
