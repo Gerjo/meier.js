@@ -752,8 +752,12 @@ define(function(require) {
         /// @param {name} property name or index number.
         /// @return A function retrieving the specified property.
         ItemGetter: function(name) {
-            return function(obj) {
-                return obj[name];
+			var args = Array.prototype.slice.call(arguments);
+			
+            return function(obj) {				
+				return args.reduce(function(p, c) {
+					return p[c];
+				}, obj);				
             }
         },
         
