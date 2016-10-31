@@ -3,7 +3,7 @@ define(function(require) {
 	var M = require("meier/math/Mat");
 	var Angles = require("meier/math/Angle");
 	
-	function ShapeContextDescriptor(pixels, distanceBuckets, angleBuckets) {
+	function ShapeContextDescriptor(distanceBuckets, angleBuckets, pixels) {
 		var distances = new (M(pixels.length, pixels.length));
 		var angles    = new (M(pixels.length, pixels.length));
 		
