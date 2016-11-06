@@ -1581,6 +1581,14 @@ define(function(require) {
 			return res;
 		};
 	
+		M.prototype.hungarian = function() {
+			var Hungarian = require("meier/contrib/Hungarian");
+			
+			var h = new Hungarian(this);
+			
+			return h.execute();
+		};
+	
         /// Zoom in or out. Makes most sense if the matrix is an image.
         ///
         ///
