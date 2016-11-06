@@ -824,6 +824,14 @@ define(function(require) {
             
             return this;
         };
+		
+		M.prototype.fill = function(val) {
+            for(var i = this.numrows * this.numcolumns - 1; i >= 0; --i) {
+                this._[i] = val;
+            }
+			
+			return this;	
+		};
         
         
         M.prototype.product = function(o) {
