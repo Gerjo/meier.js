@@ -1071,7 +1071,7 @@ define(function(require) {
             return this.wolfram();
         };
         
-        M.prototype.asArrays = function() {
+        M.prototype.asArrays = M.prototype.toArrays = function() {
             var array = [];
             
             for(var i = 0; i < columns; ++i) {
