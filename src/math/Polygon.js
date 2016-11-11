@@ -34,7 +34,7 @@ define(function(require) {
     /// []
     ///
     function Polygon(position, vertices) {
-        if(position instanceof Vec2) {
+        if(position && typeof position.x != "undefined") {
             this.position = position;
             
             if(vertices instanceof Array) {
