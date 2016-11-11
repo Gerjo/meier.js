@@ -11,7 +11,7 @@ define(function(require) {
     var Input     = require("meier/engine/Input");
     var Pixel     = require("meier/prefab/Pixel");
     var Color     = require("meier/engine/Colors");
-    var PinRect   = require("meier/math/Intersection").Test.PointInRectangle;
+    var PointRect = require("meier/math/Intersection").Test.PointInRectangle;
     var Rectangle = require("meier/math/Rectangle");
     
     Grid.prototype = new Entity();
@@ -264,7 +264,7 @@ define(function(require) {
                 
                 var rect  = this._createOptionRectangle(i);
                 
-                if(PinRect(local, rect)) {
+                if(PointRect(local, rect)) {
                     this._selected = k;
                     
                     // Do not propegate event
@@ -315,6 +315,7 @@ define(function(require) {
         if(this._showPoints) {
             Entity.prototype.draw.call(this, r);
         }
+		
         
         var wsteps = this.width  / this.spacing;
         var hsteps = this.height / this.spacing;
@@ -395,7 +396,7 @@ define(function(require) {
                     r.begin();
                     r.rectangle(fixme);
                     
-                    if(this._isEditable && PinRect(local, rect) || k == this._selected) {
+                    if(this._isEditable && PointRect(local, rect) || k == this._selected) {
                         r.fill(Color.Alpha(color, 0.7));
                     } else {
                         r.fill(Color.Alpha(color, 0.3));
