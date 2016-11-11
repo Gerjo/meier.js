@@ -717,9 +717,15 @@ define(function(require) {
             if(a.vertices.length > 0) {
                 this.save();
             
+				// Position is relative?
+                // this.context.translate(
+                //     this._translate.x + a.position.x,
+                //     this._translate.y - a.position.y
+                // );
+			   
                 this.context.translate(
-                    this._translate.x + a.position.x,
-                    this._translate.y - a.position.y
+                    a.position.x,
+                    -a.position.y
                 );
             
                 // TODO: move this duplicated code.
