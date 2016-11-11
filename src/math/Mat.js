@@ -1548,6 +1548,12 @@ define(function(require) {
 		};
     
 		M.prototype.normalize = function() {
+			// due to confusing function name.
+			DEPRICATED("M.prototype.normalize", "Use M.prototype.rescaleValues instead.");
+			return this.rescaleValues();
+		};
+	
+		M.prototype.rescaleValues = function() {
 			var stats = this.stats();
 			
             for(var i = this.num - 1; i >= 0; --i) {
