@@ -13,6 +13,7 @@ define(function(require) {
 	
 	var Align = require("meier/engine/Enum")("left", "right", "center", "middle", "bottom", "top");
 	
+	var LastAdhocId = -1;
 	
 	var LastUsedId = -1;
 	
@@ -54,12 +55,21 @@ define(function(require) {
 		
 		this._hAlign = 0.5; // 0 = left, 1 = right
 		this._vAlign = 0.5; // 0 = top,  1 = bottom
+		
+		this._onAddQueue = [];
 	}
 	
 	HtmlEntity.prototype._onAdd = function(game) {
 		Entity.prototype._onAdd.call(this, game);
 		
 		game.htmlContainer.appendChild(this._root);
+		
+		
+		this._onAddQueue.forEach(function(task) {
+			task();
+		});
+		
+		this._onAddQueue.clear();
 	};
 	
 	HtmlEntity.prototype._onDelete = function() {
@@ -74,15 +84,33 @@ define(function(require) {
 	};
 	
 	HtmlEntity.prototype.click = function(selector, fn) {
-		return Doc.OnClick(this.find(selector), function() {
-			fn(this);
-		});
+		
+		var job = function() {
+		    Doc.OnClick(this.find(selector), function() {
+		   		fn(this);
+		   	});
+		}.bind(this);
+		
+		if( ! this.game ) {
+			this._onAddQueue.push(job);
+		} else {
+			job();
+		}
 	};
 	
 	HtmlEntity.prototype.hover = function(selector, fn) {
-		return Doc.OnHover(this.find(selector), function() {
-			fn(this);
-		});
+		
+		var job = function() {
+			Doc.OnHover(this.find(selector), function() {
+				fn(this);
+			});
+		}.bind(this);
+		
+		if( ! this.game ) {
+			this._onAddQueue.push(job);
+		} else { 
+			job();
+		}
 	};
 	
 	HtmlEntity.prototype.html = function(html) {
@@ -91,7 +119,7 @@ define(function(require) {
 	};
 	
 	HtmlEntity.prototype.append = function(html) {
-		this._root.innerHTML += (html);
+		this._root.innerHTML += html;
 		return this;
 	};
 	
@@ -123,6 +151,16 @@ define(function(require) {
 		
 	};
 	
+	HtmlEntity.prototype.button = function(title, callback) {
+	
+		++LastAdhocId;
+		
+		var id = "button_" + LastAdhocId;
+		
+		this.append('<button id="' + id + '">' + title + "</button>");
+		var d = this.click("#" + id, callback);
+	};
+	
 	HtmlEntity.prototype.update = function(dt) {
 		Entity.prototype.update.call(this, dt);
 		
@@ -139,9 +177,6 @@ define(function(require) {
 		// Computed size by HTML document
 		var width = this._root.offsetWidth;
 		var height = this._root.offsetHeight;
-		
-		
-		
 		
 		// Bring to absolute game world space
 		var abs = this.toWorld();
