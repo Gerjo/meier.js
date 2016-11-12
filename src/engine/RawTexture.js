@@ -353,7 +353,7 @@ define(function(require) {
 		var res = [];
 		
         for(var i = 0; i < data.length; i += this._channels) {    
-			if( ! (data[i + 0] == data[i + 1] && data[i + 0] == data[i + 2] && data[i + 0] == 0)) {
+			if((data[i + 0] == data[i + 1] && data[i + 0] == data[i + 2] && data[i + 0] != 0)) {
 		        res.push(new Vector2(x, y));
 			}
 			
