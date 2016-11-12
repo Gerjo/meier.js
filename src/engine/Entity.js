@@ -360,26 +360,38 @@ define(function(require) {
     /// to world coordinates.
     Entity.prototype.movingToFixed = function() {
         // No translation
-        var isNull = this.position.isNull();
-
+        var noTranslation = this.position.isNull();
+		
+		var noScale = this.scale == 1;
+		
         // No rotation
         var noRotation = this.rotation == 0;
 
         // No transform at all, return identity
-        if(noRotation && isNull) {
+        if(noRotation && noTranslation && noScale) {
             return Matrix.CreateIdentity();
 
         // No rotation, just translation
-        } else if(noRotation) {
+        } else if(noRotation && noScale) {
             return Matrix.CreateTranslation(this.position);
             
         // No translation, just translation
-        } else if(isNull) {
+        } else if(noTranslation && noScale) {
             return Matrix.CreateXoY(this.rotation);
         }
         
         var r = Matrix.CreateXoY(this.rotation);
         var t = Matrix.CreateTranslation(this.position);
+		
+		if( ! noScale) {
+			var diag = this.scale;
+			var s = new Matrix([
+				diag, 0, 0, 
+				0, diag, 0, 
+				0, 0,    1]);
+				
+			return t.product(r).product(s);
+		}
         
         return t.product(r);
     };
@@ -390,6 +402,12 @@ define(function(require) {
 
         var r = Matrix.CreateXoY(-this.rotation);
         var t = Matrix.CreateTranslation(new Vector(-this.position.x, -this.position.y));
+
+		if(this.scale != 1) {
+			var diag = this.scale == 0 ? 0 : 1 / this.scale;
+			var s = new Matrix([diag, 0, 0, 0, diag, 0, 0, 0, diag]);
+			return r.product(t).product(s);
+		}
         
         return r.product(t);
     };
