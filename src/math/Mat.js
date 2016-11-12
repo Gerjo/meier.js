@@ -1590,6 +1590,10 @@ define(function(require) {
 		M.prototype.hungarian = function() {
 			var Hungarian = require("meier/contrib/Hungarian");
 			
+			if(this.numrows == 0 || this.numcolumns == 0) {
+				return [];
+			}
+			
 			var h = new Hungarian(this);
 			
 			return h.execute();
