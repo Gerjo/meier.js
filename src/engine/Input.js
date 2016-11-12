@@ -414,8 +414,9 @@ define(function(require) {
         if(this.listeners[eventtype].length === 0) {
             return 0;
         }
-    
-        return this.listeners[eventtype][this.listeners[eventtype].length - 1].priority;
+		
+		// Increment previous highest priority.
+        return this.listeners[eventtype][0].priority + 1;
     };
 
     /// Event type, see enum {Mouse.Events}.
