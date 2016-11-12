@@ -589,7 +589,7 @@ define(function(require) {
                 target[i + 0] = r;
                 target[i + 1] = g;
                 target[i + 2] = b;  
-                //target[index + 3] = a;
+                target[i + 3] = source[i + 3];
             }
             
             // Counters to keep track of x / y pixel coordinates
