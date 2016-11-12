@@ -545,10 +545,14 @@ Array.prototype.eachPair = function(callback, wraparound) {
 
 /// Call a given method on each entry.
 /// @param functionName A string representing the method name to be called.
+/// @param args Optional arguments to be passed to functionName.
 /// @return this array, for method chaining.
-Array.prototype.execute = function(functionName) {
+Array.prototype.execute = function(functionName, args) {
+	
+	var args = Array.prototype.slice.call(arguments, 1);
+	
 	this.forEach(function(item) {
-		item[functionName]();
+		item[functionName].apply(item, args);
 	});
 	
 	return this;
