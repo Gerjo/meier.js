@@ -481,9 +481,7 @@ define(function(require) {
 					// Test ifn't the entity is on the foreground already. 
 					parent._entities.remove(this);
 					parent._entities.push(this);
-					
-					console.log("doing");
-					
+
 					var events = this._eventHandlers.clone();
 					
 					events.forEach(function(notused, i) {
