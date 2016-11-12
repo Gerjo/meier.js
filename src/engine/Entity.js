@@ -447,6 +447,44 @@ define(function(require) {
         return this.position.x + (this.width * 0.5 * this.scale);
     };
     
+	/// Move an entity to the foreground.
+	Entity.prototype.toForeground = function() {
+
+		var parent = this.parent ? this.parent : this.game;
+		
+		if(parent._entities.length > 0) {
+			
+			// NB.: this makes the assumption that entities are 
+			// ordered the same way as events. Which should
+			// generally be the case.
+			if(parent._entities.last() != this) {
+				
+				if(parent._entities.contains(this)) {
+					// Test ifn't the entity is on the foreground already. 
+					parent._entities.remove(this);
+					parent._entities.push(this);
+					
+					console.log("doing");
+					
+					var events = this._eventHandlers.clone();
+					
+					events.forEach(function(notused, i) {
+						
+						this.disableEvent(i);
+						
+					}.bind(this));
+					
+					events.forEach(function(notused, i) {
+						
+						this.enableEvent(i);
+						
+					}.bind(this));
+					
+				}
+			}
+		}
+	};
+	
     /// Don't use this unless you know what you are doing.
     Entity.NaiveIntersection = function(entity, b) {
         var ehw = entity.width  * 0.5;
