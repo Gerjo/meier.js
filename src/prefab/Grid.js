@@ -13,7 +13,9 @@ define(function(require) {
     var Color     = require("meier/engine/Colors");
     var PointRect = require("meier/math/Intersection").Test.PointInRectangle;
     var Rectangle = require("meier/math/Rectangle");
-    
+    var Polygon   = require("meier/math/Polygon");
+	var Angles    = require("meier/math/Angle");
+	
     Grid.prototype = new Entity();
     function Grid(x, y, w, h) {
         Entity.call(this, x, y, w || 180, h || 180);
@@ -39,7 +41,29 @@ define(function(require) {
         this._numOptions = 0;
         this._options    = {};
         this._selected   = null;
+		
+		this._transformable = false;
+		
+		this._corner = new Polygon(new Vector(0, 0), [
+				new Vector(-this.hw, -this.hh),
+				new Vector(-this.hw+30, -this.hh),
+				new Vector(-this.hw, -this.hh+30)
+		]);
+		
+		this._transformAnchor = new Vector(0, 0);
+		this._transformTrack  = false;
     }
+	
+	Grid.prototype.setTransformable = function(isTransformable) {
+		this._transformable = isTransformable;
+		
+        if(isTransformable) {
+            this.enableEvent(Input.MOUSE_MOVE, Input.LEFT_UP);
+        } else {
+            this.disableEvent(Input.MOUSE_MOVE, Input.LEFT_UP);
+        }
+        return this;
+	};
     
     Grid.prototype.clear = function() {
         
@@ -70,6 +94,10 @@ define(function(require) {
     
     Grid.prototype.onChange = function(coordinates) {
         console.log("Unoverridden onChange method in grid.");
+    };
+	
+    Grid.prototype.onTransform = function(coordinates) {
+        console.log("Unoverridden onTransform method in grid.");
     };
     
     Grid.prototype.showPoints = function(doShow) {
@@ -179,6 +207,26 @@ define(function(require) {
     Grid.prototype.addCoordinates = function(inputs) {
         return this.addCoordinate(inputs);
     };
+	
+	Grid.prototype.getCoordinates = function(inWorld) {
+		
+		var res = [];
+		
+		for(var i = 0; i < this._entities.length; ++i) {
+			var entity = this._entities[i];
+			
+			if(entity instanceof Pixel) {
+				
+				if(inWorld) {
+					res.push(entity.toWorld());
+				} else {
+					res.push(entity.position);
+				}
+			}
+		}
+		
+		return res;
+	};
     
     Grid.prototype.addCoordinate = function(inputs) {
         
@@ -254,9 +302,60 @@ define(function(require) {
         }
     };
     
+    Grid.prototype.onMouseMove = function(input) {
+		
+		if(this._transformTrack) {
+			var world = this.toWorld();
+			
+			var angle = input.clone().subtract(world).angle();
+						
+			this.scale = input.clone().subtract(this.position).length() 
+				/ this._transformAnchor.length()
+			
+			this.rotation = angle - this._transformAnchor.angle();
+			
+			this.onTransform(this);
+		}
+		
+	};
+	
+	Grid.prototype.resetTransform = function() {
+		this.scale = 1;
+		this.rotation = 0;
+		
+		this.onTransform(this);
+	};
+	
+    Grid.prototype.onLeftUp = function(input) {
+		if(this._transformable) {
+			var didTrack = this._transformTrack;
+
+			this._transformTrack = false;
+			
+			if(didTrack === true) {
+				this.onTransform(this);
+			}
+		}
+	};
+	
     Grid.prototype.onLeftDown = function(input) {
         var local = this.toLocal(input);
         
+		if(this._transformable) {
+			
+			this.toForeground();
+			
+			// Corner contains.
+			if(this._corner.contains(local)) {
+				
+				this._transformAnchor = local;
+				
+				this._transformTrack  = true;
+				
+				return false; // early-out. Do not place a dot.
+			}
+		}
+		
         var i = 0;                      
         for(var k in this._options) {
             if(this._options.hasOwnProperty(k)) {
@@ -267,13 +366,17 @@ define(function(require) {
                 if(PointRect(local, rect)) {
                     this._selected = k;
                     
-                    // Do not propegate event
-                    return false
+                    // Do not propagate event
+                    return false;
                 }
             }
         }
         
-        this.addCoordinate(input);
+		if(this._isEditable) {
+        	this.addCoordinate(input);
+		}
+		
+        return false;
     };
     
     Grid.prototype.setRealLabels = function(showRealLabels) {
@@ -309,13 +412,8 @@ define(function(require) {
         
         return new Rectangle(x, y, x + width, y + width);
     };
-        
+	    
     Grid.prototype.draw = function(r) {
-        
-        if(this._showPoints) {
-            Entity.prototype.draw.call(this, r);
-        }
-		
         
         var wsteps = this.width  / this.spacing;
         var hsteps = this.height / this.spacing;
@@ -327,6 +425,11 @@ define(function(require) {
         r.begin();
         r.rectangle(0, 0, this.width, this.height);
         r.fill(this.backdrop);
+		
+        
+        if(this._showPoints) {
+            Entity.prototype.draw.call(this, r);
+        }
         
         // Grid:
         [1, -1].forEach(function(j) {
@@ -371,6 +474,15 @@ define(function(require) {
                 }
             }
         }.bind(this));   
+		
+		
+		if(this._transformable === true) {
+			r.begin();
+			
+			r.polygon(this._corner);
+			r.stroke("black", 1);
+			r.fill("red");
+		}
         
         
         if(this._numOptions > 0) {
