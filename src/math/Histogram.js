@@ -4,7 +4,7 @@ define(function(require) {
 	return function(min, max, buckets) {
 		var VecN = Vec(buckets);
 	
-		var BucketSize = (max - min) / (buckets-1);
+		var BucketSize = (max - min) / (buckets);
 	
 		function Index(item) {
 			
@@ -14,12 +14,11 @@ define(function(require) {
 				return 0;
 			}
 
-			return  Math.floor((item - min) / BucketSize);
+			return Math.floor((item - min) / BucketSize);
 		}
 	
 		function Histogram() {
 			this.clear();
-
 		}
 		
 		Histogram.prototype.clear = Histogram.prototype.reset = function() {
