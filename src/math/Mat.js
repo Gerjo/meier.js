@@ -963,13 +963,65 @@ define(function(require) {
         M.prototype.at = function(row, column) {
             return this._[At(row, column)];
         };
+		
+        
+        M.prototype.atSafe = function(row, column) {
+			
+			if(row < this.numrows && row >= 0) {
+				if(column < this.numcolumns && column >= 0) {
+		            return this._[At(row, column)];
+				}	
+			}
+			
+			throw new Error("Index out of bounds. Row: " + 
+				row + "/" + this.numrows + "," +
+				column + "/" + this.numcolumns + "." 
+			);
+			
+			
+            return this._[At(row, column)];
+        };
+        
         
         M.prototype.get = function(row, column) {
             return this._[At(row, column)];
         };
         
+        M.prototype.getSave = function(row, column) {
+			
+			if(row < this.numrows && row >= 0) {
+				if(column < this.numcolumns && column >= 0) {
+		            return this._[At(row, column)];
+				}	
+			}
+			
+			throw new Error("Index out of bounds. Row: " + 
+				row + "/" + this.numrows + "," +
+				column + "/" + this.numcolumns + "." 
+			);
+			
+            return this._[At(row, column)];
+        };
+		
         M.prototype.set = function(row, column, value) {
             this._[At(row, column)] = value;
+            return this;
+        };
+		
+        M.prototype.setSafe = function(row, column, value) {
+			
+			if(row < this.numrows && row >= 0) {
+				if(column < this.numcolumns && column >= 0) {
+		            this._[At(row, column)] = value;
+		            return this;
+				}	
+			}
+			
+			throw new Error("Index out of bounds. Row: " + 
+				row + "/" + this.numrows + "," +
+				column + "/" + this.numcolumns + "." 
+			);
+			
             return this;
         };
         
