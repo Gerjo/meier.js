@@ -107,11 +107,16 @@ define(function(require){
 
 		];
 		
-		this.images = this.images.slice(0, 36);
+		var letters = [];
+		for(var i = 0; i < 8; ++i) {
+			letters.push("symbols/" + i + ".png");
+		}
+		
+		this.images = this.images.slice(0, 18);
 		
 		this.setAutoClear(false);
 		
-        //this.gui = new dat.GUI();
+        this.gui = new dat.GUI();
         
 		if(this.gui) {
 			this.gui.width = 340;
@@ -169,8 +174,28 @@ define(function(require){
 				var obj = this.res[i];
 			    
 				obj.edges = texture.convolute(mat, true).inflection(1).binaryTuple();
-				obj.model = ShapeContext(10, 12, texture.coordinatesNonBlackPixels());
-				obj.descriptor = obj.model.histogram.asVector(true).normalize();
+				
+				var m = obj.edges.asMatrix().r;
+				
+				var kernel = new (M(3,3))([
+					0, 1, 0,
+					1, 0, 1,
+					0, 1, 0
+				]);
+				
+				//m = m.dilate(kernel);
+				//m = m.erode(kernel);
+				//m = m.erode(kernel);
+				
+				obj.whites = obj.edges.coordinatesNonBlackPixels();
+				
+				console.log(obj.whites.length, texture.width * texture.height);
+				
+				obj.edges = new RawTex(m);
+
+				obj.model = ShapeContext(5, 6, obj.whites);
+
+				//obj.descriptor = obj.model.histogram.asVector(true).normalize();
 				
 				if(this.res.every(Math.ItemGetter("original", "_isLoaded"))) {
 					this.allLoaded();
@@ -181,9 +206,7 @@ define(function(require){
 			return {
 			    original: original,
 				edges: null,
-				model: null,
-				descriptor: new Vec2(1,1),
-				pos: new Vec2(Random(-20, 20, true), Random(-20, 20, true))
+				model: null
 			};
 			
 		}.bind(this));
@@ -193,18 +216,30 @@ define(function(require){
 		console.log("All are loaded.");
 		
 		for(var r = 0; r < this.res.length; ++r) {
-			for(var c = r; c < this.res.length; ++c) {
+			for(var c = r + 1; c < this.res.length; ++c) {
 				
-				//var d = this.res[r].descriptor.dot(this.res[c].descriptor);
-				var d = Distance.Pearson(this.res[r].descriptor, this.res[c].descriptor);
+				try {
+					var m = ShapeContext.Compute(this.res[r].model, this.res[c].model);
+					//var m = ShapeContext.Chamfer(this.res[r].whites, this.res[c].whites);
 				
+					//var d = this.res[r].descriptor.dot(this.res[c].descriptor);
+					//var d = Distance.Cosine(this.res[r].descriptor, this.res[c].descriptor);
 				
-			    this.distances.set(r, c, d);
-			    this.distances.set(c, r, d);
-			}				
+					console.log(m.weights);
+					console.log(m.cost);
+					console.log(m.path.join());
+			
+				    this.distances.set(r, c, m.cost);
+				    this.distances.set(c, r, m.cost);
+				} catch(e) {
+				    this.distances.set(r, c, 9);
+				    this.distances.set(c, r, 9);
+					console.log(e);
+				}
+			}
 		}
 		
-		this.distances = this.distances.normalize();//.multiply(0.5);
+		//this.distances = this.distances.normalize();//.multiply(0.5);
 		
 		console.log(this.distances.pretty(2));
 	};
@@ -217,6 +252,8 @@ define(function(require){
 		var size = parseInt(this.size, 10);
 		var mat = M(size, size).CreateLoG(this.sigma * 0.1);
 		var painting = this.painting = this.original.convolute(mat, true).inflection(1).keepWhite();
+		
+		
 		
 		// Extract pixels from annotated area
 		var pixels = [];		
@@ -281,79 +318,38 @@ define(function(require){
 			return y < this.painting.height;
 		}.bind(this));
 	};
-	
-    App.prototype.update = function(dt) {
-        Game.prototype.update.call(this, dt);
-		
-		for(var i = 0; i < this.res.length; ++i) {
-			
-			
-			var res = new Vec2(0, 0);
-			
-			for(var j = 0; j < this.res.length; ++j) {
-				var dir = this.res[i].pos.direction(this.res[j].pos);
-				var w = this.distances.get(i, j) - 1;
-				var d = this.res[i].pos.distance(this.res[j].pos);
-				
-				
-				if((w < 0 && d < 30) || (w > 0 && d > 30)) {
-					res.addScaled(dir, w * dt * -0.1 * 10 * this.speed);
-				}
-				
-			}
-			
-			this.res[i].pos.addScaled(res, 1 / this.res.length);
-		}
-		
-    };
     
     App.prototype.draw = function(renderer) {
 		renderer.clear("white");
 		
 		var s = 30;
 		
-		for(var x = 0; x < this.res.length; ++x) {
+		for(var y = 0; y < this.res.length; ++y) {
+
+			//renderer.grid(0 * s - this.hw + 20, y * -s + this.hh - 30, s, s, this.res[y].model.matrix);
 			
-			for(var y = 0; y < this.res.length; ++y) {
+			renderer.texture(this.res[y].edges, 0 * s - this.hw + 50, y * -s + this.hh - 30);
+			renderer.texture(this.res[y].original, 0 * s - this.hw + 80, y * -s + this.hh - 30);
+
+			
+			var sorted = [];
+			
+			this.res.forEach(function(obj, i) {
 				
-				if(x == 0) {
-					renderer.texture(this.res[y].original, x * s - this.hw + 80, y * -s + this.hh - 110);
-					renderer.texture(this.res[y].edges, x * s - this.hw + 50, y * -s + this.hh - 110);
-					
-					if(this.res[y].model) {
-					    renderer.grid(x * s - this.hw + 20, y * -s + this.hh - 110, s, s, this.res[y].model.matrix);
-				    }
+				if(i == y) {
+					///return;
 				}
 				
-				if(y == 0) {
-					renderer.texture(this.res[x].original, x * s - this.hw + 110, y * -s + this.hh - 80);
-					renderer.texture(this.res[x].edges, x * s - this.hw + 110, y * -s + this.hh - 50);
-					
-					if(this.res[x].model) {
-					    renderer.grid(x * s - this.hw + 110, y * -s + this.hh - 20, s, s, this.res[x].model.matrix);
-				    }
-				}
-				
-				//var w = Math.pow(1-this.distances.get(x, y), 1);
-				var w = Math.pow(this.distances.get(x, y), 5);
-				
-				renderer.begin();
-				renderer.rect(x * s - this.hw + 110, y * -s + this.hh - 110, s, s);
-				renderer.stroke("black");
-				renderer.fill("rgba(0, 0, 0, " + w  + ")");
-			}
-		} 
-		
-		if(this.res && false) {
-			this.res.forEach(function(obj) {
-				if(this.showEdges)
-					renderer.texture(obj.edges, obj.pos);
-				else
-					renderer.texture(obj.original, obj.pos);
-				
-				if(this.showContext) {
-					renderer.grid(obj.pos.x, obj.pos.y, obj.original.width, obj.original.height, obj.model.matrix);
-				}
+				sorted.push({
+					obj: obj,
+					w:   this.distances.get(y, i)
+				});
+			}.bind(this));
+			
+			sorted.sort(Math.ItemGetter("w"));
+			
+			sorted.forEach(function(obj, i) {
+				renderer.texture(this.showEdges ? obj.obj.edges : obj.obj.original, i * s - this.hw + 130, y * -s + this.hh - 30);
 			}.bind(this));
 		}
     };
