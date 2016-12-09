@@ -711,7 +711,7 @@ Function.prototype.curry = function() {
         // reasons.
         if(arguments.length > 0) {
             args = Array.prototype.slice.call(args).
-            merge(Array.prototype.slice.call(arguments));
+                concat(Array.prototype.slice.call(arguments));
         }
         
         return self.apply(self, args);
