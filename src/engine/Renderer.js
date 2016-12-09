@@ -909,5 +909,60 @@ define(function(require) {
 		return this;
 	};
 	
+	Renderer.prototype.histogram = function(x, y, width, height, data) {
+		
+		// Is vector or matrix of sorts.
+		if(data._) {
+			data = data._;
+			
+		// Is an actual histogram
+		} else if(data.toVector) {
+			data = data.toVector();
+		}
+		
+		if(data.length == 0) {
+			return;
+		}
+		
+		var min = data[0];
+		var max = data[0];
+		
+		for(var i = data.length; i > 0; --i) {
+			if(data[i] > max) {
+				max = data[i];
+			}
+			
+			if(data[i] < min) {
+				min = data[i];
+			}
+		}
+		
+		var range = max - min;
+		
+		var w = width / data.length;
+		
+		// Center on screen.
+		x -= width * 0.5;
+		y -= height * 0.5;
+		
+		this.begin();
+		
+		for(var i = 0, h, counti = data.length; i < counti; ++i) {
+			h = (data[i] - min) / range * height;
+			
+			this.rect(
+				x + w * i,
+				y + h * 0.5,
+				w,
+				h
+			);
+		}
+		
+		this.setSmoothing(false);		
+		this.stroke("red", 1);
+		this.fill("rgba(255, 0, 0, 0.3)");
+		this.setSmoothing(true);
+	};
+	
     return Renderer;
 });
