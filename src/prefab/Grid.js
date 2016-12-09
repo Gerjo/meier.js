@@ -52,6 +52,9 @@ define(function(require) {
 		
 		this._transformAnchor = new Vector(0, 0);
 		this._transformTrack  = false;
+		
+		
+		this._hasMouse = false;
     }
 	
 	Grid.prototype.setTransformable = function(isTransformable) {
@@ -317,6 +320,10 @@ define(function(require) {
 			this.onTransform(this);
 		}
 		
+		if(this._transformable) {
+			var local = this.toLocal(input);
+			this._hasMouse = this._corner.contains(local);
+		}
 	};
 	
 	Grid.prototype.resetTransform = function() {
@@ -412,6 +419,14 @@ define(function(require) {
         
         return new Rectangle(x, y, x + width, y + width);
     };
+	
+	Grid.prototype.update = function() {
+		
+		// This is computed by this.onMouseMove().
+		if(this._hasMouse && this._transformable) {
+			this.input.cursor(Input.Cursor.MOVE);
+		}
+	};
 	    
     Grid.prototype.draw = function(r) {
         
