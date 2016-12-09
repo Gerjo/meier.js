@@ -31,9 +31,9 @@ define(function(require) {
 			(function(key, value, ident) {
 			
 				/*value.valueOf = function() {
-					return "Enum." + key.ucFirst();
-				};
-				*/
+					return itent.value();
+				};*/
+				
 					
 				//ident.toString = function() {
 				//	return key; // Makes sure "Foo" == Enum.Foo :)
