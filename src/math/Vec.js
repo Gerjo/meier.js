@@ -174,9 +174,10 @@ define(function(require) {
     
                 if(-this._[1] * other._[0] + this._[0] * other._[1] < 0) {
                     return -angle;
-                }*/
+                }
     
                 return angle;
+				*/
             };
             
             V.CreateAngular = function(radians, radius) {
@@ -508,13 +509,22 @@ define(function(require) {
             return this;
         };
         
-        V.prototype.pretty = V.prototype.toPretty = function(digits) {
+        V.prototype.pretty = V.prototype.toPretty = function(digits, nonNullOnly) {
             var out = [];
             digits  = isNaN(digits) ? 4 : digits;
         
             for(var i = 0, n; i < this.numrows; ++i) {
-                out.push(this._[i].toFixed(digits));
-            }
+			
+				if(nonNullOnly === true) {
+					
+					if(this._[i] != 0) {
+						out.push("[" + i + "] " + this._[i].toFixed(digits));
+					}
+					
+				} else {
+                	out.push(this._[i].toFixed(digits));
+            	}
+			}
         
             return out.join(", ");
         };
