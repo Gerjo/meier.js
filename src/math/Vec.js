@@ -150,24 +150,6 @@ define(function(require) {
             };
             
             V.prototype.angleBetween = function(other) {
-                
-				return Math.atan2(
-					other.y - this.y,
-					other.x - this.x
-				);
-				
-				// Why doesn't this work?
-				/*
-				// Early out if other is null vector
-				if(other.x == other.y && other.x == 0) {
-					return this.angle();
-				}
-				
-				// Early out if this is null vector
-				if(this.x == this.y && this.x == 0) {
-					return other.angle();
-				}
-				
                 var angle = Math.acos(
                     this.dot(other) / Math.sqrt(this.lengthSQ() * other.lengthSQ())
                 );
@@ -177,7 +159,6 @@ define(function(require) {
                 }
     
                 return angle;
-				*/
             };
             
             V.CreateAngular = function(radians, radius) {
