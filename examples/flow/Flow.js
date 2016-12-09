@@ -1,12 +1,11 @@
 define(function(require){
     var Game   = require("meier/engine/Game");
     var Input  = require("meier/engine/Input");
-<<<<<<< HEAD
-    var Color  = require("meier/aux/Colors");
+
+    var Color  = require("meier/engine/Colors");
     var V2     = require("meier/math/Vec")(2);
-=======
-    var Colors = require("meier/engine/Colors");
->>>>>>> origin/broken
+
+
     var Input  = require("meier/engine/Input");
     var dat    = require("meier/contrib/datgui");
     var Field  = require("./Field");
