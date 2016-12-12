@@ -39,7 +39,7 @@ define(function(require){
 		this.similarity = [0, 0];
 		
 		//              !A   !B 
-		this.weights = [3/6, 4/6];
+		this.weights = [3/6, 11/24];
 		this.debug = null;
     }
 	
@@ -72,7 +72,7 @@ define(function(require){
 		renderer.styled("<20px><black>Similarity between A and B: <bold>" + sim + "<>\n<12px><italic>try drawing something on the two canvases below", 0, this.hh - 20,  "center", "bottom");
 
 		renderer.styled("<15px><black>Jaccard Index<10px> normal  <>: " + this.similarity[0].toFixed(2) + "\n" +
-		"<15px><black>Jaccard Index<10px> weighted<>: " + this.similarity[1].toFixed(2) + " <10px>w<8px>1<> = " + this.weights[0].toFixed(1) + ", w<8px>1<> = " + this.weights[1].toFixed(1)
+		"<15px><black>Jaccard Index<10px> weighted<>: " + this.similarity[1].toFixed(2) + " <10px>w<8px>1<> = " + this.weights[0].toFixed(2) + ", w<8px>1<> = " + this.weights[1].toFixed(2)
 		, -this.hw+10, -this.hh + 30,  "left", "bottom");
 
 		
