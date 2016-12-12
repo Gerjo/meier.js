@@ -420,7 +420,9 @@ define(function(require) {
         return new Rectangle(x, y, x + width, y + width);
     };
 	
-	Grid.prototype.update = function() {
+	Grid.prototype.update = function(dt) {
+		
+		Entity.prototype.update.call(this, dt);
 		
 		// This is computed by this.onMouseMove().
 		if(this._hasMouse && this._transformable) {
