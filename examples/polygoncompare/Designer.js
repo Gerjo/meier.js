@@ -146,7 +146,6 @@ define(function(require) {
 		if(this.isLeftdown) {
 			this.freeform.stop();
 			
-			
 			this.configureHtml();
 		}
 		
@@ -174,10 +173,6 @@ define(function(require) {
 		this.uitop.setEnabled("#redo", ! this._redo.isEmpty());
 		
 		this.ui.setEnabled("#clear", ! this.freeform.isEmpty());
-	};
-	
-	Designer.prototype.onAdd = function(parent) {
-		
 	};
 	
 	Designer.prototype.draw = function(renderer) {
