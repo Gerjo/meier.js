@@ -16,7 +16,7 @@ Structure
 <br> online demo: [Voronoi diagrams](http://gerardmeier.com/play/cluster-detection/);
 <br> online demo: [Neural networks](http://gerardmeier.com/play/neural-network-classification/);
 <br> online demo: [Polynomials](http://gerardmeier.com/play/curve-fitting/);
-<br> online demo: [Vollyball Game ] (http://gerardmeier.com/volleyball);
+<br> online demo: [Vollyball Game](http://gerardmeier.com/volleyball);
 <br> many more at: [http://gerardmeier.com/lab/](http://gerardmeier.com/lab/).
 
 
