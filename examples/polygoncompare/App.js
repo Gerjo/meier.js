@@ -39,7 +39,7 @@ define(function(require){
 		this.similarity = [0, 0];
 		
 		//              !A   !B 
-		this.weights = [3/6, 11/24];
+		this.weights = [3/6, 14/24];
 		this.debug = null;
     }
 	
