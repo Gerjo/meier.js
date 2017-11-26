@@ -62,6 +62,53 @@ define(function(require) {
             return b * Math.pow(x, n) * Math.pow(1 - x, d - n);
         },
 
+		/// Determine the bezier curve value by computing a cubic bezier
+		/// curves that runs between the intermediate vertices that lie
+		/// between the input points. This gives a curve that is very smooth
+		/// but looks more similar to the original curve than a typical 
+		/// implementation of a cubic bezier curve. 
+		///
+		/// The t parameter runs between 0 and 1.
+		///
+		MidpointBezierCurve: function(points, t) {
+
+			if(! points || points.length == 0) {
+				return new V2(0, 0);
+			} else if(points.length <= 2) {
+				return points[0].clone();
+			}
+
+			var numPoints = points.length + 1;
+
+			var interval = 1 / numPoints;
+
+			var start = Math.floor (t / interval)-1;
+
+			var mid = Math.max(0, start + 1);
+			var end = Math.max(0, start + 2);
+			var start = Math.max(0, start);
+			
+			if (start >= points.length) {
+				start = points.length - 1;
+			}
+			
+			if (mid >= points.length) {
+				mid = points.length - 1;
+			}
+
+			if (end >= points.length) {
+				end = points.length - 1;
+			}
+
+			var a = new V2((points [start].x + points [mid].x) * 0.5, (points [start].y + points [mid].y) * 0.5);
+			var b = points [mid];
+			var c = new V2((points [mid].x + points [end].x) * 0.5, (points[mid].y + points [end].y) * 0.5);
+
+			var bezierpts = [a, b, c];
+
+			return self.BezierInterpolation (bezierpts, (t % interval) * numPoints);
+		},
+
         /// Calculate a point on a bézier curve. Works for any number of control
         /// points. Internaly uses Bernstein basis polynomals. If this is
         /// performance sensitive, (internally,) the bernstein basis polynomal
