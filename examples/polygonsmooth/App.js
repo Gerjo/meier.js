@@ -7,6 +7,8 @@ define(function(require){
 	var Math     = require("meier/math/Math");
 	var Average  = require("meier/math/Average");
 	var Grid     = require("meier/prefab/Grid");
+	var Polynom  = require("meier/math/Polynomial")
+	var Polygon  = require("meier/math/Polygon")
 	
     App.prototype = new Game();
     
@@ -22,10 +24,14 @@ define(function(require){
 			vertices: 32
 		};
 
+		this.showVertices = false;
+
 		this.doMLS = true;
 		this.doResample = false;
 		this.doOriginal = true;
 		this.resampleCount = 10;
+		this.doMidpoint = true;
+		this.midpointQuality = 3;
 
         this.gui = new dat.GUI();
         this.gui.width = 300;
@@ -45,7 +51,10 @@ define(function(require){
         folder = this.gui.addFolder("Uniform Resample - green");
 		folder.add(this, "doResample").name("Show").onChange(this.smoothen.bind(this));
 		folder.add(this, "resampleCount", 1, 300, 1).name("# Resamples").onChange(this.smoothen.bind(this));
-		//folder.open();
+
+        folder = this.gui.addFolder("Midpoint Cubic Bezier - purple");
+		folder.add(this, "doMidpoint").name("Show").onChange(this.smoothen.bind(this));
+		folder.add(this, "midpointQuality", 1, 10, 1).name("Quality").onChange(this.smoothen.bind(this));
 		
         
 				
@@ -78,6 +87,27 @@ define(function(require){
 			} else {
 				freeform.resample = null;
 			}
+			
+			if(this.doMidpoint) {
+				
+				var vertices = []
+				
+				var closedloop = freeform.original.vertices.clone();
+				closedloop.push(closedloop[0]);
+				
+				var step = 1 / (freeform.original.vertices.length * this.midpointQuality);
+				for(var t = 0; t < 1; t += step) {
+					vertices.push(
+						Polynom.MidpointBezierCurve(closedloop, t)
+					);
+				}
+
+				freeform.midpoint = new Polygon(vertices);	
+				
+			} else {
+				freeform.midpoint = null;
+			}
+			
 		}.bind(this));
 	};
 	
@@ -110,32 +140,38 @@ define(function(require){
     App.prototype.draw = function(renderer) {
         Game.prototype.draw.call(this, renderer);
 		
-		function Draw(polygon, color) {
+		function Draw(polygon, color, showVertices) {
 			renderer.begin();
 			renderer.polygon(polygon);
 			renderer.stroke(color);
 			renderer.fill(Color.Alpha(color, 0.1));
 
-			renderer.begin();				
-			polygon.vertices.forEach(function(v) {
-				renderer.rect(v, 4, 4);
-			});
-			renderer.fill(color);
+			if(showVertices) {
+				renderer.begin();				
+				polygon.vertices.forEach(function(v) {
+					renderer.rect(v, 4, 4);
+				});
+				renderer.fill(color);
+			}
 		}
 		
 		this.freeforms.forEach(function(freeform) {
 			
 			
 			if(freeform.original && this.doOriginal) {
-				Draw(freeform.original, "blue");
+				Draw(freeform.original, "blue", this.showVertices);
 			}
 			
 			if(freeform.mlsversion) {
-				Draw(freeform.mlsversion, "red");
+				Draw(freeform.mlsversion, "red", this.showVertices);
 			}
 		
 			if(freeform.resample) {
-				Draw(freeform.resample, "green");
+				Draw(freeform.resample, "green", this.showVertices);
+			}
+			
+			if(freeform.midpoint) {
+				Draw(freeform.midpoint, "purple", this.showVertices);
 			}
 
 		}.bind(this));
