@@ -28,9 +28,23 @@ define(function(require) {
         /// @param d Available options?
         /// @param n Amount selected?
         /// @return float indicating the binomial coefficient
-        BinomialCoefficient: function(k, n) {
-            // TODO: optimize factorials.
-            return Factorial(k) / (Factorial(k - n) * Factorial(n));
+        BinomialCoefficient: function(n, k) {
+
+			var res = 1;
+
+			if (k > n - k) {
+				k = n - k;
+			}
+
+			for (var i = 0; i < k; ++i) {
+				res *= (n - i);
+				res /= (i + 1);
+			}
+
+			return res;
+			
+			// Only works well for small integers
+            //return Factorial(k) / (Factorial(k - n) * Factorial(n));
         },
     
         /// Calculate Bernstein basis polynomials.
