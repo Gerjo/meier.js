@@ -154,7 +154,7 @@ define(function(require) {
             
             // Recursively insert.
             entity.forEach(function(entity) {
-                this.insert(entity);
+                this.add(entity);
             }.bind(this));
             
             return this;

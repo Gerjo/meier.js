@@ -19,8 +19,9 @@ define(function(require) {
         
         
         // Normalize is great if not all numbers have an equal range.
-        // It simply maps everything to [0, 1], thus each classifier
-        // would count evenly when measuring the euclidian distance.
+        // It simply maps everything to [0, 1], thus each classifier's 
+		// attribute would count evenly when measuring the euclidian 
+		// distance.
         if(normalize === true) {
             
             for(var k in train[0]) {
@@ -59,7 +60,7 @@ define(function(require) {
                         
                     // Simple euclidian distance
                     } else {
-                        delta = (entry[k]) - train[i][k];
+                        delta = entry[k] - train[i][k];
                     }
                     
                     length += delta * delta;

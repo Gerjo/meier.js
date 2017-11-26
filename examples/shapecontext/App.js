@@ -29,9 +29,10 @@ define(function(require){
 				showInitially: true,
 				title: "Shape Context Descriptor",
 				color: "red",
+				line: "rgba(255, 0, 0, 0.5)",
 				metric: function(a, b) {
 					var angles = 6;
-					var distances = 12;
+					var distances = 5;
 		
 					var u = Shape(distances, angles, a);
 					var v = Shape(distances, angles, b);
@@ -44,6 +45,7 @@ define(function(require){
 				showInitially: false,
 				title: "Assignment Problem",
 				color: "green",
+				line: "rgba(0, 255, 0, 0.5)",
 				metric: function(a, b) {
 					return Shape.Assignment(a, b);
 				},
@@ -53,6 +55,7 @@ define(function(require){
 				showInitially: false,
 				title: "Chamfer Matching",
 				color: "blue",
+				line: "rgba(0, 0, 255, 0.5)",
 				metric: function(a, b) {
 					
 					a = grids[0].getCoordinates(true).map(function(p) {
@@ -127,8 +130,14 @@ define(function(require){
     
     App.prototype.onChange = function() {
 	
-		var a = this.a = this.grids[0].getCoordinates(true);
-		var b = this.b = this.grids[1].getCoordinates(true);
+		var a = this.grids[0].getCoordinates(true);
+		var b = this.grids[1].getCoordinates(true);
+		
+		// Remove bias
+		if(true) {
+			//a.shuffle();
+			b.shuffle();
+		}
 		
 		this.metrics.forEach(function(m) {
 			if(this[m.title] == true) {
@@ -137,6 +146,11 @@ define(function(require){
 				m.res = null; // Remove previous outcome.
 			}			
 		}.bind(this));
+		
+		//console.log(this.metrics[0].res.weights.pretty());
+		
+		this.a = a;
+		this.b = b;
 	};
 	
     App.prototype.update = function(dt) {
@@ -160,6 +174,14 @@ define(function(require){
 		var a = this.a;
 		var b = this.b;
 		
+		a.forEach(function(p, i) {
+			renderer.text(i, p.x - 7, p.y, "black");
+		});
+		
+		b.forEach(function(p, i) {
+			renderer.text(i, p.x - 7, p.y, "black");
+		});
+		
 		this.metrics.forEach(function(m) {
 			
 			if(this[m.title] === true) {
@@ -179,11 +201,10 @@ define(function(require){
 				
 					renderer.line(a[c], b[r]);
 				});
-				renderer.stroke(m.color, 2);
+				renderer.stroke(m.line, 2);
 			}
 			
 		}.bind(this));
-		
     };
     
     return App;

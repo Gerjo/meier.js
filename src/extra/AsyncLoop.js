@@ -52,8 +52,6 @@ define(function(require) {
 			
 			if(running == false) {
 				this._callable = null;
-				
-				console.log("Async Task completed.");
 			}
 			
 		}

@@ -222,6 +222,8 @@ define(function(require){
 					var m = ShapeContext.Compute(this.res[r].model, this.res[c].model);
 					//var m = ShapeContext.Chamfer(this.res[r].whites, this.res[c].whites);
 				
+					var m = ShapeContext.Assignment(this.res[r].whites, this.res[c].whites);
+				
 					//var d = this.res[r].descriptor.dot(this.res[c].descriptor);
 					//var d = Distance.Cosine(this.res[r].descriptor, this.res[c].descriptor);
 				
